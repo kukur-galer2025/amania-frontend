@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, ArrowLeft, Loader2, CalendarDays,
   ShoppingCart, UserCircle, ShieldCheck, Zap,
-  Infinity, RefreshCw, BadgeDollarSign, Star,
+  Infinity as InfinityIcon, RefreshCw, BadgeDollarSign, Star,
   MessageSquare, Send, CheckCircle2, Lock, ThumbsUp
 } from 'lucide-react';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ import { apiFetch } from '@/app/utils/api';
 declare global { interface Window { snap: any; } }
 
 const BENEFITS = [
-  { icon: Infinity,        label: 'Akses Seumur Hidup',        desc: 'Beli sekali, nikmati selamanya. Tidak ada biaya berulang.',                from: '#6366f1', to: '#8b5cf6', bg: 'linear-gradient(135deg,#eef2ff,#ede9fe)' },
+  { icon: InfinityIcon,        label: 'Akses Seumur Hidup',        desc: 'Beli sekali, nikmati selamanya. Tidak ada biaya berulang.',                from: '#6366f1', to: '#8b5cf6', bg: 'linear-gradient(135deg,#eef2ff,#ede9fe)' },
   { icon: RefreshCw,       label: 'Materi Terupdate & Terpercaya', desc: 'Konten selalu diperbarui sesuai tren oleh para praktisi terbaik.',          from: '#0ea5e9', to: '#6366f1', bg: 'linear-gradient(135deg,#e0f2fe,#eef2ff)' },
   { icon: BadgeDollarSign, label: 'Harga Lebih Terjangkau',        desc: 'Nilai premium dengan harga bersahabat — investasi terbaik untuk kariermu.', from: '#10b981', to: '#0ea5e9', bg: 'linear-gradient(135deg,#ecfdf5,#e0f2fe)' },
 ];
@@ -25,7 +25,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
   const [hovered, setHovered] = useState(0);
   return (
     <div style={{ display: 'flex', gap: '8px' }}>
-      {[1, 2, 3, 4, 5].map(s => (
+      {[1,2,3,4,5].map((s: number) => (
         <button key={s} type="button"
           onMouseEnter={() => setHovered(s)} onMouseLeave={() => setHovered(0)} onClick={() => onChange(s)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', lineHeight: 0, borderRadius: '6px', transition: 'transform .15s' }}>
@@ -40,7 +40,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
 function StarRow({ rating, size = 13 }: { rating: number; size?: number }) {
   return (
     <span style={{ display: 'inline-flex', gap: '2px' }}>
-      {[1,2,3,4,5].map(s => (
+      {[1,2,3,4,5].map((s: number) => (
         <Star key={s} size={size} style={{ color: '#f59e0b', fill: s <= Math.round(rating) ? '#f59e0b' : 'none', flexShrink: 0 }} />
       ))}
     </span>
@@ -148,7 +148,8 @@ export default function EProductDetailClient() {
   const reviews      = product?.reviews || [];
   const totalReviews = product?.reviews_count || reviews.length;
   const avgRating    = parseFloat(product?.reviews_avg_rating) || 0;
-  const ratingDist   = [5, 4, 3, 2, 1].map(s => ({
+
+  const ratingDist = [5,4,3,2,1].map((s: number) => ({
     star: s,
     count: reviews.filter((r: any) => r.rating === s).length,
   }));
@@ -175,8 +176,6 @@ export default function EProductDetailClient() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@400;500;600;700;800&display=swap');
 
-        /* DIHAPUS: *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } */
-        
         .epd { font-family: 'Sora', sans-serif; background: transparent; }
 
         /* ── Wrapper ── */
@@ -273,7 +272,7 @@ export default function EProductDetailClient() {
 
         /* ── Cover image ── */
         .epd-cover { position: relative; width: 100%; overflow: hidden; background: #eef2ff; }
-        .epd-cover { aspect-ratio: 16/9; } /* Wider on mobile */
+        .epd-cover { aspect-ratio: 16/9; }
         @media (min-width: 860px) { .epd-cover { aspect-ratio: 4/3; } }
         .epd-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
         .epd-sidebar:hover .epd-cover img { transform: scale(1.04); }
@@ -443,7 +442,7 @@ export default function EProductDetailClient() {
                   {/* Mini benefits */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '4px' }}>
                     {[
-                      { bg: '#eef2ff', color: '#6366f1', icon: Infinity,        text: 'Akses seumur hidup' },
+                      { bg: '#eef2ff', color: '#6366f1', icon: InfinityIcon,        text: 'Akses seumur hidup' },
                       { bg: '#e0f2fe', color: '#0ea5e9', icon: RefreshCw,       text: 'Materi selalu diperbarui' },
                       { bg: '#ecfdf5', color: '#10b981', icon: BadgeDollarSign, text: 'Harga paling terjangkau' },
                       { bg: '#fef3c7', color: '#d97706', icon: ShieldCheck,     text: 'Konten terverifikasi' },
@@ -552,7 +551,7 @@ export default function EProductDetailClient() {
                         <p style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, margin: '5px 0 0' }}>{totalReviews} ulasan</p>
                       </div>
                       <div style={{ flex: 1, minWidth: '140px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {ratingDist.map(({ star, count }) => (
+                        {ratingDist.map(({ star, count }: { star: number; count: number }) => (
                           <RatingBar key={star} star={star} count={count} total={totalReviews} />
                         ))}
                       </div>
@@ -581,7 +580,7 @@ export default function EProductDetailClient() {
                                 </p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                                   <StarRow rating={r.rating} size={12} />
-                                  <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500, white: 'nowrap' }}>
+                                  <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 500, whiteSpace: 'nowrap' }}>
                                     {new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                   </span>
                                 </div>
@@ -633,7 +632,7 @@ export default function EProductDetailClient() {
                         </div>
                         <div>
                           <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', margin: '0 0 7px' }}>Tulis ulasan <span style={{ color: '#94a3b8', fontWeight: 400 }}>(opsional)</span></p>
-                          <textarea className="epd-textarea" value={myReview} onChange={e => setMyReview(e.target.value)}
+                          <textarea className="epd-textarea" value={myReview} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMyReview(e.target.value)}
                             placeholder="Bagikan pengalamanmu menggunakan produk ini…" maxLength={1000} />
                           <p style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'right', margin: '4px 0 0' }}>{myReview.length}/1000</p>
                         </div>
