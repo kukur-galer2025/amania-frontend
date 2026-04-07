@@ -17,11 +17,33 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
+            # 1. Load NVM agar perintah npm/node dikenali
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # 2. Masuk ke folder project
             cd ~/htdocs/amania.id
+            
+            # 3. Ambil update kode terbaru dari GitHub
             git pull origin main
+            
+            # 4. Bersihkan sisa build lama & lock file (Anti-Error)
+            rm -rf .next/lock
+            rm -rf .next
+            
+            # 5. Install dependencies & Build aplikasi
+            # Menggunakan 'npm ci' lebih stabil untuk server daripada 'npm install'
             npm install
             npm run build
+            
+            # 6. Manajemen Proses dengan PM2
+            # Pastikan PM2 terinstall secara global
             npm install -g pm2
-            pm2 restart all || true
+            
+            # Cek apakah proses sudah ada, jika ada restart, jika belum buat baru
+            # '|| true' memastikan script tidak berhenti jika proses belum ada
+            pm2 delete amania-frontend || true
+            pm2 start npm --name "amania-frontend" -- start
+            
+            # Simpan daftar proses agar otomatis jalan jika VPS restart
+            pm2 save
