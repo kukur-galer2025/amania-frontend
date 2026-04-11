@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Rocket, Users, FileText, 
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
-  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart
+  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Target
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -16,6 +16,7 @@ import "../globals.css";
 
 const ADMIN_PAGES = [
   { id: 'p1', title: 'Overview Dashboard', link: '/admin/dashboard', icon: LayoutDashboard },
+  { id: 'p11', title: 'Manajemen Tryout', link: '/admin/tryouts', icon: Target }, // <-- Tulisan (CBT) dihilangkan sesuai request
   { id: 'p2', title: 'Kelola Event & Program', link: '/admin/events', icon: Rocket },
   { id: 'p3', title: 'Data Pendaftar / Peserta', link: '/admin/registrations', icon: Users },
   { id: 'p4', title: 'Kelola Tiket (Scanner)', link: '/admin/tickets', icon: Ticket },
@@ -27,23 +28,28 @@ const ADMIN_PAGES = [
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
-/* ── Nav items shown in mobile bottom bar (max 5) ── */
 const BOTTOM_NAV = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
   { icon: Rocket,          label: 'Event',     href: '/admin/events' },
-  { icon: Users,           label: 'Peserta',   href: '/admin/registrations' },
+  { icon: Target,          label: 'Tryout',    href: '/admin/tryouts' },
   { icon: CreditCard,      label: 'Transaksi', href: '/admin/transactions' },
-  { icon: Menu,            label: 'Menu',      href: '__MENU__' }, // triggers sidebar
+  { icon: Menu,            label: 'Menu',      href: '__MENU__' }, 
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router   = useRouter();
   
+  // Deteksi jika berada di area Sub-Modul Tryout (seperti /skd, /polri, dll)
+  // KITA KECUALIKAN '/admin/tryouts' KARENA ITU HALAMAN PORTAL YANG HARUS PAKAI SIDEBAR UTAMA
+  const isTryoutSubModule = pathname !== '/admin/tryouts' && pathname.startsWith('/admin/tryouts');
+
   const [adminName,        setAdminName]        = useState('Super Admin');
   const [adminRole,        setAdminRole]        = useState('superadmin'); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthorized,     setIsAuthorized]     = useState(false);
+
+  const [isTransitioning,  setIsTransitioning]  = useState(false);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications,     setNotifications]     = useState<any[]>([]);
@@ -147,10 +153,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); router.push('/login'); };
 
+  // FUNGSI INI DIBIARKAN SEPERTI AWAL MENGGUNAKAN NEXT LINK SAJA
+  // JADI KETIKA KLIK MANAJEMEN TRYOUT, MENGARAH LANGSUNG KE /admin/tryouts (Portal)
+  const handleMenuClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setIsMobileMenuOpen(false);
+  };
+
   const NavItem = ({ icon: Icon, label, href }: { icon: any; label: string; href: string }) => {
     const isActive = pathname === href || (pathname.startsWith(href) && href !== '/admin');
     return (
-      <Link href={href} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'}`}>
+      <Link href={href} onClick={(e) => handleMenuClick(e, href)} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'}`}>
         <div className="flex items-center gap-3">
           <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600'} />
           <span className={`text-sm font-bold leading-none ${isActive ? 'opacity-100' : 'opacity-80'}`}>{label}</span>
@@ -167,6 +179,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 
+  // =========================================================================
+  // 🔴 JIKA BERADA DI DALAM SUB-MODUL TRYOUT (SKD, POLRI, PPPK) 🔴
+  // Sembunyikan Sidebar Utama, berikan kendali ke layout.tsx masing-masing modul
+  // =========================================================================
+  if (isTryoutSubModule) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans p-4 md:p-6 h-screen flex flex-col overflow-hidden">
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+        
+        {/* Tombol kembali cepat ke Portal / Main Dashboard */}
+        <div className="mb-4 flex items-center justify-between shrink-0">
+          <Link 
+            href="/admin/dashboard" 
+            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 bg-white border border-slate-200 px-4 py-2 rounded-xl transition-all shadow-sm"
+          >
+            <LayoutDashboard size={14} /> Kembali ke Main Dashboard
+          </Link>
+
+          <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
+            <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-indigo-700 font-black text-xs flex-shrink-0">
+              {adminName.substring(0, 2).toUpperCase()}
+            </div>
+            <p className="text-xs font-bold text-slate-800 leading-tight hidden sm:block">{adminName}</p>
+          </div>
+        </div>
+
+        {/* Di sinilah 'app/admin/tryouts/skd/layout.tsx' akan dimunculkan */}
+        {children}
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // BUKAN DI SUB-MODUL TRYOUT (Tampilkan Layout Sidebar Utama & Portal)
+  // =========================================================================
   const pageTitle = pathname === '/admin/dashboard'
     ? 'Overview'
     : pathname.split('/').filter(p => p !== 'admin' && p !== '').join(' / ').replace(/-/g, ' ');
@@ -175,7 +222,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex font-sans overflow-x-hidden">
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
 
-      {/* ═══ MOBILE OVERLAY ═══ */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -184,9 +230,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </AnimatePresence>
 
-      {/* ═══════════════════════════════════════
-          SIDEBAR (desktop: always visible | mobile: drawer)
-      ═══════════════════════════════════════ */}
       <aside className={`
         fixed top-0 left-0 h-screen w-72 bg-white border-r border-slate-100
         flex flex-col z-50 shadow-sm overflow-hidden
@@ -194,7 +237,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         lg:translate-x-0
         ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
       `}>
-        {/* ── Logo ── */}
         <div className="px-6 pt-6 pb-5 flex items-center justify-between flex-shrink-0 border-b border-slate-100">
           <Link href="/admin/dashboard" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden bg-slate-50 border border-slate-100 group-hover:scale-105 transition-transform">
@@ -213,13 +255,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        {/* ── Nav ── */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <nav className="px-3 py-4 space-y-5">
-
             <div>
               <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Dashboard</p>
               <div className="space-y-0.5"><NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" /></div>
+            </div>
+
+            <div>
+              <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-500">Aplikasi Khusus</p>
+              <div className="space-y-0.5 relative group">
+                <div className="absolute inset-y-0 left-0 w-1 bg-indigo-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                {/* <-- NAMA MENU DIUBAH DI SINI DAN MENGARAH KE PORTAL (/admin/tryouts) --> */}
+                <NavItem icon={Target} label="Manajemen Tryout" href="/admin/tryouts" />
+              </div>
             </div>
 
             <div>
@@ -247,7 +296,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
               <div className="space-y-0.5">
                 <NavItem icon={Tag}      label="Kategori Artikel" href="/admin/article-categories" />
-                <NavItem icon={FileText} label="Semua Artikel"     href="/admin/articles" />
+                <NavItem icon={FileText} label="Semua Artikel"    href="/admin/articles" />
               </div>
             </div>
 
@@ -266,9 +315,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
 
-        {/* ── Sidebar footer: profile + logout ── */}
         <div className="flex-shrink-0 border-t border-slate-100 p-3">
-          {/* Profile row */}
           <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-slate-50 mb-2">
             <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700 font-black text-sm flex-shrink-0">
               {adminName.substring(0, 2).toUpperCase()}
@@ -280,7 +327,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </p>
             </div>
           </div>
-          {/* Logout */}
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-all group">
             <LogOut size={17} className="group-hover:-translate-x-0.5 transition-transform flex-shrink-0" />
@@ -289,33 +335,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* ═══════════════════════════════════════
-          MAIN CONTENT
-      ═══════════════════════════════════════ */}
       <main className="flex-1 lg:ml-72 w-full min-h-screen flex flex-col">
-
-        {/* ── TOPBAR ── */}
         <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
-
-          {/* Left: hamburger (mobile) + breadcrumb */}
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 lg:hidden text-slate-500 hover:bg-slate-100 rounded-xl transition-colors flex-shrink-0">
-              <Menu size={20} />
-            </button>
-            <div className="hidden sm:flex bg-slate-100 p-1.5 rounded-lg text-slate-400 flex-shrink-0">
-              <LayoutDashboard size={15} />
-            </div>
+            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 lg:hidden text-slate-500 hover:bg-slate-100 rounded-xl transition-colors flex-shrink-0"><Menu size={20} /></button>
+            <div className="hidden sm:flex bg-slate-100 p-1.5 rounded-lg text-slate-400 flex-shrink-0"><LayoutDashboard size={15} /></div>
             <ChevronRight size={13} className="text-slate-300 hidden sm:block flex-shrink-0" />
             <span className="text-slate-800 font-bold text-sm capitalize truncate">{pageTitle}</span>
           </div>
 
-          {/* Right: search + notif + profile */}
           <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-
-            {/* ── SEARCH ── */}
             <div className="relative" ref={searchRef}>
-              {/* Desktop search */}
               <div className="hidden lg:block relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
                 <input
@@ -327,8 +357,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-300 bg-slate-100 border border-slate-200 px-1 py-0.5 rounded pointer-events-none">↵</span>
               </div>
-
-              {/* Mobile search toggle */}
               <button
                 onClick={() => { setShowMobileSearchInput(p => !p); setTimeout(() => document.getElementById('mobile-search')?.focus(), 80); }}
                 className="lg:hidden p-2 text-slate-500 hover:text-indigo-500 hover:bg-slate-100 rounded-xl transition-colors">
@@ -336,7 +364,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </button>
 
               <AnimatePresence>
-                {/* Mobile search panel */}
                 {showMobileSearchInput && (
                   <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                     className="absolute right-0 top-12 w-72 bg-white p-3 rounded-2xl shadow-xl border border-slate-200 z-50 lg:hidden">
@@ -351,7 +378,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </motion.div>
                 )}
 
-                {/* Search results dropdown */}
                 {showSearchDropdown && (
                   <motion.div
                     initial={{ opacity: 0, y: 8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.97 }}
@@ -362,13 +388,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
 
                     <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
-                      {/* Pages */}
                       {pageResults.length > 0 && (
                         <div className="p-2">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><LayoutDashboard size={11}/> Menu Admin</p>
                           {pageResults.map(page => (
                             <Link key={page.id} href={page.link}
-                              onClick={() => { setShowSearchDropdown(false); setSearchQuery(''); setShowMobileSearchInput(false); }}
+                              onClick={(e) => { 
+                                setShowSearchDropdown(false); setSearchQuery(''); setShowMobileSearchInput(false);
+                                if(page.link === '/admin/tryouts') handleMenuClick(e as any, page.link);
+                              }}
                               className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-indigo-50 transition-colors group/sr">
                               <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0 group-hover/sr:bg-indigo-100 group-hover/sr:text-indigo-600 transition-colors"><page.icon size={15} /></div>
                               <p className="flex-1 text-xs font-semibold text-slate-700 group-hover/sr:text-indigo-700 transition-colors truncate">{page.title}</p>
@@ -447,7 +475,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </AnimatePresence>
             </div>
 
-            {/* ── NOTIFIKASI ── */}
             <div className="relative" ref={notifRef}>
               <button onClick={() => setShowNotifications(p => !p)}
                 className={`relative p-2 rounded-xl border transition-all ${showNotifications ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200'}`}>
@@ -500,7 +527,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </AnimatePresence>
             </div>
 
-            {/* ── PROFILE BADGE (desktop) ── */}
             <div className="hidden md:flex items-center gap-3 pl-4 border-l border-slate-200">
               <div className="text-right">
                 <p className="text-sm font-bold text-slate-800 leading-none">{adminName}</p>
@@ -516,18 +542,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* ── PAGE CONTENT ── */}
         <div className="p-4 sm:p-6 lg:p-8 flex-1 pb-24 lg:pb-8">
           {children}
         </div>
 
       </main>
 
-      {/* ═══════════════════════════════════════
-          MOBILE BOTTOM NAV BAR  (hidden on lg+)
-      ═══════════════════════════════════════ */}
       <nav className="fixed bottom-0 inset-x-0 z-40 lg:hidden">
-        {/* Frosted glass bar */}
         <div className="bg-white/90 backdrop-blur-xl border-t border-slate-200 px-2 pb-safe">
           <div className="flex items-center justify-around">
             {BOTTOM_NAV.map(({ icon: Icon, label, href }) => {
@@ -545,6 +566,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               const isActive = pathname === href || (pathname.startsWith(href) && href !== '/admin');
               return (
                 <Link key={href} href={href}
+                  onClick={(e) => {
+                    if(href === '/admin/tryouts') handleMenuClick(e as any, href);
+                  }}
                   className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all active:scale-95 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
                   <div className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all ${isActive ? 'bg-indigo-100' : ''}`}>
                     <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />

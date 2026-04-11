@@ -2,26 +2,26 @@ import { Metadata } from 'next';
 import TentangKamiClient from './TentangKamiClient';
 
 export const metadata: Metadata = {
-  title: 'Tentang Kami & Tim Manajemen | Amania',
-  description: 'Kenali Amania lebih dekat. Platform edukasi teknologi inovatif yang dipimpin oleh Dr. Ir. Nurul Hidayat, S.Pt. M.Kom selaku CEO, dan dikelola oleh Prima Dzaky Hibatulloh.',
+  title: 'Tentang Kami | Amania',
+  description: 'Amania adalah platform edukasi digital komprehensif yang menyediakan layanan kelas webinar, penjualan e-product premium, dan simulasi Tryout SKD/CPNS terbaik di Indonesia.',
   keywords: [
     'tentang amania', 
-    'Dr. Ir. Nurul Hidayat CEO Amania',
-    'Prima Dzaky Hibatulloh', 
-    'mahasiswa informatika unsoed', 
-    'manajemen amania', 
+    'platform edukasi amania',
+    'webinar amania', 
+    'e-product amania', 
+    'tryout skd cpns', 
     'platform belajar IT indonesia',
-    'Prima Dzaky Hibatulloh Unsoed',
-    'Prima Dzaky Hibatulloh Amania'
+    'sistem ujian CAT',
+    'pembelajaran digital'
   ],
   alternates: { canonical: 'https://amania.id/tentang-kami' },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Tentang Amania & Tim Manajemen',
-    description: 'Platform edukasi teknologi inovatif yang dipimpin oleh Dr. Ir. Nurul Hidayat dan Prima Dzaky Hibatulloh untuk kemajuan literasi digital.',
+    title: 'Tentang Amania - Solusi Edukasi Digital',
+    description: 'Menyediakan ekosistem pembelajaran modern melalui Webinar, E-Product, dan Simulasi Tryout untuk kemajuan karir Anda.',
     url: 'https://amania.id/tentang-kami',
     siteName: 'Amania Indonesia',
-    type: 'profile', 
+    type: 'website', 
     images: [
       {
         url: 'https://amania.id/logo-amania.png',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export default function TentangKamiPage() {
-  // 🔥 SEO ADVANCED: Skema Relasi Organisasi & Person 🔥
+  // 🔥 SEO ADVANCED: Skema Organisasi & Layanan 🔥
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
@@ -44,48 +44,37 @@ export default function TentangKamiPage() {
       "name": "Amania",
       "url": "https://amania.id",
       "logo": "https://amania.id/logo-amania.png",
-      "description": "Platform edukasi teknologi yang dirancang untuk kemajuan literasi digital di Indonesia.",
-      "founder": [
-        {
-          "@type": "Person",
-          "name": "Dr. Ir. Nurul Hidayat, S.Pt. M.Kom",
-          "jobTitle": "Chief Executive Officer (CEO)",
-          "worksFor": {
-            "@type": "Organization",
-            "name": "Amania"
-          },
-          "sameAs": [
-             "https://id.linkedin.com/in/nurul-hidayat-example" 
-          ],
-          "image": "https://amania.id/images/nurul-hidayat.jpg",
-          "description": "CEO dari Amania, memimpin visi dan misi strategis perusahaan dalam memajukan teknologi edukasi."
-        }
+      "description": "Platform edukasi teknologi yang menyediakan layanan kelas webinar, e-product, dan simulasi Tryout.",
+      "sameAs": [
+        "https://www.instagram.com/amania.id"
       ],
-      "employee": [
-        {
-          "@type": "Person",
-          "name": "Prima Dzaky Hibatulloh",
-          "jobTitle": "Manager & Software Developer",
-          "email": "primadzakyhibatulloh@gmail.com",
-          "worksFor": {
-            "@type": "Organization",
-            "name": "Amania"
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Layanan Edukasi Amania",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Katalog Event & Webinar"
+            }
           },
-          "knowsAbout": ["Web Development", "Software Engineering", "Education Technology", "Management", "Laravel", "React"],
-          "sameAs": [
-            "https://github.com/primadzakyhibatulloh",
-            "https://www.instagram.com/hibatulloh._/"
-          ],
-          "alumniOf": {
-            "@type": "CollegeOrUniversity",
-            "name": "Universitas Jenderal Soedirman",
-            "alternateName": "Unsoed",
-            "sameAs": "https://unsoed.ac.id/"
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "E-Product Premium"
+            }
           },
-          "image": "https://amania.id/images/prima-dzaky.jpg",
-          "description": "Manager dan Software Developer di Amania. Mahasiswa S1 Informatika di Universitas Jenderal Soedirman yang berfokus pada pengembangan ekosistem digital Amania."
-        }
-      ]
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Simulasi Tryout SKD"
+            }
+          }
+        ]
+      }
     }
   };
 

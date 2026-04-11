@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Biarkan kosong atau tambahkan konfigurasi lain jika perlu.
-  // Tidak perlu 'output: export' karena di VPS kita akan menjalankan Node.js server.
+  // 🔥 KITA HAPUS output: 'export' KARENA SUDAH PAKAI VPS 🔥
   
-  // Opsional: trailingSlash bisa tetap dipakai jika kamu lebih suka URL berakhiran garis miring (contoh: /dashboard/)
-  // trailingSlash: true, 
+  trailingSlash: true, 
+
+  // Image optimization bisa tetap mati jika spek VPS rendah, 
+  // atau nyalakan jika ingin performa gambar lebih kencang
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;

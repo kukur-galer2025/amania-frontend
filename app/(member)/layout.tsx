@@ -253,8 +253,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={Home} label="Beranda" href="/beranda" />
                 <NavLink icon={Rocket} label="Katalog Event" href="/events" />
                 <NavLink icon={ShoppingCart} label="E-Produk Premium" href="/e-products" />
-                {/* 🔥 MENU TRYOUT DITAMBAHKAN DI SINI 🔥 */}
-                <NavLink icon={Target} label="Simulasi & Tryout" href="/tryouts" />
+                <NavLink icon={Target} label="Tryout" href="/tryouts" />
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
                 {userData && <NavLink icon={Ticket} label="Dashboard Tiket" href="/dashboard/ticket" />}
               </div>
@@ -584,15 +583,22 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         </div>
 
         <footer className="bg-white border-t border-slate-200 mt-auto w-full z-10 relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <img src="/logo-amania.png" alt="Amania" className="h-4 md:h-5 w-auto object-contain grayscale opacity-60" />
-              <span className="text-[10px] md:text-xs font-bold text-slate-500">© {new Date().getFullYear()} Amania.id</span>
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col items-center md:items-start gap-3">
+              <div className="flex items-center gap-3">
+                <img src="/logo-amania.png" alt="Amania" className="h-5 w-auto object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
+                <span className="text-xs font-bold text-slate-500">© {new Date().getFullYear()} Amania.id</span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium text-center md:text-left max-w-xs">
+                Platform pembelajaran komprehensif untuk persiapan seleksi CPNS, Kedinasan, dan pengembangan karir profesional.
+              </p>
             </div>
-            <div className="flex items-center gap-4 md:gap-6 text-[10px] md:text-xs font-bold text-slate-500">
-              <Link href="/events" className="hover:text-indigo-600 transition-colors">Katalog</Link>
-              <Link href="/tentang-kami" className="hover:text-indigo-600 transition-colors">Tentang</Link>
-              <Link href="/support" className="hover:text-indigo-600 transition-colors">Bantuan</Link>
+            
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] font-bold text-slate-500">
+              <Link href="/kebijakan-privasi" className="hover:text-indigo-600 transition-colors">Kebijakan Privasi</Link>
+              <Link href="/syarat-ketentuan" className="hover:text-indigo-600 transition-colors">Syarat & Ketentuan</Link>
+              <Link href="/tentang-kami" className="hover:text-indigo-600 transition-colors">Tentang Kami</Link>
+              <Link href="/support" className="hover:text-indigo-600 transition-colors">Pusat Bantuan</Link>
             </div>
           </div>
         </footer>
