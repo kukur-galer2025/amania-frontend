@@ -3,19 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+// 🔥 PERBAIKAN: Import Variants dari framer-motion
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { 
   ArrowLeft, ArrowRight, Clock, FileQuestion, CheckCircle2, 
   ShieldCheck, Target, Sparkles, BookOpen, Banknote, Info, Flame, LayoutList, X, AlertCircle, Loader2
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 
-const containerVariants = {
+// 🔥 PERBAIKAN: Tambahkan tipe : Variants
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } }
 };
 
-const itemVariants = {
+// 🔥 PERBAIKAN: Tambahkan tipe : Variants
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } }
 };
@@ -161,6 +164,7 @@ export default function KatalogDetailClient({ slug }: { slug: string }) {
   const activePrice = isDiscount ? discountPrice : originalPrice;
   const isFree = activePrice === 0;
 
+  // 🔥 FIX: Typed explicitly as Record<string, any[]> to avoid TypeScript 'unknown' error on Object.entries
   const groupedChannels = paymentChannels.reduce((acc, channel) => {
     if (channel.active) {
       if (!acc[channel.group]) acc[channel.group] = [];
@@ -390,7 +394,8 @@ export default function KatalogDetailClient({ slug }: { slug: string }) {
                   </div>
                 ) : (
                   <div className="space-y-8">
-                    {Object.entries(groupedChannels).map(([groupName, channels]) => (
+                    {/* 🔥 FIX: Cast to [string, any[]][] to fix TypeScript 'unknown' error */}
+                    {(Object.entries(groupedChannels) as [string, any[]][]).map(([groupName, channels]) => (
                       <div key={groupName}>
                         <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2">{groupName}</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

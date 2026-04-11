@@ -23,11 +23,12 @@ const ReactQuill = dynamic(
       (window as any).katex = katex;
     }
 
-    const Size = RQ.Quill.import('attributors/style/size');
+    // 🔥 PERBAIKAN TYPESCRIPT: Assertion as any 🔥
+    const Size = RQ.Quill.import('attributors/style/size') as any;
     Size.whitelist = SIZES;
     RQ.Quill.register(Size, true);
 
-    const Font = RQ.Quill.import('attributors/style/font');
+    const Font = RQ.Quill.import('attributors/style/font') as any;
     Font.whitelist = FONTS;
     RQ.Quill.register(Font, true);
 

@@ -2,21 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { 
   Target, ArrowRight, BookOpen, 
   Zap, BarChart3, ShieldCheck, Cpu, 
   Users, PlayCircle, Star, Quote, Award, Clock, Sparkles
 } from 'lucide-react';
 
-const containerVariants = {
+// 🔥 FIX: Typed as Variants and cast ease array to avoid TS error
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as any } }
 };
 
 export default function TryoutLandingClient() {
@@ -37,7 +38,7 @@ export default function TryoutLandingClient() {
           <motion.div 
             initial={{ opacity: 1 }} 
             exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }} 
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} 
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as any }} 
             className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center overflow-hidden"
           >
             <div className="absolute w-[400px] h-[400px] bg-sky-100/50 blur-[100px] rounded-full" />
@@ -254,33 +255,33 @@ export default function TryoutLandingClient() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
-  {[
-    { review: "TWK-nya bener-bener update dengan isu terkini. Ngebantu banget pas ujian asli karena tipenya mirip parah!" },
-    { review: "UI CBT-nya persis aslinya dan smooth banget. Alhamdulillah saya bisa lolos perangkap TIU berkat pembahasan cepatnya." },
-    { review: "Skoring TKP-nya paling masuk akal dibanding web lain. Pembahasannya juga to the point dan gampang dipahami. Recommended!" }
-  ].map((item, idx) => (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }} 
-      whileInView={{ opacity: 1, y: 0 }} 
-      viewport={{ once: true }} 
-      transition={{ delay: idx * 0.15 }}
-      key={idx} 
-      className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col h-full group hover:-translate-y-2 transition-transform duration-500"
-    >
-      <Quote size={50} strokeWidth={1.5} className="text-sky-100 absolute top-8 right-8 rotate-12 transition-transform duration-500 group-hover:rotate-0" />
+              {[
+                { review: "TWK-nya bener-bener update dengan isu terkini. Ngebantu banget pas ujian asli karena tipenya mirip parah!" },
+                { review: "UI CBT-nya persis aslinya dan smooth banget. Alhamdulillah saya bisa lolos perangkap TIU berkat pembahasan cepatnya." },
+                { review: "Skoring TKP-nya paling masuk akal dibanding web lain. Pembahasannya juga to the point dan gampang dipahami. Recommended!" }
+              ].map((item, idx) => (
+                <motion.div 
+                  initial={{ opacity: 0, y: 30 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true }} 
+                  transition={{ delay: idx * 0.15 }}
+                  key={idx} 
+                  className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col h-full group hover:-translate-y-2 transition-transform duration-500"
+                >
+                  <Quote size={50} strokeWidth={1.5} className="text-sky-100 absolute top-8 right-8 rotate-12 transition-transform duration-500 group-hover:rotate-0" />
 
-      <div className="flex gap-1 mb-8 relative z-10">
-        {[1,2,3,4,5].map(s => (
-          <Star key={s} size={18} className="text-orange-400 fill-orange-400" />
-        ))}
-      </div>
+                  <div className="flex gap-1 mb-8 relative z-10">
+                    {[1,2,3,4,5].map(s => (
+                      <Star key={s} size={18} className="text-orange-400 fill-orange-400" />
+                    ))}
+                  </div>
 
-      <p className="text-slate-600 font-medium text-base leading-relaxed relative z-10">
-        "{item.review}"
-      </p>
-    </motion.div>
-  ))}
-</div>
+                  <p className="text-slate-600 font-medium text-base leading-relaxed relative z-10">
+                    "{item.review}"
+                  </p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </section>
 
