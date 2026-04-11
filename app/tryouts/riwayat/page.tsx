@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import HistoryClient from '../history/HistoryClient';
+import HistoryClient from './HistoryClient';
 
 export const metadata: Metadata = {
   title: 'History Nilai | Amania Evaluation',
