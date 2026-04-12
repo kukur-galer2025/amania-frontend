@@ -110,16 +110,16 @@ export default function TryoutLandingClient() {
             SECTION 2: STATISTIK (OVERLAPPING HERO)
         ============================================= */}
         {/* Menggunakan margin negative (-mt-24) agar menumpuk mulus dengan Hero */}
-        <section className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-20 md:-mt-28 mb-20 md:mb-32">
+ <section className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-20 md:-mt-28 mb-20 md:mb-32">
           <motion.div 
             initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: "easeOut" }}
             className="bg-white/80 backdrop-blur-2xl border border-white rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 shadow-[0_20px_60px_-15px_rgba(2,132,199,0.1)]"
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center divide-x-0 md:divide-x divide-slate-100">
               {[
-                { value: '25K+', label: 'Peserta Ujian', icon: Users, color: 'text-sky-500' },
+                { value: '30+', label: 'Instansi CPNS', icon: Users, color: 'text-sky-500' },
                 { value: '99%', label: 'Akurasi Sistem', icon: Target, color: 'text-orange-500' },
-                { value: '1.5K+', label: 'Lolos Instansi', icon: Award, color: 'text-sky-500' },
+                { value: '10+', label: 'Sekolah Kedinasan', icon: Award, color: 'text-sky-500' },
                 { value: '24/7', label: 'Akses Server', icon: Clock, color: 'text-orange-500' },
               ].map((stat, i) => (
                 <div key={i} className="flex flex-col items-center justify-center group">

@@ -2,9 +2,8 @@ import { Metadata } from 'next';
 import HistoryClient from './HistoryClient';
 
 export const metadata: Metadata = {
-  title: 'History Nilai | Amania Evaluation',
-  description: 'Pantau perkembangan belajarmu, lihat riwayat nilai, dan evaluasi hasil tryout kamu di sini.',
-  // Tambahkan ini juga
+  title: 'Riwayat Transaksi | Amania Evaluation',
+  description: 'Pantau riwayat transaksi pembelian paket tryout Anda.',
   robots: {
     index: false,
     follow: false,

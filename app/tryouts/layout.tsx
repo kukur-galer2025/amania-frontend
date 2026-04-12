@@ -103,7 +103,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
             <NavLink href="/tryouts" label="Beranda" icon={Home} />
             <NavLink href="/tryouts/katalog" label="Katalog" icon={ShoppingBag} />
             <NavLink href="/tryouts/belajarku" label="Belajarku" icon={BookOpen} />
-            <NavLink href="/tryouts/history" label="Riwayat" icon={Award} />
+            <NavLink href="/tryouts/riwayat" label="Riwayat" icon={Award} />
           </div>
 
           {/* KANAN: Tombol Kembali & Profil */}
@@ -139,7 +139,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
                       
                       <div className="p-3 flex flex-col gap-1">
                         <Link href="/transactions" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-sky-50 hover:text-sky-700 rounded-2xl transition-colors">
-                          <Receipt size={18} className="text-sky-400" /> Riwayat Transaksi
+                          <Receipt size={18} className="text-sky-400" /> Transaksi Utama
                         </Link>
                         
                         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-2xl transition-colors group">
@@ -198,7 +198,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
                     <MobileNavLink href="/tryouts" label="Beranda" icon={Home} />
                     <MobileNavLink href="/tryouts/katalog" label="Katalog Tryout" icon={ShoppingBag} />
                     <MobileNavLink href="/tryouts/belajarku" label="Dashboard Belajarku" icon={BookOpen} />
-                    <MobileNavLink href="/tryouts/history" label="Riwayat Nilai" icon={Award} />
+                    <MobileNavLink href="/tryouts/riwayat" label="Riwayat Nilai" icon={Award} />
                   </div>
 
                   <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-3">
@@ -208,7 +208,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
                     {userData ? (
                       <>
                         <Link href="/transactions" className="flex items-center justify-center gap-2 py-4 border border-sky-100 text-sky-700 bg-sky-50 rounded-2xl font-bold hover:bg-sky-100 transition-colors">
-                          <Receipt size={18} /> Riwayat Transaksi
+                          <Receipt size={18} /> Transaksi Utama
                         </Link>
                         <button onClick={handleLogout} className="flex items-center justify-center gap-2 py-4 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl font-bold hover:bg-rose-500 hover:text-white transition-all shadow-sm">
                           <LogOut size={18} /> Keluar Akun
@@ -252,9 +252,10 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 text-xs font-bold uppercase tracking-widest text-white">
-            <Link href="/faq" className="hover:text-orange-400 transition-colors py-2">Pusat Bantuan</Link>
-            <Link href="/syarat" className="hover:text-orange-400 transition-colors py-2">Syarat & Ketentuan</Link>
-            <Link href="/privasi" className="hover:text-orange-400 transition-colors py-2">Kebijakan Privasi</Link>
+            <Link href="/support" className="hover:text-orange-400 transition-colors py-2">Pusat Bantuan</Link>
+            <Link href="/syarat-ketentuan" className="hover:text-orange-400 transition-colors py-2">Syarat & Ketentuan</Link>
+            <Link href="/kebijakan-privasi" className="hover:text-orange-400 transition-colors py-2">Kebijakan Privasi</Link>
+            <Link href="/tentang-kami" className="hover:text-orange-400 transition-colors py-2">Tentang Kami</Link>
           </div>
         </div>
         
