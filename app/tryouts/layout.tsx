@@ -103,7 +103,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
             <NavLink href="/tryouts" label="Beranda" icon={Home} />
             <NavLink href="/tryouts/katalog" label="Katalog" icon={ShoppingBag} />
             <NavLink href="/tryouts/belajarku" label="Belajarku" icon={BookOpen} />
-            <NavLink href="/tryouts/riwayat" label="Riwayat" icon={Award} />
+            <NavLink href="/tryouts/history" label="history" icon={Award} />
           </div>
 
           {/* KANAN: Tombol Kembali & Profil */}
@@ -198,7 +198,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
                     <MobileNavLink href="/tryouts" label="Beranda" icon={Home} />
                     <MobileNavLink href="/tryouts/katalog" label="Katalog Tryout" icon={ShoppingBag} />
                     <MobileNavLink href="/tryouts/belajarku" label="Dashboard Belajarku" icon={BookOpen} />
-                    <MobileNavLink href="/tryouts/riwayat" label="Riwayat Nilai" icon={Award} />
+                    <MobileNavLink href="/tryouts/history" label="History Nilai" icon={Award} />
                   </div>
 
                   <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-3">
