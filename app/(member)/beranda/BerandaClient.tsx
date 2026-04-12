@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, BookOpen, Trophy, 
-  Calendar, MapPin, Receipt, Ticket, 
+  Calendar, Receipt, Ticket, 
   Sparkles, Newspaper, ChevronRight, Award,
-  PlayCircle, Star, ShieldCheck, Users, MessageCircle, ArrowUpRight
+  PlayCircle, Star, ShieldCheck, Users, MessageCircle
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
 
@@ -151,7 +151,7 @@ export default function BerandaClient() {
                   {idx === 0 && <Award size={16} className="text-amber-500 shrink-0 ml-2" />}
                 </div>
               )) : (
-                <div className="text-center py-4 text-xs font-medium text-slate-400 break-words w-full">Belum ada peringkat.</div>
+                <div className="text-center py-4 text-xs font-medium text-slate-400 break-words w-full">Belum ada peringkat bulan ini.</div>
               )}
             </div>
           </div>
@@ -197,34 +197,52 @@ export default function BerandaClient() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
-          {events.length > 0 ? events.map((event, idx) => (
-            // 🔥 KONSISTEN MENGGUNAKAN ?slug= UNTUK CPANEL 🔥
-            <Link href={`/events/detail?slug=${event.slug}`} key={event.id} className="group bg-white rounded-[2rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col p-2 min-w-0 w-full">
-              <div className="aspect-[16/10] bg-slate-100 rounded-[1.5rem] overflow-hidden relative shrink-0 w-full">
-                {event.image ? (
-                  <img src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center"><BookOpen size={32} className="text-slate-300" /></div>
-                )}
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-indigo-600 shadow-sm shrink-0 max-w-[80%]">
-                  <span className="truncate block">{event.tier || 'Masterclass'}</span>
-                </div>
+        {/* 🔥 KONDISI LOADING, ADA DATA, ATAU KOSONG 🔥 */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
+            {[1,2,3].map(i => (
+              <div key={i} className="h-80 bg-white border border-slate-200 rounded-[2rem] p-2 animate-pulse w-full">
+                <div className="w-full h-44 bg-slate-100 rounded-3xl mb-4"></div>
+                <div className="h-4 bg-slate-100 rounded mx-4 mb-2"></div>
+                <div className="h-4 bg-slate-100 rounded mx-4 w-1/2"></div>
               </div>
-              <div className="p-5 flex flex-col flex-1 min-w-0 w-full">
-                <h3 className="text-lg font-extrabold text-slate-900 leading-snug mb-4 line-clamp-2 group-hover:text-indigo-600 transition-colors break-words w-full">{event.title}</h3>
-                <div className="mt-auto space-y-3 min-w-0 w-full">
-                  <div className="flex items-center gap-2.5 text-sm text-slate-500 font-semibold bg-slate-50 p-3 rounded-xl border border-slate-100 min-w-0 w-full">
-                    <Calendar size={16} className="text-indigo-400 shrink-0"/> 
-                    <span className="truncate">{new Date(event.start_time).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year:'numeric'})}</span>
+            ))}
+          </div>
+        ) : events.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
+            {events.map((event, idx) => (
+              <Link href={`/events/detail?slug=${event.slug}`} key={event.id} className="group bg-white rounded-[2rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col p-2 min-w-0 w-full">
+                <div className="aspect-[16/10] bg-slate-100 rounded-[1.5rem] overflow-hidden relative shrink-0 w-full">
+                  {event.image ? (
+                    <img src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><BookOpen size={32} className="text-slate-300" /></div>
+                  )}
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-indigo-600 shadow-sm shrink-0 max-w-[80%]">
+                    <span className="truncate block">{event.tier || 'Masterclass'}</span>
                   </div>
                 </div>
-              </div>
-            </Link>
-          )) : (
-            [1,2,3].map(i => <div key={i} className="h-80 bg-white border border-slate-200 rounded-[2rem] p-2 animate-pulse w-full"><div className="w-full h-44 bg-slate-100 rounded-3xl mb-4"></div><div className="h-4 bg-slate-100 rounded mx-4 mb-2"></div><div className="h-4 bg-slate-100 rounded mx-4 w-1/2"></div></div>)
-          )}
-        </div>
+                <div className="p-5 flex flex-col flex-1 min-w-0 w-full">
+                  <h3 className="text-lg font-extrabold text-slate-900 leading-snug mb-4 line-clamp-2 group-hover:text-indigo-600 transition-colors break-words w-full">{event.title}</h3>
+                  <div className="mt-auto space-y-3 min-w-0 w-full">
+                    <div className="flex items-center gap-2.5 text-sm text-slate-500 font-semibold bg-slate-50 p-3 rounded-xl border border-slate-100 min-w-0 w-full">
+                      <Calendar size={16} className="text-indigo-400 shrink-0"/> 
+                      <span className="truncate">{new Date(event.start_time).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year:'numeric'})}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white p-12 rounded-[3rem] border border-slate-200 flex flex-col items-center justify-center text-center shadow-sm w-full">
+            <div className="w-20 h-20 bg-indigo-50 text-indigo-300 rounded-full flex items-center justify-center mb-6">
+              <Calendar size={40} />
+            </div>
+            <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Belum Ada Event</h3>
+            <p className="text-slate-500 font-medium">Tim kami sedang mempersiapkan program pembelajaran terbaik untuk Anda. Nantikan segera!</p>
+          </div>
+        )}
       </section>
 
       {/* 5. ARTIKEL & JURNAL TERBARU */}
@@ -240,26 +258,44 @@ export default function BerandaClient() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
-            {articles.length > 0 ? articles.map((article, idx) => (
-              // 🔥 KONSISTEN MENGGUNAKAN ?slug= UNTUK CPANEL 🔥
-              <Link href={`/articles/read?slug=${article.slug}`} key={article.id} className="group flex flex-col gap-5 min-w-0 w-full">
-                <div className="aspect-[4/3] bg-slate-100 rounded-[2rem] overflow-hidden border border-slate-200 relative shadow-sm group-hover:shadow-lg transition-all duration-300 shrink-0 w-full">
-                  {article.image ? (
-                    <img src={`${STORAGE_URL}/${article.image}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center"><Newspaper size={32} className="text-slate-300" /></div>
-                  )}
+          {/* 🔥 KONDISI LOADING, ADA DATA, ATAU KOSONG 🔥 */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
+              {[1,2,3].map(i => (
+                <div key={i} className="flex flex-col gap-4 animate-pulse w-full">
+                  <div className="aspect-[4/3] bg-slate-100 rounded-[2rem]"></div>
+                  <div className="h-4 bg-slate-100 rounded w-1/4"></div>
+                  <div className="h-6 bg-slate-100 rounded w-full"></div>
                 </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2.5 truncate w-full">{article.category?.name || 'Edukasi IT'}</p>
-                  <h3 className="text-xl font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors break-words w-full">{article.title}</h3>
-                </div>
-              </Link>
-            )) : (
-              [1,2,3].map(i => <div key={i} className="flex flex-col gap-4 animate-pulse w-full"><div className="aspect-[4/3] bg-slate-100 rounded-[2rem]"></div><div className="h-4 bg-slate-100 rounded w-1/4"></div><div className="h-6 bg-slate-100 rounded w-full"></div></div>)
-            )}
-          </div>
+              ))}
+            </div>
+          ) : articles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
+              {articles.map((article, idx) => (
+                <Link href={`/articles/read?slug=${article.slug}`} key={article.id} className="group flex flex-col gap-5 min-w-0 w-full">
+                  <div className="aspect-[4/3] bg-slate-100 rounded-[2rem] overflow-hidden border border-slate-200 relative shadow-sm group-hover:shadow-lg transition-all duration-300 shrink-0 w-full">
+                    {article.image ? (
+                      <img src={`${STORAGE_URL}/${article.image}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center"><Newspaper size={32} className="text-slate-300" /></div>
+                    )}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2.5 truncate w-full">{article.category?.name || 'Edukasi IT'}</p>
+                    <h3 className="text-xl font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors break-words w-full">{article.title}</h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-slate-50 p-12 rounded-[3rem] border border-slate-200 flex flex-col items-center justify-center text-center shadow-inner w-full">
+              <div className="w-20 h-20 bg-white text-slate-300 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                <Newspaper size={40} />
+              </div>
+              <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Belum Ada Artikel</h3>
+              <p className="text-slate-500 font-medium">Tim redaksi kami sedang meracik artikel inspiratif untuk Anda. Nantikan segera!</p>
+            </div>
+          )}
         </div>
       </section>
 
