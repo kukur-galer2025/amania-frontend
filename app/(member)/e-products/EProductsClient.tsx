@@ -14,19 +14,19 @@ import { apiFetch } from '@/app/utils/api';
 /* ─── Animation Variants ─── */
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
+  visible: { 
+    opacity: 1, 
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 } 
+  },
 };
 
 const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 100,
-      damping: 20,
-    },
+    scale: 1,
+    transition: { type: 'spring', stiffness: 120, damping: 20 },
   },
 };
 
@@ -39,9 +39,13 @@ const SORT_OPTIONS = [
 
 function StarRow({ rating }: { rating: number }) {
   return (
-    <span style={{ display: 'inline-flex', gap: '2px' }}>
-      {[1, 2, 3, 4, 5].map(s => (
-        <Star key={s} size={13} style={{ color: '#F59E0B', fill: s <= Math.round(rating) ? '#F59E0B' : 'none', flexShrink: 0 }} />
+    <span className="inline-flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star 
+          key={s} 
+          size={13} 
+          className={s <= Math.round(rating) ? 'text-amber-500 fill-amber-500' : 'text-slate-200'} 
+        />
       ))}
     </span>
   );
@@ -64,8 +68,11 @@ export default function EProductsClient() {
         const res  = await apiFetch('/e-products');
         const json = await res.json();
         if (res.ok && json.success) setProducts(json.data);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
+      } catch (e) { 
+        console.error(e); 
+      } finally { 
+        setLoading(false); 
+      }
     })();
   }, []);
 
@@ -79,16 +86,20 @@ export default function EProductsClient() {
 
   const filtered = useMemo(() => {
     let list = [...products];
+    
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(p => p.title.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
     }
+    
     if (priceFilter === 'free') list = list.filter(p => p.price === 0);
     if (priceFilter === 'paid') list = list.filter(p => p.price > 0);
+    
     if (sort === 'top_rated') list.sort((a,b) => (parseFloat(b.reviews_avg_rating)||0) - (parseFloat(a.reviews_avg_rating)||0));
     else if (sort === 'cheapest') list.sort((a,b) => a.price - b.price);
     else if (sort === 'priciest') list.sort((a,b) => b.price - a.price);
     else list.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    
     return list;
   }, [products, search, sort, priceFilter]);
 
@@ -99,394 +110,74 @@ export default function EProductsClient() {
   const currentSort = SORT_OPTIONS.find(o => o.value === sort)!;
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+    <div className="font-sans text-slate-900 bg-slate-50/50 min-h-screen pb-24">
+      
+      {/* ════════ HERO SECTION ════════ */}
+      <section className="relative overflow-hidden bg-white border-b border-slate-200 pt-12 md:pt-16 px-4 pb-12 md:pb-16 text-center z-10">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[140%] bg-[radial-gradient(circle,rgba(124,58,237,0.06)_0%,transparent_60%)] -z-10 pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[140%] bg-[radial-gradient(circle,rgba(14,165,233,0.06)_0%,transparent_60%)] -z-10 pointer-events-none" />
 
-        .nx { font-family: 'Plus Jakarta Sans', sans-serif; background: transparent; color: #0F172A; }
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .4 }}>
+            <span className="inline-flex items-center gap-1.5 px-3.5 md:px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] md:text-[11px] font-extrabold uppercase tracking-widest mb-5 md:mb-6">
+              <Sparkles size={12} className="text-indigo-500" /> Katalog Digital Premium
+            </span>
+          </motion.div>
 
-        /* ══ HERO ══ */
-        .nx-hero {
-          position: relative; overflow: hidden;
-          background: #FFFFFF; border-bottom: 1px solid #E2E8F0;
-          padding: 64px 20px 56px; text-align: center;
-        }
-        .nx-hero::before {
-          content: ''; position: absolute; top: -20%; left: -10%; width: 60%; height: 140%;
-          background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 60%); pointer-events: none;
-        }
-        .nx-hero::after {
-          content: ''; position: absolute; bottom: -20%; right: -10%; width: 60%; height: 140%;
-          background: radial-gradient(circle, rgba(14,165,233,0.10) 0%, transparent 60%); pointer-events: none;
-        }
+          <motion.h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.15] tracking-tight text-slate-900 max-w-3xl mx-auto mb-4" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .06, duration: .5 }}>
+            Tingkatkan Keahlian Digitalmu <span className="bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent block sm:inline">Hari Ini.</span>
+          </motion.h1>
 
-        /* ── Badge ── */
-        .nx-badge {
-          display: inline-flex; align-items: center; gap: 6px;
-          padding: 5px 14px; border-radius: 999px;
-          background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE;
-          color: #4F46E5; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-          margin-bottom: 20px; box-shadow: 0 4px 12px rgba(79,70,229,0.08);
-        }
+          <motion.p className="text-[13px] sm:text-sm md:text-base font-medium text-slate-500 leading-relaxed max-w-xl mx-auto px-2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .14, duration: .5 }}>
+            Akses E-Book, Template, dan Modul eksklusif dari praktisi terbaik Amania. Investasi sekali, akses selamanya.
+          </motion.p>
 
-        /* ── H1 ── */
-        .nx-h1 {
-          font-size: clamp(1.75rem, 6vw, 3.5rem);
-          font-weight: 800; line-height: 1.2; letter-spacing: -.025em;
-          color: #0F172A; margin: 0 auto 16px; max-width: 720px;
-        }
-        .nx-h1 span {
-          background: linear-gradient(135deg, #6366F1 0%, #A855F7 50%, #EC4899 100%);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
+          {/* Stats Bar */}
+          {!loading && products.length > 0 && (() => {
+            const totalRev = products.reduce((s,p) => s + (p.reviews_count||0), 0);
+            const withR    = products.filter(p => parseFloat(p.reviews_avg_rating) > 0);
+            const avgAll   = withR.length > 0 ? (withR.reduce((s,p) => s + parseFloat(p.reviews_avg_rating), 0) / withR.length).toFixed(1) : null;
 
-        .nx-sub {
-          font-size: clamp(13px, 2.5vw, 15px); font-weight: 500; color: #475569;
-          line-height: 1.75; max-width: 520px; margin: 0 auto;
-        }
+            return (
+              <motion.div className="mt-8 md:mt-10 mx-auto flex flex-row items-center justify-center bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-lg shadow-indigo-500/5 overflow-hidden w-full max-w-[90%] sm:w-fit" initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .28, duration: .5 }}>
+                <div className="px-4 sm:px-8 py-4 text-center flex-1 sm:flex-none">
+                  <p className="text-xl sm:text-2xl font-black text-indigo-600 mb-0.5 flex items-center justify-center gap-1">{products.length}</p>
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Produk Pilihan</p>
+                </div>
+                {avgAll && (
+                  <>
+                    <div className="w-px h-10 sm:h-12 bg-slate-200 shrink-0" />
+                    <div className="px-4 sm:px-8 py-4 text-center flex-1 sm:flex-none">
+                      <p className="text-xl sm:text-2xl font-black text-indigo-600 mb-0.5 flex items-center justify-center gap-1">{avgAll} <Star size={16} className="fill-amber-500 text-amber-500 sm:w-[18px] sm:h-[18px]" /></p>
+                      <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Rating Global</p>
+                    </div>
+                  </>
+                )}
+                {totalRev > 0 && (
+                  <>
+                    <div className="w-px h-10 sm:h-12 bg-slate-200 shrink-0 hidden sm:block" />
+                    <div className="px-4 sm:px-8 py-4 text-center hidden sm:block flex-none">
+                      <p className="text-xl sm:text-2xl font-black text-indigo-600 mb-0.5 flex items-center justify-center gap-1">{totalRev.toLocaleString('id-ID')}</p>
+                      <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Ulasan Terverifikasi</p>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            );
+          })()}
+        </div>
+      </section>
 
-        /* ── Stats glassmorphism (stacks nicely on mobile) ── */
-        .nx-stats-wrap {
-          display: flex; align-items: center; justify-content: center; gap: 0;
-          margin-top: 36px;
-          background: rgba(255,255,255,0.75); backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,0.55); border-radius: 20px;
-          box-shadow: 0 8px 24px -8px rgba(79,70,229,0.12); overflow: hidden;
-          width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto;
-        }
-        .nx-stat-item { padding: 16px 28px; text-align: center; flex: 1; min-width: 0; }
-        .nx-stat-val {
-          font-size: 24px; font-weight: 800; color: #4F46E5; line-height: 1.2;
-          letter-spacing: -.02em; display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
-        .nx-stat-label { font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; white-space: nowrap; }
-        .nx-stat-div { width: 1px; background: #E2E8F0; align-self: stretch; }
-
-        @media (max-width: 480px) {
-          .nx-hero { padding: 44px 16px 40px; }
-          .nx-stats-wrap { flex-direction: column; width: 100%; border-radius: 16px; }
-          .nx-stat-div { width: 100%; height: 1px; align-self: auto; }
-          .nx-stat-item { padding: 14px 20px; width: 100%; }
-        }
-
-        /* ══ TOOLBAR ══ */
-        .nx-toolbar {
-          background: rgba(255,255,255,0.92); backdrop-filter: blur(16px);
-          border-bottom: 1px solid #E2E8F0; position: sticky; top: 0; z-index: 30;
-        }
-        .nx-toolbar-inner {
-          max-width: 1200px; margin: 0 auto;
-          padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;
-        }
-        @media (min-width: 769px) {
-          .nx-toolbar-inner { flex-direction: row; align-items: center; padding: 12px 24px; gap: 12px; }
-        }
-
-        /* ── Search ── */
-        .nx-search-wrap { position: relative; width: 100%; }
-        @media (min-width: 769px) { .nx-search-wrap { flex: 1; } }
-
-        .nx-search {
-          width: 100%; padding: 11px 36px 11px 40px;
-          border-radius: 12px; border: 1.5px solid #E2E8F0;
-          background: #F8FAFC; font-family: inherit; font-size: 14px; font-weight: 500; color: #0F172A; outline: none; transition: all .2s;
-          -webkit-appearance: none;
-        }
-        .nx-search:focus { background: #FFFFFF; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
-        .nx-search::placeholder { color: #94A3B8; }
-
-        /* ── Toolbar row 2: filters + sort ── */
-        .nx-toolbar-row2 {
-          display: flex; align-items: center; gap: 8px;
-          overflow-x: auto; -webkit-overflow-scrolling: touch;
-          padding-bottom: 2px; /* prevent clipping */
-          /* scrollbar hidden */
-          scrollbar-width: none;
-        }
-        .nx-toolbar-row2::-webkit-scrollbar { display: none; }
-
-        /* ── Filter pills ── */
-        .nx-filter-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-
-        .nx-pill {
-          display: inline-flex; align-items: center; gap: 5px;
-          padding: 8px 14px; border-radius: 10px; font-family: inherit;
-          font-size: 13px; font-weight: 700; cursor: pointer; transition: all .18s;
-          white-space: nowrap; border: 1.5px solid #E2E8F0; background: #FFFFFF; color: #475569;
-          flex-shrink: 0;
-        }
-        .nx-pill:hover { border-color: #8B5CF6; color: #8B5CF6; background: #F5F3FF; }
-        .nx-pill-active {
-          background: linear-gradient(135deg, #6366F1, #8B5CF6); color: #FFFFFF;
-          border-color: transparent; box-shadow: 0 4px 10px rgba(99,102,241,0.22);
-        }
-        .nx-pill-active:hover { background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #FFFFFF; }
-
-        /* ── Spacer ── */
-        .nx-spacer { flex: 1; min-width: 8px; }
-
-        /* ── View toggle ── */
-        .nx-view-toggle {
-          display: flex; background: #F1F5F9; border-radius: 10px; padding: 3px;
-          border: 1px solid #E2E8F0; flex-shrink: 0;
-        }
-        @media (max-width: 480px) { .nx-view-toggle { display: none; } }
-
-        .nx-view-btn {
-          padding: 7px; border-radius: 7px; border: none; cursor: pointer;
-          transition: all .18s; display: flex; align-items: center; justify-content: center;
-          background: transparent; color: #94A3B8;
-        }
-        .nx-view-btn.active { background: #FFFFFF; color: #6366F1; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-        .nx-view-btn:hover:not(.active) { color: #475569; }
-
-        /* ── Sort dropdown ── */
-        .nx-sort-wrap { position: relative; flex-shrink: 0; }
-        .nx-sort-btn {
-          display: inline-flex; align-items: center; gap: 6px;
-          padding: 8px 14px; border-radius: 10px; font-family: inherit;
-          font-size: 13px; font-weight: 700; cursor: pointer; transition: all .18s;
-          white-space: nowrap; border: 1.5px solid #E2E8F0; background: #FFFFFF; color: #475569;
-        }
-        .nx-sort-btn:hover { border-color: #C7D2FE; color: #4F46E5; background: #EEF2FF; }
-        .nx-sort-menu {
-          position: absolute; top: calc(100% + 6px); right: 0; min-width: 174px;
-          background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 6px;
-          box-shadow: 0 8px 24px rgba(15,23,42,0.10); z-index: 50;
-        }
-        .nx-sort-item {
-          display: flex; align-items: center; justify-content: space-between; gap: 8px;
-          padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
-          cursor: pointer; transition: all .15s; color: #475569; font-family: inherit; background: transparent; border: none; width: 100%;
-        }
-        .nx-sort-item:hover { background: #EEF2FF; color: #4F46E5; }
-        .nx-sort-item-on { background: #EEF2FF; color: #4F46E5; font-weight: 800; }
-
-        /* ══ RESULT BAR ══ */
-        .nx-result-bar {
-          max-width: 1200px; margin: 0 auto; padding: 14px 16px 0;
-          display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-        }
-        @media (min-width: 769px) { .nx-result-bar { padding: 14px 24px 0; } }
-        .nx-result-text { font-size: 13px; font-weight: 600; color: #64748B; }
-
-        /* ══ SKELETON ══ */
-        .nx-skeleton { background: #E2E8F0; border-radius: 8px; position: relative; overflow: hidden; }
-        .nx-skeleton::after {
-          content: ''; position: absolute; inset: 0;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
-          animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        /* ══ CARDS ══ */
-        .nx-card {
-          background: #FFFFFF; border-radius: 18px; overflow: hidden;
-          border: 1px solid #E2E8F0; display: flex; flex-direction: column;
-          transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
-          position: relative; height: 100%;
-        }
-        .nx-card:hover { transform: translateY(-6px); box-shadow: 0 16px 36px -8px rgba(99,102,241,0.18); border-color: #A5B4FC; }
-
-        /* List view: side-by-side on tablet+ only */
-        @media (min-width: 640px) {
-          .nx-card.list-view { flex-direction: row; align-items: stretch; }
-        }
-
-        /* Image wrap */
-        .nx-img-wrap { position: relative; overflow: hidden; background: #F1F5F9; flex-shrink: 0; }
-        .nx-card.grid-view .nx-img-wrap,
-        .nx-card.list-view .nx-img-wrap { aspect-ratio: 16/10; width: 100%; }
-
-        @media (min-width: 640px) {
-          .nx-card.list-view .nx-img-wrap { width: 260px; aspect-ratio: unset; min-height: 100%; }
-        }
-        @media (min-width: 900px) {
-          .nx-card.list-view .nx-img-wrap { width: 300px; }
-        }
-
-        .nx-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .45s ease; }
-        .nx-card:hover .nx-img { transform: scale(1.04); }
-
-        /* Placeholder icon area */
-        .nx-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; min-height: 160px; }
-
-        /* Overlay dim */
-        .nx-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.35) 0%, transparent 40%); pointer-events: none; }
-
-        /* Badges */
-        .nx-free-badge {
-          position: absolute; top: 12px; right: 12px;
-          padding: 5px 12px; border-radius: 999px; font-size: 10px; font-weight: 800;
-          letter-spacing: .06em; text-transform: uppercase;
-          background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF;
-          box-shadow: 0 3px 10px rgba(16,185,129,0.28); z-index: 10;
-        }
-        .nx-bestseller-badge {
-          position: absolute; top: 12px; left: 12px;
-          padding: 5px 12px; border-radius: 999px; font-size: 10px; font-weight: 800;
-          letter-spacing: .06em; text-transform: uppercase;
-          background: linear-gradient(135deg, #F59E0B, #EA580C); color: #FFFFFF;
-          box-shadow: 0 3px 10px rgba(234,88,12,0.28); z-index: 10;
-          display: flex; align-items: center; gap: 4px;
-        }
-
-        /* ── Card body ── */
-        .nx-body { padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 0; min-width: 0; }
-        @media (min-width: 480px) { .nx-body { padding: 20px; } }
-
-        /* Meta row */
-        .nx-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-        .nx-author { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #64748B; flex-shrink: 0; }
-        .nx-dot { width: 3px; height: 3px; border-radius: 50%; background: #CBD5E1; flex-shrink: 0; }
-        .nx-rating-row { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; }
-
-        /* Title */
-        .nx-title {
-          font-size: 16px; font-weight: 800; color: #0F172A; line-height: 1.4; margin: 0 0 8px;
-          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-          transition: color .18s;
-        }
-        @media (min-width: 640px) { .nx-title { font-size: 17px; } }
-        .nx-card:hover .nx-title { color: #4F46E5; }
-
-        /* Description */
-        .nx-desc {
-          font-size: 13px; color: #64748B; line-height: 1.65; margin: 0;
-          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-          flex: 1;
-        }
-
-        /* ── Card footer ── */
-        .nx-footer {
-          margin-top: 16px; padding-top: 14px; border-top: 1px solid #F1F5F9;
-          display: flex; align-items: center; justify-content: space-between; gap: 10px;
-        }
-
-        .nx-price-wrap {}
-        .nx-price-label { font-size: 9px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
-        .nx-price { font-size: 20px; font-weight: 800; color: #4F46E5; letter-spacing: -.02em; line-height: 1; }
-        .nx-price.free { color: #10B981; }
-        @media (min-width: 640px) { .nx-price { font-size: 21px; } }
-
-        .nx-cta {
-          display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-          padding: 9px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; color: #FFFFFF;
-          background: #0F172A; text-decoration: none;
-          transition: all .25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0;
-          white-space: nowrap;
-        }
-        .nx-card:hover .nx-cta {
-          background: linear-gradient(135deg, #6366F1, #8B5CF6);
-          transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99,102,241,0.28);
-        }
-
-        /* ══ CONTENT WRAPPER ══ */
-        .nx-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px 72px; }
-        @media (min-width: 769px) { .nx-content { padding: 28px 24px 80px; } }
-
-        /* ── Grid ── */
-        .nx-grid { display: grid; gap: 16px; }
-        @media (min-width: 769px) { .nx-grid { gap: 20px; } }
-        @media (min-width: 900px) { .nx-grid { gap: 24px; } }
-
-        /* ── Empty state ── */
-        .nx-empty {
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-          padding: 72px 24px; text-align: center;
-          background: #FFFFFF; border-radius: 20px; border: 1px dashed #CBD5E1;
-        }
-
-        /* ══ BANNER ══ */
-        .nx-banner {
-          margin-top: 56px; border-radius: 20px; padding: 32px 24px;
-          display: flex; align-items: center; justify-content: space-between; gap: 24px;
-          flex-wrap: wrap;
-          background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-          position: relative; overflow: hidden;
-        }
-        .nx-banner::after {
-          content: ''; position: absolute; right: 0; top: 0; width: 50%; height: 100%;
-          background: radial-gradient(circle at right, rgba(255,255,255,0.18) 0%, transparent 60%);
-          pointer-events: none;
-        }
-        @media (min-width: 640px) { .nx-banner { padding: 40px 40px; } }
-
-        .nx-banner-title { font-size: clamp(20px, 4vw, 26px); font-weight: 800; color: #FFFFFF; margin: 0 0 8px; line-height: 1.2; letter-spacing: -.02em; }
-        .nx-banner-sub { font-size: 14px; color: #C7D2FE; line-height: 1.6; margin: 0; font-weight: 500; }
-        .nx-banner-cta {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 800;
-          color: #4F46E5; background: #FFFFFF; text-decoration: none; transition: all .2s;
-          white-space: nowrap; flex-shrink: 0; position: relative; z-index: 2;
-        }
-        .nx-banner-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-      `}</style>
-
-      <div className="nx">
-
-        {/* ════════ HERO ════════ */}
-        <section className="nx-hero">
-          <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .4 }}>
-              <div className="nx-badge"><Sparkles size={12} /> Katalog Digital Premium</div>
-            </motion.div>
-
-            <motion.h1 className="nx-h1" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .06, duration: .5 }}>
-              Tingkatkan Keahlian Digitalmu <span>Hari Ini.</span>
-            </motion.h1>
-
-            <motion.p className="nx-sub" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .14, duration: .5 }}>
-              Akses E-Book, Template, dan Modul eksklusif dari praktisi terbaik Amania. Investasi sekali, akses selamanya.
-            </motion.p>
-
-            {/* Stats */}
-            {!loading && products.length > 0 && (() => {
-              const totalRev = products.reduce((s,p) => s + (p.reviews_count||0), 0);
-              const withR    = products.filter(p => parseFloat(p.reviews_avg_rating) > 0);
-              const avgAll   = withR.length > 0 ? (withR.reduce((s,p) => s + parseFloat(p.reviews_avg_rating), 0) / withR.length).toFixed(1) : null;
-
-              return (
-                <motion.div className="nx-stats-wrap" initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .28, duration: .5 }}>
-                  <div className="nx-stat-item">
-                    <p className="nx-stat-val">{products.length}</p>
-                    <p className="nx-stat-label">Produk Pilihan</p>
-                  </div>
-                  {avgAll && (
-                    <>
-                      <div className="nx-stat-div" />
-                      <div className="nx-stat-item">
-                        <p className="nx-stat-val">{avgAll} <Star size={18} style={{ color: '#F59E0B', fill: '#F59E0B' }} /></p>
-                        <p className="nx-stat-label">Rating Global</p>
-                      </div>
-                    </>
-                  )}
-                  {totalRev > 0 && (
-                    <>
-                      <div className="nx-stat-div" />
-                      <div className="nx-stat-item">
-                        <p className="nx-stat-val">{totalRev.toLocaleString('id-ID')}</p>
-                        <p className="nx-stat-label">Ulasan Terverifikasi</p>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              );
-            })()}
-          </div>
-        </section>
-
-        {/* ════════ TOOLBAR ════════ */}
-        <div className="nx-toolbar">
-          <div className="nx-toolbar-inner">
-
-            {/* Row 1: Search (always full width on mobile) */}
-            <div className="nx-search-wrap">
-              <Search size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
+      {/* ════════ TOOLBAR STICKY ════════ */}
+      <div className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 shadow-sm shadow-slate-200/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-6">
+            
+            {/* Search Bar - Full Width on Mobile */}
+            <div className="relative w-full lg:max-w-md shrink-0">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
-                className="nx-search"
+                className="w-full pl-10 pr-10 py-2.5 md:py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-[13px] sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400"
                 placeholder="Cari E-Book, Template, Modul…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -496,251 +187,303 @@ export default function EProductsClient() {
                   <motion.button
                     initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .8 }}
                     onClick={() => setSearch('')}
-                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#E2E8F0', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
-                    <X size={11} style={{ color: '#475569' }} />
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-full p-1 transition-colors"
+                  >
+                    <X size={12} />
                   </motion.button>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Row 2: Filter pills + view toggle + sort */}
-            <div className="nx-toolbar-row2">
-              <div className="nx-filter-group">
-                {[
-                  { val: 'all',  label: 'Semua',    icon: <SlidersHorizontal size={13} /> },
-                  { val: 'free', label: 'Gratis',   icon: <Gift size={13} /> },
-                  { val: 'paid', label: 'Berbayar', icon: <Tag size={13} /> },
-                ].map(({ val, label, icon }) => (
-                  <button
-                    key={val}
-                    onClick={() => setPriceFilter(val as any)}
-                    className={`nx-pill ${priceFilter === val ? 'nx-pill-active' : ''}`}>
-                    {icon} {label}
-                  </button>
-                ))}
+            {/* Filter & Controls Row */}
+            <div className="flex items-center justify-between w-full lg:w-auto gap-3">
+              
+              {/* Scrollable Filters (Aman digeser di HP) */}
+              <div className="flex-1 overflow-x-auto scrollbar-hide pb-1 -mb-1 mask-fade-right">
+                <div className="flex items-center gap-2 w-max pr-4 lg:pr-0">
+                  
+                  {/* Price Filter Group */}
+                  <div className="flex items-center p-1 bg-slate-100/80 border border-slate-200 rounded-xl shrink-0">
+                    {[
+                      { val: 'all',  label: 'Semua',    icon: <SlidersHorizontal size={14} /> },
+                      { val: 'free', label: 'Gratis',   icon: <Gift size={14} /> },
+                      { val: 'paid', label: 'Berbayar', icon: <Tag size={14} /> },
+                    ].map(({ val, label, icon }) => (
+                      <button
+                        key={val}
+                        onClick={() => setPriceFilter(val as any)}
+                        className="relative px-3.5 py-1.5 md:py-1.5 rounded-lg text-[12px] sm:text-[13px] font-bold transition-colors flex items-center gap-1.5"
+                      >
+                        {priceFilter === val && (
+                          <motion.div
+                            layoutId="activeFilterBg"
+                            className="absolute inset-0 bg-white border border-slate-200/80 shadow-sm rounded-lg"
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          />
+                        )}
+                        <span className={`relative z-10 flex items-center gap-1.5 ${priceFilter === val ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>
+                          {icon} <span>{label}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* View Toggles (Desktop Only) */}
+                  <div className="hidden sm:flex items-center p-1 bg-slate-100/80 border border-slate-200 rounded-xl shrink-0">
+                    {[
+                      { mode: 'grid', icon: LayoutGrid },
+                      { mode: 'list', icon: ListIcon }
+                    ].map(({ mode, icon: Icon }) => (
+                      <button 
+                        key={mode}
+                        onClick={() => setViewMode(mode as any)} 
+                        className="relative p-1.5 rounded-lg transition-colors flex items-center justify-center"
+                      >
+                        {viewMode === mode && (
+                          <motion.div
+                            layoutId="activeViewBg"
+                            className="absolute inset-0 bg-white border border-slate-200/80 shadow-sm rounded-lg"
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          />
+                        )}
+                        <Icon size={16} strokeWidth={2.5} className={`relative z-10 ${viewMode === mode ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`} />
+                      </button>
+                    ))}
+                  </div>
+
+                </div>
               </div>
 
-              <div className="nx-spacer" />
+              {/* Garis Pemisah Mobile */}
+              <div className="w-px h-6 bg-slate-200 shrink-0 lg:hidden" />
 
-              {/* View toggle — hidden on very small screens via CSS */}
-              <div className="nx-view-toggle">
-                <button onClick={() => setViewMode('grid')} className={`nx-view-btn ${viewMode === 'grid' ? 'active' : ''}`} title="Grid View">
-                  <LayoutGrid size={15} strokeWidth={2.5} />
+              {/* Sort Dropdown (Fixed di Kanan, tidak ikut ter-scroll) */}
+              <div className="relative shrink-0" ref={sortRef}>
+                <button 
+                  className="flex items-center gap-1.5 px-3 py-2 md:py-2 rounded-xl text-[12px] sm:text-[13px] font-bold bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 transition-colors shadow-sm"
+                  onClick={() => setSortOpen(o => !o)}
+                >
+                  <TrendingUp size={14} className="text-indigo-500 hidden sm:block" />
+                  <span className="truncate max-w-[70px] sm:max-w-none">{currentSort.label}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 shrink-0 ${sortOpen ? 'rotate-180' : ''}`} />
                 </button>
-                <button onClick={() => setViewMode('list')} className={`nx-view-btn ${viewMode === 'list' ? 'active' : ''}`} title="List View">
-                  <ListIcon size={15} strokeWidth={2.5} />
-                </button>
-              </div>
-
-              {/* Sort */}
-              <div className="nx-sort-wrap" ref={sortRef}>
-                <button className="nx-sort-btn" onClick={() => setSortOpen(o => !o)}>
-                  <TrendingUp size={14} style={{ color: '#4F46E5', flexShrink: 0 }} />
-                  <span>{currentSort.label}</span>
-                  <ChevronDown size={13} style={{ transition: 'transform .2s', transform: sortOpen ? 'rotate(180deg)' : 'rotate(0)', color: '#94A3B8', flexShrink: 0 }} />
-                </button>
+                
                 <AnimatePresence>
                   {sortOpen && (
                     <motion.div
-                      className="nx-sort-menu"
-                      initial={{ opacity: 0, y: 5, scale: .97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 5, scale: .97 }}
-                      transition={{ duration: .14 }}>
+                      className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 p-1.5 z-50 origin-top-right"
+                      initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                    >
                       {SORT_OPTIONS.map(o => (
                         <button
                           key={o.value}
-                          className={`nx-sort-item ${sort === o.value ? 'nx-sort-item-on' : ''}`}
-                          onClick={() => { setSort(o.value); setSortOpen(false); }}>
+                          className={`w-full flex items-center justify-between px-3 py-2.5 md:py-2 rounded-lg text-[13px] font-bold transition-colors ${sort === o.value ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'}`}
+                          onClick={() => { setSort(o.value); setSortOpen(false); }}
+                        >
                           {o.label}
-                          {sort === o.value && <Check size={13} style={{ flexShrink: 0, color: '#4F46E5' }} />}
+                          {sort === o.value && <Check size={14} strokeWidth={3} className="text-indigo-600 shrink-0" />}
                         </button>
                       ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </div>
 
+            </div>
           </div>
         </div>
-
-        {/* Result bar */}
-        <AnimatePresence>
-          {!loading && (
-            <motion.div className="nx-result-bar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <span className="nx-result-text">
-                Menampilkan <strong style={{ color: '#4F46E5' }}>{filtered.length}</strong> produk
-              </span>
-              {search && (
-                <span className="nx-result-text">
-                  untuk &ldquo;<strong style={{ color: '#0F172A' }}>{search}</strong>&rdquo;
-                </span>
-              )}
-              {(search || priceFilter !== 'all') && (
-                <button
-                  onClick={() => { setSearch(''); setPriceFilter('all'); }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#DC2626', background: '#FEF2F2', border: 'none', cursor: 'pointer' }}>
-                  <X size={11} /> Hapus Filter
-                </button>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ════════ CONTENT ════════ */}
-        <div className="nx-content">
-
-          {/* Skeleton */}
-          {loading && (
-            <div
-              className="nx-grid"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))' }}>
-              {[1,2,3,4,5,6].map(i => (
-                <div key={i} className="nx-card grid-view" style={{ border: 'none', boxShadow: 'none' }}>
-                  <div className="nx-skeleton" style={{ aspectRatio: '16/10', width: '100%' }} />
-                  <div className="nx-body">
-                    <div className="nx-skeleton" style={{ height: '20px', width: '75%', marginBottom: '10px' }} />
-                    <div className="nx-skeleton" style={{ height: '14px', width: '100%', marginBottom: '6px' }} />
-                    <div className="nx-skeleton" style={{ height: '14px', width: '55%', marginBottom: '0' }} />
-                    <div className="nx-footer" style={{ borderTopColor: 'transparent' }}>
-                      <div className="nx-skeleton" style={{ height: '26px', width: '100px' }} />
-                      <div className="nx-skeleton" style={{ height: '36px', width: '88px', borderRadius: '10px' }} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Empty */}
-          {!loading && filtered.length === 0 && (
-            <motion.div className="nx-empty" initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
-                <PackageSearch size={28} strokeWidth={1.5} style={{ color: '#4F46E5' }} />
-              </div>
-              <p style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>Tidak Ada Hasil</p>
-              <p style={{ fontSize: '13px', color: '#64748B', maxWidth: '280px', lineHeight: 1.6 }}>Sesuaikan filter atau kata kunci pencarian Anda.</p>
-            </motion.div>
-          )}
-
-          {/* Products */}
-          {!loading && filtered.length > 0 && (
-            <motion.div
-              className="nx-grid"
-              variants={containerVariants} initial="hidden" animate="visible"
-              style={{
-                gridTemplateColumns: viewMode === 'grid'
-                  ? 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))'
-                  : '1fr',
-              }}>
-              <AnimatePresence mode="popLayout">
-                {filtered.map(product => {
-                  const isFree      = product.price === 0;
-                  const avgRating   = parseFloat(product.reviews_avg_rating) || 0;
-                  const totalRev    = product.reviews_count || 0;
-                  const hasRating   = avgRating > 0;
-                  const isBestseller = avgRating >= 4.5 && totalRev >= 1;
-
-                  return (
-                    <motion.div
-                      key={product.id}
-                      variants={cardVariants}
-                      layout
-                      exit={{ opacity: 0, scale: .95 }}
-                      className={`nx-card ${viewMode === 'grid' ? 'grid-view' : 'list-view'}`}>
-
-                      {/* Image */}
-                      <div className="nx-img-wrap">
-                        {product.cover_image ? (
-                          <img
-                            src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${product.cover_image}`}
-                            alt={product.title}
-                            className="nx-img"
-                          />
-                        ) : (
-                          <div className="nx-img-placeholder">
-                            <FileText size={44} strokeWidth={1.5} style={{ color: '#CBD5E1' }} />
-                          </div>
-                        )}
-                        <div className="nx-img-overlay" />
-                        {isFree && <div className="nx-free-badge">Gratis</div>}
-                        {isBestseller && !isFree && (
-                          <div className="nx-bestseller-badge">
-                            <Flame size={11} fill="currentColor" /> Bestseller
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Body */}
-                      <div className="nx-body">
-
-                        {/* Meta */}
-                        <div className="nx-meta-row">
-                          <div className="nx-author">
-                            <UserCircle size={13} style={{ color: '#94A3B8', flexShrink: 0 }} />
-                            <span style={{ maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {product.author?.name?.split(' ')[0] || 'Amania'}
-                            </span>
-                          </div>
-                          {hasRating && (
-                            <>
-                              <span className="nx-dot" />
-                              <div className="nx-rating-row">
-                                <StarRow rating={avgRating} />
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: '#0F172A' }}>{avgRating.toFixed(1)}</span>
-                                <span style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8' }}>({totalRev})</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        <h3 className="nx-title" title={product.title}>{product.title}</h3>
-
-                        {product.description && (
-                          <p className="nx-desc">
-                            {product.description.replace(/<[^>]+>/g, '')}
-                          </p>
-                        )}
-
-                        {/* Footer */}
-                        <div className="nx-footer">
-                          <div className="nx-price-wrap">
-                            <p className="nx-price-label">Harga Akses</p>
-                            <p className={`nx-price ${isFree ? 'free' : ''}`}>
-                              {formatRupiah(product.price)}
-                            </p>
-                          </div>
-                          <Link href={`/e-products/detail?slug=${product.slug}`} className="nx-cta">
-                            Detail <ArrowRight size={13} />
-                          </Link>
-                        </div>
-
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </motion.div>
-          )}
-
-          {/* Bottom Banner */}
-          {!loading && products.length > 0 && (
-            <motion.div
-              className="nx-banner"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .28, duration: .6 }}>
-              <div style={{ position: 'relative', zIndex: 2, flex: 1, minWidth: '220px' }}>
-                <h2 className="nx-banner-title">Akselerasi Kariermu</h2>
-                <p className="nx-banner-sub">Selain aset digital, temukan juga kelas dan bootcamp intensif kami.</p>
-              </div>
-              <Link href="/events" className="nx-banner-cta">
-                Lihat Bootcamp <ArrowRight size={15} />
-              </Link>
-            </motion.div>
-          )}
-
-        </div>
       </div>
-    </>
+
+      {/* ════════ RESULT INFO BAR ════════ */}
+      <AnimatePresence>
+        {!loading && (
+          <motion.div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4 flex items-center flex-wrap gap-2" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+            <span className="text-[12px] sm:text-[13px] font-semibold text-slate-500">
+              Menampilkan <strong className="text-indigo-600">{filtered.length}</strong> produk
+            </span>
+            {search && (
+              <span className="text-[12px] sm:text-[13px] font-semibold text-slate-500">
+                untuk <strong className="text-slate-900">&ldquo;{search}&rdquo;</strong>
+              </span>
+            )}
+            {(search || priceFilter !== 'all') && (
+              <button
+                onClick={() => { setSearch(''); setPriceFilter('all'); }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-bold text-rose-600 bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-colors ml-1 uppercase tracking-wide shrink-0"
+              >
+                <X size={12} /> Hapus Filter
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ════════ MAIN CONTENT ════════ */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+
+        {/* Empty State */}
+        {!loading && filtered.length === 0 && (
+          <motion.div className="flex flex-col items-center justify-center text-center py-16 md:py-20 px-4 bg-white border border-dashed border-slate-300 rounded-[1.5rem] md:rounded-[2rem] mt-2 md:mt-4" initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }}>
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 md:mb-4 text-slate-400">
+              <PackageSearch size={28} className="md:w-8 md:h-8" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-lg md:text-xl font-black text-slate-900 mb-1 md:mb-2">Tidak Ada Hasil</h3>
+            <p className="text-[13px] md:text-sm text-slate-500 max-w-xs md:max-w-sm leading-relaxed">Coba sesuaikan filter atau gunakan kata kunci pencarian yang berbeda untuk menemukan produk.</p>
+          </motion.div>
+        )}
+
+        {/* Product Layout */}
+        {!loading && filtered.length > 0 && (
+          <motion.div
+            variants={containerVariants} 
+            initial="hidden" 
+            animate="visible"
+            layout 
+            className={viewMode === 'grid' ? "grid gap-5 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-4 md:gap-5"}
+          >
+            <AnimatePresence mode="popLayout">
+              {filtered.map(product => {
+                const isFree       = product.price === 0;
+                const avgRating    = parseFloat(product.reviews_avg_rating) || 0;
+                const totalRev     = product.reviews_count || 0;
+                const hasRating    = avgRating > 0;
+                const isBestseller = avgRating >= 4.5 && totalRev >= 1;
+
+                return (
+                  <motion.div
+                    key={product.id}
+                    variants={cardVariants}
+                    layout 
+                    initial="hidden"
+                    animate="visible"
+                    exit={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
+                    className={`group bg-white rounded-2xl md:rounded-[1.25rem] overflow-hidden border border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200 hover:border-slate-300 flex ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row items-stretch'}`}
+                  >
+                    {/* Card Image */}
+                    <motion.div layout="position" className={`relative overflow-hidden bg-slate-100 shrink-0 ${viewMode === 'grid' ? 'w-full aspect-[16/10]' : 'w-full sm:w-[240px] lg:w-[280px] aspect-[16/10] sm:aspect-auto'}`}>
+                      {product.cover_image ? (
+                        <motion.img layout="position" src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${product.cover_image}`} alt={product.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center min-h-[140px] md:min-h-[160px]">
+                          <FileText size={40} className="md:w-12 md:h-12 text-slate-300" strokeWidth={1} />
+                        </div>
+                      )}
+                      
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                      {isFree && (
+                        <div className="absolute top-3 right-3 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 z-10">
+                          Gratis
+                        </div>
+                      )}
+                      {isBestseller && !isFree && (
+                        <div className="absolute top-3 left-3 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-orange-500/30 z-10 flex items-center gap-1">
+                          <Flame size={10} className="md:w-3 md:h-3 fill-white" /> Bestseller
+                        </div>
+                      )}
+                    </motion.div>
+
+                    {/* Card Body */}
+                    <motion.div layout="position" className="p-4 md:p-5 flex flex-col flex-1 min-w-0">
+                      
+                      <div className="flex items-center gap-2 mb-2 md:mb-3 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-bold text-slate-500 shrink-0">
+                          <UserCircle size={14} className="text-slate-400" />
+                          <span className="truncate max-w-[100px]">{product.author?.name?.split(' ')[0] || 'Amania'}</span>
+                        </div>
+                        
+                        {hasRating && (
+                          <>
+                            <div className="w-1 h-1 rounded-full bg-slate-300 shrink-0" />
+                            <div className="flex items-center gap-1.5">
+                              <StarRow rating={avgRating} />
+                              <span className="text-[11px] md:text-[12px] font-black text-slate-700">{avgRating.toFixed(1)}</span>
+                              <span className="text-[10px] md:text-[11px] font-bold text-slate-400">({totalRev})</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <h3 className="text-[15px] sm:text-base md:text-lg font-bold text-slate-900 leading-snug mb-1.5 md:mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors" title={product.title}>
+                        {product.title}
+                      </h3>
+                      
+                      {product.description && (
+                        <p className="text-[13px] md:text-sm text-slate-500 line-clamp-2 leading-relaxed flex-1 mb-3 md:mb-4">
+                          {product.description.replace(/<[^>]+>/g, '')}
+                        </p>
+                      )}
+
+                      <motion.div layout="position" className="mt-auto pt-3 md:pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Harga Akses</p>
+                          <p className={`text-lg sm:text-xl font-black tracking-tight leading-none ${isFree ? 'text-emerald-500' : 'text-slate-900'}`}>
+                            {formatRupiah(product.price)}
+                          </p>
+                        </div>
+                        
+                        <Link href={`/e-products/${product.slug}`} className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 md:py-2 bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white text-[11px] md:text-xs font-bold rounded-xl transition-colors shrink-0">
+                          Detail <ArrowRight size={14} />
+                        </Link>
+                      </motion.div>
+
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* ════════ PROMO BANNER BOTTOM ════════ */}
+        {!loading && products.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+            className="mt-12 md:mt-16 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl md:rounded-[2rem] p-6 sm:p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 relative overflow-hidden shadow-xl shadow-indigo-600/20"
+          >
+            {/* Banner Deco */}
+            <div className="absolute right-0 top-0 w-[150%] md:w-1/2 h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2)_0%,transparent_60%)] pointer-events-none" />
+            
+            <div className="relative z-10 text-center md:text-left flex-1">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">Akselerasi Kariermu Lebih Jauh</h2>
+              <p className="text-[13px] md:text-base text-indigo-100 font-medium max-w-lg mx-auto md:mx-0 leading-relaxed">Selain aset digital berkualitas, temukan juga program bootcamp dan webinar intensif dari Amania untuk tingkatkan <i>skill</i> kamu.</p>
+            </div>
+            
+            <Link href="/events" className="relative z-10 w-full md:w-auto shrink-0 flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 py-3 md:py-3.5 rounded-xl font-bold text-sm md:text-base transition-all hover:scale-105 hover:shadow-xl hover:shadow-white/20">
+              Lihat Program Kelas <ArrowRight size={16} />
+            </Link>
+          </motion.div>
+        )}
+
+      </div>
+
+      {/* Global Style CSS untuk efek Mask Fade di scroll horizontal */}
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Mask fade out at the right edge for smooth scrolling hint */
+        .mask-fade-right {
+          -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+          mask-image: linear-gradient(to right, black 85%, transparent 100%);
+        }
+        @media (min-width: 1024px) {
+          .mask-fade-right {
+            -webkit-mask-image: none;
+            mask-image: none;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

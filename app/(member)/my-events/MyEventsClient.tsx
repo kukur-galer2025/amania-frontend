@@ -8,7 +8,7 @@ import {
   CheckCircle2, Clock, Shield, Award, ChevronRight, Inbox, Eye, Sparkles, User, ShieldCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api';
 
 export default function MyEventsClient() {
   const [myEvents, setMyEvents] = useState<any[]>([]);
@@ -149,12 +149,11 @@ export default function MyEventsClient() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full min-w-0">
             <AnimatePresence mode="popLayout">
               {filteredEvents.map((reg, idx) => {
                 const isPast = new Date(reg.event?.start_time) < new Date();
                 
-                // 🔥 LOGIKA ORGANIZER 🔥
                 const isSuperadmin = !reg.event?.organizer || reg.event?.organizer?.role === 'superadmin';
                 const organizerName = isSuperadmin ? 'Amania Official' : reg.event?.organizer?.name;
 
@@ -162,9 +161,9 @@ export default function MyEventsClient() {
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(idx * 0.05, 0.3) }}
                     key={reg.id} 
-                    className="group bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex flex-col overflow-hidden mx-1 sm:mx-0 w-full min-w-0"
+                    className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex flex-col overflow-hidden w-full min-w-0"
                   >
-                    <div className="relative w-full aspect-[16/9] bg-slate-100 overflow-hidden border-b border-slate-100 shrink-0">
+                    <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] bg-slate-100 overflow-hidden border-b border-slate-100 shrink-0">
                       <div className={`w-full h-full transition-all duration-700 ${isPast ? 'grayscale opacity-75' : ''}`}>
                         {reg.event?.image ? (
                           <img src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -192,8 +191,7 @@ export default function MyEventsClient() {
 
                     <div className="p-4 md:p-6 flex-1 flex flex-col w-full min-w-0">
                       
-                      <div className="flex items-center justify-between mb-3 md:mb-4 min-w-0 w-full">
-                         {/* 🔥 TAMPILAN ORGANIZER 🔥 */}
+                      <div className="flex items-center justify-between mb-3 md:mb-4 min-w-0 w-full gap-2">
                          <div className="flex items-center gap-1.5 min-w-0">
                             <User size={12} className="text-indigo-500 shrink-0" />
                             <p className="text-[10px] md:text-[11px] font-bold text-indigo-600 truncate min-w-0 flex items-center gap-1">
@@ -208,7 +206,7 @@ export default function MyEventsClient() {
                          </span>
                       </div>
 
-                      <h3 className={`text-base md:text-lg font-extrabold leading-snug mb-3 md:mb-4 line-clamp-2 transition-colors min-h-[2.5rem] md:min-h-[2.8rem] break-words w-full ${isPast ? 'text-slate-600' : 'text-slate-900 group-hover:text-indigo-600'}`}>
+                      <h3 className={`text-base md:text-lg font-extrabold leading-snug mb-3 md:mb-4 line-clamp-2 transition-colors break-words w-full ${isPast ? 'text-slate-600' : 'text-slate-900 group-hover:text-indigo-600'}`}>
                         {reg.event?.title || 'Program Tidak Tersedia'}
                       </h3>
 
@@ -224,9 +222,9 @@ export default function MyEventsClient() {
                       </div>
 
                       <div className="pt-4 md:pt-5 border-t border-slate-100 mt-auto w-full min-w-0">
-                        {/* 🔥 LINK MENUJU DETAIL EVENT / KELAS BELAJAR 🔥 */}
+                        {/* 🔥 LINK MENUJU DYNAMIC ROUTE [slug] 🔥 */}
                         <Link 
-                          href={`/my-events/detail?slug=${reg.event?.slug}`} 
+                          href={`/my-events/${reg.event?.slug}`} 
                           className={`w-full flex items-center justify-center gap-1.5 md:gap-2 py-2.5 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-all group/btn min-w-0 ${
                             isPast 
                             ? 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200' 

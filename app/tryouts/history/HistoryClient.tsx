@@ -119,6 +119,11 @@ export default function HistoryClient() {
               const isPaid = trx.status === 'PAID';
               const isUnpaid = trx.status === 'UNPAID';
               const isFailed = trx.status === 'FAILED' || trx.status === 'EXPIRED';
+              
+              // 🔥 PERBAIKAN: Menangkap object tryout dari Laravel yang bernama `tryout` 
+              // (Berdasarkan relasi di SkdTransaction.php: public function tryout() {})
+              const tryoutData = trx.tryout || trx.skd_tryout; 
+              const hasTryout = !!tryoutData;
 
               return (
                 <motion.div 
@@ -158,12 +163,12 @@ export default function HistoryClient() {
                   {/* Bagian Body Card */}
                   <div className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex-1">
-                      <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2">
-                        {trx.skd_tryout?.title || 'Paket Tryout (Telah Dihapus)'}
+                      <h3 className={`text-lg md:text-xl font-black mb-2 ${hasTryout ? 'text-slate-900' : 'text-slate-400 italic'}`}>
+                        {hasTryout ? tryoutData.title : 'Paket Tryout (Telah Dihapus)'}
                       </h3>
                       <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500">
                         <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                          <CreditCard size={16} className="text-sky-500" /> {trx.payment_name || trx.payment_method}
+                          <CreditCard size={16} className="text-sky-500" /> {trx.payment_name || trx.payment_method || 'Transfer'}
                         </span>
                         <span className="text-slate-400">|</span>
                         <span className="text-lg font-black text-slate-900">
@@ -174,7 +179,7 @@ export default function HistoryClient() {
 
                     {/* Tombol Aksi */}
                     <div className="w-full md:w-auto shrink-0 flex flex-col gap-2">
-                      {isUnpaid && (
+                      {isUnpaid && trx.checkout_url && (
                         <a 
                           href={trx.checkout_url} target="_blank" rel="noopener noreferrer"
                           className="w-full md:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-black rounded-xl transition-all shadow-md shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2"
@@ -183,16 +188,16 @@ export default function HistoryClient() {
                         </a>
                       )}
                       
-                      {isPaid && (
+                      {isPaid && hasTryout && (
                         <Link 
-                          href="/tryouts/belajarku"
+                          href={`/tryouts/belajarku`}
                           className="w-full md:w-auto px-6 py-3 bg-slate-900 hover:bg-sky-600 text-white text-sm font-black rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
                         >
                           Mulai Belajar <ChevronRight size={16} />
                         </Link>
                       )}
 
-                      {isFailed && (
+                      {(!hasTryout || isFailed) && (
                         <button disabled className="w-full md:w-auto px-6 py-3 bg-slate-100 text-slate-400 text-sm font-black rounded-xl cursor-not-allowed border border-slate-200">
                           Transaksi Batal
                         </button>

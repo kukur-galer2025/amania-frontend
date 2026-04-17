@@ -103,7 +103,7 @@ export default function TryoutsLayout({ children }: { children: React.ReactNode 
             <NavLink href="/tryouts" label="Beranda" icon={Home} />
             <NavLink href="/tryouts/katalog" label="Katalog" icon={ShoppingBag} />
             <NavLink href="/tryouts/belajarku" label="Belajarku" icon={BookOpen} />
-            <NavLink href="/tryouts/history" label="history" icon={Award} />
+            <NavLink href="/tryouts/history" label="History" icon={Award} />
           </div>
 
           {/* KANAN: Tombol Kembali & Profil */}

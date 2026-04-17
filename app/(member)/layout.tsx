@@ -9,21 +9,21 @@ import {
   User, LogOut, Bell, ChevronRight, Search, 
   LayoutDashboard, Newspaper, Sparkles, LogIn, Ticket,
   CalendarHeart, Info, Receipt, Settings2, Calendar, 
-  CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, Target 
+  CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, Target
 } from 'lucide-react';
-import { apiFetch } from '../utils/api'; // 🔥 API SAKTI KITA
+import { apiFetch } from '../utils/api'; 
 
 const STATIC_PAGES = [
   { id: 'sp-1', title: 'Beranda / Dashboard', link: '/beranda', icon: Home },
-  { id: 'sp-2', title: 'Katalog Event & Kelas', link: '/events', icon: Rocket },
+  { id: 'sp-2', title: 'Katalog Program', link: '/events', icon: Rocket },
   { id: 'sp-2b', title: 'E-Produk Premium', link: '/e-products', icon: ShoppingCart },
-  { id: 'sp-2c', title: 'Simulasi & Tryout', link: '/tryouts', icon: Target }, // 🔥 TAMBAHAN HALAMAN TRYOUT 🔥
+  { id: 'sp-2c', title: 'Simulasi & Tryout', link: '/tryouts', icon: Target }, 
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
-  { id: 'sp-4', title: 'Dashboard Tiket Saya', link: '/dashboard/ticket', icon: Ticket },
-  { id: 'sp-5', title: 'Kelas Saya (Ruang Belajar)', link: '/my-events', icon: CalendarHeart },
+  { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
+  { id: 'sp-5', title: 'Kelas Saya', link: '/my-events', icon: CalendarHeart },
   { id: 'sp-6', title: 'Kalender Jadwal', link: '/calendar', icon: Calendar },
   { id: 'sp-7', title: 'Riwayat Transaksi', link: '/transactions', icon: Receipt },
-  { id: 'sp-8', title: 'Papan Peringkat (Leaderboard)', link: '/leaderboard', icon: Trophy },
+  { id: 'sp-8', title: 'Papan Peringkat', link: '/leaderboard', icon: Trophy },
   { id: 'sp-9', title: 'Sertifikat Kelulusan', link: '/certificates', icon: Award },
   { id: 'sp-10', title: 'Komunitas / Diskusi', link: '/community', icon: MessageSquare },
   { id: 'sp-11', title: 'Tentang Amania', link: '/tentang-kami', icon: Info },
@@ -36,16 +36,13 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [userData, setUserData] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
   
-  // 🔥 STATE MENU MOBILE 🔥
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // STATE NOTIFIKASI
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // STATE PENCARIAN PINTAR
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -55,14 +52,63 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [articleResults, setArticleResults] = useState<any[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // 🔥 STATE UNTUK ANIMASI LOGOUT FULL SCREEN 🔥
+  const [logoutState, setLogoutState] = useState<{ isLoggingOut: boolean, msg: string, type: 'success' | 'error' }>({
+    isLoggingOut: false,
+    msg: '',
+    type: 'success'
+  });
+
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
+
+  // 🔥 FUNGSI LOGOUT DENGAN TRANSISI SATU HALAMAN PENUH 🔥
+  const handleLogout = (reason: 'manual' | 'expired' = 'manual') => {
+    // 1. Munculkan overlay loading full screen
+    setLogoutState({
+      isLoggingOut: true,
+      msg: reason === 'expired' ? 'Sesi Anda telah habis. Membawa Anda ke halaman login...' : 'Sesi Anda telah berakhir. Sampai jumpa kembali!',
+      type: reason === 'expired' ? 'error' : 'success'
+    });
+
+    // 2. Bersihkan storage di background
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUserData(null);
+
+    // 3. Tahan selama 2 detik agar user bisa membaca pesan dan melihat animasi, lalu redirect
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+  };
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // PENGECEKAN EKSTRA KETAT
     const userStr = localStorage.getItem('user');
-    if (userStr) {
-      setUserData(JSON.parse(userStr));
-      fetchNotifications();
+    const token = localStorage.getItem('token');
+    
+    const isTokenValid = token && token !== 'null' && token !== 'undefined' && token.length > 10;
+    const isUserStrValid = userStr && userStr !== 'null' && userStr !== 'undefined';
+
+    if (isTokenValid && isUserStrValid) {
+      try {
+        const parsedUser = JSON.parse(userStr);
+        if (parsedUser && typeof parsedUser === 'object' && parsedUser.name) {
+          setUserData(parsedUser);
+          fetchNotifications(); 
+        } else {
+          throw new Error('Data user tidak lengkap atau corrupt');
+        }
+      } catch (error) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setUserData(null);
+      }
+    } else {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      setUserData(null);
     }
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -86,12 +132,21 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const fetchNotifications = async () => {
     try {
       const res = await apiFetch('/notifications');
+      
+      // AUTO LOGOUT JIKA TOKEN EXPIRED
+      if (res.status === 401) {
+        handleLogout('expired');
+        return;
+      }
+
       const json = await res.json();
       if (res.ok && json.success) {
         setNotifications(json.notifications);
         setUnreadCount(json.unread_count);
       }
-    } catch (error) { console.error("Gagal ambil notifikasi"); }
+    } catch (error) { 
+      console.error("Gagal ambil notifikasi", error); 
+    }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -114,13 +169,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days} hari lalu`;
     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUserData(null);
-    router.push('/login');
   };
 
   const getAvatarSource = () => {
@@ -191,8 +239,50 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex font-sans overflow-x-hidden relative">
       
+      {/* 🔥 OVERLAY ANIMASI LOGOUT FULL SCREEN 🔥 */}
+      <AnimatePresence>
+        {logoutState.isLoggingOut && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-xl flex flex-col items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+              className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden"
+            >
+              {/* Dekorasi Cahaya Latar */}
+              <div className={`absolute top-0 w-full h-2 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-inner ${logoutState.type === 'success' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}`}>
+                {logoutState.type === 'success' ? (
+                  <CheckCircle2 size={48} strokeWidth={2.5} />
+                ) : (
+                  <AlertCircle size={48} strokeWidth={2.5} />
+                )}
+              </div>
+              
+              <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
+                {logoutState.type === 'success' ? 'Logout Berhasil' : 'Sesi Kedaluwarsa'}
+              </h2>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8 px-2">
+                {logoutState.msg}
+              </p>
+              
+              <div className="flex items-center gap-3 text-indigo-600 bg-indigo-50 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest">
+                <Loader2 size={16} className="animate-spin" /> Memuat...
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* OVERLAY MENU MOBILE */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -251,29 +341,33 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Navigasi Utama</p>
               <div className="space-y-0.5">
                 <NavLink icon={Home} label="Beranda" href="/beranda" />
-                <NavLink icon={Rocket} label="Katalog Event" href="/events" />
+                <NavLink icon={Rocket} label="Katalog Program" href="/events" />
                 <NavLink icon={ShoppingCart} label="E-Produk Premium" href="/e-products" />
-                <NavLink icon={Target} label="Tryout" href="/tryouts" />
+                <NavLink icon={Target} label="Simulasi Tryout" href="/tryouts" />
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
-                {userData && <NavLink icon={Ticket} label="Dashboard Tiket" href="/dashboard/ticket" />}
               </div>
             </div>
+
+            {/* 🔥 MENU YANG DI FLAT-KAN KEMBALI 🔥 */}
             <div>
-              <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Ruang Belajar</p>
+              <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Ruang Pembelajaran</p>
               <div className="space-y-0.5">
+                {userData && <NavLink icon={Ticket} label="Tiket Aktif" href="/dashboard/ticket" />}
                 <NavLink icon={CalendarHeart} label="Kelas Saya" href="/my-events" />
+                <NavLink icon={Award} label="Sertifikat Kelulusan" href="/certificates" />
                 <NavLink icon={Calendar} label="Kalender" href="/calendar" />
                 <NavLink icon={Receipt} label="Riwayat Transaksi" href="/transactions" />
               </div>
             </div>
+
             <div>
               <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Reputasi & Jaringan</p>
               <div className="space-y-0.5">
                 <NavLink icon={Trophy} label="Papan Peringkat" href="/leaderboard" />
-                <NavLink icon={Award} label="Sertifikat Kelulusan" href="/certificates" />
                 <NavLink icon={MessageSquare} label="Komunitas" href="/community" />
               </div>
             </div>
+
             <div>
               <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Pusat Informasi</p>
               <div className="space-y-0.5">
@@ -285,7 +379,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
           {userData && (
             <div className="px-4 mt-8 pb-4">
-              <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors group border border-transparent hover:border-rose-100">
+              <button onClick={() => handleLogout('manual')} className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors group border border-transparent hover:border-rose-100">
                 <LogOut size={16} className="group-hover:-translate-x-0.5 transition-transform" />
                 <span className="text-sm font-bold">Keluar Akun</span>
               </button>
@@ -344,7 +438,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               <button 
                 onClick={() => {
                   setShowMobileSearchInput(!showMobileSearchInput);
-                  // Focus input after opening
                   setTimeout(() => document.getElementById('mobile-search')?.focus(), 100);
                 }} 
                 className="md:hidden p-2 text-slate-400 hover:text-indigo-500 hover:bg-slate-100 rounded-full transition-colors"
@@ -540,12 +633,10 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                           const isUnread = notif.read_at === null;
                           const status = notif.data?.status; 
                           
-                          // 🔥 PENYESUAIAN IKON BERDASARKAN STATUS BARU (VERIFIED/REJECTED) 🔥
                           const Icon = status === 'verified' ? CheckCircle2 : (status === 'rejected' ? AlertCircle : Info);
                           const iconColor = status === 'verified' ? 'text-emerald-500' : (status === 'rejected' ? 'text-rose-500' : 'text-indigo-500');
                           const bgIcon = status === 'verified' ? 'bg-emerald-50' : (status === 'rejected' ? 'bg-rose-50' : 'bg-indigo-50');
 
-                          // 🔥 PENYESUAIAN BACA URL LANGSUNG DARI BACKEND 🔥
                           let targetUrl = notif.data?.url || '/dashboard/ticket';
 
                           return (
@@ -557,9 +648,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                               {isUnread && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-full bg-indigo-500" />}
                               <div className={`w-9 h-9 rounded-full ${bgIcon} ${iconColor} flex items-center justify-center shrink-0`}><Icon size={18} /></div>
                               <div className="flex-1 min-w-0">
-                                {/* Menampilkan 'Title' utama dari backend ("Pendaftaran Diverifikasi! 🎉" dsb) */}
                                 <p className="text-[12px] font-bold text-slate-900 mb-0.5 line-clamp-1">{notif.data?.title || notif.data?.event_name}</p>
-                                {/* Menampilkan pesan penuh alasannya */}
                                 <p className={`text-[11px] leading-relaxed ${isUnread ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>{notif.data?.message}</p>
                                 <p className="text-[9px] font-bold text-slate-400 mt-2">{formatTimeAgo(notif.created_at)}</p>
                               </div>

@@ -166,7 +166,8 @@ export default function ArticlesClient() {
               {/* HEADLINE (Hanya tampil di Halaman 1 jika ada data) */}
               {currentPage === 1 && currentArticles.length > 0 && (
                 <div className="mb-8 md:mb-12 border-b border-slate-200 pb-8 md:pb-10 w-full min-w-0">
-                  <Link href={`/articles/read?slug=${currentArticles[0].slug}`} className="group block w-full">
+                  {/* 🔥 PERUBAHAN: TAUTAN MENGARAH KE DYNAMIC ROUTE [slug] 🔥 */}
+                  <Link href={`/articles/${currentArticles[0].slug}`} className="group block w-full">
                     <div className="w-full aspect-video md:aspect-[16/9] bg-slate-100 mb-4 md:mb-5 relative overflow-hidden rounded-xl md:rounded-none shrink-0">
                       {currentArticles[0].image ? (
                         <img src={`${STORAGE_URL}/${currentArticles[0].image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Headline" />
@@ -213,7 +214,8 @@ export default function ArticlesClient() {
                       key={article.id}
                       className="w-full min-w-0"
                     >
-                      <Link href={`/articles/read?slug=${article.slug}`} className="group flex flex-col sm:flex-row gap-4 md:gap-5 py-5 md:py-6 border-b border-slate-200 hover:bg-slate-50 transition-colors px-1 md:px-2 rounded-xl md:rounded-none min-w-0">
+                      {/* 🔥 PERUBAHAN: TAUTAN MENGARAH KE DYNAMIC ROUTE [slug] 🔥 */}
+                      <Link href={`/articles/${article.slug}`} className="group flex flex-col sm:flex-row gap-4 md:gap-5 py-5 md:py-6 border-b border-slate-200 hover:bg-slate-50 transition-colors px-1 md:px-2 rounded-xl md:rounded-none min-w-0">
                         
                         {/* Thumbnail */}
                         <div className="w-full sm:w-[200px] md:w-[240px] aspect-video sm:aspect-[4/3] bg-slate-100 shrink-0 overflow-hidden relative rounded-xl md:rounded-lg">
@@ -324,7 +326,8 @@ export default function ArticlesClient() {
               
               <div className="space-y-0 w-full">
                 {popularArticles.map((article: any, idx: number) => (
-                  <Link href={`/articles/read?slug=${article.slug}`} key={idx} className="group flex gap-3 md:gap-4 py-3 md:py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 rounded-lg transition-colors w-full min-w-0">
+                  // 🔥 PERUBAHAN: TAUTAN MENGARAH KE DYNAMIC ROUTE [slug] 🔥
+                  <Link href={`/articles/${article.slug}`} key={idx} className="group flex gap-3 md:gap-4 py-3 md:py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 rounded-lg transition-colors w-full min-w-0">
                     <div className="text-2xl md:text-3xl font-black text-slate-200 group-hover:text-red-600 transition-colors mt-0.5 md:mt-0 shrink-0">
                       0{idx + 1}
                     </div>

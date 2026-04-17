@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation'; // 🔥 GANTI JADI useSearchParams
+// ❌ HAPUS: import { useSearchParams } from 'next/navigation'; (Tidak dipakai lagi)
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { 
   ArrowLeft, Calendar, User, 
@@ -18,11 +18,9 @@ const cleanHtml = (html: string) => {
              .replace(/&nbsp;/g, ' ');
 };
 
-export default function ReadArticleClient() {
-  // 🔥 AMBIL SLUG DARI URL PARAMETER (?slug=...) 🔥
-  const searchParams = useSearchParams();
-  const slug = searchParams.get('slug');
-
+// ✅ TANGKAP PROPS SLUG DARI SERVER COMPONENT
+export default function ReadArticleClient({ slug }: { slug: string }) {
+  
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
@@ -51,7 +49,7 @@ export default function ReadArticleClient() {
     };
     
     fetchArticle();
-  }, [slug]);
+  }, [slug]); // Array dependensi tetap pakai slug
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };

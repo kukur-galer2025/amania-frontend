@@ -5,14 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Search, Edit, Trash2, Image as ImageIcon, 
   FileText, CheckCircle2, XCircle, Loader2, PackageSearch, 
-  Eye, EyeOff, UploadCloud
+  Eye, EyeOff, UploadCloud, Link as LinkIcon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
 
 // 🔥 IMPORT REACT QUILL VERSI BARU (COMPATIBLE DENGAN REACT 19) 🔥
 import dynamic from 'next/dynamic';
-import 'react-quill-new/dist/quill.snow.css'; 
+
+// @ts-ignore
+import 'react-quill-new/dist/quill.snow.css';
+
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false }); 
 
 export default function AdminEProductsPage() {
@@ -25,13 +28,17 @@ export default function AdminEProductsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  // State Form
+  // State Form 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState(''); 
   const [price, setPrice] = useState<number | string>('');
   const [isPublished, setIsPublished] = useState(true);
   const [coverImage, setCoverImage] = useState<File | null>(null);
+  
+  // State untuk File Asli
+  const [fileType, setFileType] = useState<'upload' | 'link'>('upload');
   const [filePath, setFilePath] = useState<File | null>(null);
+  const [fileLink, setFileLink] = useState('');
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -57,12 +64,20 @@ export default function AdminEProductsPage() {
   const openModal = (product: any = null) => {
     if (product) {
       setEditingId(product.id);
-      setTitle(product.title);
-      setDescription(product.description);
-      setPrice(product.price);
-      setIsPublished(product.is_published);
+      setTitle(product.title || '');
+      setDescription(product.description || '');
+      setPrice(product.price ?? '');
+      setIsPublished(product.is_published ?? true);
       setCoverImage(null);
       setFilePath(null);
+      
+      if (product.file_path && product.file_path.startsWith('http')) {
+        setFileType('link');
+        setFileLink(product.file_path || '');
+      } else {
+        setFileType('upload');
+        setFileLink('');
+      }
     } else {
       setEditingId(null);
       setTitle('');
@@ -71,6 +86,8 @@ export default function AdminEProductsPage() {
       setIsPublished(true);
       setCoverImage(null);
       setFilePath(null);
+      setFileType('upload');
+      setFileLink('');
     }
     setIsModalOpen(true);
   };
@@ -83,9 +100,15 @@ export default function AdminEProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!editingId && !filePath) {
-      toast.error("File asli (E-Book/Template) wajib diupload untuk produk baru!");
-      return;
+    if (!editingId) {
+      if (fileType === 'upload' && !filePath) {
+        toast.error("File asli (E-Book/Template) wajib diupload!");
+        return;
+      }
+      if (fileType === 'link' && !fileLink) {
+        toast.error("Link Google Drive wajib diisi!");
+        return;
+      }
     }
     
     if (!description || description.trim() === '<p><br></p>') {
@@ -104,7 +127,12 @@ export default function AdminEProductsPage() {
       formData.append('is_published', isPublished ? '1' : '0');
       
       if (coverImage) formData.append('cover_image', coverImage);
-      if (filePath) formData.append('file_path', filePath);
+      
+      if (fileType === 'upload' && filePath) {
+        formData.append('file_upload', filePath);
+      } else if (fileType === 'link' && fileLink) {
+        formData.append('file_link', fileLink);
+      }
 
       const url = editingId ? `/admin/e-products/${editingId}` : '/admin/e-products';
       
@@ -155,7 +183,6 @@ export default function AdminEProductsPage() {
 
   const filteredProducts = products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  // 🔥 KONFIGURASI TOOLBAR REACT QUILL 🔥
   const quillModules = {
     toolbar: [
       [{ 'header': [2, 3, false] }],
@@ -256,13 +283,13 @@ export default function AdminEProductsPage() {
                   <div className="space-y-5">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Judul Produk <span className="text-rose-500">*</span></label>
-                      <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Cth: Template Notion Event Organizer" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
+                      <input type="text" required value={title || ''} onChange={(e) => setTitle(e.target.value)} placeholder="Cth: Template Notion Event Organizer" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Harga (Rp) <span className="text-rose-500">*</span></label>
-                        <input type="number" required min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Isi 0 jika Gratis" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
+                        <input type="number" required min="0" value={price ?? ''} onChange={(e) => setPrice(e.target.value)} placeholder="Isi 0 jika Gratis" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Status Publikasi</label>
@@ -279,7 +306,7 @@ export default function AdminEProductsPage() {
                       <div className="bg-white rounded-xl overflow-hidden border border-slate-300 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
                         <ReactQuill 
                           theme="snow" 
-                          value={description} 
+                          value={description || ''} 
                           onChange={setDescription} 
                           modules={quillModules}
                           placeholder="Tuliskan deskripsi produk yang menarik di sini..."
@@ -291,20 +318,83 @@ export default function AdminEProductsPage() {
 
                   {/* Area Upload */}
                   <div className="p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-5">
+                    
+                    {/* COVER UPLOAD */}
                     <div>
-                      <label className="block text-xs font-bold text-indigo-900 mb-2 uppercase tracking-wider flex items-center gap-2"><ImageIcon size={14}/> Cover Gambar (Opsional)</label>
-                      <input type="file" accept="image/jpeg,image/png,image/jpg,image/webp" onChange={(e) => setCoverImage(e.target.files ? e.target.files[0] : null)} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer" />
-                      {/* 🔥 INFORMASI MAKSIMAL 10MB DITAMBAHKAN DI SINI 🔥 */}
-                      <p className="text-[10px] text-slate-500 mt-1.5">
-                        *Maksimal ukuran 10MB. {editingId && 'Abaikan jika tidak ingin mengganti cover yang lama.'}
-                      </p>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+                          <ImageIcon size={14}/> Cover Gambar (Opsional)
+                        </label>
+                        <span className="text-[10px] font-bold bg-rose-100 text-rose-600 px-2 py-0.5 rounded-md">Maks 10 MB</span>
+                      </div>
+                      
+                      <input 
+                        type="file" 
+                        accept="image/jpeg,image/png,image/jpg,image/webp" 
+                        onChange={(e) => {
+                          const file = e.target.files ? e.target.files[0] : null;
+                          if (file && file.size > 10 * 1024 * 1024) { // 10MB limit check
+                            toast.error("Ukuran file cover tidak boleh melebihi 10 MB!");
+                            e.target.value = ''; // Reset input
+                            setCoverImage(null);
+                            return;
+                          }
+                          setCoverImage(file);
+                        }} 
+                        className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer" 
+                      />
+                      {editingId && <p className="text-[10px] text-slate-500 mt-1.5">*Abaikan jika tidak ingin mengganti cover yang lama.</p>}
                     </div>
+                    
                     <div className="h-px bg-indigo-100 w-full" />
+                    
+                    {/* FILE MASTER UPLOAD / LINK */}
                     <div>
-                      <label className="block text-xs font-bold text-indigo-900 mb-2 uppercase tracking-wider flex items-center gap-2"><UploadCloud size={14}/> File Asli (ZIP/RAR/PDF) {editingId ? '' : <span className="text-rose-500">*</span>}</label>
-                      <input type="file" accept=".zip,.rar,.pdf" onChange={(e) => setFilePath(e.target.files ? e.target.files[0] : null)} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer" />
-                      {editingId ? <p className="text-[10px] text-slate-500 mt-1.5">*Abaikan jika tidak ingin mengganti file master yang lama.</p> : <p className="text-[10px] text-slate-500 mt-1.5">*Ini adalah file rahasia yang otomatis diunduh pembeli setelah bayar.</p>}
+                      <div className="flex items-center gap-6 mb-4">
+                        <label className="flex items-center gap-2 text-sm font-bold text-indigo-900 cursor-pointer">
+                          <input type="radio" checked={fileType === 'upload'} onChange={() => setFileType('upload')} className="text-indigo-600 focus:ring-indigo-500 w-4 h-4" /> 
+                          <UploadCloud size={16}/> Upload File Asli
+                        </label>
+                        <label className="flex items-center gap-2 text-sm font-bold text-indigo-900 cursor-pointer">
+                          <input type="radio" checked={fileType === 'link'} onChange={() => setFileType('link')} className="text-indigo-600 focus:ring-indigo-500 w-4 h-4" /> 
+                          <LinkIcon size={16}/> Link Eksternal (GDrive)
+                        </label>
+                      </div>
+
+                      {fileType === 'upload' ? (
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                              Format: .zip, .rar, .pdf
+                            </label>
+                            <span className="text-[10px] font-bold bg-rose-100 text-rose-600 px-2 py-0.5 rounded-md">Maks 50 MB</span>
+                          </div>
+
+                          <input 
+                            type="file" 
+                            accept=".zip,.rar,.pdf" 
+                            onChange={(e) => {
+                              const file = e.target.files ? e.target.files[0] : null;
+                              if (file && file.size > 50 * 1024 * 1024) { // 50MB limit check
+                                toast.error("Ukuran file asli tidak boleh melebihi 50 MB!");
+                                e.target.value = ''; // Reset input
+                                setFilePath(null);
+                                return;
+                              }
+                              setFilePath(file);
+                            }} 
+                            className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer" 
+                          />
+                          {editingId ? <p className="text-[10px] text-slate-500 mt-1.5">*Abaikan jika tidak ingin mengganti file master yang lama.</p> : <p className="text-[10px] text-slate-500 mt-1.5">*Ini adalah file rahasia yang otomatis diunduh pembeli setelah bayar.</p>}
+                        </div>
+                      ) : (
+                        <div>
+                          <input type="url" required value={fileLink || ''} onChange={(e) => setFileLink(e.target.value)} placeholder="https://drive.google.com/..." className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
+                          <p className="text-[10px] text-slate-500 mt-1.5">*Masukkan tautan Google Drive / Dropbox / Cloud Storage untuk diakses pembeli.</p>
+                        </div>
+                      )}
                     </div>
+
                   </div>
                 </form>
               </div>

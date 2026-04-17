@@ -273,9 +273,9 @@ export default function TicketDashboardClient() {
                       </div>
                       
                       {isApproved ? (
-                       // 🔥 UBAH LINK TOMBOL E-TICKET 🔥
+                       // 🔥 UBAH LINK TOMBOL E-TICKET MENGARAH KE DYNAMIC ROUTE [slug] 🔥
                       <Link 
-                        href={`/dashboard/ticket/detail?slug=${reg.event?.slug}`} 
+                        href={`/dashboard/ticket/${reg.event?.slug}`} 
                         className="inline-flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg md:rounded-xl text-[11px] md:text-xs font-semibold transition-colors shadow-sm group/btn shrink-0 min-w-0"
                       >
                         <span className="truncate">E-Ticket</span> <ChevronRight size={14} className="group-hover/btn:translate-x-0.5 transition-transform shrink-0" />
