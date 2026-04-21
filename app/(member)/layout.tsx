@@ -9,7 +9,7 @@ import {
   User, LogOut, Bell, ChevronRight, Search, 
   LayoutDashboard, Newspaper, Sparkles, LogIn, Ticket,
   CalendarHeart, Info, Receipt, Settings2, Calendar, 
-  CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, Target
+  CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, FileText
 } from 'lucide-react';
 import { apiFetch } from '../utils/api'; 
 
@@ -17,10 +17,10 @@ const STATIC_PAGES = [
   { id: 'sp-1', title: 'Beranda / Dashboard', link: '/beranda', icon: Home },
   { id: 'sp-2', title: 'Katalog Program', link: '/events', icon: Rocket },
   { id: 'sp-2b', title: 'E-Produk Premium', link: '/e-products', icon: ShoppingCart },
-  { id: 'sp-2c', title: 'Simulasi & Tryout', link: '/tryouts', icon: Target }, 
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
   { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
   { id: 'sp-5', title: 'Kelas Saya', link: '/my-events', icon: CalendarHeart },
+  { id: 'sp-5b', title: 'Koleksi E-Produk', link: '/my-e-products', icon: FileText }, // 🔥 BARU
   { id: 'sp-6', title: 'Kalender Jadwal', link: '/calendar', icon: Calendar },
   { id: 'sp-7', title: 'Riwayat Transaksi', link: '/transactions', icon: Receipt },
   { id: 'sp-8', title: 'Papan Peringkat', link: '/leaderboard', icon: Trophy },
@@ -52,7 +52,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [articleResults, setArticleResults] = useState<any[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // 🔥 STATE UNTUK ANIMASI LOGOUT FULL SCREEN 🔥
   const [logoutState, setLogoutState] = useState<{ isLoggingOut: boolean, msg: string, type: 'success' | 'error' }>({
     isLoggingOut: false,
     msg: '',
@@ -61,21 +60,17 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
-  // 🔥 FUNGSI LOGOUT DENGAN TRANSISI SATU HALAMAN PENUH 🔥
   const handleLogout = (reason: 'manual' | 'expired' = 'manual') => {
-    // 1. Munculkan overlay loading full screen
     setLogoutState({
       isLoggingOut: true,
       msg: reason === 'expired' ? 'Sesi Anda telah habis. Membawa Anda ke halaman login...' : 'Sesi Anda telah berakhir. Sampai jumpa kembali!',
       type: reason === 'expired' ? 'error' : 'success'
     });
 
-    // 2. Bersihkan storage di background
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUserData(null);
 
-    // 3. Tahan selama 2 detik agar user bisa membaca pesan dan melihat animasi, lalu redirect
     setTimeout(() => {
       router.push('/login');
     }, 2000);
@@ -84,7 +79,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     setIsMounted(true);
     
-    // PENGECEKAN EKSTRA KETAT
     const userStr = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     
@@ -133,7 +127,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
     try {
       const res = await apiFetch('/notifications');
       
-      // AUTO LOGOUT JIKA TOKEN EXPIRED
       if (res.status === 401) {
         handleLogout('expired');
         return;
@@ -256,7 +249,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
               className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden"
             >
-              {/* Dekorasi Cahaya Latar */}
               <div className={`absolute top-0 w-full h-2 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
               <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
 
@@ -343,17 +335,17 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={Home} label="Beranda" href="/beranda" />
                 <NavLink icon={Rocket} label="Katalog Program" href="/events" />
                 <NavLink icon={ShoppingCart} label="E-Produk Premium" href="/e-products" />
-                <NavLink icon={Target} label="Simulasi Tryout" href="/tryouts" />
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
               </div>
             </div>
 
-            {/* 🔥 MENU YANG DI FLAT-KAN KEMBALI 🔥 */}
             <div>
               <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Ruang Pembelajaran</p>
               <div className="space-y-0.5">
                 {userData && <NavLink icon={Ticket} label="Tiket Aktif" href="/dashboard/ticket" />}
                 <NavLink icon={CalendarHeart} label="Kelas Saya" href="/my-events" />
+                {/* 🔥 LINK MENU E-PRODUK DITAMBAHKAN DI SINI 🔥 */}
+                {userData && <NavLink icon={FileText} label="Koleksi E-Produk" href="/my-e-products" />}
                 <NavLink icon={Award} label="Sertifikat Kelulusan" href="/certificates" />
                 <NavLink icon={Calendar} label="Kalender" href="/calendar" />
                 <NavLink icon={Receipt} label="Riwayat Transaksi" href="/transactions" />
@@ -679,7 +671,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <span className="text-xs font-bold text-slate-500">© {new Date().getFullYear()} Amania.id</span>
               </div>
               <p className="text-[10px] text-slate-400 font-medium text-center md:text-left max-w-xs">
-                Platform pembelajaran komprehensif untuk persiapan seleksi CPNS, Kedinasan, dan pengembangan karir profesional.
+                Platform pembelajaran komprehensif untuk pengembangan karir profesional.
               </p>
             </div>
             

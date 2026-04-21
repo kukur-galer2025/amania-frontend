@@ -4,10 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FileText, ArrowLeft, Loader2, CalendarDays,
+  FileText, ArrowLeft, Loader2,
   ShoppingCart, UserCircle, ShieldCheck, Zap,
   Infinity as InfinityIcon, RefreshCw, BadgeDollarSign, Star,
-  MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, DownloadCloud, X
+  MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, DownloadCloud, X, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -34,6 +34,8 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   const [product,    setProduct]    = useState<any>(null);
   const [loading,    setLoading]    = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
+  
+  // 🔥 STATUS KEPEMILIKAN AKTUAL 🔥
   const [isOwned,    setIsOwned]    = useState(false); 
 
   const [myRating,   setMyRating]   = useState(0);
@@ -43,6 +45,12 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
 
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentChannels, setPaymentChannels] = useState<any[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<string>('');
+  const [isLoadingChannels, setIsLoadingChannels] = useState(false);
+  const [channelError, setChannelError] = useState<string | null>(null);
+
   const userData = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -50,10 +58,18 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
     if (!slug) return;
     (async () => {
       try {
-        const res  = await apiFetch(`/e-products/${slug}`);
+        // 🔥 PASTIKAN KIRIM TOKEN AGAR BACKEND BISA CEK STATUS BELI 🔥
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const res  = await apiFetch(`/e-products/${slug}`, { headers });
         const json = await res.json();
+        
         if (res.ok && json.success) {
           setProduct(json.data);
+          
+          // 🔥 Set status kepemilikan langsung dari data backend
+          setIsOwned(json.data.is_purchased === true);
           
           if (userData && json.data.reviews) {
             const mine = json.data.reviews.find((r: any) => r.user_id === userData.id);
@@ -61,26 +77,70 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
               setMyRating(mine.rating); 
               setMyReview(mine.review || ''); 
               setSubmitted(true); 
-              setIsOwned(true); 
             }
           }
-        } else { toast.error('Produk tidak ditemukan.'); router.push('/e-products'); }
-      } catch { toast.error('Gagal memuat data.'); }
-      finally { setLoading(false); }
+        } else { 
+          toast.error('Produk tidak ditemukan.'); 
+          router.push('/e-products'); 
+        }
+      } catch { 
+        toast.error('Gagal memuat data.'); 
+      } finally { 
+        setLoading(false); 
+      }
     })();
   }, [slug]);
 
-  const handlePurchase = async () => {
+  const handleOpenPaymentModal = async () => {
     if (!userData) {
       toast.error('Silakan masuk terlebih dahulu.');
       sessionStorage.setItem('redirectAfterLogin', `/e-products/${slug}`);
       router.push('/login'); return;
     }
+
+    if (product.price === 0) {
+      handleProcessCheckout('FREE'); 
+      return;
+    }
+
+    setIsPaymentModalOpen(true);
+    setIsLoadingChannels(true);
+    setChannelError(null);
+
+    try {
+      const res = await apiFetch('/checkout/payment-channels', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const json = await res.json();
+      
+      if (res.ok && json.success) {
+        setPaymentChannels(json.data);
+      } else {
+        setChannelError(json.message || "Gagal mengambil data metode pembayaran.");
+      }
+    } catch (error) {
+      setChannelError("Terjadi kesalahan jaringan.");
+    } finally {
+      setIsLoadingChannels(false);
+    }
+  };
+
+  const handleProcessCheckout = async (methodOverride?: string) => {
+    const finalMethod = methodOverride || selectedChannel;
+    
+    if (!finalMethod && product.price > 0) {
+      toast.error("Pilih metode pembayaran terlebih dahulu!");
+      return;
+    }
+
     setBtnLoading(true);
-    const tid = toast.loading('Menyiapkan pembayaran Tripay...');
+    const tid = toast.loading('Menyiapkan pesanan...');
+    
     try {
       const res  = await apiFetch('/checkout/e-product', { 
-        method: 'POST', body: JSON.stringify({ e_product_id: product.id, method: 'QRIS' }) 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ e_product_id: product.id, method: finalMethod }) 
       });
       const json = await res.json();
       
@@ -88,9 +148,10 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         if (json.message?.toLowerCase().includes('sudah memiliki')) {
           toast.success('Kamu sudah memiliki akses ke produk ini!', { id: tid, icon: '🎉' });
           setIsOwned(true); 
+          setIsPaymentModalOpen(false);
           setIsLockedModalOpen(false); 
         } else {
-          toast.error(json.message || 'Gagal memproses pembayaran.', { id: tid }); 
+          toast.error(json.message || 'Gagal memproses pesanan.', { id: tid }); 
         }
         setBtnLoading(false); return; 
       }
@@ -98,12 +159,13 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       if (json.is_free) { 
         toast.success('Produk gratis berhasil diklaim!', { id: tid }); 
         setIsOwned(true); 
+        setIsPaymentModalOpen(false);
         setIsLockedModalOpen(false);
         setBtnLoading(false); return; 
       }
       
       if (json.checkout_url) {
-        toast.success('Mengalihkan ke halaman pembayaran...', { id: tid });
+        toast.success('Mengalihkan ke pembayaran...', { id: tid });
         window.location.href = json.checkout_url;
       } else { 
         toast.error('Gateway tidak tersedia.', { id: tid }); setBtnLoading(false); 
@@ -128,9 +190,15 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       if (res.ok && json.success) {
         toast.success('Ulasan berhasil disimpan!');
         setSubmitted(true);
-        const r2 = await apiFetch(`/e-products/${slug}`);
+        // Refresh data produk agar ulasan baru muncul tanpa me-reset status kepemilikan
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const r2 = await apiFetch(`/e-products/${slug}`, { headers });
         const j2 = await r2.json();
-        if (r2.ok && j2.success) setProduct(j2.data);
+        if (r2.ok && j2.success) {
+          setProduct(j2.data);
+          setIsOwned(j2.data.is_purchased === true);
+        }
       } else { toast.error(json.message || 'Gagal menyimpan ulasan.'); }
     } catch { toast.error('Kesalahan koneksi.'); }
     finally { setSubmitting(false); }
@@ -143,12 +211,21 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   const reviews      = product?.reviews || [];
   const totalReviews = product?.reviews_count || reviews.length;
   const avgRating    = parseFloat(product?.reviews_avg_rating) || 0;
+  const isFree       = product?.price === 0;
 
   const getAvatar = (user: any) => {
     if (!user?.avatar) return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=6366f1&color=fff&bold=true`;
     if (user.avatar.startsWith('http')) return user.avatar;
     return `${STORAGE_URL}/${user.avatar}`;
   };
+
+  const groupedChannels = paymentChannels.reduce((acc, channel) => {
+    if (channel.active) {
+      if (!acc[channel.group]) acc[channel.group] = [];
+      acc[channel.group].push(channel);
+    }
+    return acc;
+  }, {} as Record<string, any[]>);
 
   if (loading) return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 bg-slate-50">
@@ -158,8 +235,6 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Memuat produk...</p>
     </div>
   );
-
-  const isFree = product?.price === 0;
 
   return (
     <div className="min-h-screen bg-slate-50/80 font-sans pb-28 lg:pb-24 selection:bg-indigo-100 selection:text-indigo-900">
@@ -174,6 +249,9 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         .html-content h2, .html-content h3 { color: #0f172a; font-weight: 800; margin-top: 2em; margin-bottom: 0.75em; letter-spacing: -0.02em; }
         .html-content h2 { font-size: 1.35rem; } .html-content h3 { font-size: 1.15rem; }
         @media (min-width: 640px) { .html-content h2 { font-size: 1.5rem; } .html-content h3 { font-size: 1.25rem; } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
       `}</style>
 
       {/* HEADER NAV */}
@@ -202,13 +280,18 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                   <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-300">Digital Asset</span>
                 </div>
               )}
-              <div className="absolute top-3 md:top-4 left-3 md:left-4 flex gap-2">
-                <span className="bg-white/90 backdrop-blur text-indigo-700 text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1.5 rounded-full border border-white shadow-sm flex items-center gap-1.5">
+              <div className="absolute top-3 md:top-4 left-3 md:left-4 flex flex-col gap-2">
+                <span className="bg-white/90 backdrop-blur text-indigo-700 text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1.5 rounded-full border border-white shadow-sm flex items-center gap-1.5 w-fit">
                   <Zap size={12} className="fill-indigo-600" /> Digital Product
                 </span>
-                {isFree && (
-                  <span className="bg-emerald-500 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1.5 rounded-full shadow-sm">
+                {isFree && !isOwned && (
+                  <span className="bg-emerald-500 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1.5 rounded-full shadow-sm w-fit">
                     Gratis
+                  </span>
+                )}
+                {isOwned && (
+                  <span className="bg-indigo-600 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1.5 rounded-full shadow-sm w-fit flex items-center gap-1">
+                    <CheckCircle2 size={12} /> Dimiliki
                   </span>
                 )}
               </div>
@@ -364,10 +447,24 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
           <div className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-24">
             <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/30 overflow-hidden">
               <div className="p-5 sm:p-8">
-                <p className="text-[10px] md:text-xs font-black text-indigo-500 uppercase tracking-widest mb-1.5 md:mb-2">Investasi</p>
-                <p className={`text-3xl md:text-4xl font-black tracking-tight mb-2 ${isFree ? 'text-emerald-500' : 'text-slate-900'}`}>{formatRupiah(product.price)}</p>
-                {!isFree && <p className="text-xs md:text-sm font-medium text-slate-500 mb-6 md:mb-8">Pembayaran satu kali untuk akses selamanya.</p>}
-                {isFree && <p className="text-xs md:text-sm font-medium text-emerald-600 mb-6 md:mb-8">Tersedia gratis untuk komunitas Amania.</p>}
+                
+                {/* 🔥 INDIKATOR HARGA / KEPEMILIKAN 🔥 */}
+                {isOwned ? (
+                  <div className="flex items-center gap-2 mb-3 bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg w-fit border border-indigo-100">
+                    <CheckCircle2 size={16} strokeWidth={2.5}/>
+                    <p className="text-[11px] md:text-xs font-black uppercase tracking-widest">Telah Dimiliki</p>
+                  </div>
+                ) : (
+                  <p className="text-[10px] md:text-xs font-black text-indigo-500 uppercase tracking-widest mb-1.5 md:mb-2">Investasi</p>
+                )}
+
+                <p className={`text-3xl md:text-4xl font-black tracking-tight mb-2 ${isFree || isOwned ? 'text-emerald-500' : 'text-slate-900'}`}>
+                  {isOwned ? 'Akses Terbuka' : formatRupiah(product.price)}
+                </p>
+                
+                {!isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-slate-500 mb-6 md:mb-8">Pembayaran satu kali untuk akses selamanya.</p>}
+                {isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-emerald-600 mb-6 md:mb-8">Tersedia gratis untuk komunitas Amania.</p>}
+                {isOwned && <p className="text-xs md:text-sm font-medium text-indigo-500 mb-6 md:mb-8">Anda memiliki akses penuh ke materi ini.</p>}
 
                 <div className="hidden lg:block">
                   {isOwned ? (
@@ -375,7 +472,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                       <DownloadCloud size={20} /> Buka / Akses Materi
                     </button>
                   ) : (
-                    <button onClick={handlePurchase} disabled={btnLoading} className="w-full py-4 rounded-xl font-black text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
+                    <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="w-full py-4 rounded-xl font-black text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0">
                       {btnLoading ? <Loader2 size={20} className="animate-spin" /> : <ShoppingCart size={20} />}
                       {isFree ? 'Klaim Gratis Sekarang' : 'Beli Sekarang'}
                     </button>
@@ -409,9 +506,9 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       {/* 🔥 MOBILE STICKY BOTTOM BAR (Khusus tampil di HP) 🔥 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 pb-safe z-50 lg:hidden shadow-[0_-10px_30px_rgba(15,23,42,0.06)] flex items-center justify-between gap-4">
         <div className="shrink-0">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Harga</p>
-          <p className={`text-xl font-black tracking-tight leading-none ${isFree ? 'text-emerald-500' : 'text-slate-900'}`}>
-            {formatRupiah(product.price)}
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{isOwned ? 'Status' : 'Total Harga'}</p>
+          <p className={`text-xl font-black tracking-tight leading-none ${isFree || isOwned ? 'text-emerald-500' : 'text-slate-900'}`}>
+            {isOwned ? 'Dimiliki' : formatRupiah(product.price)}
           </p>
         </div>
         
@@ -420,7 +517,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             <DownloadCloud size={18} /> Buka Materi
           </button>
         ) : (
-          <button onClick={handlePurchase} disabled={btnLoading} className="flex-1 py-3.5 rounded-xl font-black text-white text-sm bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-70 active:scale-95 transition-transform">
+          <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="flex-1 py-3.5 rounded-xl font-black text-white text-sm bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-70 active:scale-95 transition-transform">
             {btnLoading ? <Loader2 size={18} className="animate-spin" /> : <ShoppingCart size={18} />}
             {isFree ? 'Klaim Gratis' : 'Beli Sekarang'}
           </button>
@@ -431,44 +528,94 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       <AnimatePresence>
         {isLockedModalOpen && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-              onClick={() => setIsLockedModalOpen(false)} 
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} 
-              className="relative w-full max-w-[90%] sm:max-w-md bg-white rounded-[2rem] shadow-2xl p-6 sm:p-8 text-center"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLockedModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-[90%] sm:max-w-md bg-white rounded-[2rem] shadow-2xl p-6 sm:p-8 text-center">
               <button onClick={() => setIsLockedModalOpen(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors">
                 <X size={18} />
               </button>
-              
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5 border-4 border-white shadow-sm shadow-rose-100">
                 <Lock size={28} className="sm:w-8 sm:h-8" />
               </div>
-              
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 mb-2 sm:mb-3">Akses Terkunci</h3>
-              
               <p className="text-xs sm:text-sm text-slate-500 mb-6 sm:mb-8 leading-relaxed">
                 Hanya pengguna yang telah resmi memiliki produk ini yang diizinkan untuk memberikan ulasan. Ini adalah komitmen Amania untuk menjaga <strong>100% ulasan asli</strong>.
               </p>
-              
               <div className="flex flex-col gap-2.5 sm:gap-3">
-                <button 
-                  onClick={() => { 
-                    setIsLockedModalOpen(false); 
-                    handlePurchase(); 
-                  }} 
-                  className="w-full py-3 sm:py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
-                >
+                <button onClick={() => { setIsLockedModalOpen(false); handleOpenPaymentModal(); }} className="w-full py-3 sm:py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
                   <ShoppingCart size={16} /> {isFree ? 'Klaim Gratis Sekarang' : 'Beli Produk Sekarang'}
                 </button>
-                <button 
-                  onClick={() => setIsLockedModalOpen(false)} 
-                  className="w-full py-3 sm:py-3.5 rounded-xl font-bold text-slate-500 text-xs sm:text-sm hover:bg-slate-100 transition-colors"
-                >
+                <button onClick={() => setIsLockedModalOpen(false)} className="w-full py-3 sm:py-3.5 rounded-xl font-bold text-slate-500 text-xs sm:text-sm hover:bg-slate-100 transition-colors">
                   Mungkin Nanti Saja
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 🔥 MODAL PEMILIHAN PEMBAYARAN TRIPAY 🔥 */}
+      <AnimatePresence>
+        {isPaymentModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPaymentModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, y: 100, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 100, scale: 0.95 }} className="relative bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl w-full md:w-[600px] max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden">
+              <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900">Metode Pembayaran</h3>
+                  <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Pilih Channel Favorit Anda</p>
+                </div>
+                <button onClick={() => setIsPaymentModalOpen(false)} className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-200 transition-colors">
+                  <X size={20} strokeWidth={2.5} />
+                </button>
+              </div>
+              <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar bg-slate-50">
+                {isLoadingChannels ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-4">
+                    <Loader2 size={40} className="text-indigo-500 animate-spin" />
+                    <p className="text-sm font-bold text-slate-500 animate-pulse">Menghubungkan ke Tripay...</p>
+                  </div>
+                ) : channelError ? (
+                  <div className="text-center py-10">
+                    <AlertCircle size={40} className="text-rose-400 mx-auto mb-4" />
+                    <p className="text-slate-600 font-bold mb-2">Terjadi Kesalahan</p>
+                    <p className="text-slate-500 font-medium text-sm">{channelError}</p>
+                  </div>
+                ) : Object.keys(groupedChannels).length === 0 ? (
+                  <div className="text-center py-10">
+                    <AlertCircle size={40} className="text-slate-300 mx-auto mb-4" />
+                    <p className="text-slate-500 font-medium">Metode pembayaran tidak tersedia saat ini.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    {(Object.entries(groupedChannels) as [string, any[]][]).map(([groupName, channels]) => (
+                      <div key={groupName}>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2">{groupName}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {channels.map((channel: any) => (
+                            <button key={channel.code} onClick={() => setSelectedChannel(channel.code)} className={`flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${selectedChannel === channel.code ? 'border-indigo-500 bg-indigo-50/50 shadow-md' : 'border-white bg-white hover:border-indigo-200 shadow-sm'}`}>
+                              <div className="w-12 h-10 shrink-0 bg-white rounded-lg flex items-center justify-center px-1">
+                                <img src={channel.icon_url} alt={channel.name} className="max-w-full max-h-full object-contain" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className={`text-sm font-bold truncate ${selectedChannel === channel.code ? 'text-indigo-700' : 'text-slate-700'}`}>
+                                  {channel.name}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="p-6 md:p-8 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-center sm:text-left w-full sm:w-auto">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Tagihan</p>
+                  <p className="text-2xl font-black text-slate-900 leading-none">{formatRupiah(product.price)}</p>
+                </div>
+                <button onClick={() => handleProcessCheckout()} disabled={!selectedChannel || btnLoading || !!channelError} className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white rounded-[1.25rem] font-black transition-all flex items-center justify-center gap-2 active:scale-95">
+                  {btnLoading ? <><Loader2 size={18} className="animate-spin" /> Memproses...</> : <>Bayar Sekarang</>}
                 </button>
               </div>
             </motion.div>

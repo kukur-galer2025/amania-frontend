@@ -2,26 +2,25 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-// ❌ HAPUS: import { useSearchParams } from 'next/navigation'; (Tidak dipakai lagi)
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { 
   ArrowLeft, Calendar, User, 
   Share2, Bookmark, Facebook, Twitter, Link as LinkIcon, AlertCircle, ChevronRight, BookOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api'; 
 
-// 🔥 Helper untuk membersihkan encoding karakter yang nyangkut dari database
+// Helper untuk membersihkan encoding karakter
 const cleanHtml = (html: string) => {
   if (!html) return "";
   return html.replace(/&amp;nbsp;/g, ' ')
              .replace(/&nbsp;/g, ' ');
 };
 
-// ✅ TANGKAP PROPS SLUG DARI SERVER COMPONENT
 export default function ReadArticleClient({ slug }: { slug: string }) {
   
   const [article, setArticle] = useState<any>(null);
+  const [popularArticles, setPopularArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -32,15 +31,31 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
   useEffect(() => {
     if (!slug) return;
 
-    const fetchArticle = async () => {
+    const fetchData = async () => {
       try {
-        const res = await apiFetch(`/articles/${slug}`);
-        const data = await res.json();
-        if (data.success) {
-          setArticle(data.data);
+        // 🔥 Mengambil artikel utama dan daftar artikel lainnya secara bersamaan 🔥
+        const [resArticle, resAll] = await Promise.all([
+          apiFetch(`/articles/${slug}`),
+          apiFetch('/articles')
+        ]);
+
+        const dataArticle = await resArticle.json();
+        const dataAll = await resAll.json();
+
+        if (dataArticle.success) {
+          setArticle(dataArticle.data);
         } else {
           setArticle(null);
         }
+
+        if (dataAll.success) {
+          // Filter artikel yang sedang dibaca agar tidak muncul di sidebar, ambil 3 teratas
+          const others = dataAll.data
+            .filter((a: any) => a.slug !== slug)
+            .slice(0, 3);
+          setPopularArticles(others);
+        }
+
       } catch (error) {
         toast.error("Gagal memuat artikel");
       } finally {
@@ -48,15 +63,14 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
       }
     };
     
-    fetchArticle();
-  }, [slug]); // Array dependensi tetap pakai slug
+    fetchData();
+  }, [slug]);
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
     return new Intl.DateTimeFormat('id-ID', options).format(new Date(dateString));
   };
 
-  // 🔥 FUNGSI SHARE NATIVE AGAR RESPONSIF DI HP 🔥
   const handleShare = async () => {
     const shareUrl = window.location.href;
     const shareData = {
@@ -72,7 +86,6 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
         console.log('Membagikan dibatalkan');
       }
     } else {
-      // Fallback untuk desktop
       navigator.clipboard.writeText(shareUrl);
       toast.success("Tautan artikel berhasil disalin!");
     }
@@ -102,7 +115,6 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
     <div className="bg-white min-h-screen font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden w-full">
       <motion.div className="fixed top-0 left-0 right-0 h-1 md:h-1.5 bg-blue-600 z-[100] origin-left" style={{ scaleX }} />
 
-      {/* 🔥 PERBAIKAN Z-INDEX DI SINI AGAR TIDAK MENEMBUS SIDEBAR 🔥 */}
       <nav className="border-b border-slate-200 bg-white sticky top-0 z-20 w-full">
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 md:h-16 flex items-center justify-between w-full min-w-0">
           <Link href="/articles" className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors font-medium text-xs md:text-sm shrink-0">
@@ -115,7 +127,6 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
         </div>
       </nav>
 
-      {/* Kontainer utama diberi min-w-0 agar tidak melebar */}
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12 flex flex-col lg:flex-row gap-10 lg:gap-16 w-full min-w-0">
         
         {/* KOLOM KIRI: ARTIKEL UTAMA */}
@@ -129,13 +140,11 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
             <span className="text-red-600">{article.category?.name || 'Umum'}</span>
           </div>
 
-          {/* Judul Artikel diberi break-words */}
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-black text-slate-900 leading-[1.25] tracking-tight mb-5 md:mb-6 break-words w-full">
             {article.title}
           </h1>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-y border-slate-200 py-4 mb-6 md:mb-8 gap-4 w-full min-w-0">
-            {/* 🔥 PROFIL AUTHOR / ORGANIZER 🔥 */}
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                 {article.author?.avatar ? (
@@ -147,7 +156,6 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
               <div className="min-w-0">
                 <p className="text-xs md:text-sm font-bold text-slate-900 flex items-center flex-wrap gap-1.5 truncate">
                   {article.author?.name || 'Tim Redaksi Amania'}
-                  {/* Badge Role Organizer / Superadmin */}
                   {article.author?.role === 'superadmin' && (
                     <span className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-[4px] text-[8px] md:text-[9px] uppercase tracking-wider shrink-0">Admin</span>
                   )}
@@ -187,13 +195,11 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
             </figcaption>
           </figure>
 
-          {/* Teks Editorial */}
           <article 
             className="prose-news break-words w-full min-w-0"
             dangerouslySetInnerHTML={{ __html: cleanHtml(article.content) }}
           />
 
-          {/* Tags */}
           {article.tags && article.tags.length > 0 && (
             <div className="mt-10 md:mt-12 pt-6 md:pt-8 border-t border-slate-200 w-full min-w-0">
               <span className="text-[10px] md:text-xs font-bold uppercase text-slate-500 tracking-wider block mb-3">Tag Terkait:</span>
@@ -219,33 +225,27 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
               </h3>
               
               <div className="space-y-5 md:space-y-6 w-full min-w-0">
-                <Link href="/articles" className="group block w-full min-w-0">
-                  <span className="text-[10px] md:text-xs font-bold text-red-600 mb-1 block truncate">Programming</span>
-                  <h4 className="text-xs md:text-sm font-bold text-slate-800 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 break-words">
-                    Mengapa Golang Semakin Populer di Kalangan Backend Developer Tahun Ini?
-                  </h4>
-                  <span className="text-[9px] md:text-[10px] text-slate-500 mt-1.5 md:mt-2 block">12 Maret 2026</span>
-                </Link>
-
-                <hr className="border-slate-100" />
-
-                <Link href="/articles" className="group block w-full min-w-0">
-                  <span className="text-[10px] md:text-xs font-bold text-red-600 mb-1 block truncate">Data Science</span>
-                  <h4 className="text-xs md:text-sm font-bold text-slate-800 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 break-words">
-                    5 Library Python yang Wajib Dikuasai Data Analyst Pemula
-                  </h4>
-                  <span className="text-[9px] md:text-[10px] text-slate-500 mt-1.5 md:mt-2 block">10 Maret 2026</span>
-                </Link>
-
-                <hr className="border-slate-100" />
-
-                <Link href="/articles" className="group block w-full min-w-0">
-                  <span className="text-[10px] md:text-xs font-bold text-red-600 mb-1 block truncate">Karir & Tips</span>
-                  <h4 className="text-xs md:text-sm font-bold text-slate-800 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 break-words">
-                    Strategi Menembus Wawancara Teknis di Perusahaan Teknologi Raksasa
-                  </h4>
-                  <span className="text-[9px] md:text-[10px] text-slate-500 mt-1.5 md:mt-2 block">8 Maret 2026</span>
-                </Link>
+                {/* 🔥 LOOPING ARTIKEL POPULER DARI DATABASE 🔥 */}
+                {popularArticles.length > 0 ? (
+                  popularArticles.map((popArt, idx) => (
+                    <React.Fragment key={popArt.id}>
+                      <Link href={`/articles/${popArt.slug}`} className="group block w-full min-w-0">
+                        <span className="text-[10px] md:text-xs font-bold text-red-600 mb-1 block truncate">
+                          {popArt.category?.name || 'Umum'}
+                        </span>
+                        <h4 className="text-xs md:text-sm font-bold text-slate-800 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 break-words">
+                          {popArt.title}
+                        </h4>
+                        <span className="text-[9px] md:text-[10px] text-slate-500 mt-1.5 md:mt-2 block">
+                          {new Date(popArt.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </span>
+                      </Link>
+                      {idx < popularArticles.length - 1 && <hr className="border-slate-100" />}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-500 italic">Belum ada artikel lain saat ini.</p>
+                )}
               </div>
             </div>
 

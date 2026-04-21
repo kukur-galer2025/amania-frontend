@@ -3,22 +3,21 @@ import TentangKamiClient from './TentangKamiClient';
 
 export const metadata: Metadata = {
   title: 'Tentang Kami | Amania',
-  description: 'Amania adalah platform edukasi digital komprehensif yang menyediakan layanan kelas webinar, penjualan e-product premium, dan simulasi Tryout SKD/CPNS terbaik di Indonesia.',
+  description: 'Amania adalah platform edukasi digital komprehensif yang menyediakan layanan kelas webinar, artikel wawasan, dan penjualan e-product premium terbaik di Indonesia.',
   keywords: [
     'tentang amania', 
     'platform edukasi amania',
     'webinar amania', 
     'e-product amania', 
-    'tryout skd cpns', 
-    'platform belajar IT indonesia',
-    'sistem ujian CAT',
+    'artikel edukasi',
+    'platform belajar profesional',
     'pembelajaran digital'
   ],
   alternates: { canonical: 'https://amania.id/tentang-kami' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Tentang Amania - Solusi Edukasi Digital',
-    description: 'Menyediakan ekosistem pembelajaran modern melalui Webinar, E-Product, dan Simulasi Tryout untuk kemajuan karir Anda.',
+    description: 'Menyediakan ekosistem pembelajaran modern melalui Webinar, E-Product, dan Jurnal Wawasan untuk kemajuan karir Anda.',
     url: 'https://amania.id/tentang-kami',
     siteName: 'Amania Indonesia',
     type: 'website', 
@@ -34,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export default function TentangKamiPage() {
-  // 🔥 SEO ADVANCED: Skema Organisasi & Layanan 🔥
+  // 🔥 SEO ADVANCED: Skema Organisasi & Layanan Tanpa Tryout 🔥
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
@@ -44,7 +43,7 @@ export default function TentangKamiPage() {
       "name": "Amania",
       "url": "https://amania.id",
       "logo": "https://amania.id/logo-amania.png",
-      "description": "Platform edukasi teknologi yang menyediakan layanan kelas webinar, e-product, dan simulasi Tryout.",
+      "description": "Platform edukasi teknologi yang menyediakan layanan kelas webinar, wawasan industri, dan penjualan e-product premium.",
       "sameAs": [
         "https://www.instagram.com/amania.id"
       ],
@@ -70,7 +69,7 @@ export default function TentangKamiPage() {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Simulasi Tryout SKD"
+              "name": "Artikel & Wawasan"
             }
           }
         ]

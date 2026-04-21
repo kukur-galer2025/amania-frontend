@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Rocket, Users, FileText, 
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
-  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Target
+  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -16,7 +16,6 @@ import "../globals.css";
 
 const ADMIN_PAGES = [
   { id: 'p1', title: 'Overview Dashboard', link: '/admin/dashboard', icon: LayoutDashboard },
-  { id: 'p11', title: 'Manajemen Tryout', link: '/admin/tryouts', icon: Target }, // <-- Tulisan (CBT) dihilangkan sesuai request
   { id: 'p2', title: 'Kelola Event & Program', link: '/admin/events', icon: Rocket },
   { id: 'p3', title: 'Data Pendaftar / Peserta', link: '/admin/registrations', icon: Users },
   { id: 'p4', title: 'Kelola Tiket (Scanner)', link: '/admin/tickets', icon: Ticket },
@@ -31,8 +30,8 @@ const ADMIN_PAGES = [
 const BOTTOM_NAV = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
   { icon: Rocket,          label: 'Event',     href: '/admin/events' },
-  { icon: Target,          label: 'Tryout',    href: '/admin/tryouts' },
   { icon: CreditCard,      label: 'Transaksi', href: '/admin/transactions' },
+  { icon: ShoppingCart,    label: 'E-Produk',  href: '/admin/e-products' },
   { icon: Menu,            label: 'Menu',      href: '__MENU__' }, 
 ];
 
@@ -40,25 +39,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router   = useRouter();
   
-  // Deteksi jika berada di area Sub-Modul Tryout (seperti /skd, /polri, dll)
-  // KITA KECUALIKAN '/admin/tryouts' KARENA ITU HALAMAN PORTAL YANG HARUS PAKAI SIDEBAR UTAMA
-  const isTryoutSubModule = pathname !== '/admin/tryouts' && pathname.startsWith('/admin/tryouts');
-
   const [adminName,        setAdminName]        = useState('Super Admin');
   const [adminRole,        setAdminRole]        = useState('superadmin'); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthorized,     setIsAuthorized]     = useState(false);
-
-  const [isTransitioning,  setIsTransitioning]  = useState(false);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications,     setNotifications]     = useState<any[]>([]);
   const [unreadCount,       setUnreadCount]       = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const [searchQuery,           setSearchQuery]           = useState('');
-  const [isSearching,           setIsSearching]           = useState(false);
-  const [showSearchDropdown,    setShowSearchDropdown]    = useState(false);
+  const [searchQuery,            setSearchQuery]            = useState('');
+  const [isSearching,            setIsSearching]            = useState(false);
+  const [showSearchDropdown,     setShowSearchDropdown]     = useState(false);
   const [showMobileSearchInput, setShowMobileSearchInput] = useState(false); 
   const [pageResults,    setPageResults]    = useState<any[]>([]);
   const [userResults,    setUserResults]    = useState<any[]>([]);
@@ -153,16 +146,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); router.push('/login'); };
 
-  // FUNGSI INI DIBIARKAN SEPERTI AWAL MENGGUNAKAN NEXT LINK SAJA
-  // JADI KETIKA KLIK MANAJEMEN TRYOUT, MENGARAH LANGSUNG KE /admin/tryouts (Portal)
-  const handleMenuClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleMenuClick = () => {
     setIsMobileMenuOpen(false);
   };
 
   const NavItem = ({ icon: Icon, label, href }: { icon: any; label: string; href: string }) => {
     const isActive = pathname === href || (pathname.startsWith(href) && href !== '/admin');
     return (
-      <Link href={href} onClick={(e) => handleMenuClick(e, href)} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'}`}>
+      <Link href={href} onClick={handleMenuClick} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'}`}>
         <div className="flex items-center gap-3">
           <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600'} />
           <span className={`text-sm font-bold leading-none ${isActive ? 'opacity-100' : 'opacity-80'}`}>{label}</span>
@@ -179,41 +170,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 
-  // =========================================================================
-  // 🔴 JIKA BERADA DI DALAM SUB-MODUL TRYOUT (SKD, POLRI, PPPK) 🔴
-  // Sembunyikan Sidebar Utama, berikan kendali ke layout.tsx masing-masing modul
-  // =========================================================================
-  if (isTryoutSubModule) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans p-4 md:p-6 h-screen flex flex-col overflow-hidden">
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-        
-        {/* Tombol kembali cepat ke Portal / Main Dashboard */}
-        <div className="mb-4 flex items-center justify-between shrink-0">
-          <Link 
-            href="/admin/dashboard" 
-            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 bg-white border border-slate-200 px-4 py-2 rounded-xl transition-all shadow-sm"
-          >
-            <LayoutDashboard size={14} /> Kembali ke Main Dashboard
-          </Link>
-
-          <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
-            <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-indigo-700 font-black text-xs flex-shrink-0">
-              {adminName.substring(0, 2).toUpperCase()}
-            </div>
-            <p className="text-xs font-bold text-slate-800 leading-tight hidden sm:block">{adminName}</p>
-          </div>
-        </div>
-
-        {/* Di sinilah 'app/admin/tryouts/skd/layout.tsx' akan dimunculkan */}
-        {children}
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // BUKAN DI SUB-MODUL TRYOUT (Tampilkan Layout Sidebar Utama & Portal)
-  // =========================================================================
   const pageTitle = pathname === '/admin/dashboard'
     ? 'Overview'
     : pathname.split('/').filter(p => p !== 'admin' && p !== '').join(' / ').replace(/-/g, ' ');
@@ -260,15 +216,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div>
               <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Dashboard</p>
               <div className="space-y-0.5"><NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" /></div>
-            </div>
-
-            <div>
-              <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-500">Aplikasi Khusus</p>
-              <div className="space-y-0.5 relative group">
-                <div className="absolute inset-y-0 left-0 w-1 bg-indigo-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                {/* <-- NAMA MENU DIUBAH DI SINI DAN MENGARAH KE PORTAL (/admin/tryouts) --> */}
-                <NavItem icon={Target} label="Manajemen Tryout" href="/admin/tryouts" />
-              </div>
             </div>
 
             <div>
@@ -393,9 +340,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><LayoutDashboard size={11}/> Menu Admin</p>
                           {pageResults.map(page => (
                             <Link key={page.id} href={page.link}
-                              onClick={(e) => { 
+                              onClick={() => { 
                                 setShowSearchDropdown(false); setSearchQuery(''); setShowMobileSearchInput(false);
-                                if(page.link === '/admin/tryouts') handleMenuClick(e as any, page.link);
                               }}
                               className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-indigo-50 transition-colors group/sr">
                               <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0 group-hover/sr:bg-indigo-100 group-hover/sr:text-indigo-600 transition-colors"><page.icon size={15} /></div>
@@ -566,9 +512,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               const isActive = pathname === href || (pathname.startsWith(href) && href !== '/admin');
               return (
                 <Link key={href} href={href}
-                  onClick={(e) => {
-                    if(href === '/admin/tryouts') handleMenuClick(e as any, href);
-                  }}
                   className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all active:scale-95 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
                   <div className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all ${isActive ? 'bg-indigo-100' : ''}`}>
                     <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
