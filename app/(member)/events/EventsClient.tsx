@@ -35,7 +35,6 @@ const getSnippet = (html: string, length = 110) => {
   return text.length > length ? text.substring(0, length) + '...' : text;
 };
 
-// 🔥 Tipe Variants framer-motion sudah diperbaiki dengan "as const" 🔥
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -110,14 +109,14 @@ export default function EventsClient() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 400, behavior: 'smooth' }); 
+    window.scrollTo({ top: 300, behavior: 'smooth' }); 
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans pb-24 selection:bg-indigo-100 selection:text-indigo-900 w-full overflow-x-hidden">
+    <div className="font-sans pb-12 w-full">
       
-      {/* ════════ HERO SECTION ════════ */}
-      <section className="relative pt-24 pb-28 md:pt-32 md:pb-40 px-4 w-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 rounded-b-[2rem] md:rounded-b-[3.5rem] shadow-2xl z-10">
+      {/* ════════ HERO SECTION KOTAK ════════ */}
+      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 w-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 rounded-[2rem] md:rounded-[3rem] shadow-2xl mb-12">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?auto=format&fit=crop&q=80&w=2070" 
@@ -125,36 +124,36 @@ export default function EventsClient() {
             className="w-full h-full object-cover opacity-30 mix-blend-luminosity" 
           />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/20 blur-[100px] rounded-full pointer-events-none" />
         </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center w-full">
+        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center w-full">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 border border-indigo-400/20 rounded-full text-indigo-300 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-lg">
              <Sparkles size={14} className="text-amber-400" /> Amania Masterclass
           </motion.div>
           
-          <motion.h1 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter mb-6 leading-[1.1] drop-shadow-2xl">
-            Investasi Terbaik <br className="hidden sm:block"/> Adalah Edukasi.
+          <motion.h1 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-[1.2] drop-shadow-2xl">
+            Investasi Terbaik Adalah Edukasi.
           </motion.h1>
           
-          <motion.p initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-300 text-sm md:text-lg font-medium max-w-2xl mx-auto mb-10 md:mb-14 leading-relaxed px-4">
+          <motion.p initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-300 text-sm md:text-base font-medium max-w-xl mx-auto mb-10 leading-relaxed">
             Tingkatkan keahlian Anda melalui program intensif dan webinar eksklusif yang dipandu langsung oleh pakar industri.
           </motion.p>
           
           {/* FLOATING SEARCH BAR */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="max-w-2xl mx-auto w-full px-4 sm:px-0">
-            <div className="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl p-1.5 md:p-2 border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] focus-within:bg-white/20 focus-within:border-indigo-400/50 transition-all duration-300 w-full group">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="max-w-xl mx-auto w-full">
+            <div className="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl p-1.5 border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] focus-within:bg-white/20 focus-within:border-indigo-400/50 transition-all duration-300 w-full group">
               <div className="pl-4 pr-2 text-indigo-300 shrink-0 group-focus-within:text-white transition-colors">
-                <Search size={22} />
+                <Search size={20} />
               </div>
               <input 
                 type="text" 
                 placeholder="Cari program, kelas, atau mentor..." 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full bg-transparent border-none text-white placeholder:text-slate-400 py-3.5 text-sm md:text-base font-semibold outline-none min-w-0" 
+                className="w-full bg-transparent border-none text-white placeholder:text-slate-400 py-3 text-sm font-semibold outline-none min-w-0" 
               />
-              <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 md:px-8 py-3.5 md:py-4 rounded-xl font-bold text-xs md:text-sm hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg shadow-indigo-600/30 shrink-0 active:scale-95">
+              <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg shadow-indigo-600/30 shrink-0 active:scale-95">
                 Cari
               </button>
             </div>
@@ -163,7 +162,7 @@ export default function EventsClient() {
       </section>
 
       {/* ════════ FILTER TABS ════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 -mt-6 md:-mt-8 relative z-20 flex justify-center mb-10 md:mb-12">
+      <div className="relative z-20 flex justify-center mb-8 w-full -mt-16">
         <div className="flex gap-2 overflow-x-auto custom-scrollbar bg-white/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/50 w-max max-w-full">
           {[
             { id: 'upcoming', label: 'Program Tersedia' },
@@ -188,8 +187,8 @@ export default function EventsClient() {
         </div>
       </div>
 
-      {/* ════════ MAIN CONTENT ════════ */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 w-full">
+      {/* ════════ MAIN CONTENT GRID ════════ */}
+      <main className="w-full">
         
         {!loading && !error && (
           <div className="mb-6 flex items-center justify-between">
@@ -360,13 +359,6 @@ export default function EventsClient() {
           </>
         )}
       </main>
-      
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { display: none; }
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 }

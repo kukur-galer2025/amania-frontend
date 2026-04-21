@@ -20,7 +20,7 @@ const STATIC_PAGES = [
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
   { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
   { id: 'sp-5', title: 'Kelas Saya', link: '/my-events', icon: CalendarHeart },
-  { id: 'sp-5b', title: 'Koleksi E-Produk', link: '/my-e-products', icon: FileText }, // 🔥 BARU
+  { id: 'sp-5b', title: 'Koleksi E-Produk', link: '/my-e-products', icon: FileText },
   { id: 'sp-6', title: 'Kalender Jadwal', link: '/calendar', icon: Calendar },
   { id: 'sp-7', title: 'Riwayat Transaksi', link: '/transactions', icon: Receipt },
   { id: 'sp-8', title: 'Papan Peringkat', link: '/leaderboard', icon: Trophy },
@@ -238,15 +238,11 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
       <AnimatePresence>
         {logoutState.isLoggingOut && (
           <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }} 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
             className="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-xl flex flex-col items-center justify-center p-4"
           >
             <motion.div 
-              initial={{ scale: 0.8, opacity: 0, y: 20 }} 
-              animate={{ scale: 1, opacity: 1, y: 0 }} 
-              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+              initial={{ scale: 0.8, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
               className="bg-white p-10 md:p-14 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden"
             >
               <div className={`absolute top-0 w-full h-2 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
@@ -344,7 +340,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               <div className="space-y-0.5">
                 {userData && <NavLink icon={Ticket} label="Tiket Aktif" href="/dashboard/ticket" />}
                 <NavLink icon={CalendarHeart} label="Kelas Saya" href="/my-events" />
-                {/* 🔥 LINK MENU E-PRODUK DITAMBAHKAN DI SINI 🔥 */}
                 {userData && <NavLink icon={FileText} label="Koleksi E-Produk" href="/my-e-products" />}
                 <NavLink icon={Award} label="Sertifikat Kelulusan" href="/certificates" />
                 <NavLink icon={Calendar} label="Kalender" href="/calendar" />
@@ -426,7 +421,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 </div>
               </div>
 
-              {/* Mobile Search Button (Toggles input) */}
+              {/* Mobile Search Button */}
               <button 
                 onClick={() => {
                   setShowMobileSearchInput(!showMobileSearchInput);
@@ -477,8 +472,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                     </div>
                     
                     <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
-                      
-                      {/* HASIL: HALAMAN STATIS */}
                       {pageResults.length > 0 && (
                         <div className="p-2">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
@@ -507,7 +500,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* LOADING STATE */}
                       {isSearching && eventResults.length === 0 && articleResults.length === 0 && (
                          <div className="p-6 flex items-center justify-center text-slate-400 gap-2">
                            <Loader2 size={16} className="animate-spin text-indigo-500" />
@@ -515,7 +507,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                          </div>
                       )}
 
-                      {/* JIKA KOSONG */}
                       {!isSearching && pageResults.length === 0 && eventResults.length === 0 && articleResults.length === 0 && (
                         <div className="p-8 flex flex-col items-center justify-center text-center text-slate-400">
                           <Search size={28} className="mb-3 text-slate-300" />
@@ -524,7 +515,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* HASIL: EVENT */}
                       {eventResults.length > 0 && (
                         <div className="p-2 border-t border-slate-100">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
@@ -553,7 +543,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* HASIL: ARTIKEL */}
                       {articleResults.length > 0 && (
                         <div className="p-2 border-t border-slate-100">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
@@ -657,8 +646,9 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           </div>
         </header>
 
+        {/* 🔥 PERUBAHAN: KEMBALIKAN PEMBATAS MAX-WIDTH AGAR RAPI & PROPORSIONAL 🔥 */}
         <div className="flex-1 w-full py-6 md:py-8 overflow-x-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
             {children}
           </div>
         </div>
