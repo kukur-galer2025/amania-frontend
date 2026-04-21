@@ -53,9 +53,13 @@ export default function EProductsClient() {
   useEffect(() => {
     (async () => {
       try {
-        // Ambil token dari localStorage jika user sudah login
+        // 🔥 PERBAIKAN TYPESCRIPT: Menggunakan tipe Record<string, string> secara eksplisit
         const token = localStorage.getItem('token');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const headers: Record<string, string> = {}; 
+        
+        if (token && token !== 'null' && token !== 'undefined') {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
 
         const res  = await apiFetch('/e-products', { headers });
         const json = await res.json();
@@ -76,7 +80,6 @@ export default function EProductsClient() {
     return () => document.removeEventListener('mousedown', h);
   }, []);
 
-  // Ambil 6 buku rating tertinggi / terpopuler untuk Carousel
   const featuredProducts = useMemo(() => {
     return [...products]
       .sort((a, b) => (parseFloat(b.reviews_avg_rating) || 0) - (parseFloat(a.reviews_avg_rating) || 0))
@@ -118,54 +121,47 @@ export default function EProductsClient() {
   };
 
   return (
-    <div className="font-sans bg-white min-h-screen pb-24 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="font-sans bg-[#F8FAFC] min-h-screen pb-24 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900 w-full overflow-x-hidden flex flex-col">
       
       {/* ════════ 1. HERO SECTION (IMERSIVE LIBRARY BACKGROUND) ════════ */}
-      <section ref={heroRef} className="relative overflow-hidden pt-20 pb-24 md:pt-32 md:pb-36 border-b border-slate-800 bg-slate-950">
-        
-        {/* Gambar Latar Perpustakaan dengan Efek Paraks */}
-        <motion.div 
-          style={{ y: backgroundY }}
-          className="absolute inset-0 z-0"
-        >
+      <section ref={heroRef} className="relative pt-16 pb-24 md:pt-24 md:pb-36 w-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 rounded-[2rem] md:rounded-[3rem] shadow-2xl mb-12 shrink-0">
+        <motion.div style={{ y: backgroundY }} className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2000&auto=format&fit=cover"
             alt="Majestic Library"
             className="w-full h-full object-cover opacity-40"
           />
-          {/* Overlay Gradien Gelap untuk Keterbacaan Teks */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-slate-950 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/20 blur-[100px] rounded-full pointer-events-none" />
         </motion.div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 flex flex-col items-center text-center">
-          
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-indigo-300 text-xs font-bold tracking-widest uppercase mb-8 backdrop-blur-sm shadow-[0_0_20px_rgba(79,70,229,0.2)]">
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center w-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 border border-indigo-400/20 rounded-full text-indigo-300 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-lg">
             <Sparkles size={14} className="text-amber-400" /> Pustaka Digital Premium Amania
           </motion.div>
           
-          <motion.h1 style={{ y: textY }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-5xl md:text-6xl lg:text-8xl font-black text-white tracking-tight leading-[1.05] mb-8 max-w-5xl drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+          <motion.h1 style={{ y: textY }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter mb-4 leading-[1.1] drop-shadow-2xl">
             Pintu Menuju <br />
             Pengetahuan <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200">Tanpa Batas.</span>
           </motion.h1>
           
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-sm md:text-xl text-slate-200 font-medium max-w-3xl leading-relaxed mb-12 drop-shadow">
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-300 text-sm md:text-base font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
             Temukan ribuan koleksi eksklusif e-book, modul praktis, dan template profesional yang dirancang khusus oleh para ahli untuk mengakselerasi pertumbuhan karier dan bisnis Anda.
           </motion.p>
           
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-            <button onClick={scrollToCatalog} className="px-10 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-xl font-bold text-lg transition-all shadow-[0_10px_30px_rgba(79,70,229,0.5)] hover:shadow-[0_15px_40px_rgba(79,70,229,0.7)] active:scale-95 flex items-center justify-center gap-2.5 group">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+            <button onClick={scrollToCatalog} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-xl font-bold transition-all shadow-[0_10px_30px_rgba(79,70,229,0.5)] active:scale-95 flex items-center justify-center gap-2.5 group">
               <Search size={20} /> Mulai Eksplorasi <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <Link href="/events" className="px-10 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-bold text-lg backdrop-blur-sm transition-all active:scale-95 flex items-center justify-center gap-2.5">
+            <Link href="/events" className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-bold backdrop-blur-sm transition-all active:scale-95 flex items-center justify-center gap-2.5">
               <BookOpen size={20} /> Lihat Kelas Live
             </Link>
           </motion.div>
-
         </div>
       </section>
 
       {/* ════════ 2. CAROUSEL BUKU TERPOPULER ════════ */}
-      <section className="bg-slate-50 pt-10 pb-12 border-b border-slate-200 relative -mt-8 rounded-t-3xl z-30">
+      <section className="bg-slate-50 pt-12 pb-12 border-b border-slate-200 relative -mt-20 rounded-t-[3rem] z-30 mx-auto w-full shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           
           <div className="flex items-end justify-between mb-6">
@@ -200,7 +196,7 @@ export default function EProductsClient() {
                       
                       {/* 🔥 KUNCI MATI COVER BUKU (ANTI MELAR) 🔥 */}
                       <div 
-                        className="relative w-full bg-slate-200 rounded-lg shadow-[0_8px_16px_rgba(0,0,0,0.08)] group-hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] group-hover:-translate-y-1.5 transition-all duration-300 overflow-hidden border border-slate-200/80 mb-3 block"
+                        className="relative w-full bg-slate-200 rounded-[1.25rem] shadow-[0_8px_16px_rgba(0,0,0,0.08)] group-hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] group-hover:-translate-y-1.5 transition-all duration-300 overflow-hidden border border-slate-200/80 mb-3 block"
                         style={{ aspectRatio: '2 / 3' }}
                       >
                         {prod.cover_image ? (
@@ -239,9 +235,9 @@ export default function EProductsClient() {
                             <p className={`text-sm md:text-base font-black tracking-tight ${isFree ? 'text-emerald-600' : 'text-slate-900'}`}>{formatRupiah(prod.price)}</p>
                           )}
                           {avgRating > 0 && (
-                            <div className="flex items-center gap-0.5">
-                              <Star size={12} className="fill-amber-400 text-amber-400" />
-                              <span className="text-[11px] font-bold text-slate-700">{avgRating.toFixed(1)}</span>
+                            <div className="flex items-center gap-0.5 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                              <Star size={10} className="fill-amber-400 text-amber-400" />
+                              <span className="text-[10px] font-bold text-slate-700">{avgRating.toFixed(1)}</span>
                             </div>
                           )}
                         </div>
@@ -256,7 +252,7 @@ export default function EProductsClient() {
           ) : (
              <div className="flex gap-4 overflow-hidden px-4 sm:px-0 pt-2 pb-6">
                {[1,2,3,4,5].map(i => (
-                 <div key={i} className="shrink-0 w-[140px] sm:w-[160px] md:w-[180px] bg-slate-200 rounded-lg animate-pulse" style={{ aspectRatio: '2 / 3' }}></div>
+                 <div key={i} className="shrink-0 w-[140px] sm:w-[160px] md:w-[180px] bg-slate-200 rounded-[1.25rem] animate-pulse" style={{ aspectRatio: '2 / 3' }}></div>
                ))}
              </div>
           )}
@@ -264,7 +260,7 @@ export default function EProductsClient() {
       </section>
 
       {/* ════════ 3. TOOLBAR PENCARIAN & FILTER ════════ */}
-      <div id="katalog-section" className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm pt-2">
+      <div id="katalog-section" className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm pt-2 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             
@@ -278,8 +274,8 @@ export default function EProductsClient() {
               />
               <AnimatePresence>
                 {search && (
-                  <motion.button initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .8 }} onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    <X size={16} />
+                  <motion.button initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .8 }} onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-slate-100 p-1 rounded-full transition-colors">
+                    <X size={14} />
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -321,15 +317,15 @@ export default function EProductsClient() {
       </div>
 
       {/* ════════ 4. GRID SEMUA KATALOG BUKU ════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 w-full flex-1">
 
         <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-3">
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Semua Koleksi</h2>
-          <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{filtered.length} Publikasi</span>
+          <span className="text-xs font-bold text-slate-500 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-sm">{filtered.length} Publikasi</span>
         </div>
 
         {!loading && filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center text-center py-20 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+          <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed shadow-sm">
             <PackageSearch size={48} className="text-slate-300 mb-4" strokeWidth={1.5} />
             <h3 className="text-lg font-bold text-slate-900 mb-1">Buku Tidak Ditemukan</h3>
             <p className="text-sm text-slate-500 font-medium">Coba gunakan kata kunci lain atau ubah filter pencarian Anda.</p>
@@ -337,7 +333,7 @@ export default function EProductsClient() {
         )}
 
         {!loading && filtered.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 w-full">
             <AnimatePresence mode="popLayout">
               {filtered.map(product => {
                 const isFree    = product.price === 0;
@@ -347,10 +343,10 @@ export default function EProductsClient() {
                 
                 return (
                   <motion.div key={product.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
-                    <Link href={`/e-products/${product.slug}`} className="group flex flex-col h-full">
+                    <Link href={`/e-products/${product.slug}`} className="group flex flex-col h-full w-full">
                       
                       {/* 🔥 KUNCI MATI COVER BUKU BAWAH (NATIVE CSS ASPECT RATIO) 🔥 */}
-                      <div className="relative w-full bg-slate-100 rounded-lg shadow-sm border border-slate-200/80 group-hover:shadow-[0_8px_16px_rgba(0,0,0,0.1)] group-hover:-translate-y-1.5 transition-all duration-300 overflow-hidden mb-3 block" style={{ aspectRatio: '2 / 3' }}>
+                      <div className="relative w-full bg-slate-100 rounded-xl md:rounded-[1.25rem] shadow-sm border border-slate-200/80 group-hover:shadow-[0_8px_16px_rgba(0,0,0,0.1)] group-hover:-translate-y-1.5 transition-all duration-300 overflow-hidden mb-3 block" style={{ aspectRatio: '2 / 3' }}>
                         {product.cover_image ? (
                           <img src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
@@ -387,9 +383,9 @@ export default function EProductsClient() {
                           )}
                           
                           {avgRating > 0 && (
-                            <div className="flex items-center gap-0.5 shrink-0">
-                              <Star size={12} className="fill-amber-400 text-amber-400" />
-                              <span className="text-[11px] font-bold text-slate-700">{avgRating.toFixed(1)}</span>
+                            <div className="flex items-center gap-0.5 shrink-0 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                              <Star size={10} className="fill-amber-400 text-amber-400" />
+                              <span className="text-[10px] font-bold text-slate-700">{avgRating.toFixed(1)}</span>
                             </div>
                           )}
                         </div>
@@ -403,7 +399,7 @@ export default function EProductsClient() {
           </motion.div>
         )}
 
-      </div>
+      </main>
 
       <style jsx global>{`
         .hide-scroll-bar::-webkit-scrollbar { display: none; }
