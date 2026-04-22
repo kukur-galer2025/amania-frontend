@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Loader2, Eye, EyeOff, Mail, Lock, 
   Sparkles, ArrowRight, AlertTriangle, 
-  Presentation, FileCheck2, Milestone, Check
+  Check, Video, BookOpen, Award
 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
@@ -143,7 +143,7 @@ export default function LoginClient() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="text-slate-500 font-medium max-w-md mx-auto text-sm md:text-base leading-relaxed"
             >
-              Selamat datang kembali di Amania. Menyiapkan ruang Anda...
+              Selamat datang kembali di Amania. Menyiapkan akses produk digital & kelas Anda...
             </motion.p>
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
@@ -177,7 +177,7 @@ export default function LoginClient() {
               Selamat Datang
             </h1>
             <p className="text-slate-500 md:text-slate-600 font-medium text-sm md:text-base px-4 sm:px-0">
-              Masuk untuk melanjutkan progres belajar Anda di Amania.
+              Masuk untuk mengakses e-produk, mengikuti webinar, dan mengunduh sertifikat resmi Anda di Amania.
             </p>
           </div>
 
@@ -278,10 +278,12 @@ export default function LoginClient() {
       {/* KOLOM KANAN: VISUAL */}
       <div className="hidden lg:flex w-1/2 bg-slate-950 relative items-center justify-center overflow-hidden">
         
+        {/* 🔥 GAMBAR BACKGROUND DARI HASIL PENCARIAN AI 🔥 */}
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-30"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop')" }}
+          style={{ backgroundImage: `url('http://googleusercontent.com/image_collection/image_retrieval/13535098923783399998')` }} 
         ></div>
+
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/90 to-slate-950/95"></div>
         <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px] pointer-events-none"></div>
@@ -292,35 +294,35 @@ export default function LoginClient() {
           </div>
           
           <h2 className="text-4xl xl:text-5xl font-black leading-[1.15] mb-8 tracking-tighter">
-            Lanjutkan Perjalanan <span className="text-indigo-400">Belajarmu.</span>
+            Tingkatkan Keahlianmu <span className="text-indigo-400">Sekarang.</span>
           </h2>
           
           <p className="text-lg text-slate-300 mb-14 font-medium leading-relaxed max-w-xl">
-            Satu portal untuk semua kebutuhan belajar IT Anda. Akses kembali modul, sertifikat, dan progres bootcamp Anda di Amania.
+            Satu portal untuk semua kebutuhan edukasi digital Anda. Akses kembali e-produk, sesi webinar, online course, dan klaim sertifikat resmi Anda di Amania.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
-              <Presentation className="text-emerald-400 shrink-0 mt-0.5" size={24} />
+              <Video className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
-                <h4 className="font-bold text-white text-sm">Akses Tak Terbatas</h4>
-                <p className="text-xs text-slate-400 mt-1">Review kembali materi belajar Anda kapan saja dan di mana saja.</p>
+                <h4 className="font-bold text-white text-sm">Webinar & Course</h4>
+                <p className="text-xs text-slate-400 mt-1">Ikuti sesi webinar live eksklusif dan pelajari kembali materi kelas interaktif dari mana saja.</p>
               </div>
             </div>
             
             <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
-              <FileCheck2 className="text-emerald-400 shrink-0 mt-0.5" size={24} />
+              <BookOpen className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
-                <h4 className="font-bold text-white text-sm">Unduh Sertifikat</h4>
-                <p className="text-xs text-slate-400 mt-1">Akses langsung ke e-sertifikat dari kelas yang sudah Anda selesaikan.</p>
+                <h4 className="font-bold text-white text-sm">E-Produk Premium</h4>
+                <p className="text-xs text-slate-400 mt-1">Akses instan dan tak terbatas ke e-book, template, dan produk digital yang telah Anda miliki.</p>
               </div>
             </div>
 
             <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl md:col-span-2 transition-transform hover:-translate-y-1 duration-300">
-              <Milestone className="text-emerald-400 shrink-0 mt-0.5" size={24} />
+              <Award className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
-                <h4 className="font-bold text-white text-sm">Pantau Progres Karir</h4>
-                <p className="text-xs text-slate-400 mt-1">Lacak perkembangan belajar dan persiapkan diri Anda untuk peluang karir teknologi.</p>
+                <h4 className="font-bold text-white text-sm">Sertifikat Resmi</h4>
+                <p className="text-xs text-slate-400 mt-1">Dapatkan dan unduh e-sertifikat resmi setiap kali Anda menyelesaikan kursus atau menghadiri webinar.</p>
               </div>
             </div>
           </div>

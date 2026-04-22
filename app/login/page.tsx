@@ -7,14 +7,14 @@ import LoginClient from './LoginClient';
 // ==========================================
 export const metadata: Metadata = {
   title: 'Masuk Akun | Amania Platform Pembelajaran',
-  description: 'Masuk ke portal pembelajaran Amania. Lanjutkan progres belajar Anda, akses bootcamp eksklusif, dan tingkatkan karir IT Anda.',
+  description: 'Masuk ke portal pembelajaran Amania. Lanjutkan progres belajar Anda, akses bootcamp eksklusif, e-produk, dan tingkatkan karir Anda.',
   keywords: [
     'login amania', 
     'masuk akun amania', 
     'portal belajar IT', 
     'amania indonesia login',
-    'akses bootcamp amania',
-    'dashboard siswa amania'
+    'akses kelas amania',
+    'e-produk amania'
   ],
   authors: [{ name: 'Amania Team' }],
   creator: 'Amania Indonesia',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Selamat Datang Kembali | Amania',
-    description: 'Lanjutkan perjalanan karir teknologi Anda. Masuk sekarang untuk mengakses ratusan materi IT eksklusif di Amania.',
+    description: 'Lanjutkan perjalanan belajar Anda. Masuk sekarang untuk mengakses kelas, e-produk, dan e-sertifikat di Amania.',
     url: 'https://amania.id/login',
     siteName: 'Amania Indonesia',
     locale: 'id_ID',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Masuk Akun | Amania',
-    description: 'Lanjutkan progres belajar IT Anda di portal Amania.',
+    description: 'Lanjutkan progres belajar Anda di portal Amania.',
     images: ['https://amania.id/images/og-login.jpg'],
   },
 };
@@ -60,7 +60,6 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
-  // 🔥 ADVANCED SEO: JSON-LD WebPage & Action 🔥
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
