@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Receipt, Loader2, CheckCircle2, Clock, 
   XCircle, Eye, Image as ImageIcon, X, 
-  ChevronRight, Search, ReceiptText, ArrowUpRight,
-  Ticket, FileText, DownloadCloud
+  Search, ReceiptText, ArrowUpRight,
+  Ticket, FileText, DownloadCloud, CalendarDays, Hash, CreditCard, ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -35,7 +35,6 @@ export default function TransactionsClient() {
           return;
         }
 
-        // 🔥 FETCH KEDUA DATA SECARA BERSAMAAN 🔥
         const [resEvents, resEProducts] = await Promise.all([
           apiFetch('/my-registrations'),
           apiFetch('/my-e-products')
@@ -66,7 +65,6 @@ export default function TransactionsClient() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
 
-  // 🔥 FUNGSI UNTUK FORMAT TANGGAL + JAM 🔥
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleString('id-ID', {
@@ -75,38 +73,38 @@ export default function TransactionsClient() {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    }).replace(/\./g, ':'); // Mengubah format 14.30 menjadi 14:30
-    
+    }).replace(/\./g, ':'); 
     return `${formattedDate} WIB`;
   };
 
+  // 🔥 DESAIN BADGE STATUS BARU 🔥
   const getStatusBadge = (status: string) => {
     const s = status?.toLowerCase();
     if (s === 'verified' || s === 'paid' || s === 'success') {
       return (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/50 rounded-md text-[10px] font-bold uppercase tracking-wider">
-          <CheckCircle2 size={14} /> Berhasil
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm">
+          <CheckCircle2 size={12} className="text-emerald-500" /> Berhasil
         </div>
       );
     }
     if (s === 'rejected' || s === 'failed' || s === 'expired') {
       return (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200/50 rounded-md text-[10px] font-bold uppercase tracking-wider">
-          <XCircle size={14} /> Gagal / Ditolak
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm">
+          <XCircle size={12} className="text-rose-500" /> Gagal
         </div>
       );
     }
     return (
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200/50 rounded-md text-[10px] font-bold uppercase tracking-wider">
-        <Clock size={14} /> Diproses
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm">
+        <Clock size={12} className="text-amber-500 animate-pulse" /> Diproses
       </div>
     );
   };
 
   if (loading) return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center gap-4 bg-[#F8FAFC]">
-      <Loader2 className="animate-spin text-indigo-600" size={32} />
-      <span className="text-sm font-medium text-slate-500">Menarik data tagihan Amania Anda...</span>
+      <Loader2 className="animate-spin text-indigo-600" size={40} />
+      <span className="text-sm font-bold text-slate-500 tracking-wide">Sinkronisasi Data Tagihan...</span>
     </div>
   );
 
@@ -114,241 +112,233 @@ export default function TransactionsClient() {
     <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans">
       
       {/* ════ HEADER SECTION ════ */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-0 md:pt-10 md:pb-0">
-          <div className="max-w-2xl mb-6">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-100 rounded-md text-indigo-700 text-[9px] md:text-[10px] font-bold uppercase tracking-wider mb-3 md:mb-4">
-              <ReceiptText size={14} className="md:w-4 md:h-4" /> Tagihan & Pembayaran Amania
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-0 md:pt-12 md:pb-0">
+          <div className="max-w-2xl mb-8">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-100/50 border border-indigo-200/50 rounded-full text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-4">
+              <ReceiptText size={14} /> Tagihan & Akses
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">
               Riwayat Transaksi
             </h1>
-            <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">
-              Pantau status verifikasi dan akses histori pembelian produk pembelajaran Anda di sini.
+            <p className="text-sm md:text-base text-slate-500 font-medium leading-relaxed max-w-lg">
+              Pantau status verifikasi pembayaran dan akses produk digital yang telah Anda beli.
             </p>
           </div>
 
           {/* 🔥 TABS NAVIGATION 🔥 */}
-          <div className="flex gap-6 border-b border-slate-200 overflow-x-auto hide-scroll-bar">
+          <div className="flex gap-8 border-b border-slate-200 overflow-x-auto hide-scroll-bar">
             <button 
               onClick={() => setActiveTab('event')}
-              className={`pb-4 text-sm font-bold transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === 'event' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 text-sm font-black transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === 'event' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
-              <Ticket size={16} /> Tiket Event / Kelas
-              {activeTab === 'event' && <motion.div layoutId="activeTabTrx" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full" />}
+              <Ticket size={18} className={activeTab === 'event' ? 'text-indigo-500' : ''} /> Tiket Event & Kelas
+              {activeTab === 'event' && <motion.div layoutId="activeTabTrx" className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-t-full" />}
             </button>
             <button 
               onClick={() => setActiveTab('eproduct')}
-              className={`pb-4 text-sm font-bold transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === 'eproduct' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`pb-4 text-sm font-black transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === 'eproduct' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
             >
-              <FileText size={16} /> E-Produk Premium
-              {activeTab === 'eproduct' && <motion.div layoutId="activeTabTrx" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full" />}
+              <FileText size={18} className={activeTab === 'eproduct' ? 'text-indigo-500' : ''} /> E-Produk Premium
+              {activeTab === 'eproduct' && <motion.div layoutId="activeTabTrx" className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-t-full" />}
             </button>
           </div>
         </div>
       </div>
 
       {/* ════ MAIN CONTENT ════ */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10">
         
         {/* TAB 1: TRANSAKSI EVENT (WEBINAR/KELAS) */}
         {activeTab === 'event' && (
-          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             {eventTransactions.length === 0 ? (
-              <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-10 md:p-16 flex flex-col items-center justify-center text-center shadow-sm">
-                <div className="w-14 h-14 md:w-16 md:h-16 bg-slate-50 border border-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-4 md:mb-5 shadow-sm">
-                  <Ticket size={24} className="md:w-8 md:h-8" strokeWidth={1.5} />
+              <div className="bg-white border border-slate-200 border-dashed rounded-[2rem] p-12 md:p-20 flex flex-col items-center justify-center text-center shadow-sm">
+                <div className="w-20 h-20 bg-slate-50 border border-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                  <Ticket size={32} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1.5 md:mb-2">Belum Ada Transaksi Event</h3>
-                <p className="text-slate-500 text-xs md:text-sm font-medium max-w-sm leading-relaxed mb-6">
-                  Anda belum melakukan pendaftaran kelas atau webinar. Transaksi tiket Anda akan muncul di sini.
+                <h3 className="text-xl font-black text-slate-900 mb-2">Belum Ada Transaksi Event</h3>
+                <p className="text-slate-500 text-sm font-medium max-w-sm leading-relaxed mb-8">
+                  Anda belum melakukan pendaftaran kelas atau webinar. Temukan program menarik di katalog kami.
                 </p>
-                <Link href="/events" className="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg transition-colors border border-indigo-200">
-                  Lihat Katalog Program
+                <Link href="/events" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+                  Cari Kelas Sekarang
                 </Link>
               </div>
             ) : (
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  <div className="col-span-5">Deskripsi Program</div>
-                  <div className="col-span-3">Status</div>
-                  <div className="col-span-2 text-right">Total Tagihan</div>
-                  <div className="col-span-2 text-right">Aksi</div>
-                </div>
+              <div className="space-y-4 md:space-y-6">
+                {eventTransactions.map((trx) => (
+                  <div key={trx.id} className="bg-white border border-slate-200/80 rounded-[1.5rem] p-4 md:p-6 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 group flex flex-col sm:flex-row gap-5">
+                    
+                    {/* Kiri: Thumbnail Event */}
+                    <div className="w-full sm:w-36 md:w-48 shrink-0 rounded-[1rem] bg-slate-100 overflow-hidden border border-slate-200/80 relative shadow-sm aspect-video sm:aspect-[4/3] md:aspect-video">
+                      {trx.event?.image ? (
+                        <img src={`${STORAGE_URL}/${trx.event.image}`} alt={trx.event?.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50"><Ticket size={32} strokeWidth={1} /></div>
+                      )}
+                      <div className="absolute top-2 left-2 sm:hidden">
+                        {getStatusBadge(trx.status)}
+                      </div>
+                    </div>
 
-                <div className="flex flex-col divide-y divide-slate-100">
-                  {eventTransactions.map((trx) => (
-                    <div key={trx.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-start md:items-center px-4 md:px-6 py-4 md:py-5 hover:bg-slate-50/50 transition-colors group">
+                    {/* Kanan: Detail & Aksi */}
+                    <div className="flex-1 flex flex-col">
+                      <div className="hidden sm:flex flex-wrap gap-2 mb-2.5">
+                        {getStatusBadge(trx.status)}
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-widest"><Hash size={12}/> {trx.ticket_code || `TRX-EVT-${trx.id}`}</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-widest"><CalendarDays size={12}/> {formatDateTime(trx.created_at)}</span>
+                      </div>
                       
-                      <div className="col-span-1 md:col-span-5 flex flex-col w-full">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[9px] md:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-                            {formatDateTime(trx.created_at)}
-                          </span>
-                          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                          <span className="text-[9px] md:text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-                            {trx.ticket_code || `TRX-EVT-${trx.id}`}
-                          </span>
-                        </div>
-                        <h3 className="text-xs md:text-sm font-bold text-slate-900 leading-snug line-clamp-2 md:pr-4 group-hover:text-indigo-600 transition-colors">
-                          {trx.event?.title || <span className="italic text-slate-400">Event tidak tersedia</span>}
-                        </h3>
-                        <div className="mt-1.5 md:mt-2">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[8px] md:text-[9px] font-bold uppercase tracking-wider border ${trx.tier === 'premium' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                            {trx.tier === 'premium' ? 'VIP Access' : 'Basic Pass'}
-                          </span>
-                        </div>
+                      <div className="sm:hidden flex flex-wrap gap-2 mb-2 mt-1">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-md text-[9px] font-bold uppercase tracking-widest"><Hash size={12}/> {trx.ticket_code || `TRX-EVT-${trx.id}`}</span>
                       </div>
 
-                      <div className="h-px w-full bg-slate-100 md:hidden my-1"></div>
+                      <h3 className="text-base md:text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight mb-2">
+                        {trx.event?.title || <span className="italic text-slate-400">Event tidak tersedia</span>}
+                      </h3>
+                      
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-4">
+                        Kategori: <span className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider ${trx.tier === 'premium' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{trx.tier === 'premium' ? 'VIP Access' : 'Basic Pass'}</span>
+                      </div>
 
-                      <div className="col-span-1 md:col-span-7 w-full flex flex-row md:grid md:grid-cols-7 items-center justify-between gap-2 md:gap-4">
-                        <div className="md:col-span-3 flex items-center shrink-0">
-                          {getStatusBadge(trx.status)}
+                      {/* Area Harga & Tombol */}
+                      <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-0.5"><CreditCard size={12} /> Total Pembayaran</span>
+                          <span className="text-lg md:text-2xl font-black text-slate-900 font-mono tracking-tight">
+                            {formatRupiah(trx.total_amount)}
+                          </span>
                         </div>
 
-                        <div className="flex items-center gap-3 md:col-span-4 md:grid md:grid-cols-4 md:w-full ml-auto">
-                          <div className="md:col-span-2 flex flex-col items-end w-full">
-                            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest md:hidden mb-0.5">Total</span>
-                            <span className="text-xs md:text-sm font-extrabold text-slate-900 font-mono text-right">
-                              {formatRupiah(trx.total_amount)}
-                            </span>
-                          </div>
-
-                          <div className="md:col-span-2 flex justify-end w-full">
-                            {parseFloat(trx.total_amount) > 0 ? (
-                              <button 
-                                onClick={() => trx.payment_proof ? setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`) : toast.error("Bukti belum diunggah")}
-                                className="inline-flex items-center justify-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-[10px] md:text-xs font-semibold transition-colors shadow-sm shrink-0"
-                              >
-                                {trx.payment_proof ? (
-                                  <><Eye size={12} className="text-slate-400 md:w-3.5 md:h-3.5" /> <span className="hidden xl:inline">Lihat Bukti</span><span className="xl:hidden">Bukti</span></>
-                                ) : (
-                                  <><ImageIcon size={12} className="text-slate-300 md:w-3.5 md:h-3.5" /> <span className="hidden xl:inline">Tanpa Bukti</span><span className="xl:hidden">-</span></>
-                                )}
-                              </button>
-                            ) : (
-                              <div className="inline-flex items-center justify-center px-3 py-1.5 bg-slate-50 border border-slate-100 text-slate-400 rounded-lg text-[10px] md:text-xs font-medium cursor-not-allowed">
-                                -
-                              </div>
-                            )}
-                          </div>
+                        <div className="flex w-full sm:w-auto">
+                          {parseFloat(trx.total_amount) > 0 ? (
+                            <button 
+                              onClick={() => trx.payment_proof ? setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`) : toast.error("Bukti belum diunggah")}
+                              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs md:text-sm font-bold transition-all shadow-md"
+                            >
+                              {trx.payment_proof ? (
+                                <><Eye size={16} /> Lihat Bukti Transfer</>
+                              ) : (
+                                <><ShieldAlert size={16} className="text-rose-400" /> Belum Upload Bukti</>
+                              )}
+                            </button>
+                          ) : (
+                            <div className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs md:text-sm font-bold">
+                              Tiket Gratis (Free Pass)
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                  </div>
+                ))}
               </div>
             )}
           </motion.div>
         )}
 
-        {/* TAB 2: TRANSAKSI E-PRODUCT (TRIPAY) */}
+        {/* TAB 2: TRANSAKSI E-PRODUCT (TRIPAY) 🔥 KINI DENGAN COVER PRODUK 🔥 */}
         {activeTab === 'eproduct' && (
-          <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             {eProductTransactions.length === 0 ? (
-              <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-10 md:p-16 flex flex-col items-center justify-center text-center shadow-sm">
-                <div className="w-14 h-14 md:w-16 md:h-16 bg-slate-50 border border-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-4 md:mb-5 shadow-sm">
-                  <FileText size={24} className="md:w-8 md:h-8" strokeWidth={1.5} />
+              <div className="bg-white border border-slate-200 border-dashed rounded-[2rem] p-12 md:p-20 flex flex-col items-center justify-center text-center shadow-sm">
+                <div className="w-20 h-20 bg-slate-50 border border-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                  <FileText size={32} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1.5 md:mb-2">Belum Ada Transaksi E-Produk</h3>
-                <p className="text-slate-500 text-xs md:text-sm font-medium max-w-sm leading-relaxed mb-6">
-                  Anda belum melakukan pembelian aset digital atau modul. Histori pembayaran otomatis Anda akan tampil di sini.
+                <h3 className="text-xl font-black text-slate-900 mb-2">Belum Ada Transaksi E-Produk</h3>
+                <p className="text-slate-500 text-sm font-medium max-w-sm leading-relaxed mb-8">
+                  Anda belum melakukan pembelian e-book atau modul. Histori pembayaran otomatis Anda akan tampil di sini.
                 </p>
-                <Link href="/e-products" className="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg transition-colors border border-indigo-200">
-                  Lihat Katalog E-Produk
+                <Link href="/e-products" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+                  Lihat Katalog Produk
                 </Link>
               </div>
             ) : (
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  <div className="col-span-5">Informasi Produk</div>
-                  <div className="col-span-3">Status Tripay</div>
-                  <div className="col-span-2 text-right">Total Tagihan</div>
-                  <div className="col-span-2 text-right">Aksi</div>
-                </div>
-
-                <div className="flex flex-col divide-y divide-slate-100">
-                  {eProductTransactions.map((trx) => (
-                    <div key={`ep-${trx.id}`} className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-start md:items-center px-4 md:px-6 py-4 md:py-5 hover:bg-slate-50/50 transition-colors group">
+              <div className="space-y-4 md:space-y-6">
+                {eProductTransactions.map((trx) => (
+                  <div key={`ep-${trx.id}`} className="bg-white border border-slate-200/80 rounded-[1.5rem] p-4 md:p-6 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 group flex flex-col sm:flex-row gap-5 md:gap-6">
+                    
+                    {/* Kiri: Thumbnail Cover E-Product */}
+                    <div className="w-24 sm:w-28 md:w-32 shrink-0 rounded-xl bg-slate-100 overflow-hidden border border-slate-200/80 relative shadow-sm" style={{ aspectRatio: '2/3' }}>
+                      {trx.product?.cover_image ? (
+                        <img src={`${STORAGE_URL}/${trx.product.cover_image}`} alt={trx.product?.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50"><FileText size={32} strokeWidth={1}/></div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 to-transparent pointer-events-none"></div>
                       
-                      <div className="col-span-1 md:col-span-5 flex flex-col w-full">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[9px] md:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-                            {formatDateTime(trx.created_at)}
-                          </span>
-                          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                          <span className="text-[9px] md:text-[10px] font-mono text-slate-500 uppercase tracking-wider truncate">
-                            {trx.reference || `TRX-EP-${trx.id}`}
-                          </span>
+                      {/* Status untuk mobile diletakkan di dalam cover */}
+                      <div className="absolute top-2 left-2 sm:hidden">
+                        {getStatusBadge(trx.status)}
+                      </div>
+                    </div>
+
+                    {/* Kanan: Detail & Aksi */}
+                    <div className="flex-1 flex flex-col justify-center">
+                      
+                      <div className="hidden sm:flex flex-wrap gap-2 mb-2.5">
+                        {getStatusBadge(trx.status)}
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
+                          <Receipt size={12}/> Ref: {trx.reference || `TRX-EP-${trx.id}`}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-md text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
+                          <CalendarDays size={12}/> {formatDateTime(trx.created_at)}
+                        </span>
+                      </div>
+
+                      <div className="sm:hidden flex flex-wrap gap-2 mb-2 mt-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-md text-[9px] font-bold uppercase tracking-widest">
+                          <Receipt size={12}/> Ref: {trx.reference || `TRX-EP-${trx.id}`}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base md:text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight mb-2">
+                        {trx.product?.title || <span className="italic text-slate-400">Produk tidak tersedia</span>}
+                      </h3>
+
+                      {trx.payment_method && (
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-4">
+                          Metode Bayar: <span className="text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md uppercase tracking-wider text-[10px] border border-slate-200">{trx.payment_method}</span>
                         </div>
-                        <h3 className="text-xs md:text-sm font-bold text-slate-900 leading-snug line-clamp-2 md:pr-4 group-hover:text-indigo-600 transition-colors">
-                          {trx.product?.title || <span className="italic text-slate-400">Produk tidak tersedia</span>}
-                        </h3>
-                        <div className="mt-1.5 md:mt-2 flex items-center gap-1.5">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] md:text-[9px] font-bold uppercase tracking-wider border bg-sky-50 text-sky-700 border-sky-200">
-                            Digital Asset
-                          </span>
-                          {trx.payment_method && (
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Via {trx.payment_method}</span>
+                      )}
+
+                      {/* Area Harga & Tombol */}
+                      <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 flex items-center gap-1"><CreditCard size={12}/> Tagihan Tripay</span>
+                          <span className="text-lg md:text-2xl font-black text-slate-900 font-mono tracking-tight">{formatRupiah(trx.amount)}</span>
+                        </div>
+
+                        <div className="flex gap-2.5 w-full sm:w-auto">
+                          {trx.status === 'PAID' || trx.status === 'success' || trx.status === 'verified' ? (
+                            <>
+                              {trx.checkout_url && (
+                                <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm">
+                                  <ReceiptText size={16} className="text-slate-400" /> <span className="hidden xl:inline">E-Receipt</span>
+                                </a>
+                              )}
+                              <Link href={`/e-products/${trx.product?.slug}`} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs md:text-sm font-bold transition-all shadow-md shadow-indigo-600/20">
+                                <DownloadCloud size={16} /> Akses Produk
+                              </Link>
+                            </>
+                          ) : trx.checkout_url && trx.status !== 'EXPIRED' ? (
+                            <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-xs md:text-sm font-black transition-all shadow-lg shadow-amber-500/20">
+                              Bayar Sekarang <ArrowUpRight size={16} />
+                            </a>
+                          ) : (
+                            <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2 bg-slate-50 border border-slate-200 text-slate-400 rounded-xl text-xs md:text-sm font-bold cursor-not-allowed">
+                              Kedaluwarsa
+                            </div>
                           )}
                         </div>
                       </div>
-
-                      <div className="h-px w-full bg-slate-100 md:hidden my-1"></div>
-
-                      <div className="col-span-1 md:col-span-7 w-full flex flex-row md:grid md:grid-cols-7 items-center justify-between gap-2 md:gap-4">
-                        <div className="md:col-span-3 flex items-center shrink-0">
-                          {getStatusBadge(trx.status)}
-                        </div>
-
-                        <div className="flex items-center gap-3 md:col-span-4 md:grid md:grid-cols-4 md:w-full ml-auto">
-                          <div className="md:col-span-2 flex flex-col items-end w-full">
-                            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest md:hidden mb-0.5">Total</span>
-                            <span className="text-xs md:text-sm font-extrabold text-slate-900 font-mono text-right">
-                              {formatRupiah(trx.amount)}
-                            </span>
-                          </div>
-
-                          <div className="md:col-span-2 flex justify-end w-full gap-2">
-                            {trx.status === 'PAID' || trx.status === 'success' || trx.status === 'verified' ? (
-                              <>
-                                {/* 🔥 TOMBOL E-RECEIPT 🔥 */}
-                                {trx.checkout_url && (
-                                  <a 
-                                    href={trx.checkout_url} target="_blank" rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm shrink-0"
-                                    title="Lihat Struk Pembayaran"
-                                  >
-                                    <ReceiptText size={14} /> <span className="hidden xl:inline">E-Receipt</span>
-                                  </a>
-                                )}
-                                
-                                <Link 
-                                  href={`/e-products/${trx.product?.slug}`}
-                                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm shadow-indigo-600/20 shrink-0"
-                                >
-                                  <DownloadCloud size={14} /> Akses
-                                </Link>
-                              </>
-                            ) : trx.checkout_url && trx.status !== 'EXPIRED' ? (
-                               <a 
-                                 href={trx.checkout_url} target="_blank" rel="noopener noreferrer"
-                                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm shadow-amber-500/20 shrink-0"
-                               >
-                                 Bayar Sekarang
-                               </a>
-                            ) : (
-                               <div className="inline-flex items-center justify-center px-3 py-1.5 bg-slate-50 border border-slate-100 text-slate-400 rounded-lg text-[10px] md:text-xs font-medium cursor-not-allowed">
-                                -
-                               </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
           </motion.div>
@@ -361,35 +351,37 @@ export default function TransactionsClient() {
         {selectedProof && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md"
             onClick={() => setSelectedProof(null)}
           >
             <motion.div 
-              initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }}
-              className="relative max-w-xl w-full flex flex-col items-center bg-white p-2 rounded-xl md:rounded-2xl shadow-2xl border border-slate-200"
+              initial={{ scale: 0.95, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 20, opacity: 0 }}
+              className="relative max-w-xl w-full flex flex-col items-center bg-white p-3 rounded-[2rem] shadow-2xl border border-slate-200"
               onClick={(e) => e.stopPropagation()} 
             >
-              <div className="w-full flex justify-between items-center p-2 mb-1 md:mb-2">
-                <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider ml-2">Bukti Pembayaran</span>
+              <div className="w-full flex justify-between items-center px-3 py-2 mb-2 border-b border-slate-100">
+                <span className="text-xs font-black text-slate-800 flex items-center gap-2">
+                   <ImageIcon size={16} className="text-indigo-500" /> BUKTI PEMBAYARAN
+                </span>
                 <button 
                   onClick={() => setSelectedProof(null)}
-                  className="p-1 md:p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+                  className="p-1.5 bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-500 rounded-xl transition-colors"
                 >
-                  <X size={16} className="md:w-4 md:h-4" />
+                  <X size={18} />
                 </button>
               </div>
-              <div className="w-full bg-slate-50 rounded-lg md:rounded-xl overflow-hidden border border-slate-100">
-                 <img src={selectedProof} alt="Bukti Transfer" className="w-full max-h-[60vh] md:max-h-[70vh] object-contain" />
+              <div className="w-full bg-slate-100 rounded-2xl overflow-hidden">
+                 <img src={selectedProof} alt="Bukti Transfer" className="w-full max-h-[65vh] object-contain" />
               </div>
-              <div className="w-full p-3 md:p-4 flex justify-end">
+              <div className="w-full pt-4 pb-1 px-1 flex justify-end">
                  <a 
                    href={selectedProof} 
                    download 
                    target="_blank"
                    rel="noopener noreferrer"
-                   className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-slate-900 text-white rounded-lg text-[10px] md:text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm"
+                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-lg"
                  >
-                   Buka Resolusi Penuh <ArrowUpRight size={14} className="md:w-3.5 md:h-3.5" />
+                   Buka Resolusi Penuh <ArrowUpRight size={16} />
                  </a>
               </div>
             </motion.div>
