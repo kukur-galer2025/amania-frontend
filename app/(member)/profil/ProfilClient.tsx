@@ -1,24 +1,24 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { User, Mail, Lock, Camera, Save, Loader2, CheckCircle2, AlertCircle, FileText, X, ShieldCheck } from 'lucide-react';
+import { User, Mail, Lock, Camera, Save, Loader2, CheckCircle2, AlertCircle, FileText, X, ShieldCheck, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api';
 
 export default function ProfilClient() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: '', text: '' });
   
+  // 🔥 PERBAIKAN: Menambahkan state phone
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', password_confirmation: '', bio: ''
+    name: '', email: '', phone: '', password: '', password_confirmation: '', bio: ''
   });
   
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 🔗 AMBIL STORAGE URL DARI .ENV
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
   useEffect(() => {
@@ -30,6 +30,7 @@ export default function ProfilClient() {
         ...formData, 
         name: parsedUser.name, 
         email: parsedUser.email,
+        phone: parsedUser.phone || '', // 🔥 Mengisi nilai phone dari Storage
         bio: parsedUser.bio || ''
       });
       
@@ -37,7 +38,7 @@ export default function ProfilClient() {
         setAvatarPreview(
           parsedUser.avatar.startsWith('http') 
             ? parsedUser.avatar 
-            : `${STORAGE_URL}/${parsedUser.avatar}` // 🔥 Pakai Storage URL dinamis
+            : `${STORAGE_URL}/${parsedUser.avatar}`
         );
       } else {
         setAvatarPreview(`https://ui-avatars.com/api/?name=${encodeURIComponent(parsedUser.name)}&background=4f46e5&color=fff&size=200`);
@@ -75,6 +76,7 @@ export default function ProfilClient() {
     const submitData = new FormData();
     submitData.append('name', formData.name);
     submitData.append('email', formData.email);
+    submitData.append('phone', formData.phone); // 🔥 Menambahkan phone ke Body Request
     submitData.append('bio', formData.bio);
     if (formData.password) {
       submitData.append('password', formData.password);
@@ -85,12 +87,10 @@ export default function ProfilClient() {
     }
 
     try {
-      // 🔥 PENGGUNAAN APIFETCH 🔥
       const res = await apiFetch('/profile/update', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
-            // Hapus Content-Type agar browser mengatur form-data secara otomatis
             'Content-Type': '' 
         },
         body: submitData
@@ -200,7 +200,7 @@ export default function ProfilClient() {
               </div>
               <div className="text-left">
                 <h4 className="text-sm md:text-base font-bold text-slate-900">Foto Profil</h4>
-                <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 md:mt-1 mb-3">Rekomendasi ukuran 500x500px. Maksimal 2MB.</p>
+                <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 md:mt-1 mb-3">Rekomendasi ukuran 500x500px. Maksimal 5MB.</p>
                 <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 md:px-4 py-1.5 md:py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
                   Ganti Foto
                 </button>
@@ -238,17 +238,28 @@ export default function ProfilClient() {
         {/* SECTION 2: KEAMANAN & KONTAK */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           <div className="lg:col-span-1">
-            <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1 flex items-center gap-2"><ShieldCheck size={18} className="text-indigo-600"/> Keamanan Akun</h3>
-            <p className="text-xs md:text-sm text-slate-500">Perbarui email aktif dan ubah kata sandi untuk melindungi akun Amania Anda.</p>
+            <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1 flex items-center gap-2"><ShieldCheck size={18} className="text-indigo-600"/> Keamanan & Kontak</h3>
+            <p className="text-xs md:text-sm text-slate-500">Perbarui email aktif, nomor WhatsApp, dan ubah kata sandi untuk melindungi akun Amania Anda.</p>
           </div>
           
           <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 md:p-8 shadow-sm space-y-5 md:space-y-6">
             
-            <div>
-              <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Email Terdaftar</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+              <div>
+                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Email Terdaftar</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                </div>
+              </div>
+              
+              {/* 🔥 KOLOM NOMOR HP BARU 🔥 */}
+              <div>
+                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Nomor HP (WhatsApp)</label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Contoh: 08123456789" className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                </div>
               </div>
             </div>
 

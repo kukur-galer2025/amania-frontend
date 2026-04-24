@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Search, Edit, Trash2, Image as ImageIcon, 
   FileText, CheckCircle2, XCircle, Loader2, PackageSearch, 
-  Eye, EyeOff, UploadCloud, Link as LinkIcon
+  Eye, EyeOff, UploadCloud, Link as LinkIcon, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -20,6 +20,7 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 export default function AdminEProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]); // State untuk nyimpen Kategori
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -30,6 +31,7 @@ export default function AdminEProductsPage() {
 
   // State Form 
   const [title, setTitle] = useState('');
+  const [categoryId, setCategoryId] = useState(''); // State Kategori ID
   const [description, setDescription] = useState(''); 
   const [price, setPrice] = useState<number | string>('');
   const [isPublished, setIsPublished] = useState(true);
@@ -42,29 +44,37 @@ export default function AdminEProductsPage() {
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/admin/e-products');
-      const json = await res.json();
-      if (res.ok && json.success) {
-        setProducts(json.data);
-      }
+      // Fetch Produk & Kategori secara bersamaan
+      const [prodRes, catRes] = await Promise.all([
+        apiFetch('/admin/e-products'),
+        apiFetch('/admin/e-product-categories')
+      ]);
+      
+      const prodJson = await prodRes.json();
+      const catJson = await catRes.json();
+      
+      if (prodRes.ok && prodJson.success) setProducts(prodJson.data);
+      if (catRes.ok && catJson.success) setCategories(catJson.data);
+      
     } catch (error) {
-      toast.error('Gagal mengambil data E-Produk');
+      toast.error('Gagal mengambil data sistem');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
   const openModal = (product: any = null) => {
     if (product) {
       setEditingId(product.id);
       setTitle(product.title || '');
+      setCategoryId(product.e_product_category_id || '');
       setDescription(product.description || '');
       setPrice(product.price ?? '');
       setIsPublished(product.is_published ?? true);
@@ -81,6 +91,7 @@ export default function AdminEProductsPage() {
     } else {
       setEditingId(null);
       setTitle('');
+      setCategoryId('');
       setDescription('');
       setPrice('');
       setIsPublished(true);
@@ -99,6 +110,11 @@ export default function AdminEProductsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!categoryId) {
+        toast.error("Kategori wajib dipilih!");
+        return;
+    }
 
     if (!editingId) {
       if (fileType === 'upload' && !filePath) {
@@ -122,6 +138,7 @@ export default function AdminEProductsPage() {
     try {
       const formData = new FormData();
       formData.append('title', title);
+      formData.append('e_product_category_id', categoryId); // Kirim Kategori ID
       formData.append('description', description); 
       formData.append('price', price.toString());
       formData.append('is_published', isPublished ? '1' : '0');
@@ -134,6 +151,7 @@ export default function AdminEProductsPage() {
         formData.append('file_link', fileLink);
       }
 
+      // Jika update di Laravel menggunakan POST + _method=PUT karena ada upload file
       const url = editingId ? `/admin/e-products/${editingId}` : '/admin/e-products';
       
       const res = await apiFetch(url, {
@@ -145,7 +163,7 @@ export default function AdminEProductsPage() {
 
       if (res.ok && json.success) {
         toast.success(json.message, { id: loadToast });
-        fetchProducts();
+        fetchData();
         closeModal();
       } else {
         toast.error(json.message || "Gagal menyimpan produk.", { id: loadToast });
@@ -167,7 +185,7 @@ export default function AdminEProductsPage() {
 
       if (res.ok && json.success) {
         toast.success("Produk berhasil dihapus!", { id: loadToast });
-        fetchProducts();
+        fetchData();
       } else {
         toast.error("Gagal menghapus produk.", { id: loadToast });
       }
@@ -206,10 +224,10 @@ export default function AdminEProductsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input 
               type="text" placeholder="Cari produk..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-full md:w-64 transition-all"
+              className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-full md:w-64 transition-all shadow-sm"
             />
           </div>
-          <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm shrink-0">
+          <button onClick={() => openModal()} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm shrink-0">
             <Plus size={16} /> <span className="hidden sm:block">Tambah Produk</span>
           </button>
         </div>
@@ -222,9 +240,9 @@ export default function AdminEProductsPage() {
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
               <tr>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Info Produk</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Kategori</th>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Harga</th>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Diunggah Oleh</th>
                 <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] text-right">Aksi</th>
               </tr>
             </thead>
@@ -243,15 +261,19 @@ export default function AdminEProductsPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-slate-900 truncate max-w-[250px]">{product.title}</p>
-                          <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><FileText size={10} /> DIGITAL ASSET</div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Author: {product.author?.name || 'Sistem'}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-md">
+                            <Layers size={12}/> {product.category?.name || 'Belum diatur'}
+                        </span>
                     </td>
                     <td className="px-6 py-4"><span className={`font-bold ${product.price === 0 ? 'text-emerald-600' : 'text-slate-900'}`}>{formatRupiah(product.price)}</span></td>
                     <td className="px-6 py-4">
                       {product.is_published ? <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100"><Eye size={14} /> Publik</span> : <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-500 text-xs font-bold border border-slate-200"><EyeOff size={14} /> Draft</span>}
                     </td>
-                    <td className="px-6 py-4"><span className="text-xs font-semibold text-slate-600">{product.author?.name || 'Sistem'}</span></td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openModal(product)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><Edit size={16} /></button>
@@ -271,39 +293,42 @@ export default function AdminEProductsPage() {
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeModal} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-3xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
               
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
                 <h2 className="text-lg font-bold text-slate-900">{editingId ? 'Edit E-Produk' : 'Unggah Produk Baru'}</h2>
-                <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors"><XCircle size={20} /></button>
+                <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors"><XCircle size={20} /></button>
               </div>
 
-              <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
                 <form id="productForm" onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-5">
+                  
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-5">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Judul Produk <span className="text-rose-500">*</span></label>
-                      <input type="text" required value={title || ''} onChange={(e) => setTitle(e.target.value)} placeholder="Cth: Template Notion Event Organizer" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
+                      <input type="text" required value={title || ''} onChange={(e) => setTitle(e.target.value)} placeholder="Cth: Template Notion Event Organizer" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Harga (Rp) <span className="text-rose-500">*</span></label>
-                        <input type="number" required min="0" value={price ?? ''} onChange={(e) => setPrice(e.target.value)} placeholder="Isi 0 jika Gratis" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Kategori Produk <span className="text-rose-500">*</span></label>
+                        <select required value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer">
+                          <option value="" disabled>-- Pilih Kategori --</option>
+                          {categories.map(c => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Status Publikasi</label>
-                        <select value={isPublished ? '1' : '0'} onChange={(e) => setIsPublished(e.target.value === '1')} className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer">
-                          <option value="1">Publik (Bisa Dibeli)</option>
-                          <option value="0">Draft (Sembunyikan)</option>
-                        </select>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Harga (Rp) <span className="text-rose-500">*</span></label>
+                        <input type="number" required min="0" value={price ?? ''} onChange={(e) => setPrice(e.target.value)} placeholder="Isi 0 jika Gratis" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
                       </div>
                     </div>
 
                     {/* 🔥 AREA REACT QUILL 🔥 */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Deskripsi & Info <span className="text-rose-500">*</span></label>
-                      <div className="bg-white rounded-xl overflow-hidden border border-slate-300 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
+                      <div className="bg-white rounded-xl overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 shadow-sm">
                         <ReactQuill 
                           theme="snow" 
                           value={description || ''} 
@@ -317,7 +342,7 @@ export default function AdminEProductsPage() {
                   </div>
 
                   {/* Area Upload */}
-                  <div className="p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-5">
+                  <div className="p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl shadow-sm space-y-6">
                     
                     {/* COVER UPLOAD */}
                     <div>
@@ -333,20 +358,20 @@ export default function AdminEProductsPage() {
                         accept="image/jpeg,image/png,image/jpg,image/webp" 
                         onChange={(e) => {
                           const file = e.target.files ? e.target.files[0] : null;
-                          if (file && file.size > 10 * 1024 * 1024) { // 10MB limit check
+                          if (file && file.size > 10 * 1024 * 1024) { 
                             toast.error("Ukuran file cover tidak boleh melebihi 10 MB!");
-                            e.target.value = ''; // Reset input
+                            e.target.value = ''; 
                             setCoverImage(null);
                             return;
                           }
                           setCoverImage(file);
                         }} 
-                        className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer" 
+                        className="w-full bg-white p-2 border border-indigo-100 rounded-xl text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer shadow-sm" 
                       />
-                      {editingId && <p className="text-[10px] text-slate-500 mt-1.5">*Abaikan jika tidak ingin mengganti cover yang lama.</p>}
+                      {editingId && <p className="text-[10px] text-indigo-500 font-medium mt-1.5">*Abaikan jika tidak ingin mengganti cover yang lama.</p>}
                     </div>
                     
-                    <div className="h-px bg-indigo-100 w-full" />
+                    <div className="h-px bg-indigo-200/50 w-full" />
                     
                     {/* FILE MASTER UPLOAD / LINK */}
                     <div>
@@ -375,33 +400,42 @@ export default function AdminEProductsPage() {
                             accept=".zip,.rar,.pdf" 
                             onChange={(e) => {
                               const file = e.target.files ? e.target.files[0] : null;
-                              if (file && file.size > 50 * 1024 * 1024) { // 50MB limit check
+                              if (file && file.size > 50 * 1024 * 1024) {
                                 toast.error("Ukuran file asli tidak boleh melebihi 50 MB!");
-                                e.target.value = ''; // Reset input
+                                e.target.value = ''; 
                                 setFilePath(null);
                                 return;
                               }
                               setFilePath(file);
                             }} 
-                            className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer" 
+                            className="w-full bg-white p-2 border border-indigo-100 rounded-xl text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer shadow-sm" 
                           />
-                          {editingId ? <p className="text-[10px] text-slate-500 mt-1.5">*Abaikan jika tidak ingin mengganti file master yang lama.</p> : <p className="text-[10px] text-slate-500 mt-1.5">*Ini adalah file rahasia yang otomatis diunduh pembeli setelah bayar.</p>}
+                          {editingId ? <p className="text-[10px] text-indigo-500 font-medium mt-1.5">*Abaikan jika tidak ingin mengganti file master yang lama.</p> : <p className="text-[10px] text-indigo-500 font-medium mt-1.5">*Ini adalah file rahasia yang otomatis diunduh pembeli setelah bayar.</p>}
                         </div>
                       ) : (
                         <div>
-                          <input type="url" required value={fileLink || ''} onChange={(e) => setFileLink(e.target.value)} placeholder="https://drive.google.com/..." className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" />
-                          <p className="text-[10px] text-slate-500 mt-1.5">*Masukkan tautan Google Drive / Dropbox / Cloud Storage untuk diakses pembeli.</p>
+                          <input type="url" required value={fileLink || ''} onChange={(e) => setFileLink(e.target.value)} placeholder="https://drive.google.com/..." className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-sm" />
+                          <p className="text-[10px] text-indigo-500 font-medium mt-1.5">*Masukkan tautan Google Drive / Dropbox / Cloud Storage untuk diakses pembeli.</p>
                         </div>
                       )}
                     </div>
 
                   </div>
+                  
+                  {/* Status Publikasi */}
+                  <div className="flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <input type="checkbox" id="publish-check" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer" />
+                    <label htmlFor="publish-check" className="text-sm font-bold text-slate-800 cursor-pointer select-none">
+                        Tampilkan di Katalog Publik (Publish)
+                    </label>
+                  </div>
+
                 </form>
               </div>
 
-              <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
-                <button type="button" onClick={closeModal} disabled={isSubmitting} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
-                <button type="submit" form="productForm" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm disabled:opacity-70">
+              <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end gap-3 shrink-0">
+                <button type="button" onClick={closeModal} disabled={isSubmitting} className="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button type="submit" form="productForm" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-70">
                   {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Produk'}
                 </button>

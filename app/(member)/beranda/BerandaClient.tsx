@@ -356,6 +356,7 @@ export default function BerandaClient() {
       </section>
 
       {/* 6. ARTIKEL & JURNAL TERBARU */}
+      {/* 6. ARTIKEL & JURNAL TERBARU */}
       <section className="bg-white border-t border-slate-200 py-16 md:py-24 w-full min-w-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full min-w-0">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 text-center md:text-left w-full min-w-0">
@@ -383,7 +384,8 @@ export default function BerandaClient() {
           ) : articles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
               {articles.map((article) => (
-                <Link href={`/articles/read?slug=${article.slug}`} key={article.id} className="group flex flex-col gap-5 min-w-0 w-full">
+                // 🔥 PERBAIKAN: Mengubah format Link agar sesuai dengan Dynamic Routing
+                <Link href={`/articles/${article.slug}`} key={article.id} className="group flex flex-col gap-5 min-w-0 w-full">
                   
                   <div 
                     className="relative w-full bg-slate-100 rounded-[2rem] overflow-hidden border border-slate-200 shadow-sm group-hover:shadow-lg transition-all duration-300 shrink-0 block"

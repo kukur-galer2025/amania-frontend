@@ -50,6 +50,10 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [pageResults, setPageResults] = useState<any[]>([]);
   const [eventResults, setEventResults] = useState<any[]>([]);
   const [articleResults, setArticleResults] = useState<any[]>([]);
+  
+  // 🔥 STATE BARU UNTUK E-PRODUK 🔥
+  const [eProductResults, setEProductResults] = useState<any[]>([]);
+  
   const searchRef = useRef<HTMLDivElement>(null);
 
   const [logoutState, setLogoutState] = useState<{ isLoggingOut: boolean, msg: string, type: 'success' | 'error' }>({
@@ -175,7 +179,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setShowSearchDropdown(false);
-      setPageResults([]); setEventResults([]); setArticleResults([]);
+      // 🔥 RESET SEMUA STATE PENCARIAN 🔥
+      setPageResults([]); setEventResults([]); setArticleResults([]); setEProductResults([]);
       return;
     }
 
@@ -194,11 +199,13 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         if (res.ok && json.success) {
           setEventResults(json.events || []);
           setArticleResults(json.articles || []);
+          // 🔥 TANGKAP HASIL PENCARIAN E-PRODUK 🔥
+          setEProductResults(json.eproducts || []);
         } else {
-          setEventResults([]); setArticleResults([]);
+          setEventResults([]); setArticleResults([]); setEProductResults([]);
         }
       } catch (error) {
-        setEventResults([]); setArticleResults([]);
+        setEventResults([]); setArticleResults([]); setEProductResults([]);
       } finally {
         setIsSearching(false);
       }
@@ -232,9 +239,10 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex font-sans overflow-x-hidden relative">
+    // 🔥 PERBAIKAN: Menghapus overflow-x-hidden agar layout sticky tidak tergencet 🔥
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex font-sans relative w-full">
       
-      {/* 🔥 OVERLAY ANIMASI LOGOUT FULL SCREEN 🔥 */}
+      {/* OVERLAY ANIMASI LOGOUT FULL SCREEN */}
       <AnimatePresence>
         {logoutState.isLoggingOut && (
           <motion.div 
@@ -442,7 +450,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                     className="absolute right-0 top-12 w-[280px] sm:w-[320px] bg-white p-3 rounded-xl shadow-xl border border-slate-200 z-50 md:hidden"
                   >
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
                       <input 
                         id="mobile-search"
                         type="text" 
@@ -472,6 +480,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                     </div>
                     
                     <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
+                      
+                      {/* 1. HALAMAN SISTEM */}
                       {pageResults.length > 0 && (
                         <div className="p-2">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
@@ -500,21 +510,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {isSearching && eventResults.length === 0 && articleResults.length === 0 && (
-                         <div className="p-6 flex items-center justify-center text-slate-400 gap-2">
-                           <Loader2 size={16} className="animate-spin text-indigo-500" />
-                           <span className="text-[11px] font-medium">Menyinkronkan data...</span>
-                         </div>
-                      )}
-
-                      {!isSearching && pageResults.length === 0 && eventResults.length === 0 && articleResults.length === 0 && (
-                        <div className="p-8 flex flex-col items-center justify-center text-center text-slate-400">
-                          <Search size={28} className="mb-3 text-slate-300" />
-                          <p className="text-xs font-medium text-slate-600">Tidak ada hasil untuk "{searchQuery}"</p>
-                          <p className="text-[10px] mt-1 text-slate-500">Coba gunakan kata kunci yang lebih umum.</p>
-                        </div>
-                      )}
-
+                      {/* 2. KATALOG PROGRAM / EVENT */}
                       {eventResults.length > 0 && (
                         <div className="p-2 border-t border-slate-100">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
@@ -543,6 +539,40 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
+                      {/* 3. 🔥 KATALOG E-PRODUK PREMIUM 🔥 */}
+                      {eProductResults.length > 0 && (
+                        <div className="p-2 border-t border-slate-100">
+                          <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
+                            <ShoppingCart size={12}/> E-Produk Premium
+                          </p>
+                          <div className="mt-1 space-y-0.5">
+                            {eProductResults.map((ep) => (
+                              <Link 
+                                key={ep.id} href={ep.link} 
+                                onClick={() => { setShowSearchDropdown(false); setShowMobileSearchInput(false); setSearchQuery(''); }}
+                                className="flex items-center gap-3.5 p-3 rounded-lg hover:bg-slate-50 transition-colors group/item"
+                              >
+                                <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 shrink-0 border border-slate-200 shadow-inner" style={{ aspectRatio: '2 / 3' }}>
+                                  {ep.image ? (
+                                    <img src={`${STORAGE_URL}/${ep.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform" alt={ep.title} />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-300"><FileText size={20} /></div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-semibold text-slate-900 leading-tight truncate group-hover/item:text-amber-600 transition-colors">{ep.title}</h4>
+                                  <p className="text-[9px] font-medium text-slate-500 flex items-center gap-1.5 mt-1">
+                                    <User size={10} className="text-slate-400 shrink-0"/> <span className="truncate">{ep.author_name}</span> • <span className={`font-bold ${ep.formatted_price === 'Gratis' ? 'text-emerald-500' : 'text-slate-700'}`}>{ep.formatted_price}</span>
+                                  </p>
+                                </div>
+                                <ArrowRight size={14} className="text-slate-300 opacity-0 group-hover/item:opacity-100 group-hover/item:text-amber-500 group-hover/item:translate-x-0.5 transition-all shrink-0" />
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 4. ARTIKEL & BERITA */}
                       {articleResults.length > 0 && (
                         <div className="p-2 border-t border-slate-100">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
@@ -561,7 +591,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                                 <div className="flex-1 min-w-0">
                                   <h4 className="text-xs font-semibold text-slate-900 leading-tight truncate group-hover/item:text-rose-600 transition-colors">{article.title}</h4>
                                   <p className="text-[9px] font-medium text-slate-500 flex items-center gap-1 mt-1">
-                                    <User size={10} className="text-slate-400 shrink-0"/> {article.author}
+                                    <User size={10} className="text-slate-400 shrink-0"/> {article.author_name}
                                   </p>
                                 </div>
                                 <ArrowRight size={14} className="text-slate-300 opacity-0 group-hover/item:opacity-100 group-hover/item:text-rose-500 group-hover/item:translate-x-0.5 transition-all shrink-0" />
@@ -570,6 +600,24 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                           </div>
                         </div>
                       )}
+
+                      {/* TAMPILAN LOADING */}
+                      {isSearching && eventResults.length === 0 && articleResults.length === 0 && eProductResults.length === 0 && (
+                         <div className="p-6 flex items-center justify-center text-slate-400 gap-2">
+                           <Loader2 size={16} className="animate-spin text-indigo-500" />
+                           <span className="text-[11px] font-medium">Menyinkronkan data...</span>
+                         </div>
+                      )}
+
+                      {/* TAMPILAN KOSONG */}
+                      {!isSearching && pageResults.length === 0 && eventResults.length === 0 && articleResults.length === 0 && eProductResults.length === 0 && (
+                        <div className="p-8 flex flex-col items-center justify-center text-center text-slate-400">
+                          <Search size={28} className="mb-3 text-slate-300" />
+                          <p className="text-xs font-medium text-slate-600">Tidak ada hasil untuk "{searchQuery}"</p>
+                          <p className="text-[10px] mt-1 text-slate-500">Coba gunakan kata kunci yang lebih umum.</p>
+                        </div>
+                      )}
+
                     </div>
                   </motion.div>
                 )}
@@ -646,8 +694,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           </div>
         </header>
 
-        {/* 🔥 PERUBAHAN: KEMBALIKAN PEMBATAS MAX-WIDTH AGAR RAPI & PROPORSIONAL 🔥 */}
-        <div className="flex-1 w-full py-6 md:py-8 overflow-x-hidden">
+        <div className="flex-1 w-full py-6 md:py-8">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
             {children}
           </div>

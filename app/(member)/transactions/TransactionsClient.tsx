@@ -66,7 +66,7 @@ export default function TransactionsClient() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
 
-  // 🔥 FUNGSI BARU UNTUK FORMAT TANGGAL + JAM 🔥
+  // 🔥 FUNGSI UNTUK FORMAT TANGGAL + JAM 🔥
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleString('id-ID', {
@@ -182,7 +182,6 @@ export default function TransactionsClient() {
                       
                       <div className="col-span-1 md:col-span-5 flex flex-col w-full">
                         <div className="flex items-center gap-2 mb-1.5">
-                          {/* 🔥 WAKTU TRANSAKSI DENGAN JAM 🔥 */}
                           <span className="text-[9px] md:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                             {formatDateTime(trx.created_at)}
                           </span>
@@ -275,7 +274,6 @@ export default function TransactionsClient() {
                       
                       <div className="col-span-1 md:col-span-5 flex flex-col w-full">
                         <div className="flex items-center gap-2 mb-1.5">
-                          {/* 🔥 WAKTU TRANSAKSI DENGAN JAM 🔥 */}
                           <span className="text-[9px] md:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                             {formatDateTime(trx.created_at)}
                           </span>
@@ -312,14 +310,27 @@ export default function TransactionsClient() {
                             </span>
                           </div>
 
-                          <div className="md:col-span-2 flex justify-end w-full">
+                          <div className="md:col-span-2 flex justify-end w-full gap-2">
                             {trx.status === 'PAID' || trx.status === 'success' || trx.status === 'verified' ? (
-                              <Link 
-                                href={`/e-products/${trx.product?.slug}`}
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm shadow-indigo-600/20 shrink-0"
-                              >
-                                <DownloadCloud size={14} /> Akses
-                              </Link>
+                              <>
+                                {/* 🔥 TOMBOL E-RECEIPT 🔥 */}
+                                {trx.checkout_url && (
+                                  <a 
+                                    href={trx.checkout_url} target="_blank" rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm shrink-0"
+                                    title="Lihat Struk Pembayaran"
+                                  >
+                                    <ReceiptText size={14} /> <span className="hidden xl:inline">E-Receipt</span>
+                                  </a>
+                                )}
+                                
+                                <Link 
+                                  href={`/e-products/${trx.product?.slug}`}
+                                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm shadow-indigo-600/20 shrink-0"
+                                >
+                                  <DownloadCloud size={14} /> Akses
+                                </Link>
+                              </>
                             ) : trx.checkout_url && trx.status !== 'EXPIRED' ? (
                                <a 
                                  href={trx.checkout_url} target="_blank" rel="noopener noreferrer"

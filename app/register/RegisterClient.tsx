@@ -7,11 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Loader2, Eye, EyeOff, Mail, Lock, 
   User, Sparkles, ArrowRight, AlertTriangle, 
-  Check, Video, BookOpen, Award
+  Check, Video, BookOpen, Award, Phone
 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api';
 
 export default function RegisterClient() {
   const router = useRouter();
@@ -22,8 +22,9 @@ export default function RegisterClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   
+  // 🔥 PERBAIKAN: Menambahkan 'phone' pada state formData
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', password_confirmation: ''
+    name: '', email: '', phone: '', password: '', password_confirmation: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,7 +42,6 @@ export default function RegisterClient() {
     setError('');
 
     try {
-      // 🔥 PENGGUNAAN APIFETCH 🔥
       const res = await apiFetch('/register', {
         method: 'POST',
         body: JSON.stringify(formData)
@@ -71,7 +71,6 @@ export default function RegisterClient() {
       const loadToast = toast.loading("Memproses akun Google...");
 
       try {
-        // 🔥 PENGGUNAAN APIFETCH 🔥
         const res = await apiFetch('/auth/google', {
           method: 'POST',
           body: JSON.stringify({ token: tokenResponse.access_token }),
@@ -155,7 +154,7 @@ export default function RegisterClient() {
 
           <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8">
             <hr className="flex-1 border-slate-200" />
-            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">ATAU EMAIL</span>
+            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">ATAU MANUAL</span>
             <hr className="flex-1 border-slate-200" />
           </div>
 
@@ -167,13 +166,24 @@ export default function RegisterClient() {
                 <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Nama Anda" className="w-full bg-white border border-slate-300 md:border-slate-200 rounded-xl py-2.5 md:py-3 pl-10 md:pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-600 transition-all" />
               </div>
             </div>
-            <div>
-              <label className="block text-[10px] md:text-xs font-bold text-slate-700 mb-1.5 md:mb-2 uppercase tracking-wide">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="nama@email.com" className="w-full bg-white border border-slate-300 md:border-slate-200 rounded-xl py-2.5 md:py-3 pl-10 md:pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-600 transition-all" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+              <div>
+                <label className="block text-[10px] md:text-xs font-bold text-slate-700 mb-1.5 md:mb-2 uppercase tracking-wide">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="nama@email.com" className="w-full bg-white border border-slate-300 md:border-slate-200 rounded-xl py-2.5 md:py-3 pl-10 md:pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-600 transition-all" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] md:text-xs font-bold text-slate-700 mb-1.5 md:mb-2 uppercase tracking-wide">Nomor HP</label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required placeholder="08123..." className="w-full bg-white border border-slate-300 md:border-slate-200 rounded-xl py-2.5 md:py-3 pl-10 md:pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-600 transition-all" />
+                </div>
               </div>
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
               <div>
                 <label className="block text-[10px] md:text-xs font-bold text-slate-700 mb-1.5 md:mb-2 uppercase tracking-wide">Sandi</label>
@@ -191,6 +201,7 @@ export default function RegisterClient() {
                 </div>
               </div>
             </div>
+
             <button type="submit" disabled={loading || isGoogleLoading || showSuccessOverlay} className="w-full bg-indigo-600 text-white py-3 md:py-3.5 rounded-xl text-sm md:text-base font-bold hover:bg-indigo-700 transition-all shadow-md flex items-center justify-center gap-2 mt-2 md:mt-4">
               {loading ? <Loader2 size={18} className="animate-spin" /> : 'Buat Akun Sekarang'}
               {!loading && <ArrowRight size={18} />}
@@ -208,7 +219,6 @@ export default function RegisterClient() {
 
       {/* KOLOM KANAN: VISUAL */}
       <div className="hidden lg:flex w-1/2 bg-slate-950 relative items-center justify-center overflow-hidden">
-        {/* 🔥 GAMBAR BACKGROUND DARI HASIL PENCARIAN AI (Sama dengan Login) 🔥 */}
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-30" 
           style={{ backgroundImage: `url('http://googleusercontent.com/image_collection/image_retrieval/13535098923783399998')` }}
