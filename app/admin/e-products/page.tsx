@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Search, Edit, Trash2, Image as ImageIcon, 
   FileText, CheckCircle2, XCircle, Loader2, PackageSearch, 
-  Eye, EyeOff, UploadCloud, Link as LinkIcon, Layers, AlertCircle, Info, User
+  Eye, EyeOff, UploadCloud, Link as LinkIcon, Layers, AlertCircle, Info, User,AlertTriangle,CreditCard,SmartphoneNfc,Store
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
