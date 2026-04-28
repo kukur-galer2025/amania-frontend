@@ -98,18 +98,14 @@ const processQuillHtml = (html: string): string => {
 // ─────────────────────────────────────────────────────────────────────────────
 const stripHtmlToText = (html: string) => {
   if (!html) return '';
-  // Ubah <br> dan </p> menjadi baris baru (enter) agar kalimat tidak menempel
   let text = html.replace(/<br\s*[\/]?>/gi, '\n').replace(/<\/p>/gi, '\n\n');
-  // Hapus semua tag HTML yang tersisa (seperti <strong>, <em>, dll)
   text = text.replace(/<[^>]*>?/gm, '');
-  // Ubah entitas HTML umum kembali menjadi karakter aslinya
   text = text.replace(/&nbsp;/g, ' ')
              .replace(/&amp;/g, '&')
              .replace(/&lt;/g, '<')
              .replace(/&gt;/g, '>')
              .replace(/&quot;/g, '"')
              .replace(/&#39;/g, "'");
-  // Bersihkan enter berlebih di awal dan akhir
   return text.trim();
 };
 
@@ -163,7 +159,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
-  // 🔥 UPDATE: handleShare Hybrid + Full Text Deskripsi
   const handleShare = async () => {
     if (isSharing) return;
     setIsSharing(true);
@@ -171,15 +166,12 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     const shareUrl = window.location.href;
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
     
-    // 1. Ekstrak dan bersihkan seluruh deskripsi dari HTML
     const fullDesc = stripHtmlToText(eventData?.description || '');
 
-    // 2. Susun Teks Caption Final (Tanpa dipotong)
     const shareIntro = `*Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara.*\n\n${fullDesc}\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
     const captionText = `${shareIntro}${shareUrl}`;
 
     try {
-      // Trik Ampuh: Otomatis copy text ke clipboard terlebih dahulu
       try {
         await navigator.clipboard.writeText(captionText);
       } catch (err) {
@@ -199,12 +191,11 @@ export default function EventDetailClient({ slug }: { slug: string }) {
             const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
 
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              // Berikan instruksi ke user karena WA Desktop/Web membuang teksnya
               toast.success('Teks & Deskripsi disalin! Silakan "Paste/Tempel" di kolom pesan.', { duration: 6000, icon: '📋' });
 
               await navigator.share({
                 title: shareTitle,
-                text: captionText, // Teks caption lengkap dengan seluruh deskripsi
+                text: captionText, 
                 files: [file]
               });
               sharedWithImage = true;
@@ -214,7 +205,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           }
         }
 
-        // Jika gambar gagal dimuat, bagikan teksnya saja
         if (!sharedWithImage) {
           await navigator.share({ title: shareTitle, text: captionText });
           toast.success('Berhasil membagikan tautan!');
@@ -571,7 +561,21 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="order-1 lg:order-2 w-full lg:sticky lg:top-6 lg:self-start">
+        {/* 🔥 UPDATE: Wrapper utama ditambahkan flex-col dan gap-6 untuk memberi jarak antara foto & container tiket */}
+        <div className="order-1 lg:order-2 w-full lg:sticky lg:top-6 lg:self-start flex flex-col gap-6">
+          
+          {/* 🔥 TAMBAHAN: FOTO EVENT SECARA KESELURUHAN (FULL POSTER) */}
+          {eventData.image && (
+            <div className="w-full bg-slate-50 rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-lg relative p-2">
+              <img
+                src={`${STORAGE_URL}/${eventData.image}`}
+                alt="Poster Program"
+                className="w-full h-auto max-h-[600px] object-contain rounded-[2rem]"
+              />
+            </div>
+          )}
+
+          {/* CONTAINER TIKET & PENYELENGGARA (Bawaan) */}
           <div className="bg-white border border-slate-200 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-10 opacity-50" />
 
