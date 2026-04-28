@@ -15,8 +15,7 @@ import { apiFetch } from '@/app/utils/api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // processQuillHtml — v3
-//
-// Membersihkan HTML dari Quill agar kata tidak terpotong di tengah.
+// Membersihkan HTML dari Quill agar kata tidak terpotong di tengah untuk Tampilan Web.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BASE_P_STYLE =
@@ -35,12 +34,10 @@ const processQuillHtml = (html: string): string => {
 
   let r = html.replace(/\r\n?/g, '\n');
 
-  // 🔥 FIX UTAMA: HAPUS KARAKTER INVISIBLE
-  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); // zero-width chars
-  r = r.replace(/&shy;/gi, '');                // soft hyphen
-  r = r.replace(/&nbsp;/gi, ' ');              // normalisasi spasi
+  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); 
+  r = r.replace(/&shy;/gi, '');                
+  r = r.replace(/&nbsp;/gi, ' ');              
 
-  // ── A + B: KATA TERPOTONG DI </p><p> ──────────────────────────────
   {
     let prev = '';
     while (prev !== r) {
@@ -55,7 +52,6 @@ const processQuillHtml = (html: string): string => {
     }
   }
 
-  // ── C: KATA TERPOTONG DI <br> ─────────────────────────────────────
   {
     let prev = '';
     while (prev !== r) {
@@ -70,16 +66,12 @@ const processQuillHtml = (html: string): string => {
     }
   }
 
-  // ── D: KATA TERPOTONG OLEH \n ─────────────────────────────────────
   r = r.replace(
     new RegExp(`([${WC}])[ \\t]*\\n+[ \\t]*([${WC}])`, 'g'),
     '$1$2'
   );
 
-  // ── E: FIX DOUBLE SPACE (opsional tapi bagus)
   r = r.replace(/ {2,}/g, ' ');
-
-  // ── F: STYLE PARAGRAF ─────────────────────────────────────────────
 
   r = r.replace(
     /<p><\/p>/g,
@@ -102,12 +94,31 @@ const processQuillHtml = (html: string): string => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// HELPER CONVERT HTML TO PLAIN TEXT (Khusus untuk WhatsApp Share)
+// ─────────────────────────────────────────────────────────────────────────────
+const stripHtmlToText = (html: string) => {
+  if (!html) return '';
+  // Ubah <br> dan </p> menjadi baris baru (enter) agar kalimat tidak menempel
+  let text = html.replace(/<br\s*[\/]?>/gi, '\n').replace(/<\/p>/gi, '\n\n');
+  // Hapus semua tag HTML yang tersisa (seperti <strong>, <em>, dll)
+  text = text.replace(/<[^>]*>?/gm, '');
+  // Ubah entitas HTML umum kembali menjadi karakter aslinya
+  text = text.replace(/&nbsp;/g, ' ')
+             .replace(/&amp;/g, '&')
+             .replace(/&lt;/g, '<')
+             .replace(/&gt;/g, '>')
+             .replace(/&quot;/g, '"')
+             .replace(/&#39;/g, "'");
+  // Bersihkan enter berlebih di awal dan akhir
+  return text.trim();
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // HELPER ZONA WAKTU (ANTI TIMEZONE HELL)
 // ─────────────────────────────────────────────────────────────────────────────
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
   let safeStr = dateStr.replace(' ', 'T');
-  // Jika string dari Laravel tidak memiliki 'Z' atau '+', anggap sebagai WIB (+07:00)
   if (!safeStr.includes('Z') && !safeStr.includes('+')) {
     safeStr += '+07:00';
   }
@@ -152,20 +163,26 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
-  // 🔥 UPDATE: handleShare Hybrid (Auto Copy Text + Native Share Image)
+  // 🔥 UPDATE: handleShare Hybrid + Extrak Deskripsi dari Database
   const handleShare = async () => {
     if (isSharing) return;
     setIsSharing(true);
 
     const shareUrl = window.location.href;
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
-    const shareIntro = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:\n\n`;
     
-    // GABUNGKAN teks pengantar dan URL
+    // 1. Ekstrak dan bersihkan deskripsi dari HTML
+    const plainDesc = stripHtmlToText(eventData?.description || '');
+    
+    // 2. Potong deskripsi agar tidak terlalu panjang di WA (maks 250 karakter)
+    const shortDesc = plainDesc.length > 250 ? plainDesc.substring(0, 250) + '...' : plainDesc;
+
+    // 3. Susun Teks Caption Final
+    const shareIntro = `*Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara.*\n\n${shortDesc}\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
     const captionText = `${shareIntro}${shareUrl}`;
 
     try {
-      // 1. Trik Ampuh: Otomatis copy text ke clipboard terlebih dahulu
+      // Trik Ampuh: Otomatis copy text ke clipboard terlebih dahulu
       try {
         await navigator.clipboard.writeText(captionText);
       } catch (err) {
@@ -185,12 +202,12 @@ export default function EventDetailClient({ slug }: { slug: string }) {
             const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
 
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              // Berikan instruksi ke user karena WA sering membuang teksnya
-              toast.success('Teks disalin! Silakan "Paste/Tempel" di kolom pesan WhatsApp.', { duration: 6000, icon: '📋' });
+              // Berikan instruksi ke user karena WA Desktop/Web membuang teksnya
+              toast.success('Teks & Deskripsi disalin! Silakan "Paste/Tempel" di kolom pesan.', { duration: 6000, icon: '📋' });
 
               await navigator.share({
                 title: shareTitle,
-                text: captionText, // Tetap dikirim untuk device/app yang support
+                text: captionText, // Teks caption lengkap dengan deskripsi
                 files: [file]
               });
               sharedWithImage = true;
@@ -200,12 +217,13 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           }
         }
 
+        // Jika gambar gagal dimuat, bagikan teksnya saja
         if (!sharedWithImage) {
           await navigator.share({ title: shareTitle, text: captionText });
           toast.success('Berhasil membagikan tautan!');
         }
       } else {
-        toast.success('Teks dan tautan disalin ke clipboard!');
+        toast.success('Teks deskripsi dan tautan disalin ke clipboard!');
       }
     } catch (error: any) {
       if (error.name !== 'AbortError') {
