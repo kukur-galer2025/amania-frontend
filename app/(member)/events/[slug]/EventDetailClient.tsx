@@ -35,10 +35,12 @@ const processQuillHtml = (html: string): string => {
 
   let r = html.replace(/\r\n?/g, '\n');
 
-  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); 
-  r = r.replace(/&shy;/gi, '');                
-  r = r.replace(/&nbsp;/gi, ' ');              
+  // 🔥 FIX UTAMA: HAPUS KARAKTER INVISIBLE
+  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); // zero-width chars
+  r = r.replace(/&shy;/gi, '');                // soft hyphen
+  r = r.replace(/&nbsp;/gi, ' ');              // normalisasi spasi
 
+  // ── A + B: KATA TERPOTONG DI </p><p> ──────────────────────────────
   {
     let prev = '';
     while (prev !== r) {
@@ -53,6 +55,7 @@ const processQuillHtml = (html: string): string => {
     }
   }
 
+  // ── C: KATA TERPOTONG DI <br> ─────────────────────────────────────
   {
     let prev = '';
     while (prev !== r) {
@@ -67,12 +70,16 @@ const processQuillHtml = (html: string): string => {
     }
   }
 
+  // ── D: KATA TERPOTONG OLEH \n ─────────────────────────────────────
   r = r.replace(
     new RegExp(`([${WC}])[ \\t]*\\n+[ \\t]*([${WC}])`, 'g'),
     '$1$2'
   );
 
+  // ── E: FIX DOUBLE SPACE (opsional tapi bagus)
   r = r.replace(/ {2,}/g, ' ');
+
+  // ── F: STYLE PARAGRAF ─────────────────────────────────────────────
 
   r = r.replace(
     /<p><\/p>/g,
@@ -95,11 +102,12 @@ const processQuillHtml = (html: string): string => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER ZONA WAKTU
+// HELPER ZONA WAKTU (ANTI TIMEZONE HELL)
 // ─────────────────────────────────────────────────────────────────────────────
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
   let safeStr = dateStr.replace(' ', 'T');
+  // Jika string dari Laravel tidak memiliki 'Z' atau '+', anggap sebagai WIB (+07:00)
   if (!safeStr.includes('Z') && !safeStr.includes('+')) {
     safeStr += '+07:00';
   }
@@ -114,7 +122,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('desc');
   const [selectedTier, setSelectedTier] = useState<'basic' | 'premium'>('basic');
-  const [isSharing, setIsSharing] = useState(false); // State untuk loading share button
+  const [isSharing, setIsSharing] = useState(false);
 
   const userData =
     typeof window !== 'undefined'
@@ -144,7 +152,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
-  // 🔥 UPDATE: handleShare dengan Native File Sharing untuk melampirkan gambar poster
+  // 🔥 UPDATE: handleShare dengan perbaikan Caption Foto
   const handleShare = async () => {
     if (isSharing) return;
     setIsSharing(true);
@@ -152,29 +160,30 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     const shareUrl = window.location.href;
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
     const shareText = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:`;
+    
+    // GABUNGKAN teks dan URL agar menjadi Caption yang utuh
+    const captionText = `${shareText}\n\n${shareUrl}`;
 
     try {
       if (navigator.share) {
         let sharedWithImage = false;
 
-        // Coba fetch gambar dan konversi jadi File object jika device support
+        // Coba fetch gambar dan konversi jadi File object
         if (eventData?.image) {
           try {
             const imgUrl = `${STORAGE_URL}/${eventData.image}`;
             const response = await fetch(imgUrl);
             const blob = await response.blob();
             
-            // Ekstrak ekstensi dari tipe MIME
             const ext = blob.type.split('/')[1] || 'jpg';
             const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
 
-            // Cek apakah browser mendukung share tipe file tersebut
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               await navigator.share({
                 title: shareTitle,
-                text: shareText,
-                url: shareUrl,
-                files: [file] // Mengirim gambar sebagai lampiran
+                text: captionText, // 🔥 Kirim teks gabungan di sini
+                // url: shareUrl,  // 🔥 HAPUS properti URL agar aplikasi (WA) tidak error/membuang teksnya
+                files: [file]
               });
               toast.success('Berhasil membagikan poster dan tautan!');
               sharedWithImage = true;
@@ -184,18 +193,20 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           }
         }
 
-        // Fallback jika tidak bisa melampirkan gambar (hanya bagi text & url)
+        // Fallback jika tidak bisa melampirkan gambar
         if (!sharedWithImage) {
-          await navigator.share({ title: shareTitle, text: `${shareText}\n\n`, url: shareUrl });
+          await navigator.share({ 
+            title: shareTitle, 
+            text: captionText // Gunakan teks gabungan juga untuk fallback
+          });
           toast.success('Berhasil membagikan tautan!');
         }
       } else {
-        // Fallback untuk desktop PC lama / browser yang tidak dukung Web Share API
-        await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+        // Fallback untuk copy paste biasa
+        await navigator.clipboard.writeText(captionText);
         toast.success('Tautan disalin ke clipboard!');
       }
     } catch (error: any) {
-      // Abaikan error jika user sengaja mencancel dialog share (AbortError)
       if (error.name !== 'AbortError') {
         toast.error('Terjadi kesalahan saat membagikan.');
       }
