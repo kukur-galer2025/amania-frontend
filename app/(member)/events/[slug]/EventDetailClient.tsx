@@ -102,6 +102,19 @@ const processQuillHtml = (html: string): string => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// HELPER ZONA WAKTU (ANTI TIMEZONE HELL)
+// ─────────────────────────────────────────────────────────────────────────────
+const parseSafeDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  let safeStr = dateStr.replace(' ', 'T');
+  // Jika string dari Laravel tidak memiliki 'Z' atau '+', anggap sebagai WIB (+07:00)
+  if (!safeStr.includes('Z') && !safeStr.includes('+')) {
+    safeStr += '+07:00';
+  }
+  return new Date(safeStr);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventDetailClient({ slug }: { slug: string }) {
   const router = useRouter();
@@ -223,8 +236,11 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     );
 
   const isFree = eventData.basic_price === 0;
-  const eventDate = new Date(eventData.start_time);
-  const isPast = new Date(eventData.end_time) < new Date();
+  
+  // 🔥 Menggunakan parser aman agar tidak terjadi pergeseran jam
+  const eventDate = parseSafeDate(eventData.start_time);
+  const isPast = parseSafeDate(eventData.end_time) < new Date();
+  
   const isSuperadmin = !eventData.organizer || eventData.organizer.role === 'superadmin';
   const organizerName = isSuperadmin ? 'Amania Official' : eventData.organizer.name;
   const organizerAvatar =
@@ -232,15 +248,25 @@ export default function EventDetailClient({ slug }: { slug: string }) {
       ? `${STORAGE_URL}/${eventData.organizer.avatar}`
       : null;
 
-  // 🔥 Helper untuk memformat Start Time - End Time secara elegan
+  // 🔥 FORMAT WAKTU MULAI - SELESAI (DIPAKSA WIB)
   const formatTimeRange = (start: string, end: string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    
-    const startTimeStr = startDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-    const endTimeStr = endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-    
-    return `${startTimeStr} - ${endTimeStr}`;
+    if (!start || !end) return '';
+    try {
+      const startDate = parseSafeDate(start);
+      const endDate = parseSafeDate(end);
+      
+      const startTimeStr = startDate.toLocaleTimeString('id-ID', { 
+        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' 
+      });
+      const endTimeStr = endDate.toLocaleTimeString('id-ID', { 
+        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' 
+      });
+      
+      // Mengubah titik menjadi titik dua (08.15 -> 08:15)
+      return `${startTimeStr.replace(/\./g, ':')} - ${endTimeStr.replace(/\./g, ':')}`;
+    } catch {
+      return '';
+    }
   };
 
   const processedDescription = processQuillHtml(eventData.description || '');
@@ -325,8 +351,9 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 <Calendar size={16} />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal Pelaksanaan</p>
+              {/* 🔥 TANGGAL DIPAKSA WIB JUGA 🔥 */}
               <p className="text-sm font-bold text-slate-900">
-                {eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                {eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
               </p>
             </div>
             <div className="bg-white p-4 sm:p-5 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col gap-1.5">
@@ -334,7 +361,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 <Clock size={16} />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Waktu Akses</p>
-              {/* 🔥 Tampilan Waktu Diperbarui (Start - End) 🔥 */}
+              {/* 🔥 Tampilan Start - End Terpasang Di Sini 🔥 */}
               <p className="text-sm font-bold text-slate-900 truncate">
                 {formatTimeRange(eventData.start_time, eventData.end_time)} WIB
               </p>
@@ -639,25 +666,29 @@ export default function EventDetailClient({ slug }: { slug: string }) {
       </div>
 
       <style jsx global>{`
-        /* ── q-content: wrapper CSS sebagai fallback ───────────────
-           Inline style dari processQuillHtml() sudah menangani semua
-           kasus <p>. CSS di sini hanya untuk elemen SELAIN <p>.
-        ─────────────────────────────────────────────────────────── */
         .q-content {
           font-size: 0.95rem;
           line-height: 1.7;
           color: #334155;
-          /* Hanya pecah kata jika BENAR-BENAR tidak muat (URL panjang, dsb) */
           overflow-wrap: break-word;
           word-break: normal;
           hyphens: none;
           -webkit-hyphens: none;
+          white-space: normal;
         }
 
-        /* Safety net — inline style dari JS akan menang atas ini */
-        .q-content p {
+        .q-content p,
+        .q-content span,
+        .q-content li,
+        .q-content h1,
+        .q-content h2,
+        .q-content h3,
+        .q-content h4 {
           margin: 0 !important;
-          padding: 0;
+          word-break: normal !important;
+          hyphens: none !important;
+          -webkit-hyphens: none !important;
+          white-space: normal !important;
         }
 
         /* ── Formatting ── */
@@ -667,15 +698,15 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         .q-content s                     { text-decoration: line-through; }
 
         /* ── Headings ── */
-        .q-content h1 { font-size:1.75rem; font-weight:900; color:#0f172a; margin:1.5rem 0 0.5rem; line-height:1.3; }
-        .q-content h2 { font-size:1.5rem;  font-weight:800; color:#0f172a; margin:1.25rem 0 0.4rem; line-height:1.35; }
-        .q-content h3 { font-size:1.25rem; font-weight:700; color:#0f172a; margin:1rem 0 0.35rem; line-height:1.4; }
-        .q-content h4 { font-size:1.1rem;  font-weight:700; color:#1e293b; margin:0.75rem 0 0.25rem; }
+        .q-content h1 { font-size:1.75rem; font-weight:900; color:#0f172a; margin:1.5rem 0 0.5rem !important; line-height:1.3; }
+        .q-content h2 { font-size:1.5rem;  font-weight:800; color:#0f172a; margin:1.25rem 0 0.4rem !important; line-height:1.35; }
+        .q-content h3 { font-size:1.25rem; font-weight:700; color:#0f172a; margin:1rem 0 0.35rem !important; line-height:1.4; }
+        .q-content h4 { font-size:1.1rem;  font-weight:700; color:#1e293b; margin:0.75rem 0 0.25rem !important; }
 
         /* ── Lists ── */
         .q-content ul { padding-left:1.5em; margin:0; list-style-type:disc; }
         .q-content ol { padding-left:1.5em; margin:0; list-style-type:decimal; }
-        .q-content li { margin-bottom:0.2rem; }
+        .q-content li { margin-bottom:0.2rem !important; }
 
         /* ── Blockquote & Code ── */
         .q-content blockquote {

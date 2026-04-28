@@ -6,7 +6,8 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { 
   Calendar, MapPin, Search, AlertCircle, 
   Image as ImageIcon, Sparkles, 
-  ChevronLeft, ChevronRight, User, Gem, Zap, CheckCircle2, ShieldCheck, ArrowRight
+  ChevronLeft, ChevronRight, User, Gem, Zap, CheckCircle2, ShieldCheck, ArrowRight,
+  MonitorPlay, BookOpen
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 
@@ -115,46 +116,86 @@ export default function EventsClient() {
   return (
     <div className="font-sans pb-12 w-full">
       
-      {/* ════════ HERO SECTION KOTAK ════════ */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 w-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 rounded-[2rem] md:rounded-[3rem] shadow-2xl mb-12">
+      {/* ════════ HERO SECTION KOTAK (LUXURY REDESIGN) ════════ */}
+      <section className="relative pt-20 pb-24 md:pt-32 md:pb-32 w-full flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0c] rounded-[2rem] md:rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] mb-12 border border-white/5">
+        
+        {/* Background & Overlays */}
         <div className="absolute inset-0 z-0">
+          {/* 🔥 GAMBAR BACKGROUND BARU: Suasana kelas/diskusi profesional yang estetik 🔥 */}
           <img 
-            src="https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?auto=format&fit=crop&q=80&w=2070" 
-            alt="Hero Background" 
-            className="w-full h-full object-cover opacity-30 mix-blend-luminosity" 
+            src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=2070" 
+            alt="Webinar Hero Background" 
+            className="w-full h-full object-cover opacity-[0.15] mix-blend-screen scale-105" 
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/20 blur-[100px] rounded-full pointer-events-none" />
+          {/* Deep dark gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0c]/80 via-[#0a0a0c]/60 to-[#0a0a0c]" />
+          
+          {/* Luxury Ambient Glows */}
+          <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-indigo-500/15 via-amber-500/10 to-transparent blur-[120px] rounded-full pointer-events-none" />
         </div>
 
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center w-full">
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 border border-indigo-400/20 rounded-full text-indigo-300 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-lg">
-             <Sparkles size={14} className="text-amber-400" /> Amania Masterclass
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center w-full">
+          
+          {/* Premium VIP Badge */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} 
+            className="inline-flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/20 rounded-full text-amber-300 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(251,191,36,0.1)]"
+          >
+             <Gem size={14} className="text-amber-400" /> Amania Masterclass
           </motion.div>
           
-          <motion.h1 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-[1.2] drop-shadow-2xl">
-            Investasi Terbaik Adalah Edukasi.
-          </motion.h1>
+          {/* Luxury Typography Headline */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }} className="relative mb-6">
+            {/* Dekorasi Ikon Melayang Kiri */}
+            <motion.div 
+              animate={{ y: [0, -10, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} 
+              className="absolute -top-6 -left-4 md:left-10 text-white/20 hidden md:block"
+            >
+              <MonitorPlay size={40} strokeWidth={1} />
+            </motion.div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-200 to-slate-400 tracking-tight leading-[1.1] drop-shadow-sm">
+              Elevate Your <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 font-serif italic font-light pr-2">Expertise.</span>
+            </h1>
+
+            {/* Dekorasi Ikon Melayang Kanan */}
+            <motion.div 
+              animate={{ y: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} 
+              className="absolute -bottom-2 -right-2 md:right-12 text-amber-400/20 hidden md:block"
+            >
+              <BookOpen size={36} strokeWidth={1} />
+            </motion.div>
+          </motion.div>
           
-          <motion.p initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-300 text-sm md:text-base font-medium max-w-xl mx-auto mb-10 leading-relaxed">
-            Tingkatkan keahlian Anda melalui program intensif dan webinar eksklusif yang dipandu langsung oleh pakar industri.
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }} 
+            className="text-slate-400 text-sm md:text-base lg:text-lg font-medium max-w-2xl mx-auto mb-12 leading-relaxed"
+          >
+            Bergabunglah dengan Webinar dan Event premium kami. Dipandu eksklusif oleh pakar industri untuk melesatkan karir profesional Anda.
           </motion.p>
           
-          {/* FLOATING SEARCH BAR */}
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="max-w-xl mx-auto w-full">
-            <div className="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl p-1.5 border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] focus-within:bg-white/20 focus-within:border-indigo-400/50 transition-all duration-300 w-full group">
-              <div className="pl-4 pr-2 text-indigo-300 shrink-0 group-focus-within:text-white transition-colors">
-                <Search size={20} />
+          {/* FLOATING SEARCH BAR (Luxury Glassmorphism) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }} 
+            className="max-w-2xl mx-auto w-full relative group"
+          >
+            {/* Glowing border effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-amber-500/20 to-purple-500/20 rounded-[1.75rem] blur-md opacity-50 group-hover:opacity-100 transition duration-700" />
+            
+            <div className="relative flex flex-col sm:flex-row items-center bg-[#18181b]/80 backdrop-blur-2xl rounded-2xl p-2 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] focus-within:bg-[#18181b] focus-within:border-amber-400/30 transition-all duration-500 w-full gap-2 sm:gap-0">
+              <div className="hidden sm:block pl-5 pr-3 text-slate-400 group-focus-within:text-amber-400 transition-colors">
+                <Search size={22} strokeWidth={2} />
               </div>
               <input 
                 type="text" 
-                placeholder="Cari program, kelas, atau mentor..." 
+                placeholder="Cari webinar, bootcamp, atau mentor..." 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full bg-transparent border-none text-white placeholder:text-slate-400 py-3 text-sm font-semibold outline-none min-w-0" 
+                className="w-full bg-transparent border-none text-white placeholder:text-slate-500 py-3 sm:py-3.5 px-4 sm:px-0 text-sm md:text-base font-medium outline-none min-w-0 text-center sm:text-left" 
               />
-              <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg shadow-indigo-600/30 shrink-0 active:scale-95">
-                Cari
+              <button className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 px-8 py-3.5 sm:py-4 rounded-xl font-black text-sm hover:from-amber-300 hover:to-orange-400 transition-all shadow-[0_0_20px_rgba(251,191,36,0.2)] shrink-0 active:scale-95 sm:ml-2 flex justify-center items-center gap-2">
+                <Search size={16} className="sm:hidden" /> Eksplorasi
               </button>
             </div>
           </motion.div>
@@ -192,7 +233,7 @@ export default function EventsClient() {
         
         {!loading && !error && (
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl md:text-2xl font-black text-slate-900">Eksplorasi Kelas</h2>
+            <h2 className="text-xl md:text-2xl font-black text-slate-900">Webinar & Event</h2>
             <div className="text-xs md:text-sm font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
               <span className="text-indigo-600 font-bold">{filteredEvents.length}</span> program
             </div>
@@ -243,7 +284,7 @@ export default function EventsClient() {
                     >
                       <Link href={`/events/${event.slug}`} className="group block h-full bg-white rounded-[2rem] p-2.5 sm:p-3 border border-slate-200 hover:border-indigo-300 hover:shadow-[0_20px_40px_-15px_rgba(79,70,229,0.15)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col relative overflow-hidden">
                         
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
 
                         <div className="relative w-full aspect-[16/10] bg-slate-100 rounded-[1.25rem] overflow-hidden mb-4 shrink-0">
                           <div className="absolute top-3 left-3 z-10 flex flex-col gap-2 items-start">
@@ -282,7 +323,7 @@ export default function EventsClient() {
 
                         <div className="px-3 sm:px-4 pb-3 flex flex-col flex-1">
                           <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-3 truncate">
-                            <span className="flex items-center gap-1.5 shrink-0 text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100/50">
+                            <span className="flex items-center gap-1.5 shrink-0 text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-200/50">
                               <Calendar size={12} className="mb-0.5"/> 
                               {new Date(event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                             </span>
@@ -325,7 +366,7 @@ export default function EventsClient() {
                               </div>
                             )}
                             
-                            <div className="p-2 md:p-3 bg-white rounded-lg md:rounded-xl border border-slate-200 shadow-sm group-hover:border-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 transform group-hover:translate-x-1 shrink-0 ml-1 self-center">
+                            <div className="p-2 md:p-3 bg-white rounded-lg md:rounded-xl border border-slate-200 shadow-sm group-hover:border-amber-400 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-orange-500 group-hover:text-white transition-all duration-300 transform group-hover:translate-x-1 shrink-0 ml-1 self-center">
                               <ArrowRight size={16} className="md:w-5 md:h-5 shrink-0" />
                             </div>
                           </div>

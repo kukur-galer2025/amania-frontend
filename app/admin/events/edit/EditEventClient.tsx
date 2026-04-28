@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; // 🔥 PENGGUNAAN useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -22,10 +22,16 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
 });
 import 'react-quill-new/dist/quill.snow.css';
 
+// 🔥 HELPER AMAN UNTUK DATETIME-LOCAL 🔥
+// Mengubah "2024-05-09 08:15:00" menjadi "2024-05-09T08:15" tanpa campur tangan timezone browser.
+const formatForDatetimeLocal = (dateStr: string) => {
+  if (!dateStr) return '';
+  return dateStr.replace(' ', 'T').slice(0, 16);
+};
+
 export default function EditEventClient() {
   const router = useRouter();
   
-  // 🔥 AMBIL ID DARI URL PARAMETER (?id=...) 🔥
   const searchParams = useSearchParams();
   const eventId = searchParams.get('id');
 
@@ -79,7 +85,7 @@ export default function EditEventClient() {
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // 🔥 STATE VALIDASI UNTUK 422 ERROR 🔥
+  // State Validasi 422
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -106,8 +112,11 @@ export default function EditEventClient() {
         setTitle(ev.title || ''); 
         setDescription(ev.description || ''); 
         setVenue(ev.venue || '');
-        setStartTime(ev.start_time ? new Date(ev.start_time).toISOString().slice(0, 16) : '');
-        setEndTime(ev.end_time ? new Date(ev.end_time).toISOString().slice(0, 16) : '');
+        
+        // 🔥 PERBAIKAN WAKTU: Menggunakan fungsi helper aman 🔥
+        setStartTime(formatForDatetimeLocal(ev.start_time));
+        setEndTime(formatForDatetimeLocal(ev.end_time));
+        
         setQuota(ev.quota?.toString() || ''); 
         setBasicPrice(ev.basic_price?.toString() || '0'); 
         setPremiumPrice(ev.premium_price?.toString() || ''); 
@@ -175,21 +184,39 @@ export default function EditEventClient() {
     if(e) e.preventDefault();
     if(!eventId) return;
 
-    setValidationErrors({});
+    // 🔥 VALIDASI KETAT FRONTEND AGAR TIDAK BIAS 🔥
+    const errors: Record<string, string[]> = {};
+
+    if (!title.trim()) errors.title = ["Judul program wajib diisi."];
+    if (!description || description === '<p><br></p>') errors.description = ["Deskripsi wajib diisi."];
+    if (!venue.trim()) errors.venue = ["Lokasi acara wajib diisi."];
+    if (!startTime) errors.start_time = ["Waktu mulai wajib ditentukan."];
+    if (!endTime) errors.end_time = ["Waktu selesai wajib ditentukan."];
     
-    if (!description || description === '<p><br></p>') {
-      toast.error("Deskripsi event wajib diisi!");
-      setValidationErrors(prev => ({ ...prev, description: ["Deskripsi wajib diisi."] }));
+    // Validasi Logika Waktu
+    if (startTime && endTime) {
+      if (new Date(startTime) >= new Date(endTime)) {
+        errors.end_time = ["Waktu selesai harus lebih lambat dari waktu mulai!"];
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      toast.error("Gagal menyimpan! Harap periksa form yang bertanda merah.");
+      
+      // Auto-switch ke tab detail jika error ada di form utama
+      if (activeTab !== 'detail') setActiveTab('detail');
       return;
     }
 
+    setValidationErrors({});
     setSaving(true);
     const loadToast = toast.loading("Menyimpan perubahan...");
     
     const formData = new FormData();
-    formData.append('title', title); 
+    formData.append('title', title.trim()); 
     formData.append('description', description);
-    formData.append('venue', venue); 
+    formData.append('venue', venue.trim()); 
     formData.append('start_time', startTime.replace('T', ' ') + ':00');
     formData.append('end_time', endTime.replace('T', ' ') + ':00'); 
     formData.append('quota', quota.trim() || '0');
@@ -234,6 +261,7 @@ export default function EditEventClient() {
            if (errorsArray.length > 0 && errorsArray[0].length > 0) {
              errorMessage = errorsArray[0][0]; 
            }
+           if (activeTab !== 'detail') setActiveTab('detail');
         }
         
         toast.error(errorMessage, { id: loadToast }); 
@@ -399,7 +427,7 @@ export default function EditEventClient() {
                   
                   <div className="space-y-1.5 md:space-y-2">
                     <label className="text-[10px] md:text-xs font-semibold text-slate-700 flex items-center gap-1.5"><AlignLeft size={14} className={`${validationErrors.title ? 'text-rose-500' : 'text-indigo-500'}`} /> Judul Program</label>
-                    <input type="text" value={title} onChange={(e) => { setTitle(e.target.value); if(validationErrors.title) setValidationErrors({...validationErrors, title: []}); }} className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.title ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                    <input type="text" value={title} onChange={(e) => { setTitle(e.target.value); if(validationErrors.title) setValidationErrors({...validationErrors, title: []}); }} className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.title ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                     {validationErrors.title && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.title[0]}</p>}
                   </div>
 
@@ -448,21 +476,21 @@ export default function EditEventClient() {
                   <div className="space-y-3 md:space-y-4">
                     <div className="space-y-1 md:space-y-1.5">
                       <label className="text-[9px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Calendar size={10} className={`${validationErrors.start_time ? 'text-rose-500' : 'text-emerald-500'} md:w-3 md:h-3`} /> Waktu Mulai</label>
-                      <input type="datetime-local" value={startTime} onChange={(e) => { setStartTime(e.target.value); if(validationErrors.start_time) setValidationErrors({...validationErrors, start_time: []}); }} className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.start_time ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
-                      {validationErrors.start_time && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.start_time[0]}</p>}
+                      <input type="datetime-local" value={startTime} onChange={(e) => { setStartTime(e.target.value); if(validationErrors.start_time) setValidationErrors({...validationErrors, start_time: []}); }} className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.start_time ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                      {validationErrors.start_time && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.start_time[0]}</p>}
                     </div>
                     <div className="space-y-1 md:space-y-1.5">
                       <label className="text-[9px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Clock size={10} className={`${validationErrors.end_time ? 'text-rose-500' : 'text-rose-500'} md:w-3 md:h-3`} /> Waktu Selesai</label>
-                      <input type="datetime-local" value={endTime} onChange={(e) => { setEndTime(e.target.value); if(validationErrors.end_time) setValidationErrors({...validationErrors, end_time: []}); }} className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.end_time ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
-                      {validationErrors.end_time && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.end_time[0]}</p>}
+                      <input type="datetime-local" value={endTime} onChange={(e) => { setEndTime(e.target.value); if(validationErrors.end_time) setValidationErrors({...validationErrors, end_time: []}); }} className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.end_time ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                      {validationErrors.end_time && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.end_time[0]}</p>}
                     </div>
                     <div className="space-y-1 md:space-y-1.5">
                       <label className="text-[9px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><MapPin size={10} className={`${validationErrors.venue ? 'text-rose-500' : 'text-blue-500'} md:w-3 md:h-3`} /> Lokasi (Publik)</label>
                       <div className="relative">
                         <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
-                        <input type="text" value={venue} onChange={(e) => { setVenue(e.target.value); if(validationErrors.venue) setValidationErrors({...validationErrors, venue: []}); }} placeholder="Contoh: Zoom Meeting" className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.venue ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                        <input type="text" value={venue} onChange={(e) => { setVenue(e.target.value); if(validationErrors.venue) setValidationErrors({...validationErrors, venue: []}); }} placeholder="Contoh: Zoom Meeting" className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.venue ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                       </div>
-                      {validationErrors.venue && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.venue[0]}</p>}
+                      {validationErrors.venue && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.venue[0]}</p>}
                     </div>
                   </div>
 
@@ -491,14 +519,14 @@ export default function EditEventClient() {
                       <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={10} className={`${validationErrors.quota ? 'text-rose-500' : 'text-amber-500'} md:w-3 md:h-3`} /> Kuota Peserta</label>
                       <div className="relative">
                         <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
-                        <input type="number" value={quota} onChange={(e) => { setQuota(e.target.value); if(validationErrors.quota) setValidationErrors({...validationErrors, quota: []}); }} placeholder="0 = Tidak Terbatas" className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.quota ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                        <input type="number" value={quota} onChange={(e) => { setQuota(e.target.value); if(validationErrors.quota) setValidationErrors({...validationErrors, quota: []}); }} placeholder="0 = Tidak Terbatas" className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.quota ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                       </div>
                       {validationErrors.quota && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.quota[0]}</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1 md:space-y-1.5">
                         <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Tag size={10} className={`${validationErrors.basic_price ? 'text-rose-500' : 'text-emerald-500'} md:w-3 md:h-3`} /> Basic (Rp)</label>
-                        <input type="number" value={basicPrice} onChange={(e) => { setBasicPrice(e.target.value); if(validationErrors.basic_price) setValidationErrors({...validationErrors, basic_price: []}); }} placeholder="0 = Gratis" className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.basic_price ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                        <input type="number" value={basicPrice} onChange={(e) => { setBasicPrice(e.target.value); if(validationErrors.basic_price) setValidationErrors({...validationErrors, basic_price: []}); }} placeholder="0 = Gratis" className={`w-full bg-white border rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.basic_price ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                         {validationErrors.basic_price && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.basic_price[0]}</p>}
                       </div>
                       <div className="space-y-1 md:space-y-1.5">
@@ -518,7 +546,7 @@ export default function EditEventClient() {
                         <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
                         <input type="url" value={certificateLink} onChange={(e) => { setCertificateLink(e.target.value); if(validationErrors.certificate_link) setValidationErrors({...validationErrors, certificate_link: []}); }} placeholder="https://..." className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.certificate_link ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                       </div>
-                      {validationErrors.certificate_link && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.certificate_link[0]}</p>}
+                      {validationErrors.certificate_link && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.certificate_link[0]}</p>}
                     </div>
                     <div className="space-y-1 md:space-y-1.5">
                       <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">

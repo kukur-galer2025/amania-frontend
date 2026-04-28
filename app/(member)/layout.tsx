@@ -5,17 +5,19 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Home, Rocket, Trophy, Award, MessageSquare, 
+  Home, Trophy, Award, MessageSquare, 
   User, LogOut, Bell, ChevronRight, Search, 
   LayoutDashboard, Newspaper, Sparkles, LogIn, Ticket,
   CalendarHeart, Info, Receipt, Settings2, Calendar, 
-  CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, FileText
+  CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, FileText,
+  MonitorPlay // 🔥 IKON BARU UNTUK WEBINAR 🔥
 } from 'lucide-react';
 import { apiFetch } from '../utils/api'; 
 
 const STATIC_PAGES = [
   { id: 'sp-1', title: 'Beranda / Dashboard', link: '/beranda', icon: Home },
-  { id: 'sp-2', title: 'Katalog Program', link: '/events', icon: Rocket },
+  // 🔥 PERUBAHAN TEKS & IKON KATALOG PROGRAM MENJADI WEBINAR / EVENT 🔥
+  { id: 'sp-2', title: 'Webinar / Event', link: '/events', icon: MonitorPlay },
   { id: 'sp-2b', title: 'E-Produk Premium', link: '/e-products', icon: ShoppingCart },
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
   { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
@@ -337,7 +339,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               <p className="px-3 mb-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400">Navigasi Utama</p>
               <div className="space-y-0.5">
                 <NavLink icon={Home} label="Beranda" href="/beranda" />
-                <NavLink icon={Rocket} label="Katalog Program" href="/events" />
+                {/* 🔥 TEKS DIGANTI DI SINI 🔥 */}
+                <NavLink icon={MonitorPlay} label="Webinar / Event" href="/events" />
                 <NavLink icon={ShoppingCart} label="E-Produk Premium" href="/e-products" />
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
               </div>
@@ -514,7 +517,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                       {eventResults.length > 0 && (
                         <div className="p-2 border-t border-slate-100">
                           <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
-                            <Rocket size={12}/> Katalog Program
+                            <MonitorPlay size={12}/> Webinar / Event
                           </p>
                           <div className="mt-1 space-y-0.5">
                             {eventResults.map((event) => (

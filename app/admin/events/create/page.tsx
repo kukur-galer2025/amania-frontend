@@ -11,7 +11,7 @@ import {
   AlignLeft, FileText, Clock, Tag, Star, Zap, Info,
   DollarSign, Users, AlertTriangle, Lock
 } from 'lucide-react';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api'; 
 
 // Quill Editor
 const ReactQuill = dynamic(() => import('react-quill-new'), { 
@@ -24,7 +24,7 @@ export default function CreateEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
-  // 🔥 State untuk Menangkap Error Validasi (422) per Kolom 🔥
+  // 🔥 State untuk Menangkap Error Validasi per Kolom 🔥
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   
   // State untuk form
@@ -37,7 +37,7 @@ export default function CreateEventPage() {
   const [basicPrice, setBasicPrice] = useState('0');
   const [premiumPrice, setPremiumPrice] = useState('');
   const [certificateLink, setCertificateLink] = useState('');
-  const [certificateTier, setCertificateTier] = useState<'all'|'premium'>('all'); // 🔥 Tambahan state
+  const [certificateTier, setCertificateTier] = useState<'all'|'premium'>('all'); 
   
   // State Akses Privat
   const [joinLink, setJoinLink] = useState('');
@@ -66,42 +66,51 @@ export default function CreateEventPage() {
       }
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
-      // Hapus error jika ada
       if (validationErrors.image) setValidationErrors(prev => ({ ...prev, image: [] }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationErrors({}); // Reset pesan error sebelumnya
+    
+    // 🔥 VALIDASI KETAT FRONTEND AGAR TIDAK BIAS 🔥
+    const errors: Record<string, string[]> = {};
 
-    if (!description || description === '<p><br></p>') {
-      toast.error("Deskripsi event wajib diisi!");
-      setValidationErrors(prev => ({ ...prev, description: ["Deskripsi wajib diisi."] }));
+    if (!title.trim()) errors.title = ["Judul program wajib diisi."];
+    if (!description || description === '<p><br></p>') errors.description = ["Deskripsi wajib diisi."];
+    if (!venue.trim()) errors.venue = ["Lokasi acara wajib diisi."];
+    if (!startTime) errors.start_time = ["Waktu mulai wajib ditentukan."];
+    if (!endTime) errors.end_time = ["Waktu selesai wajib ditentukan."];
+    
+    // Validasi Logika Waktu
+    if (startTime && endTime) {
+      if (new Date(startTime) >= new Date(endTime)) {
+        errors.end_time = ["Waktu selesai harus lebih lambat dari waktu mulai!"];
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      toast.error("Pendaftaran ditolak! Harap periksa form yang bertanda merah.");
       return;
     }
 
-    if (new Date(startTime) >= new Date(endTime)) {
-      toast.error("Waktu selesai harus lebih besar dari waktu mulai!");
-      setValidationErrors(prev => ({ ...prev, end_time: ["Waktu selesai harus lebih besar dari waktu mulai."] }));
-      return;
-    }
-
+    setValidationErrors({});
     const loadToast = toast.loading("Membangun Ruang Event...");
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('title', title);
+    formData.append('title', title.trim());
     formData.append('description', description);
-    formData.append('venue', venue);
+    formData.append('venue', venue.trim());
+    
+    // Penambahan :00 hanya terjadi jika startTime/endTime benar-benar ada isinya
     formData.append('start_time', startTime.replace('T', ' ') + ':00'); 
     formData.append('end_time', endTime.replace('T', ' ') + ':00');
     
-    // Pastikan angka valid
     formData.append('quota', quota.trim() || '0');
     formData.append('basic_price', basicPrice.trim() || '0'); 
     
-    // Pastikan URL hanya di-append jika tidak kosong untuk menghindari error 'url' laravel
     if (joinLink.trim()) formData.append('join_link', joinLink.trim());
     if (joinInstructions.trim()) formData.append('join_instructions', joinInstructions.trim());
     if (premiumPrice.trim()) formData.append('premium_price', premiumPrice.trim());
@@ -115,7 +124,6 @@ export default function CreateEventPage() {
         method: 'POST',
         headers: { 
             'Accept': 'application/json',
-            'Content-Type': '' // Biarkan form-data
         },
         body: formData
       });
@@ -130,16 +138,13 @@ export default function CreateEventPage() {
           </div>, 
           { id: loadToast, duration: 4000 }
         );
-        router.push(`/admin/events/edit/${responseData.data.id}`);
+        router.push(`/admin/events/edit?id=${responseData.data.id}`);
       } else {
-        // 🔥 Tangkap Validation Errors (422) 🔥
+        // 🔥 Tangkap Validation Errors (422) dari Server 🔥
         if (res.status === 422 && responseData.errors) {
             setValidationErrors(responseData.errors);
-            
-            // Ambil pesan error pertama untuk ditampilkan di Toast
             const firstErrorField = Object.keys(responseData.errors)[0];
             const firstErrorMsg = responseData.errors[firstErrorField][0];
-            
             toast.error(`Validasi Gagal: ${firstErrorMsg}`, { id: loadToast });
         } else {
             toast.error(responseData.message || "Gagal membuat event", { id: loadToast });
@@ -187,7 +192,6 @@ export default function CreateEventPage() {
                     ? 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500 bg-rose-50/50' 
                     : 'border-slate-300 focus:ring-indigo-500/20 focus:border-indigo-500'
                 }`}
-                required
               />
               {validationErrors.title && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.title[0]}</p>}
             </div>
@@ -260,15 +264,15 @@ export default function CreateEventPage() {
                 <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                   <Calendar size={10} className={`${validationErrors.start_time ? 'text-rose-500' : 'text-emerald-500'} md:w-3 md:h-3`} /> Waktu Mulai
                 </label>
-                <input type="datetime-local" value={startTime} onChange={(e) => { setStartTime(e.target.value); if(validationErrors.start_time) setValidationErrors({...validationErrors, start_time: []}); }} className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.start_time ? 'border-rose-500 bg-rose-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
-                {validationErrors.start_time && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.start_time[0]}</p>}
+                <input type="datetime-local" value={startTime} onChange={(e) => { setStartTime(e.target.value); if(validationErrors.start_time) setValidationErrors({...validationErrors, start_time: []}); }} className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.start_time ? 'border-rose-500 bg-rose-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                {validationErrors.start_time && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.start_time[0]}</p>}
               </div>
               <div className="space-y-1 md:space-y-1.5">
                 <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                   <Clock size={10} className={`${validationErrors.end_time ? 'text-rose-500' : 'text-rose-500'} md:w-3 md:h-3`} /> Waktu Selesai
                 </label>
-                <input type="datetime-local" value={endTime} onChange={(e) => { setEndTime(e.target.value); if(validationErrors.end_time) setValidationErrors({...validationErrors, end_time: []}); }} className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.end_time ? 'border-rose-500 bg-rose-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
-                {validationErrors.end_time && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.end_time[0]}</p>}
+                <input type="datetime-local" value={endTime} onChange={(e) => { setEndTime(e.target.value); if(validationErrors.end_time) setValidationErrors({...validationErrors, end_time: []}); }} className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.end_time ? 'border-rose-500 bg-rose-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                {validationErrors.end_time && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.end_time[0]}</p>}
               </div>
               <div className="space-y-1 md:space-y-1.5">
                 <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -276,9 +280,9 @@ export default function CreateEventPage() {
                 </label>
                 <div className="relative">
                   <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
-                  <input type="text" value={venue} onChange={(e) => { setVenue(e.target.value); if(validationErrors.venue) setValidationErrors({...validationErrors, venue: []}); }} placeholder="Misal: Zoom Meeting" className={`w-full bg-white border rounded-lg py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.venue ? 'border-rose-500 bg-rose-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                  <input type="text" value={venue} onChange={(e) => { setVenue(e.target.value); if(validationErrors.venue) setValidationErrors({...validationErrors, venue: []}); }} placeholder="Misal: Zoom Meeting" className={`w-full bg-white border rounded-lg py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.venue ? 'border-rose-500 bg-rose-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                 </div>
-                {validationErrors.venue && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.venue[0]}</p>}
+                {validationErrors.venue && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.venue[0]}</p>}
               </div>
             </div>
 
@@ -329,7 +333,7 @@ export default function CreateEventPage() {
                 </label>
                 <div className="relative">
                   <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
-                  <input type="number" value={quota} onChange={(e) => { setQuota(e.target.value); if(validationErrors.quota) setValidationErrors({...validationErrors, quota: []}); }} placeholder="0 = Tidak Terbatas" className={`w-full bg-white border rounded-lg py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.quota ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                  <input type="number" value={quota} onChange={(e) => { setQuota(e.target.value); if(validationErrors.quota) setValidationErrors({...validationErrors, quota: []}); }} placeholder="0 = Tidak Terbatas" className={`w-full bg-white border rounded-lg py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.quota ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                 </div>
                 {validationErrors.quota && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.quota[0]}</p>}
               </div>
@@ -339,7 +343,7 @@ export default function CreateEventPage() {
                   <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                     <Tag size={10} className={`${validationErrors.basic_price ? 'text-rose-500' : 'text-emerald-500'} md:w-3 md:h-3`} /> Basic (Rp)
                   </label>
-                  <input type="number" value={basicPrice} onChange={(e) => { setBasicPrice(e.target.value); if(validationErrors.basic_price) setValidationErrors({...validationErrors, basic_price: []}); }} placeholder="0 = Gratis" className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.basic_price ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} required />
+                  <input type="number" value={basicPrice} onChange={(e) => { setBasicPrice(e.target.value); if(validationErrors.basic_price) setValidationErrors({...validationErrors, basic_price: []}); }} placeholder="0 = Gratis" className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.basic_price ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                   {validationErrors.basic_price && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.basic_price[0]}</p>}
                 </div>
                 <div className="space-y-1 md:space-y-1.5">
