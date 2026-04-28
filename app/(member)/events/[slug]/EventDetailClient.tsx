@@ -122,7 +122,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('desc');
   const [selectedTier, setSelectedTier] = useState<'basic' | 'premium'>('basic');
-  const [isSharing, setIsSharing] = useState(false); // 🔥 Tambahkan state loading untuk tombol
+  const [isSharing, setIsSharing] = useState(false);
 
   const userData =
     typeof window !== 'undefined'
@@ -152,7 +152,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
-  // 🔥 UPDATE: handleShare dengan Best Practice untuk Caption Foto Native
+  // 🔥 UPDATE: handleShare Hybrid (Auto Copy Text + Native Share Image)
   const handleShare = async () => {
     if (isSharing) return;
     setIsSharing(true);
@@ -161,52 +161,53 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
     const shareIntro = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:\n\n`;
     
-    // GABUNGKAN teks pengantar dan URL agar menjadi Caption Foto Native
+    // GABUNGKAN teks pengantar dan URL
     const captionText = `${shareIntro}${shareUrl}`;
 
     try {
+      // 1. Trik Ampuh: Otomatis copy text ke clipboard terlebih dahulu
+      try {
+        await navigator.clipboard.writeText(captionText);
+      } catch (err) {
+        console.warn("Clipboard access denied", err);
+      }
+
       if (navigator.share) {
         let sharedWithImage = false;
 
-        // Best Practice Seluler: Siapkan file gambar untuk dialog share native
         if (eventData?.image) {
           try {
             const imgUrl = `${STORAGE_URL}/${eventData.image}`;
             const response = await fetch(imgUrl);
             const blob = await response.blob();
             
-            // Ekstrak ekstensi yang benar dari Blob
             const ext = blob.type.split('/')[1] || 'jpg';
             const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
 
-            // Cek apakah browser sistem mendukung berbagi tipe file ini
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              // Berikan instruksi ke user karena WA sering membuang teksnya
+              toast.success('Teks disalin! Silakan "Paste/Tempel" di kolom pesan WhatsApp.', { duration: 6000, icon: '📋' });
+
               await navigator.share({
                 title: shareTitle,
-                text: captionText, // 🔥 Kirim teks gabungan di sini sebagai keterangan
-                // url: shareUrl,  // 🔥 JANGAN sertakan properti URL di sini jika menyertakan file native agar aplikasi seperti WA tidak error membuang teks
-                files: [file] // Kirim file native
+                text: captionText, // Tetap dikirim untuk device/app yang support
+                files: [file]
               });
-              toast.success('Berhasil membagikan poster dan keterangan!');
               sharedWithImage = true;
             }
           } catch (imgError) {
-            console.warn("Gagal menyiapkan file gambar, fallback ke teks", imgError);
+            console.warn("Gagal menyiapkan file gambar", imgError);
           }
         }
 
-        // Fallback jika tidak bisa melampirkan gambar (misalnya desktop tanpa Web Share API native files)
         if (!sharedWithImage) {
-          await navigator.share({ title: shareTitle, text: `${shareIntro}`, url: shareUrl });
+          await navigator.share({ title: shareTitle, text: captionText });
           toast.success('Berhasil membagikan tautan!');
         }
       } else {
-        // Fallback untuk desktop PC lama: salin teks keterangan ke clipboard
-        await navigator.clipboard.writeText(captionText);
-        toast.success('Tautan disalin ke clipboard!');
+        toast.success('Teks dan tautan disalin ke clipboard!');
       }
     } catch (error: any) {
-      // Abaikan error jika user sengaja membatalkan dialog share (AbortError)
       if (error.name !== 'AbortError') {
         toast.error('Terjadi kesalahan saat membagikan.');
       }
@@ -331,7 +332,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           </div>
           <span>Katalog Program</span>
         </Link>
-        {/* 🔥 Update Button Share: Disabled State & Spinner */}
         <button
           onClick={handleShare}
           disabled={isSharing}
