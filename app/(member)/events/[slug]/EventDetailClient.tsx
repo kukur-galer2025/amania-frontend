@@ -163,7 +163,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
-  // 🔥 UPDATE: handleShare Hybrid + Extrak Deskripsi dari Database
+  // 🔥 UPDATE: handleShare Hybrid + Full Text Deskripsi
   const handleShare = async () => {
     if (isSharing) return;
     setIsSharing(true);
@@ -171,14 +171,11 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     const shareUrl = window.location.href;
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
     
-    // 1. Ekstrak dan bersihkan deskripsi dari HTML
-    const plainDesc = stripHtmlToText(eventData?.description || '');
-    
-    // 2. Potong deskripsi agar tidak terlalu panjang di WA (maks 250 karakter)
-    const shortDesc = plainDesc.length > 250 ? plainDesc.substring(0, 250) + '...' : plainDesc;
+    // 1. Ekstrak dan bersihkan seluruh deskripsi dari HTML
+    const fullDesc = stripHtmlToText(eventData?.description || '');
 
-    // 3. Susun Teks Caption Final
-    const shareIntro = `*Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara.*\n\n${shortDesc}\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
+    // 2. Susun Teks Caption Final (Tanpa dipotong)
+    const shareIntro = `*Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara.*\n\n${fullDesc}\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
     const captionText = `${shareIntro}${shareUrl}`;
 
     try {
@@ -207,7 +204,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
               await navigator.share({
                 title: shareTitle,
-                text: captionText, // Teks caption lengkap dengan deskripsi
+                text: captionText, // Teks caption lengkap dengan seluruh deskripsi
                 files: [file]
               });
               sharedWithImage = true;
@@ -223,7 +220,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           toast.success('Berhasil membagikan tautan!');
         }
       } else {
-        toast.success('Teks deskripsi dan tautan disalin ke clipboard!');
+        toast.success('Teks deskripsi utuh dan tautan disalin ke clipboard!');
       }
     } catch (error: any) {
       if (error.name !== 'AbortError') {
