@@ -17,19 +17,6 @@ import { apiFetch } from '@/app/utils/api';
 // processQuillHtml — v3
 //
 // Membersihkan HTML dari Quill agar kata tidak terpotong di tengah.
-//
-// 4 PENYEBAB KATA TERPOTONG:
-//   A. </p><p> tepat di tengah kata         → "tr</p><p>ansformasi"
-//   B. </p><p> di tengah kata + inline-tags → "r</span></p><p><span>ans"
-//      ↑ kasus ini TIDAK tertangkap oleh versi lama
-//   C. <br> di tengah kata                  → "tr<br>ansformasi"
-//   D. \n literal di tengah kata            → "tr\nansformasi"
-//
-// SOLUSI:
-//   IC (Inline Close) = 0-banyak closing tag inline sebelum </p>
-//   IO (Inline Open)  = 0-banyak opening tag inline setelah <p>
-//   → semua tag inline di antara dua word-char dibuang, teks tetap utuh
-//   → loop sampai tidak ada perubahan (kasus berantai / nested)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BASE_P_STYLE =
@@ -245,16 +232,23 @@ export default function EventDetailClient({ slug }: { slug: string }) {
       ? `${STORAGE_URL}/${eventData.organizer.avatar}`
       : null;
 
+  // 🔥 Helper untuk memformat Start Time - End Time secara elegan
+  const formatTimeRange = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    const startTimeStr = startDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+    const endTimeStr = endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+    
+    return `${startTimeStr} - ${endTimeStr}`;
+  };
+
   const processedDescription = processQuillHtml(eventData.description || '');
 
   return (
-    // MemberLayout sudah handle min-h-screen & header sticky.
-    // Komponen ini cukup jadi konten biasa tanpa fixed nav sendiri.
     <div className="w-full pb-32 lg:pb-16 selection:bg-indigo-200 selection:text-indigo-900 font-sans">
 
-      {/* ── TOP ACTION BAR (inline, bukan fixed) ─────────────────────────────
-          Menggantikan <nav fixed> lama yang menimpa header MemberLayout.
-      ───────────────────────────────────────────────────────────────────────── */}
+      {/* ── TOP ACTION BAR ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <Link
           href="/events"
@@ -325,7 +319,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         <div className="space-y-8 order-2 lg:order-1 min-w-0 w-full">
 
           {/* Info Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             <div className="bg-white p-4 sm:p-5 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col gap-1.5">
               <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 mb-1">
                 <Calendar size={16} />
@@ -340,11 +334,12 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 <Clock size={16} />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Waktu Akses</p>
-              <p className="text-sm font-bold text-slate-900">
-                {eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} WIB
+              {/* 🔥 Tampilan Waktu Diperbarui (Start - End) 🔥 */}
+              <p className="text-sm font-bold text-slate-900 truncate">
+                {formatTimeRange(eventData.start_time, eventData.end_time)} WIB
               </p>
             </div>
-            <div className="bg-white p-4 sm:p-5 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col gap-1.5 col-span-2 md:col-span-1">
+            <div className="bg-white p-4 sm:p-5 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col gap-1.5 sm:col-span-2 md:col-span-1">
               <div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 mb-1">
                 <MapPin size={16} />
               </div>
@@ -644,29 +639,25 @@ export default function EventDetailClient({ slug }: { slug: string }) {
       </div>
 
       <style jsx global>{`
+        /* ── q-content: wrapper CSS sebagai fallback ───────────────
+           Inline style dari processQuillHtml() sudah menangani semua
+           kasus <p>. CSS di sini hanya untuk elemen SELAIN <p>.
+        ─────────────────────────────────────────────────────────── */
         .q-content {
           font-size: 0.95rem;
           line-height: 1.7;
           color: #334155;
+          /* Hanya pecah kata jika BENAR-BENAR tidak muat (URL panjang, dsb) */
           overflow-wrap: break-word;
           word-break: normal;
           hyphens: none;
           -webkit-hyphens: none;
-          white-space: normal;
         }
 
-        .q-content p,
-        .q-content span,
-        .q-content li,
-        .q-content h1,
-        .q-content h2,
-        .q-content h3,
-        .q-content h4 {
+        /* Safety net — inline style dari JS akan menang atas ini */
+        .q-content p {
           margin: 0 !important;
-          word-break: normal !important;
-          hyphens: none !important;
-          -webkit-hyphens: none !important;
-          white-space: normal !important;
+          padding: 0;
         }
 
         /* ── Formatting ── */
@@ -676,15 +667,15 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         .q-content s                     { text-decoration: line-through; }
 
         /* ── Headings ── */
-        .q-content h1 { font-size:1.75rem; font-weight:900; color:#0f172a; margin:1.5rem 0 0.5rem !important; line-height:1.3; }
-        .q-content h2 { font-size:1.5rem;  font-weight:800; color:#0f172a; margin:1.25rem 0 0.4rem !important; line-height:1.35; }
-        .q-content h3 { font-size:1.25rem; font-weight:700; color:#0f172a; margin:1rem 0 0.35rem !important; line-height:1.4; }
-        .q-content h4 { font-size:1.1rem;  font-weight:700; color:#1e293b; margin:0.75rem 0 0.25rem !important; }
+        .q-content h1 { font-size:1.75rem; font-weight:900; color:#0f172a; margin:1.5rem 0 0.5rem; line-height:1.3; }
+        .q-content h2 { font-size:1.5rem;  font-weight:800; color:#0f172a; margin:1.25rem 0 0.4rem; line-height:1.35; }
+        .q-content h3 { font-size:1.25rem; font-weight:700; color:#0f172a; margin:1rem 0 0.35rem; line-height:1.4; }
+        .q-content h4 { font-size:1.1rem;  font-weight:700; color:#1e293b; margin:0.75rem 0 0.25rem; }
 
         /* ── Lists ── */
         .q-content ul { padding-left:1.5em; margin:0; list-style-type:disc; }
         .q-content ol { padding-left:1.5em; margin:0; list-style-type:decimal; }
-        .q-content li { margin-bottom:0.2rem !important; }
+        .q-content li { margin-bottom:0.2rem; }
 
         /* ── Blockquote & Code ── */
         .q-content blockquote {
