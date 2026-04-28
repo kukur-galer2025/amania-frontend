@@ -234,7 +234,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   if (!isMounted) return null;
 
   return (
-    // AMBIENT BACKGROUND: Gradasi halus + Orbs warna
     <div className="min-h-screen bg-[#F4F7FB] text-slate-800 flex font-sans relative w-full overflow-hidden">
       
       {/* Abstract Ambient Orbs - Membuat BG tidak polos */}
@@ -253,10 +252,10 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               initial={{ scale: 0.8, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
               className="bg-white/90 p-10 md:p-14 rounded-[2.5rem] shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden backdrop-blur-md"
             >
-              <div className={`absolute top-0 w-full h-2 ${logoutState.type === 'success' ? 'bg-indigo-600' : 'bg-rose-500'}`} />
-              <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-15 ${logoutState.type === 'success' ? 'bg-indigo-600' : 'bg-rose-500'}`} />
+              <div className={`absolute top-0 w-full h-2 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-15 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
 
-              <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-inner ${logoutState.type === 'success' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-rose-50 text-rose-500 border border-rose-100'}`}>
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-inner ${logoutState.type === 'success' ? 'bg-emerald-50 text-emerald-500 border border-emerald-100' : 'bg-rose-50 text-rose-500 border border-rose-100'}`}>
                 {logoutState.type === 'success' ? (
                   <CheckCircle2 size={48} strokeWidth={2.5} />
                 ) : (
@@ -290,7 +289,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         )}
       </AnimatePresence>
 
-      {/* SIDEBAR - GLASSMORPHISM (Tembus Pandang Elegan) */}
+      {/* SIDEBAR - GLASSMORPHISM */}
       <aside className={`fixed top-0 left-0 h-screen w-[270px] bg-white/70 backdrop-blur-2xl border-r border-white/60 flex flex-col z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.05)]' : '-translate-x-full'}`}>
         <div className="h-[72px] px-8 flex items-center justify-between border-b border-slate-200/40 shrink-0 bg-transparent">
           <Link href="/beranda" className="flex items-center gap-3 group">
@@ -321,7 +320,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 </div>
               </Link>
             ) : (
-              // KARTU MODE TAMU - LUXURY MIDNIGHT CARD
               <div className="p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl shadow-[0_12px_40px_-10px_rgba(30,27,75,0.4)] text-center relative overflow-hidden group border border-slate-800">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10 transition-all duration-500 group-hover:bg-indigo-500/30"></div>
                 <Sparkles size={26} className="text-indigo-300 mx-auto mb-3 drop-shadow-sm" />
@@ -415,7 +413,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
             {/* MESIN PENCARI PINTAR */}
             <div className="relative group" ref={searchRef}>
               
-              {/* Desktop Search Bar */}
               <div className="hidden md:block">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                 <input 
@@ -431,7 +428,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 </div>
               </div>
 
-              {/* Mobile Search Button */}
               <button 
                 onClick={() => {
                   setShowMobileSearchInput(!showMobileSearchInput);
@@ -483,7 +479,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                     
                     <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
                       
-                      {/* 1. HALAMAN SISTEM */}
                       {pageResults.length > 0 && (
                         <div className="p-2.5">
                           <p className="px-3.5 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
@@ -512,7 +507,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* 2. KATALOG PROGRAM / EVENT */}
                       {eventResults.length > 0 && (
                         <div className="p-2.5 border-t border-slate-50">
                           <p className="px-3.5 py-2 text-[9px] font-bold uppercase tracking-widest text-indigo-600 flex items-center gap-2">
@@ -541,7 +535,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* 3. KATALOG E-PRODUK PREMIUM */}
                       {eProductResults.length > 0 && (
                         <div className="p-2.5 border-t border-slate-50">
                           <p className="px-3.5 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
@@ -574,7 +567,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* 4. ARTIKEL & BERITA */}
                       {articleResults.length > 0 && (
                         <div className="p-2.5 border-t border-slate-50">
                           <p className="px-3.5 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
@@ -603,7 +595,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                         </div>
                       )}
 
-                      {/* TAMPILAN LOADING */}
                       {isSearching && eventResults.length === 0 && articleResults.length === 0 && eProductResults.length === 0 && (
                          <div className="p-8 flex items-center justify-center text-slate-500 gap-3">
                            <Loader2 size={18} className="animate-spin text-indigo-500" />
@@ -611,7 +602,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                          </div>
                       )}
 
-                      {/* TAMPILAN KOSONG */}
                       {!isSearching && pageResults.length === 0 && eventResults.length === 0 && articleResults.length === 0 && eProductResults.length === 0 && (
                         <div className="p-10 flex flex-col items-center justify-center text-center text-slate-400">
                           <Search size={32} className="mb-4 text-slate-300" />
@@ -656,7 +646,9 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                     <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
                       {notifications.length === 0 ? (
                         <div className="p-10 flex flex-col items-center justify-center text-center text-slate-400">
-                          <Bell size={32} className="mb-4 text-slate-200" />
+                          <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3 border border-slate-100">
+                            <Bell size={20} className="text-slate-300" />
+                          </div>
                           <p className="text-[13px] font-bold text-slate-500">Belum ada notifikasi baru.</p>
                         </div>
                       ) : (
@@ -724,11 +716,54 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         </footer>
       </main>
 
+      {/* ════════ 🔥 FLOATING WHATSAPP BUTTON (LUXURY EMERALD) 🔥 ════════ */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.5, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 1 }}
+        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[99]"
+      >
+        <Link 
+          href="https://wa.me/628985477864" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="relative block group"
+        >
+          {/* Efek Aura Glowing Luar */}
+          <div className="absolute inset-0 bg-[#25D366] rounded-full blur-xl opacity-20 group-hover:opacity-50 group-hover:scale-150 transition-all duration-500"></div>
+          
+          {/* Tombol Utama */}
+          <motion.div 
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white rounded-full shadow-[0_10px_25px_-5px_rgba(37,211,102,0.5)] border border-white/20 overflow-hidden active:scale-95 transition-transform"
+          >
+            {/* Kilauan (Shimmer) Efek Luxury */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>
+            
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16" className="drop-shadow-md">
+              <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+            </svg>
+          </motion.div>
+
+          {/* Label Tooltip Melayang */}
+          <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none translate-x-2 group-hover:translate-x-0 hidden sm:block">
+            <div className="bg-white/90 backdrop-blur-md text-slate-800 text-[11px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1)] whitespace-nowrap border border-slate-200">
+              Hubungi Amania
+              <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 border-y-4 border-y-transparent border-l-4 border-l-white/90 backdrop-blur-md"></div>
+            </div>
+          </div>
+        </Link>
+      </motion.div>
+
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
       `}</style>
     </div>
   );
