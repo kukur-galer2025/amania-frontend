@@ -22,11 +22,29 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
 });
 import 'react-quill-new/dist/quill.snow.css';
 
-// 🔥 HELPER AMAN UNTUK DATETIME-LOCAL 🔥
-// Mengubah "2024-05-09 08:15:00" menjadi "2024-05-09T08:15" tanpa campur tangan timezone browser.
+// 🔥 HELPER BARU: MENANGANI TIMEZONE DENGAN BENAR 🔥
 const formatForDatetimeLocal = (dateStr: string) => {
   if (!dateStr) return '';
+  
+  // Jika formatnya dari Laravel mengandung 'Z' (berarti format UTC ISO-8601)
+  if (dateStr.endsWith('Z')) {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    // Otomatis terjemahkan waktu UTC ke waktu WIB (Lokal Browser)
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  
+  // Jika formatnya sudah string biasa seperti "2024-05-09 08:15:00"
   return dateStr.replace(' ', 'T').slice(0, 16);
+};
+
+// 🔥 HELPER SUBMIT: Memastikan format Y-m-d H:i:s aman 🔥
+const formatSubmitDate = (dt: string) => {
+  if (!dt) return '';
+  const formatted = dt.replace('T', ' ');
+  // Jika panjangnya 16 ("YYYY-MM-DD HH:mm"), tambahkan detik :00
+  return formatted.length === 16 ? `${formatted}:00` : formatted;
 };
 
 export default function EditEventClient() {
@@ -113,7 +131,7 @@ export default function EditEventClient() {
         setDescription(ev.description || ''); 
         setVenue(ev.venue || '');
         
-        // 🔥 PERBAIKAN WAKTU: Menggunakan fungsi helper aman 🔥
+        // Formatter akan otomatis mendeteksi zona waktu UTC atau Format biasa
         setStartTime(formatForDatetimeLocal(ev.start_time));
         setEndTime(formatForDatetimeLocal(ev.end_time));
         
@@ -184,7 +202,6 @@ export default function EditEventClient() {
     if(e) e.preventDefault();
     if(!eventId) return;
 
-    // 🔥 VALIDASI KETAT FRONTEND AGAR TIDAK BIAS 🔥
     const errors: Record<string, string[]> = {};
 
     if (!title.trim()) errors.title = ["Judul program wajib diisi."];
@@ -217,8 +234,11 @@ export default function EditEventClient() {
     formData.append('title', title.trim()); 
     formData.append('description', description);
     formData.append('venue', venue.trim()); 
-    formData.append('start_time', startTime.replace('T', ' ') + ':00');
-    formData.append('end_time', endTime.replace('T', ' ') + ':00'); 
+    
+    // Gunakan fungsi format yang aman untuk merubah ke Y-m-d H:i:s
+    formData.append('start_time', formatSubmitDate(startTime));
+    formData.append('end_time', formatSubmitDate(endTime)); 
+    
     formData.append('quota', quota.trim() || '0');
     formData.append('basic_price', basicPrice.trim() || '0'); 
     

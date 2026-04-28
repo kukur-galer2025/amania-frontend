@@ -20,6 +20,14 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
 });
 import 'react-quill-new/dist/quill.snow.css';
 
+// 🔥 HELPER SUBMIT: Memastikan format Y-m-d H:i:s aman 🔥
+const formatSubmitDate = (dt: string) => {
+  if (!dt) return '';
+  const formatted = dt.replace('T', ' ');
+  // Jika panjangnya 16 ("YYYY-MM-DD HH:mm"), tambahkan detik :00
+  return formatted.length === 16 ? `${formatted}:00` : formatted;
+};
+
 export default function CreateEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -104,9 +112,9 @@ export default function CreateEventPage() {
     formData.append('description', description);
     formData.append('venue', venue.trim());
     
-    // Penambahan :00 hanya terjadi jika startTime/endTime benar-benar ada isinya
-    formData.append('start_time', startTime.replace('T', ' ') + ':00'); 
-    formData.append('end_time', endTime.replace('T', ' ') + ':00');
+    // 🔥 PERBAIKAN WAKTU: Gunakan fungsi helper agar penambahan detik dinamis 🔥
+    formData.append('start_time', formatSubmitDate(startTime)); 
+    formData.append('end_time', formatSubmitDate(endTime));
     
     formData.append('quota', quota.trim() || '0');
     formData.append('basic_price', basicPrice.trim() || '0'); 
@@ -370,7 +378,7 @@ export default function CreateEventPage() {
                   <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
                   <input type="url" value={certificateLink} onChange={(e) => { setCertificateLink(e.target.value); if(validationErrors.certificate_link) setValidationErrors({...validationErrors, certificate_link: []}); }} placeholder="https://..." className={`w-full bg-white border rounded-lg py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.certificate_link ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                 </div>
-                {validationErrors.certificate_link && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.certificate_link[0]}</p>}
+                {validationErrors.certificate_link && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.certificate_link[0]}</p>}
               </div>
 
               <div className="space-y-1 md:space-y-1.5">
