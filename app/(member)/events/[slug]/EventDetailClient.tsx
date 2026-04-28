@@ -7,7 +7,7 @@ import {
   ArrowLeft, Calendar, MapPin, Clock, ShieldCheck, 
   User, Share2, Ticket, AlertCircle, Loader2, CheckCircle2,
   Gem, Image as ImageIcon, BookOpen, Video, FileText, Lock, Briefcase, 
-  DownloadCloud, Sparkles, Info 
+  DownloadCloud, Sparkles, Info, Tag, ArrowRight, Users, Award 
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -35,12 +35,10 @@ const processQuillHtml = (html: string): string => {
 
   let r = html.replace(/\r\n?/g, '\n');
 
-  // 🔥 FIX UTAMA: HAPUS KARAKTER INVISIBLE
-  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); // zero-width chars
-  r = r.replace(/&shy;/gi, '');                // soft hyphen
-  r = r.replace(/&nbsp;/gi, ' ');              // normalisasi spasi
+  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); 
+  r = r.replace(/&shy;/gi, '');                
+  r = r.replace(/&nbsp;/gi, ' ');              
 
-  // ── A + B: KATA TERPOTONG DI </p><p> ──────────────────────────────
   {
     let prev = '';
     while (prev !== r) {
@@ -55,7 +53,6 @@ const processQuillHtml = (html: string): string => {
     }
   }
 
-  // ── C: KATA TERPOTONG DI <br> ─────────────────────────────────────
   {
     let prev = '';
     while (prev !== r) {
@@ -70,16 +67,12 @@ const processQuillHtml = (html: string): string => {
     }
   }
 
-  // ── D: KATA TERPOTONG OLEH \n ─────────────────────────────────────
   r = r.replace(
     new RegExp(`([${WC}])[ \\t]*\\n+[ \\t]*([${WC}])`, 'g'),
     '$1$2'
   );
 
-  // ── E: FIX DOUBLE SPACE (opsional tapi bagus)
   r = r.replace(/ {2,}/g, ' ');
-
-  // ── F: STYLE PARAGRAF ─────────────────────────────────────────────
 
   r = r.replace(
     /<p><\/p>/g,
@@ -102,12 +95,11 @@ const processQuillHtml = (html: string): string => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER ZONA WAKTU (ANTI TIMEZONE HELL)
+// HELPER ZONA WAKTU
 // ─────────────────────────────────────────────────────────────────────────────
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
   let safeStr = dateStr.replace(' ', 'T');
-  // Jika string dari Laravel tidak memiliki 'Z' atau '+', anggap sebagai WIB (+07:00)
   if (!safeStr.includes('Z') && !safeStr.includes('+')) {
     safeStr += '+07:00';
   }
@@ -122,6 +114,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('desc');
   const [selectedTier, setSelectedTier] = useState<'basic' | 'premium'>('basic');
+  const [isSharing, setIsSharing] = useState(false); // State untuk loading share button
 
   const userData =
     typeof window !== 'undefined'
@@ -151,18 +144,63 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
+  // 🔥 UPDATE: handleShare dengan Native File Sharing untuk melampirkan gambar poster
   const handleShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+
     const shareUrl = window.location.href;
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
-    const shareText = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:\n\n`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-        toast.success('Berhasil membagikan tautan!');
-      } catch {}
-    } else {
-      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-      toast.success('Tautan disalin ke clipboard!');
+    const shareText = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:`;
+
+    try {
+      if (navigator.share) {
+        let sharedWithImage = false;
+
+        // Coba fetch gambar dan konversi jadi File object jika device support
+        if (eventData?.image) {
+          try {
+            const imgUrl = `${STORAGE_URL}/${eventData.image}`;
+            const response = await fetch(imgUrl);
+            const blob = await response.blob();
+            
+            // Ekstrak ekstensi dari tipe MIME
+            const ext = blob.type.split('/')[1] || 'jpg';
+            const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
+
+            // Cek apakah browser mendukung share tipe file tersebut
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: shareTitle,
+                text: shareText,
+                url: shareUrl,
+                files: [file] // Mengirim gambar sebagai lampiran
+              });
+              toast.success('Berhasil membagikan poster dan tautan!');
+              sharedWithImage = true;
+            }
+          } catch (imgError) {
+            console.warn("Gagal menyiapkan file gambar, fallback ke teks", imgError);
+          }
+        }
+
+        // Fallback jika tidak bisa melampirkan gambar (hanya bagi text & url)
+        if (!sharedWithImage) {
+          await navigator.share({ title: shareTitle, text: `${shareText}\n\n`, url: shareUrl });
+          toast.success('Berhasil membagikan tautan!');
+        }
+      } else {
+        // Fallback untuk desktop PC lama / browser yang tidak dukung Web Share API
+        await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+        toast.success('Tautan disalin ke clipboard!');
+      }
+    } catch (error: any) {
+      // Abaikan error jika user sengaja mencancel dialog share (AbortError)
+      if (error.name !== 'AbortError') {
+        toast.error('Terjadi kesalahan saat membagikan.');
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -237,7 +275,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
   const isFree = eventData.basic_price === 0;
   
-  // 🔥 Menggunakan parser aman agar tidak terjadi pergeseran jam
   const eventDate = parseSafeDate(eventData.start_time);
   const isPast = parseSafeDate(eventData.end_time) < new Date();
   
@@ -248,7 +285,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
       ? `${STORAGE_URL}/${eventData.organizer.avatar}`
       : null;
 
-  // 🔥 FORMAT WAKTU MULAI - SELESAI (DIPAKSA WIB)
   const formatTimeRange = (start: string, end: string) => {
     if (!start || !end) return '';
     try {
@@ -262,7 +298,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' 
       });
       
-      // Mengubah titik menjadi titik dua (08.15 -> 08:15)
       return `${startTimeStr.replace(/\./g, ':')} - ${endTimeStr.replace(/\./g, ':')}`;
     } catch {
       return '';
@@ -287,9 +322,11 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         </Link>
         <button
           onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+          disabled={isSharing}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-sm disabled:opacity-50 disabled:cursor-wait"
         >
-          <Share2 size={14} /> <span>Bagikan</span>
+          {isSharing ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />} 
+          <span>Bagikan</span>
         </button>
       </div>
 
@@ -351,7 +388,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 <Calendar size={16} />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal Pelaksanaan</p>
-              {/* 🔥 TANGGAL DIPAKSA WIB JUGA 🔥 */}
               <p className="text-sm font-bold text-slate-900">
                 {eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
               </p>
@@ -361,7 +397,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 <Clock size={16} />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Waktu Akses</p>
-              {/* 🔥 Tampilan Start - End Terpasang Di Sini 🔥 */}
               <p className="text-sm font-bold text-slate-900 truncate">
                 {formatTimeRange(eventData.start_time, eventData.end_time)} WIB
               </p>
@@ -527,8 +562,8 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 }`}
               >
                 <div>
-                  <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${selectedTier === 'basic' ? 'text-indigo-600' : 'text-slate-500'}`}>
-                    Basic Pass
+                  <p className={`text-[10px] font-black uppercase tracking-wider mb-1 flex items-center gap-1.5 ${selectedTier === 'basic' ? 'text-indigo-600' : 'text-slate-500'}`}>
+                    <Tag size={12} /> Basic Pass
                   </p>
                   <p className={`text-xl font-black ${selectedTier === 'basic' ? 'text-slate-900' : 'text-slate-600'}`}>
                     {isFree ? 'GRATIS' : `Rp ${eventData.basic_price.toLocaleString('id-ID')}`}
@@ -575,7 +610,13 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                     : 'bg-slate-900 text-white shadow-slate-900/20 hover:bg-indigo-600'
                 }`}
               >
-                {isPast ? 'PROGRAM SELESAI' : eventData.quota === 0 ? 'KUOTA PENUH' : 'LANJUT KE PEMBAYARAN'}
+                {isPast ? (
+                  <span className="flex items-center justify-center gap-2"><AlertCircle size={16} /> PROGRAM SELESAI</span>
+                ) : eventData.quota === 0 ? (
+                  <span className="flex items-center justify-center gap-2"><AlertCircle size={16} /> KUOTA PENUH</span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">LANJUT KE PEMBAYARAN <ArrowRight size={16} /></span>
+                )}
               </button>
               {eventData.image && (
                 <button
@@ -589,13 +630,13 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3 mb-6">
               <div className="flex items-center justify-between text-xs min-w-0">
-                <span className="text-slate-500 font-semibold shrink-0">Sisa Kuota</span>
+                <span className="text-slate-500 font-semibold shrink-0 flex items-center gap-1.5"><Users size={14} className="text-slate-400" /> Sisa Kuota</span>
                 <span className="font-bold text-slate-900 bg-white px-2 py-1 rounded-md border border-slate-200">
                   {eventData.quota === 0 ? 'Habis' : `${eventData.quota} Kursi`}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs min-w-0">
-                <span className="text-slate-500 font-semibold shrink-0">E-Certificate</span>
+                <span className="text-slate-500 font-semibold shrink-0 flex items-center gap-1.5"><Award size={14} className="text-slate-400" /> E-Certificate</span>
                 <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">
                   {eventData.certificate_tier === 'none' ? 'Tidak Ada' : 'Tersedia'}
                 </span>
@@ -651,8 +692,8 @@ export default function EventDetailClient({ slug }: { slug: string }) {
               : 'bg-slate-900 shadow-slate-900/20'
           }`}
         >
-          <span className="truncate">
-            {isPast ? 'Ditutup' : eventData.quota === 0 ? 'Penuh' : 'Lanjut Bayar'}
+          <span className="truncate flex items-center justify-center gap-1.5">
+            {isPast ? <><AlertCircle size={14} /> Ditutup</> : eventData.quota === 0 ? <><AlertCircle size={14} /> Penuh</> : <>Lanjut Bayar <ArrowRight size={14} /></>}
           </span>
         </button>
         {eventData.image && (
@@ -693,7 +734,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
         /* ── Formatting ── */
         .q-content strong, .q-content b { font-weight: 800; color: #0f172a; }
-        .q-content em, .q-content i     { font-style: italic; }
+        .q-content em, .q-content i      { font-style: italic; }
         .q-content u                     { text-decoration: underline; }
         .q-content s                     { text-decoration: line-through; }
 

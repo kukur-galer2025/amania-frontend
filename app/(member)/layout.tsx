@@ -20,7 +20,7 @@ const STATIC_PAGES = [
   { id: 'sp-2b', title: 'E-Produk Premium', link: '/e-products', icon: ShoppingCart },
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
   { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
-  { id: 'sp-5', title: 'Kelas Saya', link: '/my-events', icon: CalendarHeart },
+  { id: 'sp-5', title: 'Event Saya', link: '/my-events', icon: CalendarHeart },
   { id: 'sp-5b', title: 'Koleksi E-Produk', link: '/my-e-products', icon: FileText },
   { id: 'sp-6', title: 'Kalender Jadwal', link: '/calendar', icon: Calendar },
   { id: 'sp-7', title: 'Riwayat Transaksi', link: '/transactions', icon: Receipt },
@@ -349,7 +349,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
               <p className="px-3.5 mb-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Ruang Pembelajaran</p>
               <div className="space-y-1">
                 {userData && <NavLink icon={Ticket} label="Tiket Aktif" href="/dashboard/ticket" />}
-                <NavLink icon={CalendarHeart} label="Kelas Saya" href="/my-events" />
+                <NavLink icon={CalendarHeart} label="Event Saya" href="/my-events" />
                 {userData && <NavLink icon={FileText} label="Koleksi E-Produk" href="/my-e-products" />}
                 <NavLink icon={Award} label="Sertifikat Kelulusan" href="/certificates" />
                 <NavLink icon={Calendar} label="Kalender" href="/calendar" />
