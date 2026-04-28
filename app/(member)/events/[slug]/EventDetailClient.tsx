@@ -122,7 +122,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('desc');
   const [selectedTier, setSelectedTier] = useState<'basic' | 'premium'>('basic');
-  const [isSharing, setIsSharing] = useState(false);
+  const [isSharing, setIsSharing] = useState(false); // 🔥 Tambahkan state loading untuk tombol
 
   const userData =
     typeof window !== 'undefined'
@@ -152,40 +152,42 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEventDetail();
   }, [slug, router]);
 
-  // 🔥 UPDATE: handleShare dengan perbaikan Caption Foto
+  // 🔥 UPDATE: handleShare dengan Best Practice untuk Caption Foto Native
   const handleShare = async () => {
     if (isSharing) return;
     setIsSharing(true);
 
     const shareUrl = window.location.href;
     const shareTitle = eventData?.title || 'Program Unggulan Amania';
-    const shareText = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:`;
+    const shareIntro = `Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara. Cek detailnya di sini:\n\n`;
     
-    // GABUNGKAN teks dan URL agar menjadi Caption yang utuh
-    const captionText = `${shareText}\n\n${shareUrl}`;
+    // GABUNGKAN teks pengantar dan URL agar menjadi Caption Foto Native
+    const captionText = `${shareIntro}${shareUrl}`;
 
     try {
       if (navigator.share) {
         let sharedWithImage = false;
 
-        // Coba fetch gambar dan konversi jadi File object
+        // Best Practice Seluler: Siapkan file gambar untuk dialog share native
         if (eventData?.image) {
           try {
             const imgUrl = `${STORAGE_URL}/${eventData.image}`;
             const response = await fetch(imgUrl);
             const blob = await response.blob();
             
+            // Ekstrak ekstensi yang benar dari Blob
             const ext = blob.type.split('/')[1] || 'jpg';
             const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
 
+            // Cek apakah browser sistem mendukung berbagi tipe file ini
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               await navigator.share({
                 title: shareTitle,
-                text: captionText, // 🔥 Kirim teks gabungan di sini
-                // url: shareUrl,  // 🔥 HAPUS properti URL agar aplikasi (WA) tidak error/membuang teksnya
-                files: [file]
+                text: captionText, // 🔥 Kirim teks gabungan di sini sebagai keterangan
+                // url: shareUrl,  // 🔥 JANGAN sertakan properti URL di sini jika menyertakan file native agar aplikasi seperti WA tidak error membuang teks
+                files: [file] // Kirim file native
               });
-              toast.success('Berhasil membagikan poster dan tautan!');
+              toast.success('Berhasil membagikan poster dan keterangan!');
               sharedWithImage = true;
             }
           } catch (imgError) {
@@ -193,20 +195,18 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           }
         }
 
-        // Fallback jika tidak bisa melampirkan gambar
+        // Fallback jika tidak bisa melampirkan gambar (misalnya desktop tanpa Web Share API native files)
         if (!sharedWithImage) {
-          await navigator.share({ 
-            title: shareTitle, 
-            text: captionText // Gunakan teks gabungan juga untuk fallback
-          });
+          await navigator.share({ title: shareTitle, text: `${shareIntro}`, url: shareUrl });
           toast.success('Berhasil membagikan tautan!');
         }
       } else {
-        // Fallback untuk copy paste biasa
+        // Fallback untuk desktop PC lama: salin teks keterangan ke clipboard
         await navigator.clipboard.writeText(captionText);
         toast.success('Tautan disalin ke clipboard!');
       }
     } catch (error: any) {
+      // Abaikan error jika user sengaja membatalkan dialog share (AbortError)
       if (error.name !== 'AbortError') {
         toast.error('Terjadi kesalahan saat membagikan.');
       }
@@ -331,13 +331,14 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           </div>
           <span>Katalog Program</span>
         </Link>
+        {/* 🔥 Update Button Share: Disabled State & Spinner */}
         <button
           onClick={handleShare}
           disabled={isSharing}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-sm disabled:opacity-50 disabled:cursor-wait"
         >
           {isSharing ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />} 
-          <span>Bagikan</span>
+          <span>{isSharing ? 'Mempersiapkan...' : 'Bagikan'}</span>
         </button>
       </div>
 
