@@ -529,12 +529,12 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                               <img
                                 src={`${STORAGE_URL}/${spk.photo}`}
                                 alt={spk.name}
-                                className="w-14 h-14 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform shrink-0"
+                                className="w-14 h-14 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform shrink-0 bg-slate-200"
                               />
                               <div className="flex-1 min-w-0 pt-0.5">
-                                <h4 className="text-sm font-bold text-slate-900 leading-snug">{spk.name}</h4>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-start gap-1.5 mt-1.5 leading-relaxed">
-                                  <Briefcase size={12} className="text-indigo-400 shrink-0 mt-0.5" />
+                                <h4 className="text-sm font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors">{spk.name}</h4>
+                                <p className="text-[11px] md:text-xs font-medium text-slate-500 flex items-start gap-1.5 mt-1 w-full leading-snug">
+                                  <Briefcase size={12} className="text-indigo-400 shrink-0 mt-[2px]" />
                                   <span className="flex-1">{spk.role}</span>
                                 </p>
                               </div>

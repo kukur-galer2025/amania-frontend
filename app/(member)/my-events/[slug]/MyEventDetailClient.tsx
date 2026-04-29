@@ -485,22 +485,27 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
                   <motion.div key="desc" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full min-w-0">
                     <div className="q-content break-words w-full min-w-0" dangerouslySetInnerHTML={{ __html: processedDescription }} />
 
-                    {event.speakers && event.speakers.length > 0 && (
+                  {event.speakers && event.speakers.length > 0 && (
                       <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-slate-200 w-full min-w-0">
                         <h3 className="text-base md:text-lg font-black text-slate-900 mb-4 md:mb-6 flex items-center gap-2">
                           <User size={18} className="text-indigo-500 shrink-0" /> Profil Instruktur
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 w-full min-w-0">
                           {event.speakers.map((spk: any) => (
-                            <div key={spk.id} className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:shadow-md transition-all group min-w-0 w-full">
+                            <div key={spk.id} className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:shadow-md transition-all group min-w-0 w-full">
                               <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-slate-200">
                                 <img src={`${STORAGE_URL}/${spk.photo}`} alt={spk.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                               </div>
-                              <div className="flex-1 min-w-0 w-full">
-                                <h4 className="text-xs md:text-sm font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors w-full">{spk.name}</h4>
-                                <p className="text-[9px] md:text-[10px] font-semibold text-slate-500 flex items-center gap-1.5 mt-0.5 truncate w-full uppercase tracking-wider">
-                                  <Briefcase size={10} className="text-indigo-400 shrink-0"/> <span className="truncate">{spk.role}</span>
+                              <div className="flex-1 min-w-0 w-full pt-1">
+                                <h4 className="text-xs md:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors w-full">{spk.name}</h4>
+                                
+                                {/* 👇 BAGIAN YANG DIPERBAIKI 👇 */}
+                                <p className="text-[11px] md:text-xs font-medium text-slate-500 flex items-start gap-1.5 mt-1 w-full leading-snug">
+                                  <Briefcase size={12} className="text-indigo-400 shrink-0 mt-[2px]"/> 
+                                  <span>{spk.role}</span>
                                 </p>
+                                {/* 👆 SELESAI DIPERBAIKI 👆 */}
+
                               </div>
                             </div>
                           ))}
