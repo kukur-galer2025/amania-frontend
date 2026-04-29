@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, Clock, ShieldCheck, ArrowRight, 
   Ticket, Calendar, MapPin, CheckCircle2, 
-  XCircle, Loader2, UploadCloud, X, ChevronRight, AlertCircle, Sparkles, User, AlertTriangle
+  XCircle, Loader2, UploadCloud, X, ChevronRight, AlertCircle, Sparkles, User, AlertTriangle, Video
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; 
@@ -107,7 +107,7 @@ export default function TicketDashboardClient() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-12 w-full min-w-0 overflow-x-hidden">
+    <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-12 w-full min-w-0 overflow-x-hidden selection:bg-indigo-100">
       
       {/* 🔥 HERO SECTION 🔥 */}
       <div className="relative w-full overflow-hidden bg-slate-900 rounded-[1.5rem] md:rounded-[2rem] border border-slate-800 shadow-sm mt-4 min-w-0">
@@ -130,12 +130,12 @@ export default function TicketDashboardClient() {
                  Pusat Akses Tiket
                </motion.h1>
                <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-400 text-xs md:text-sm lg:text-base font-medium leading-relaxed break-words w-full">
-                 Kelola seluruh pendaftaran, pantau status pembayaran, dan unduh E-Ticket Anda untuk memasuki ruang belajar Amania.
+                 Kelola seluruh pendaftaran, pantau status pembayaran, dan masuk ke ruang kelas Amania Anda.
                </motion.p>
             </div>
             
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="shrink-0 w-full md:w-auto">
-               <Link href="/events" className="flex items-center justify-center gap-2 w-full px-5 md:px-6 py-2.5 md:py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs md:text-sm font-semibold transition-all shadow-lg shadow-indigo-600/20 group min-w-0">
+               <Link href="/events" className="flex items-center justify-center gap-2 w-full px-5 md:px-6 py-2.5 md:py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs md:text-sm font-bold transition-all shadow-lg shadow-indigo-600/20 group min-w-0">
                  <BookOpen size={16} className="shrink-0" /> <span className="hidden xs:inline truncate">Eksplorasi</span> <span className="truncate">Katalog</span>
                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform shrink-0" />
                </Link>
@@ -199,7 +199,6 @@ export default function TicketDashboardClient() {
                 <span className="flex-1">
                   Apabila terdapat kendala terkait tiket, pembayaran, atau perubahan data, silakan hubungi Customer Service Amania.
                   <div className="mt-2.5">
-                    {/* 🔥 TOMBOL WHATSAPP DENGAN TEKS PROFESIONAL 🔥 */}
                     <a href="https://wa.me/628985477864" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg font-bold text-xs shadow-sm shadow-[#25D366]/30 transition-all active:scale-95 group w-max">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="shrink-0 group-hover:scale-110 transition-transform">
                         <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
@@ -222,7 +221,7 @@ export default function TicketDashboardClient() {
             </div>
             <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1.5 break-words w-full">Belum ada transaksi</h3>
             <p className="text-xs md:text-sm text-slate-500 mb-5 md:mb-6 max-w-md leading-relaxed px-4 md:px-0 break-words w-full">Anda belum mendaftar di program apapun. Mulai perjalanan karir Anda dengan mengikuti kelas pertama di Amania.</p>
-            <Link href="/events" className="px-5 md:px-6 py-2.5 bg-slate-900 text-white rounded-lg text-xs md:text-sm font-semibold hover:bg-slate-800 transition-colors shadow-sm inline-flex items-center gap-2 shrink-0">
+            <Link href="/events" className="px-5 md:px-6 py-2.5 bg-slate-900 text-white rounded-lg text-xs md:text-sm font-semibold hover:bg-indigo-600 transition-colors shadow-sm inline-flex items-center gap-2 shrink-0">
                Cari Program <ArrowRight size={14} className="md:w-4 md:h-4 shrink-0" />
             </Link>
           </div>
@@ -241,14 +240,20 @@ export default function TicketDashboardClient() {
                 >
                   <div className="p-4 md:p-5 flex flex-col lg:flex-row gap-4 md:gap-6 items-start lg:items-center w-full min-w-0">
                     
-                    <div className="w-full lg:w-56 h-40 sm:h-48 lg:h-32 rounded-lg md:rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 relative">
+                    {/* GAMBAR BANNER KELAS */}
+                    <div className="w-full lg:w-56 h-40 sm:h-48 lg:h-32 rounded-lg md:rounded-xl bg-slate-900 border border-slate-200 overflow-hidden shrink-0 relative flex items-center justify-center p-2">
                       {reg.event?.image ? (
-                        <img src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <>
+                          <div className="absolute inset-0 z-0">
+                            <img src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover blur-md opacity-40 scale-110" alt="blur-bg"/>
+                          </div>
+                          <img src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 drop-shadow-lg" />
+                        </>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400"><BookOpen size={24} className="md:w-7 md:h-7" /></div>
                       )}
                       
-                      <div className="absolute top-2 left-2 lg:hidden flex gap-1.5 min-w-0">
+                      <div className="absolute top-2 left-2 z-20 lg:hidden flex gap-1.5 min-w-0">
                         {isApproved ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50/90 backdrop-blur-sm text-emerald-700 border border-emerald-200/50 rounded text-[9px] font-bold uppercase tracking-wider shadow-sm shrink-0 max-w-[120px]">
                             <CheckCircle2 size={10} className="shrink-0" /> <span className="truncate">Aktif</span>
@@ -312,28 +317,41 @@ export default function TicketDashboardClient() {
                       </div>
                     </div>
 
-                    <div className="w-full lg:w-auto flex flex-row lg:flex-col justify-between items-center lg:items-end gap-3 md:gap-4 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 pt-3 md:pt-4 lg:pt-0 lg:pl-6 min-w-0">
+                    <div className="w-full lg:w-auto flex flex-col justify-center items-start lg:items-end gap-3 md:gap-4 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 pt-3 md:pt-4 lg:pt-0 lg:pl-6 min-w-0 h-full">
                       <div className="text-left lg:text-right min-w-0 w-full">
                         <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5 md:mb-1 truncate w-full">Total Tagihan</p>
                         <p className="text-base md:text-lg font-extrabold text-slate-900 truncate w-full">Rp {parseFloat(reg.total_amount).toLocaleString('id-ID')}</p>
                       </div>
                       
-                      {isApproved ? (
-                      <Link 
-                        href={`/dashboard/ticket/${reg.event?.slug}`} 
-                        className="inline-flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg md:rounded-xl text-[11px] md:text-xs font-semibold transition-colors shadow-sm group/btn shrink-0 min-w-0"
-                      >
-                        <span className="truncate">E-Ticket</span> <ChevronRight size={14} className="group-hover/btn:translate-x-0.5 transition-transform shrink-0" />
-                      </Link>
-                      ) : reg.status === 'pending' ? (
-                        <button disabled className="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-lg md:rounded-xl text-[10px] md:text-xs font-semibold cursor-not-allowed shrink-0 min-w-0">
-                          <Loader2 size={12} className="animate-spin md:w-3.5 md:h-3.5 shrink-0" /> <span className="hidden xs:inline truncate">Sedang Diproses</span><span className="xs:hidden truncate">Diproses</span>
-                        </button>
-                      ) : (
-                        <button disabled className="inline-flex items-center justify-center px-3 md:px-5 py-2 md:py-2.5 bg-rose-50 text-rose-400 border border-rose-100 rounded-lg md:rounded-xl text-[10px] md:text-xs font-semibold cursor-not-allowed shrink-0 min-w-0">
-                          <span className="truncate">Dibatalkan</span>
-                        </button>
-                      )}
+                      {/* 🔥 TOMBOL ACTION 🔥 */}
+                      <div className="flex flex-row lg:flex-col gap-2 w-full">
+                        {isApproved ? (
+                          <>
+                            <Link 
+                              href={`/my-events/${reg.event?.slug || reg.event?.id}`} 
+                              className="flex-1 lg:w-full inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold transition-all shadow-md shadow-indigo-600/20 group/btn shrink-0 min-w-0"
+                            >
+                              <Video size={14} className="shrink-0 group-hover/btn:scale-110 transition-transform" /> 
+                              <span className="truncate">Masuk Kelas</span>
+                            </Link>
+                            <Link 
+                              href={`/dashboard/ticket/${reg.event?.slug}`} 
+                              className="flex-1 lg:w-full inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold transition-colors shadow-sm group/btn shrink-0 min-w-0"
+                            >
+                              <Ticket size={14} className="shrink-0" /> 
+                              <span className="truncate">E-Ticket</span>
+                            </Link>
+                          </>
+                        ) : reg.status === 'pending' ? (
+                          <button disabled className="w-full inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-lg md:rounded-xl text-[10px] md:text-xs font-semibold cursor-not-allowed shrink-0 min-w-0">
+                            <Loader2 size={12} className="animate-spin md:w-3.5 md:h-3.5 shrink-0" /> <span className="truncate">Sedang Diproses</span>
+                          </button>
+                        ) : (
+                          <button disabled className="w-full inline-flex items-center justify-center px-3 md:px-5 py-2 md:py-2.5 bg-rose-50 text-rose-400 border border-rose-100 rounded-lg md:rounded-xl text-[10px] md:text-xs font-semibold cursor-not-allowed shrink-0 min-w-0">
+                            <span className="truncate">Dibatalkan</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 

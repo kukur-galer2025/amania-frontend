@@ -10,7 +10,6 @@ export default function ProfilClient() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: '', text: '' });
   
-  // 🔥 PERBAIKAN: Menambahkan state phone
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', password: '', password_confirmation: '', bio: ''
   });
@@ -30,7 +29,7 @@ export default function ProfilClient() {
         ...formData, 
         name: parsedUser.name, 
         email: parsedUser.email,
-        phone: parsedUser.phone || '', // 🔥 Mengisi nilai phone dari Storage
+        phone: parsedUser.phone || '', 
         bio: parsedUser.bio || ''
       });
       
@@ -76,7 +75,7 @@ export default function ProfilClient() {
     const submitData = new FormData();
     submitData.append('name', formData.name);
     submitData.append('email', formData.email);
-    submitData.append('phone', formData.phone); // 🔥 Menambahkan phone ke Body Request
+    submitData.append('phone', formData.phone);
     submitData.append('bio', formData.bio);
     if (formData.password) {
       submitData.append('password', formData.password);
@@ -118,9 +117,9 @@ export default function ProfilClient() {
   if (!user) return null;
 
   return (
-    <div className="max-w-5xl mx-auto pb-24 font-sans animate-in fade-in duration-500">
+    <div className="max-w-5xl mx-auto pb-28 md:pb-24 font-sans animate-in fade-in duration-500 w-full min-w-0">
       
-      {/* FLOATING TOAST NOTIFICATION */}
+      {/* ── FLOATING TOAST NOTIFICATION ── */}
       <div className="fixed top-4 md:top-8 left-4 right-4 md:left-0 md:right-0 z-[100] flex justify-center pointer-events-none">
         <AnimatePresence>
           {toast.show && (
@@ -129,20 +128,20 @@ export default function ProfilClient() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.8 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 bg-white min-w-[300px]"
+              className="pointer-events-auto flex items-center gap-3 px-4 md:px-5 py-3 md:py-4 rounded-2xl shadow-2xl shadow-slate-900/10 border border-slate-100 bg-white min-w-[300px] max-w-sm w-full"
             >
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                {toast.type === 'success' ? <CheckCircle2 size={18} strokeWidth={2.5} /> : <AlertCircle size={18} strokeWidth={2.5} />}
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toast.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                {toast.type === 'success' ? <CheckCircle2 size={20} strokeWidth={2.5} /> : <AlertCircle size={20} strokeWidth={2.5} />}
               </div>
-              <div className="flex-1 pr-4">
-                <h4 className="font-bold text-sm text-slate-900 leading-none mb-1">
+              <div className="flex-1 pr-2 min-w-0">
+                <h4 className="font-bold text-sm text-slate-900 leading-tight mb-0.5 truncate">
                   {toast.type === 'success' ? 'Berhasil Tersimpan' : 'Terjadi Kesalahan'}
                 </h4>
-                <p className="text-xs font-medium text-slate-500">{toast.text}</p>
+                <p className="text-[11px] md:text-xs font-medium text-slate-500 leading-relaxed">{toast.text}</p>
               </div>
               <button 
                 onClick={() => setToast({ ...toast, show: false })} 
-                className="text-slate-400 hover:text-slate-600 p-1.5 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors ml-2 shrink-0"
+                className="text-slate-400 hover:text-slate-700 p-2 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors shrink-0"
               >
                 <X size={14} strokeWidth={2.5} />
               </button>
@@ -151,80 +150,81 @@ export default function ProfilClient() {
         </AnimatePresence>
       </div>
 
-      {/* OVERLAY LOADING */}
+      {/* ── OVERLAY LOADING ── */}
       <AnimatePresence>
          {loading && (
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex items-center justify-center"
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] flex items-center justify-center w-full min-w-0 p-4"
             >
-               <div className="bg-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-200">
-                  <Loader2 className="animate-spin text-indigo-600" size={24} />
-                  <span className="text-sm font-bold text-slate-700">Menyimpan data...</span>
-               </div>
+               <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white px-6 md:px-8 py-5 md:py-6 rounded-[1.5rem] shadow-2xl flex flex-col items-center gap-4 border border-slate-100 min-w-[200px]">
+                  <Loader2 className="animate-spin text-indigo-600" size={36} strokeWidth={2.5} />
+                  <span className="text-xs md:text-sm font-bold tracking-wide text-slate-700">Menyimpan data...</span>
+               </motion.div>
             </motion.div>
          )}
       </AnimatePresence>
 
-      {/* HEADER SECTION - Responsif */}
+      {/* ── HEADER SECTION ── */}
       <div className="pt-4 md:pt-8 pb-6 md:pb-8 border-b border-slate-200 mb-8 md:mb-10 px-4 md:px-0">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Pengaturan Profil</h1>
-        <p className="text-xs md:text-sm text-slate-500 font-medium mt-1 md:mt-2">Kelola informasi publik dan keamanan akun Amania Anda.</p>
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Pengaturan Profil</h1>
+        <p className="text-xs md:text-sm text-slate-500 font-medium mt-1.5 md:mt-2">Kelola informasi publik dan keamanan akun Amania Anda.</p>
       </div>
 
-      {/* FORM SETTINGS */}
-      <form onSubmit={handleSubmit} className="space-y-8 md:space-y-10 px-4 md:px-0">
+      {/* ── FORM SETTINGS ── */}
+      <form onSubmit={handleSubmit} className="space-y-8 md:space-y-12 px-4 md:px-0 w-full min-w-0">
         
         {/* SECTION 1: PROFIL PUBLIK */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <div className="lg:col-span-1">
-            <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1">Profil Publik</h3>
-            <p className="text-xs md:text-sm text-slate-500">Informasi ini akan ditampilkan secara publik dan tercetak di E-Certificate Amania Anda.</p>
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 w-full min-w-0">
+          <div className="w-full lg:w-[280px] shrink-0">
+            <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1.5 md:mb-2">Profil Publik</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">Informasi ini akan ditampilkan secara publik di forum dan tercetak pada E-Certificate Amania Anda.</p>
           </div>
           
-          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 md:p-8 shadow-sm">
+          <div className="flex-1 bg-white border border-slate-200/80 rounded-[2rem] p-5 md:p-8 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] w-full min-w-0">
             
-            {/* Foto Profil Responsif */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-6 md:mb-8 border-b border-slate-100 pb-6 md:pb-8">
+            {/* Foto Profil Responsif (Tengah di HP, Kiri di Desktop) */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 mb-8 border-b border-slate-100 pb-8">
               <div className="relative group cursor-pointer shrink-0" onClick={() => fileInputRef.current?.click()}>
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-100 relative group-hover:ring-4 group-hover:ring-indigo-50 transition-all">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-slate-100 shadow-md bg-slate-50 relative group-hover:ring-4 group-hover:ring-indigo-100 transition-all">
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <User size={40} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-300" />
                   )}
                   <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                    <Camera size={20} />
+                    <Camera size={24} />
                   </div>
                 </div>
               </div>
-              <div className="text-left">
+              <div className="flex-1 flex flex-col items-center sm:items-start justify-center pt-2">
                 <h4 className="text-sm md:text-base font-bold text-slate-900">Foto Profil</h4>
-                <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 md:mt-1 mb-3">Rekomendasi ukuran 500x500px. Maksimal 5MB.</p>
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 md:px-4 py-1.5 md:py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
-                  Ganti Foto
+                <p className="text-[10px] md:text-xs text-slate-500 mt-1 mb-3.5 max-w-xs">Rekomendasi rasio 1:1 (Persegi). Ukuran maksimal 5MB (JPG/PNG).</p>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm">
+                  Pilih Foto Baru
                 </button>
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/png, image/jpeg, image/webp" className="hidden" />
               </div>
             </div>
 
-            {/* Nama & Bio */}
-            <div className="space-y-4 md:space-y-5">
+            {/* Input Nama & Bio */}
+            <div className="space-y-5 md:space-y-6 w-full min-w-0">
               <div>
-                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Nama Lengkap</label>
+                <label className="block text-[10px] md:text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Nama Lengkap Sesuai Gelar</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} required 
+                         className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner" />
                 </div>
               </div>
               
               <div>
-                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Tentang Saya (Bio)</label>
+                <label className="block text-[10px] md:text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Tentang Saya (Bio Pendek)</label>
                 <div className="relative">
-                  <FileText className="absolute left-3.5 top-3 text-slate-400" size={16} />
+                  <FileText className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <textarea 
-                    name="bio" value={formData.bio} onChange={handleChange} rows={4} placeholder="Tuliskan keahlian atau latar belakang pendidikan Anda..."
-                    className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none placeholder:text-slate-400" 
+                    name="bio" value={formData.bio} onChange={handleChange} rows={4} placeholder="Ceritakan latar belakang pendidikan atau profesi Anda..."
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none placeholder:text-slate-400 shadow-inner" 
                   />
                 </div>
               </div>
@@ -236,48 +236,54 @@ export default function ProfilClient() {
         <div className="h-px bg-slate-200 w-full" />
 
         {/* SECTION 2: KEAMANAN & KONTAK */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <div className="lg:col-span-1">
-            <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1 flex items-center gap-2"><ShieldCheck size={18} className="text-indigo-600"/> Keamanan & Kontak</h3>
-            <p className="text-xs md:text-sm text-slate-500">Perbarui email aktif, nomor WhatsApp, dan ubah kata sandi untuk melindungi akun Amania Anda.</p>
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 w-full min-w-0">
+          <div className="w-full lg:w-[280px] shrink-0">
+            <h3 className="text-sm md:text-base font-bold text-slate-900 mb-1.5 md:mb-2 flex items-center gap-2">
+              <ShieldCheck size={18} className="text-indigo-600"/> Kontak & Keamanan
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">Perbarui email aktif, nomor telepon (WhatsApp), dan ganti kata sandi untuk keamanan ekstra.</p>
           </div>
           
-          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 md:p-8 shadow-sm space-y-5 md:space-y-6">
+          <div className="flex-1 bg-white border border-slate-200/80 rounded-[2rem] p-5 md:p-8 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] space-y-6 md:space-y-8 w-full min-w-0">
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+            {/* Kontak Group */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
               <div>
-                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Email Terdaftar</label>
+                <label className="block text-[10px] md:text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Alamat Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required 
+                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm font-semibold text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner" />
                 </div>
               </div>
               
-              {/* 🔥 KOLOM NOMOR HP BARU 🔥 */}
               <div>
-                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Nomor HP (WhatsApp)</label>
+                <label className="block text-[10px] md:text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Nomor HP / WhatsApp</label>
                 <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Contoh: 08123456789" className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="08123456789" 
+                         className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 shadow-inner" />
                 </div>
               </div>
             </div>
 
-            {/* Grid berubah di HP jadi tumpuk */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 pt-4 border-t border-slate-100">
+            {/* Keamanan Group */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 pt-6 border-t border-slate-100">
               <div>
-                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Kata Sandi Baru</label>
+                <label className="block text-[10px] md:text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Kata Sandi Baru</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Kosongkan jika tidak diubah" minLength={8} className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Kosongkan jika tidak diubah" minLength={8} 
+                         className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm font-medium focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 shadow-inner" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 md:mb-2 uppercase tracking-wider">Konfirmasi Sandi</label>
+                <label className="block text-[10px] md:text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Konfirmasi Sandi Baru</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleChange} placeholder="Ketik ulang sandi baru" minLength={8} className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleChange} placeholder="Ketik ulang sandi baru" minLength={8} 
+                         className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm font-medium focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 shadow-inner" />
                 </div>
               </div>
             </div>
@@ -285,14 +291,14 @@ export default function ProfilClient() {
           </div>
         </div>
 
-        {/* BOTTOM FLOATING ACTION BAR - Responsif di HP */}
-        <div className="fixed sm:sticky bottom-0 sm:bottom-6 left-0 right-0 sm:mt-12 bg-white sm:bg-white/80 backdrop-blur-md border-t sm:border border-slate-200 px-4 sm:px-6 py-4 sm:rounded-2xl shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] sm:shadow-lg flex items-center justify-between z-40 sm:z-auto">
-          <div>
-            <p className="text-sm md:text-base font-bold text-slate-800">Simpan Perubahan</p>
-            <p className="text-[10px] text-slate-500 hidden md:block">Pastikan semua data sudah benar sebelum menyimpan.</p>
+        {/* ── BOTTOM FLOATING ACTION BAR ── */}
+        <div className="fixed sm:sticky bottom-0 sm:bottom-6 left-0 right-0 sm:mt-12 bg-white/90 sm:bg-white/80 backdrop-blur-xl border-t sm:border border-slate-200 px-5 sm:px-8 py-4 sm:py-5 sm:rounded-[1.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.05)] sm:shadow-lg flex items-center justify-between z-40 sm:z-auto w-full min-w-0">
+          <div className="min-w-0 pr-4">
+            <p className="text-sm md:text-base font-black text-slate-900 truncate">Simpan Perubahan</p>
+            <p className="text-[10px] md:text-xs text-slate-500 hidden md:block">Pastikan data yang Anda masukkan valid dan aktif.</p>
           </div>
-          <button type="submit" disabled={loading} className="bg-indigo-600 text-white px-5 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold hover:bg-indigo-700 transition-all shadow-md flex items-center gap-2 disabled:opacity-70">
-            <Save size={16} /> Simpan
+          <button type="submit" disabled={loading} className="bg-slate-900 text-white px-6 md:px-8 py-3 md:py-3.5 rounded-xl text-xs md:text-sm font-bold hover:bg-indigo-600 transition-all shadow-md flex items-center gap-2 shrink-0 disabled:opacity-70">
+            <Save size={16} /> <span className="hidden sm:inline">Simpan</span>
           </button>
         </div>
 

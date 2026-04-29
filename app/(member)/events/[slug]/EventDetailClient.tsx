@@ -104,7 +104,8 @@ const stripHtmlToText = (html: string) => {
              .replace(/&lt;/g, '<')
              .replace(/&gt;/g, '>')
              .replace(/&quot;/g, '"')
-             .replace(/&#39;/g, "'");
+             .replace(/&#39;/g, "'")
+             .replace(/\s+/g, ' ');
   return text.trim();
 };
 
@@ -207,7 +208,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     
     const fullDesc = stripHtmlToText(eventData?.description || '');
 
-    const shareIntro = `*Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara.*\n\n${fullDesc}\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
+    const shareIntro = `*Halo! Yuk ikutan program "${shareTitle}" di Amania Nusantara.*\n\n${fullDesc.substring(0, 150)}...\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
     const captionText = `${shareIntro}${shareUrl}`;
 
     try {
@@ -223,7 +224,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         if (eventData?.image) {
           try {
             const imgUrl = `${STORAGE_URL}/${eventData.image}`;
-            const response = await fetch(imgUrl);
+            const response = await fetch(imgUrl, { mode: 'cors' });
             const blob = await response.blob();
             
             const ext = blob.type.split('/')[1] || 'jpg';
@@ -264,7 +265,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     if (!eventData?.image) return;
     const imgUrl = `${STORAGE_URL}/${eventData.image}`;
     try {
-      const response = await fetch(imgUrl);
+      const response = await fetch(imgUrl, { mode: 'cors' });
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -281,18 +282,21 @@ export default function EventDetailClient({ slug }: { slug: string }) {
   };
 
   const handleProceedToCheckout = () => {
+    // 1. Cek apakah user sudah login
     if (!userData) {
       setModalType('login');
       setShowModal(true);
       return;
     }
 
+    // 2. Cek apakah user sudah punya tiket (dari Backend)
     if (eventData?.user_registration) {
       setModalType('registered');
       setShowModal(true);
       return;
     }
 
+    // 3. Cek sisa kuota
     if (eventData.quota <= 0) {
       toast.error('Maaf, kuota untuk program ini sudah habis.');
       return;
@@ -420,7 +424,6 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                     <Sparkles size={12} className="text-amber-400" />
                     {eventData.certificate_tier !== 'none' ? 'Sertifikat Tersedia' : 'Amania Official'}
                   </span>
-                  
                   <span
                     className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg ${
                       isPast ? 'bg-rose-500/90 text-white' : 'bg-emerald-500/90 text-white'
@@ -429,19 +432,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                     {isPast ? <AlertCircle size={12} /> : <CheckCircle2 size={12} />}
                     {isPast ? 'Program Selesai' : 'Pendaftaran Dibuka'}
                   </span>
-
-                  {/* 🔥 BADGE HITUNG MUNDUR (DI HERO) 🔥 */}
-                  {timeLeft && !isPast && (
-                    <motion.span 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="px-3 py-1.5 bg-amber-500/90 backdrop-blur-md border border-amber-400 text-white rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg"
-                    >
-                      <Clock size={12} /> {timeLeft}
-                    </motion.span>
-                  )}
                 </div>
-
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.15] tracking-tight drop-shadow-2xl">
                   {eventData.title}
                 </h1>
@@ -621,36 +612,46 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
         {/* RIGHT COLUMN */}
         <div className="order-1 lg:order-2 w-full lg:sticky lg:top-6 lg:self-start flex flex-col gap-6">
-          
-          {/* 🔥 WIDGET HITUNG MUNDUR LUXURY (DI SIDEBAR / CARD KANAN) 🔥 */}
-          {timeLeft && !isPast && (
+
+          {/* 🔥 POSISI BARU: POSTER EVENT DI ATAS KOTAK TIKET 🔥 */}
+          {eventData.image && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="w-full flex items-center justify-between p-4 sm:p-5 rounded-[2rem] border bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md relative overflow-hidden group"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="w-full bg-slate-900 rounded-[1.5rem] md:rounded-[2rem] border-4 border-white shadow-xl overflow-hidden relative"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/20 rounded-bl-full -z-10 blur-xl group-hover:bg-amber-400/40 transition-all duration-500" />
-              <div className="flex items-center gap-3.5 z-10">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-orange-500/30">
-                  <Clock size={22} />
-                </div>
-                <div>
-                  <p className="text-[10px] text-amber-700/80 font-black uppercase tracking-[0.15em] mb-1">
-                    Waktu Tersisa
-                  </p>
-                  <p className="text-sm sm:text-base font-black text-amber-950 uppercase tracking-wide drop-shadow-sm">
-                    {timeLeft}
-                  </p>
-                </div>
-              </div>
-              <div className="shrink-0 z-10 hidden sm:block">
-                 <Zap size={28} className="text-amber-500 opacity-60 animate-pulse" />
-              </div>
+              <img
+                src={`${STORAGE_URL}/${eventData.image}`}
+                alt="Poster Program"
+                className="w-full h-auto max-h-[600px] object-contain rounded-[1.25rem] md:rounded-[1.5rem]"
+              />
             </motion.div>
           )}
 
           <div className="bg-white border border-slate-200 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-10 opacity-50" />
+
+            {/* WIDGET WAKTU TERSISA (Hitung Mundur) */}
+            {timeLeft && !isPast && (
+              <div className="mb-6 w-full flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-amber-400/20 rounded-bl-full -z-10 blur-xl transition-all duration-500" />
+                <div className="flex items-center gap-3 z-10">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-amber-700/80 font-black uppercase tracking-[0.15em] mb-0.5">
+                      Waktu Tersisa
+                    </p>
+                    <p className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wide">
+                      {timeLeft}
+                    </p>
+                  </div>
+                </div>
+                <div className="shrink-0 z-10">
+                   <Zap size={24} className="text-amber-500 opacity-60 animate-pulse" />
+                </div>
+              </div>
+            )}
 
             <h3 className="text-xs font-black text-indigo-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
               <Ticket size={16} /> Pilih Tiket Akses
@@ -722,6 +723,8 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                   <span className="flex items-center justify-center gap-2">LANJUT KE PEMBAYARAN <ArrowRight size={16} /></span>
                 )}
               </button>
+              
+              {/* TOMBOL UNDUH POSTER */}
               {eventData.image && (
                 <button
                   onClick={handleDownloadBanner}

@@ -8,7 +8,7 @@ import {
   ShoppingCart, UserCircle, ShieldCheck, Zap,
   Infinity as InfinityIcon, RefreshCw, Star,
   MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, DownloadCloud, X, AlertCircle, Sparkles,
-  AlertTriangle, Crown, BookOpen, Award
+  AlertTriangle, Crown
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -213,7 +213,6 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   const totalReviews = product?.reviews_count || reviews.length;
   const avgRating    = parseFloat(product?.reviews_avg_rating) || 0;
   const isFree       = product?.price === 0;
-  // 🔥 LOGIKA DISKON 90%
   const originalPrice = product ? product.price * 10 : 0; 
   
   const getAvatar = (user: any) => {
@@ -235,7 +234,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}>
         <Loader2 size={48} className="text-indigo-600" />
       </motion.div>
-      <p className="text-sm font-black text-indigo-500/80 uppercase tracking-[0.3em]">Memuat Aset Premium...</p>
+      <p className="text-sm font-black text-indigo-500/80 uppercase tracking-[0.3em] animate-pulse">Memuat Aset Premium...</p>
     </div>
   );
 
@@ -247,7 +246,6 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         @keyframes shimmer {
           100% { transform: translateX(100%); }
         }
-        /* Penyesuaian HTML Content agar responsive di HP */
         .html-content { font-size: 1.05rem; line-height: 1.8; color: #334155; word-wrap: break-word; overflow-wrap: break-word; }
         .html-content p { margin-bottom: 1.5em; max-width: 100%; overflow-x: hidden; }
         .html-content img, .html-content video, .html-content iframe { max-width: 100%; height: auto; border-radius: 0.75rem; margin: 1rem 0; }

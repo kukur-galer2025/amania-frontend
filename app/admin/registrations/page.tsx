@@ -5,52 +5,40 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, XCircle, Eye, Search, 
   Loader2, Ticket, X, Mail, User, CreditCard, 
-  AlertTriangle, MessageSquare, Filter, Calendar, MapPin, Hash, ShieldCheck
+  AlertTriangle, MessageSquare, Filter, Calendar, MapPin, Hash, ShieldCheck, ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api'; 
 
 export default function AdminRegistrationsPage() {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // State Utama
   const [selectedProof, setSelectedProof] = useState<string | null>(null);
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   
-  // State Filter
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterEvent, setFilterEvent] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // State Alasan Penolakan
   const [rejectionReason, setRejectionReason] = useState('');
 
-  // 🔗 AMBIL STORAGE URL DARI .ENV
+  // 🔥 STATE BARU UNTUK MODAL FILTER EVENT 🔥
+  const [showEventFilterModal, setShowEventFilterModal] = useState(false);
+
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
-  // State Modal Konfirmasi
   const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    id: number | null;
-    action: 'verify' | 'reject' | null;
-    title: string;
-    desc: string;
-  }>({
-    isOpen: false, id: null, action: null, title: '', desc: ''
-  });
+    isOpen: boolean; id: number | null; action: 'verify' | 'reject' | null; title: string; desc: string;
+  }>({ isOpen: false, id: null, action: null, title: '', desc: '' });
 
   const fetchRegistrations = async () => {
     try {
-      // 🔥 PENGGUNAAN APIFETCH 🔥
       const res = await apiFetch('/admin/registrations');
       const json = await res.json();
       if (json.success) setRegistrations(json.data);
-    } catch (error) {
-      toast.error("Gagal mengambil data pendaftar");
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error("Gagal mengambil data pendaftar"); } 
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchRegistrations(); }, []);
@@ -74,7 +62,6 @@ export default function AdminRegistrationsPage() {
     });
   };
 
-  // 🔥 OPTIMISTIC UPDATE YANG AMAN 🔥
   const executeAction = async () => {
     if (!confirmModal.id || !confirmModal.action) return;
     
@@ -88,10 +75,9 @@ export default function AdminRegistrationsPage() {
     
     setConfirmModal({ ...confirmModal, isOpen: false });
     
-    // Simpan status sebelum ada error
     const backupRegistrations = [...registrations];
     
-    // Update State secara lokal agar instan
+    // Optimistic Update
     setRegistrations(prev => 
       prev.map(reg => {
         if (reg.id === id) {
@@ -107,36 +93,31 @@ export default function AdminRegistrationsPage() {
     );
     
     setSelectedDetailId(null);
-    
     const loadToast = toast.loading("Memproses di server...");
     
     try {
       const payload = action === 'reject' ? { reason: currentReason } : {};
-
-      // 🔥 PENGGUNAAN APIFETCH 🔥
       const res = await apiFetch(`/admin/registrations/${id}/${action}`, {
-        method: 'POST',
-        body: JSON.stringify(payload)
+        method: 'POST', body: JSON.stringify(payload)
       });
       const json = await res.json();
       
       if (res.ok && json.success) {
         toast.success(json.message, { id: loadToast });
         
-        // 🔥 UPDATE AMAN: Pertahankan objek event & user agar teks tidak jadi "Event Dihapus" 🔥
+        // Sinkronisasi data asli dari server
         setRegistrations(prev => prev.map(reg => {
           if (reg.id === id) {
              return {
                ...reg,
                ...json.data,
-               event: reg.event, // GARANSI event tidak hilang
-               user: reg.user // GARANSI user tidak hilang
+               event: reg.event,
+               user: reg.user 
              };
           }
           return reg;
         }));
       } else {
-        // Rollback
         setRegistrations(backupRegistrations);
         toast.error(json.message || "Gagal memproses", { id: loadToast });
       }
@@ -146,7 +127,6 @@ export default function AdminRegistrationsPage() {
     }
   };
 
-  // Filter Data
   const filteredData = useMemo(() => registrations.filter(reg => {
     const matchesStatus = filterStatus === 'all' || reg.status === filterStatus;
     const matchesEvent = filterEvent === 'all' || reg.event_id?.toString() === filterEvent;
@@ -201,19 +181,22 @@ export default function AdminRegistrationsPage() {
             ))}
           </div>
 
-          {/* Select Event Filter */}
+          {/* 🔥 UPDATE: Filter Event menggunakan Button & Modal (Mobile Friendly) 🔥 */}
           <div className="relative w-full sm:w-auto">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" size={14} />
-            <select 
-              value={filterEvent}
-              onChange={(e) => setFilterEvent(e.target.value)}
-              className="w-full sm:w-[200px] bg-white border border-slate-200 rounded-lg py-2.5 md:py-3 pl-9 pr-3 text-xs md:text-sm font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none shadow-sm truncate cursor-pointer"
+            <button
+              onClick={() => setShowEventFilterModal(true)}
+              className="w-full sm:w-[250px] flex items-center justify-between bg-white border border-slate-200 rounded-lg py-2.5 md:py-3 px-3.5 text-xs md:text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-indigo-300 transition-all shadow-sm"
             >
-              <option value="all">Semua Program Event</option>
-              {uniqueEvents.map((ev: any) => (
-                <option key={ev.id} value={ev.id.toString()}>{ev.title}</option>
-              ))}
-            </select>
+              <div className="flex items-center gap-2 truncate">
+                <Filter className="text-indigo-500 shrink-0" size={16} />
+                <span className="truncate">
+                  {filterEvent === 'all' 
+                    ? 'Semua Program Event' 
+                    : uniqueEvents.find(e => e.id.toString() === filterEvent)?.title || 'Semua Program Event'}
+                </span>
+              </div>
+              <ChevronDown size={16} className="text-slate-400 shrink-0 ml-2" />
+            </button>
           </div>
         </div>
 
@@ -244,7 +227,6 @@ export default function AdminRegistrationsPage() {
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredData.length > 0 ? filteredData.map((reg) => {
                 
-                // 🔥 LOGIKA TIPE AKSES 🔥
                 const isFree = parseFloat(reg.total_amount) === 0;
                 const isPremium = reg.tier === 'premium';
                 
@@ -320,6 +302,64 @@ export default function AdminRegistrationsPage() {
           </table>
         </div>
       </div>
+
+      {/* 🔥 MODAL POPUP: FILTER PROGRAM EVENT 🔥 */}
+      <AnimatePresence>
+        {showEventFilterModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowEventFilterModal(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-white rounded-[1.5rem] md:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[85vh] border border-slate-200"
+              onClick={(e) => e.stopPropagation()} 
+            >
+              <div className="px-5 md:px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+                <h2 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Filter size={18} className="text-indigo-500" /> Filter Event
+                </h2>
+                <button 
+                  onClick={() => setShowEventFilterModal(false)} 
+                  className="text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors p-1.5 rounded-lg"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-3 md:p-4 overflow-y-auto custom-scrollbar flex-1 space-y-1.5">
+                <button
+                  onClick={() => { setFilterEvent('all'); setShowEventFilterModal(false); }}
+                  className={`w-full text-left px-4 py-3.5 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center justify-between ${
+                    filterEvent === 'all' ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200' : 'text-slate-700 hover:bg-slate-50 border border-transparent'
+                  }`}
+                >
+                  <span>Semua Program Event</span>
+                  {filterEvent === 'all' && <CheckCircle2 size={18} className="text-indigo-600" />}
+                </button>
+
+                {uniqueEvents.map((ev: any) => (
+                  <button
+                    key={ev.id}
+                    onClick={() => { setFilterEvent(ev.id.toString()); setShowEventFilterModal(false); }}
+                    className={`w-full text-left px-4 py-3.5 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center justify-between ${
+                      filterEvent === ev.id.toString() ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200' : 'text-slate-700 hover:bg-slate-50 border border-transparent'
+                    }`}
+                  >
+                    <span className="line-clamp-2 pr-4">{ev.title}</span>
+                    {filterEvent === ev.id.toString() && <CheckCircle2 size={18} className="text-indigo-600 shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {selectedDetail && (
