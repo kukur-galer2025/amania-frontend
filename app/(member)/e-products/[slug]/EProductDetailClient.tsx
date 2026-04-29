@@ -7,7 +7,7 @@ import {
   FileText, ArrowLeft, Loader2,
   ShoppingCart, UserCircle, ShieldCheck, Zap,
   Infinity as InfinityIcon, RefreshCw, Star,
-  MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, DownloadCloud, X, AlertCircle,
+  MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, DownloadCloud, X, AlertCircle, Sparkles,
   AlertTriangle, Crown, BookOpen, Award
 } from 'lucide-react';
 import Link from 'next/link';
