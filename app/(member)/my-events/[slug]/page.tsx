@@ -1,16 +1,9 @@
-import { Metadata } from 'next';
+// Di file: app/my-events/[slug]/page.tsx
+import React, { use } from 'react';
 import MyEventDetailClient from './MyEventDetailClient';
 
-export const metadata: Metadata = {
-  title: 'Ruang Kelas | Amania',
-  description: 'Akses modul materi, video, dan link pertemuan program masterclass Amania.',
-  robots: { 
-    index: false, // ⚠️ Melindungi privasi kelas dari Google Search
-    follow: false 
-  }
-};
-
-export default function MyEventDetailPage({ params }: { params: { slug: string } }) {
-  // 🔥 Meneruskan parameter slug (cth: "kelas-react-js") langsung ke Client Component
-  return <MyEventDetailClient slug={params.slug} />;
+export default function MyEventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  // 🔥 SOLUSI BUG MUTER-MUTER: Gunakan React.use() untuk mengambil slug
+  const resolvedParams = use(params);
+  return <MyEventDetailClient slug={resolvedParams.slug} />;
 }

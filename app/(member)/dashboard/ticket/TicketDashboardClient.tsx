@@ -6,10 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, Clock, ShieldCheck, ArrowRight, 
   Ticket, Calendar, MapPin, CheckCircle2, 
-  XCircle, Loader2, UploadCloud, X, ChevronRight, AlertCircle, Sparkles, User
+  XCircle, Loader2, UploadCloud, X, ChevronRight, AlertCircle, Sparkles, User, AlertTriangle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI KITA
+import { apiFetch } from '@/app/utils/api'; 
 
 export default function TicketDashboardClient() {
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -22,7 +22,6 @@ export default function TicketDashboardClient() {
   const [isUploading, setIsUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // 🔗 AMBIL STORAGE URL DARI .ENV
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
   const fetchMyRegistrations = async () => {
@@ -33,7 +32,6 @@ export default function TicketDashboardClient() {
         return setLoading(false);
       }
 
-      // 🔥 MENGGUNAKAN APIFETCH 🔥
       const res = await apiFetch('/my-registrations');
       const json = await res.json();
       
@@ -66,12 +64,11 @@ export default function TicketDashboardClient() {
       const formData = new FormData();
       formData.append('payment_proof', newProof);
 
-      // 🔥 MENGGUNAKAN APIFETCH DENGAN FORMDATA 🔥
       const res = await apiFetch(`/registrations/${reuploadModal.regId}/reupload`, {
         method: 'POST',
         headers: { 
             'Accept': 'application/json',
-            'Content-Type': '' // Dihapus agar browser set multipart boundary sendiri
+            'Content-Type': '' 
         },
         body: formData
       });
@@ -90,6 +87,12 @@ export default function TicketDashboardClient() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    const date = new Date(timeString);
+    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(/\./g, ':');
   };
 
   const totalClasses = registrations.length;
@@ -140,7 +143,7 @@ export default function TicketDashboardClient() {
          </div>
       </div>
 
-      {/* STATS SECTION - Horizontal Scroll on Mobile */}
+      {/* STATS SECTION */}
       <div className="bg-white border border-slate-200 rounded-xl md:rounded-2xl shadow-sm flex md:grid md:grid-cols-3 divide-x md:divide-y-0 divide-slate-200 overflow-x-auto relative z-20 md:-mt-6 mx-0 md:mx-4 lg:mx-8 custom-scrollbar w-auto min-w-0">
         <div className="p-4 md:p-6 flex items-center gap-3 md:gap-4 hover:bg-slate-50/50 transition-colors min-w-[200px] md:min-w-0 flex-1">
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
@@ -173,6 +176,43 @@ export default function TicketDashboardClient() {
 
       {/* LIST TICKETS SECTION */}
       <div className="space-y-4 md:space-y-5 px-1 md:px-0 w-full min-w-0">
+        
+        {/* 🔥 PENGUMUMAN / CATATAN PENTING 🔥 */}
+        <div className="bg-rose-50 border-l-4 border-rose-500 rounded-r-xl md:rounded-r-2xl p-4 md:p-5 flex gap-3 md:gap-4 shadow-sm mx-1 md:mx-0 min-w-0 w-auto relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 text-rose-500/10 rotate-12">
+             <AlertTriangle size={100} strokeWidth={2} />
+          </div>
+
+          <AlertTriangle size={24} className="text-rose-600 shrink-0 mt-0.5 relative z-10" strokeWidth={2.5} />
+          
+          <div className="flex flex-col gap-2 w-full min-w-0 text-xs md:text-sm leading-relaxed relative z-10">
+            <p className="font-black text-rose-800 uppercase tracking-widest text-[11px] md:text-xs">Catatan Penting</p>
+            <ul className="list-none space-y-3.5 text-rose-700/90 font-medium">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0 mt-1.5" />
+                <span className="flex-1">
+                  <strong>E-Ticket</strong> hanya digunakan apabila event berjalan secara <strong className="text-rose-900 bg-rose-100/80 px-1 rounded uppercase">offline</strong> (tunjukkan E-Ticket ini ke panitia di lokasi pendaftaran ulang).
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0 mt-1.5" />
+                <span className="flex-1">
+                  Apabila terdapat kendala terkait tiket, pembayaran, atau perubahan data, silakan hubungi Customer Service Amania.
+                  <div className="mt-2.5">
+                    {/* 🔥 TOMBOL WHATSAPP DENGAN TEKS PROFESIONAL 🔥 */}
+                    <a href="https://wa.me/628985477864" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg font-bold text-xs shadow-sm shadow-[#25D366]/30 transition-all active:scale-95 group w-max">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="shrink-0 group-hover:scale-110 transition-transform">
+                        <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                      </svg>
+                      Hubungi Customer Service
+                    </a>
+                  </div>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <h2 className="text-base md:text-lg font-bold text-slate-900 px-1 md:px-2 mt-2 md:mt-4 break-words w-full">Riwayat Transaksi</h2>
         
         {registrations.length === 0 ? (
@@ -191,7 +231,6 @@ export default function TicketDashboardClient() {
             {registrations.map((reg, idx) => {
               const isApproved = reg.status === 'verified' || reg.tier === 'free';
               
-              // 🔥 LOGIKA ORGANIZER 🔥
               const isSuperadmin = !reg.event?.organizer || reg.event?.organizer?.role === 'superadmin';
               const organizerName = isSuperadmin ? 'Amania Official' : reg.event?.organizer?.name;
 
@@ -202,7 +241,6 @@ export default function TicketDashboardClient() {
                 >
                   <div className="p-4 md:p-5 flex flex-col lg:flex-row gap-4 md:gap-6 items-start lg:items-center w-full min-w-0">
                     
-                    {/* Thumbnail */}
                     <div className="w-full lg:w-56 h-40 sm:h-48 lg:h-32 rounded-lg md:rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 relative">
                       {reg.event?.image ? (
                         <img src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -210,7 +248,6 @@ export default function TicketDashboardClient() {
                         <div className="w-full h-full flex items-center justify-center text-slate-400"><BookOpen size={24} className="md:w-7 md:h-7" /></div>
                       )}
                       
-                      {/* Mobile Status Badge Overlay */}
                       <div className="absolute top-2 left-2 lg:hidden flex gap-1.5 min-w-0">
                         {isApproved ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50/90 backdrop-blur-sm text-emerald-700 border border-emerald-200/50 rounded text-[9px] font-bold uppercase tracking-wider shadow-sm shrink-0 max-w-[120px]">
@@ -228,7 +265,6 @@ export default function TicketDashboardClient() {
                       </div>
                     </div>
 
-                    {/* Content Details */}
                     <div className="flex-1 w-full min-w-0 space-y-2.5 md:space-y-3">
                       <div className="hidden lg:flex flex-wrap items-center gap-2 min-w-0 w-full">
                         {isApproved ? (
@@ -253,19 +289,29 @@ export default function TicketDashboardClient() {
                         <h3 className="text-base md:text-lg font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2 lg:line-clamp-none break-words w-full">
                           {reg.event?.title || 'Program Tidak Tersedia'}
                         </h3>
-                        {/* 🔥 MENAMPILKAN NAMA ORGANIZER 🔥 */}
                         <p className="text-[10px] md:text-[11px] font-semibold text-slate-500 mt-1 flex items-center gap-1 truncate w-full">
                            <User size={10} className="text-indigo-400 shrink-0"/> {organizerName} {isSuperadmin && <ShieldCheck size={10} className="text-emerald-500 shrink-0" />}
                         </p>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:gap-6 text-[11px] md:text-xs font-semibold text-slate-500 min-w-0 w-full">
-                        <span className="flex items-center gap-1.5 min-w-0 w-full"><Calendar size={14} className="text-slate-400 shrink-0"/> <span className="truncate w-full">{reg.event ? new Date(reg.event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span></span>
-                        <span className="flex items-center gap-1.5 min-w-0 w-full"><MapPin size={14} className="text-slate-400 shrink-0"/> <span className="truncate max-w-[200px] sm:max-w-[150px] md:max-w-none">{reg.event?.venue || '-'}</span></span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:gap-5 text-[11px] md:text-xs font-semibold text-slate-500 min-w-0 w-full flex-wrap">
+                        <span className="flex items-center gap-1.5 min-w-0 shrink-0">
+                          <Calendar size={14} className="text-slate-400 shrink-0"/> 
+                          <span className="truncate">{reg.event ? new Date(reg.event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span>
+                        </span>
+                        
+                        <span className="flex items-center gap-1.5 min-w-0 shrink-0">
+                          <Clock size={14} className="text-slate-400 shrink-0"/> 
+                          <span className="truncate">{reg.event ? `${formatTime(reg.event.start_time)} - ${formatTime(reg.event.end_time)} WIB` : '-'}</span>
+                        </span>
+
+                        <span className="flex items-center gap-1.5 min-w-0 shrink-0">
+                          <MapPin size={14} className="text-slate-400 shrink-0"/> 
+                          <span className="truncate max-w-[200px] sm:max-w-[150px] md:max-w-[200px]">{reg.event?.venue || '-'}</span>
+                        </span>
                       </div>
                     </div>
 
-                    {/* Action & Price Area */}
                     <div className="w-full lg:w-auto flex flex-row lg:flex-col justify-between items-center lg:items-end gap-3 md:gap-4 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 pt-3 md:pt-4 lg:pt-0 lg:pl-6 min-w-0">
                       <div className="text-left lg:text-right min-w-0 w-full">
                         <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5 md:mb-1 truncate w-full">Total Tagihan</p>
@@ -273,7 +319,6 @@ export default function TicketDashboardClient() {
                       </div>
                       
                       {isApproved ? (
-                       // 🔥 UBAH LINK TOMBOL E-TICKET MENGARAH KE DYNAMIC ROUTE [slug] 🔥
                       <Link 
                         href={`/dashboard/ticket/${reg.event?.slug}`} 
                         className="inline-flex items-center justify-center gap-1.5 md:gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg md:rounded-xl text-[11px] md:text-xs font-semibold transition-colors shadow-sm group/btn shrink-0 min-w-0"
@@ -292,7 +337,6 @@ export default function TicketDashboardClient() {
                     </div>
                   </div>
 
-                  {/* ALERTA PENOLAKAN */}
                   {reg.status === 'rejected' && (
                     <div className="bg-rose-50/80 border-t border-rose-100 px-4 md:px-5 py-3 md:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4 w-full min-w-0">
                       <div className="flex items-start gap-2.5 md:gap-3 w-full min-w-0">

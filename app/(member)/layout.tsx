@@ -236,7 +236,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-[#F4F7FB] text-slate-800 flex font-sans relative w-full overflow-hidden">
       
-      {/* Abstract Ambient Orbs - Membuat BG tidak polos */}
+      {/* Abstract Ambient Orbs */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-100/40 blur-[100px] pointer-events-none z-0"></div>
       <div className="fixed bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-100/30 blur-[120px] pointer-events-none z-0"></div>
       <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-50/40 blur-[80px] pointer-events-none z-0"></div>
@@ -289,7 +289,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         )}
       </AnimatePresence>
 
-      {/* SIDEBAR - GLASSMORPHISM */}
+      {/* SIDEBAR */}
       <aside className={`fixed top-0 left-0 h-screen w-[270px] bg-white/70 backdrop-blur-2xl border-r border-white/60 flex flex-col z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.05)]' : '-translate-x-full'}`}>
         <div className="h-[72px] px-8 flex items-center justify-between border-b border-slate-200/40 shrink-0 bg-transparent">
           <Link href="/beranda" className="flex items-center gap-3 group">
@@ -384,32 +384,31 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 lg:ml-[270px] w-full min-h-screen flex flex-col relative z-10">
+      <main className="flex-1 lg:ml-[270px] w-full min-h-screen flex flex-col relative z-10 overflow-x-hidden">
         
-        {/* Header Bar Responsif - Glassmorphism */}
-        <header className="h-[72px] bg-white/60 backdrop-blur-2xl border-b border-white/60 flex items-center justify-between px-5 md:px-10 sticky top-0 z-30 shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 lg:hidden text-slate-500 hover:bg-white hover:shadow-sm rounded-lg transition-all">
+        <header className="h-[72px] bg-white/60 backdrop-blur-2xl border-b border-white/60 flex items-center justify-between px-4 sm:px-5 md:px-10 sticky top-0 z-30 shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center gap-3 md:gap-4">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 lg:hidden text-slate-500 hover:bg-white hover:shadow-sm rounded-lg transition-all shrink-0">
               <Menu size={22} />
             </button>
             
-            <div className="hidden sm:flex items-center gap-2.5 text-sm">
-              <div className="text-slate-400">
+            <div className="hidden sm:flex items-center gap-2.5 text-sm min-w-0">
+              <div className="text-slate-400 shrink-0">
                 {pathname === '/beranda' ? <Home size={18} /> : 
                  pathname.startsWith('/tentang-kami') ? <Info size={18} /> : 
                  pathname.startsWith('/profil') ? <User size={18} /> : 
                  <LayoutDashboard size={18} />}
               </div>
-              <ChevronRight size={14} className="text-slate-300" /> 
-              <span className="text-slate-800 font-bold capitalize tracking-wide">
+              <ChevronRight size={14} className="text-slate-300 shrink-0" /> 
+              <span className="text-slate-800 font-bold capitalize tracking-wide truncate">
                 {pathname.split('/')[1]?.replace('-', ' ') || 'Beranda'}
               </span>
             </div>
             {/* Logo Mobile Only */}
-            <div className="sm:hidden font-black text-slate-900 tracking-tight text-xl">Amania</div>
+            <div className="sm:hidden font-black text-slate-900 tracking-tight text-xl shrink-0">Amania</div>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-6 shrink-0">
             {/* MESIN PENCARI PINTAR */}
             <div className="relative group" ref={searchRef}>
               
@@ -421,7 +420,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchEnter}
                   placeholder="Pencarian global..." 
-                  className="bg-white/80 border border-slate-200/60 rounded-full py-2 pl-10 pr-4 text-[13px] text-slate-700 font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 w-52 lg:w-64 focus:lg:w-80 transition-all duration-300 outline-none shadow-sm placeholder-slate-400" 
+                  className="bg-white/80 border border-slate-200/60 rounded-full py-2 pl-10 pr-4 text-[13px] text-slate-700 font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 w-48 lg:w-64 focus:lg:w-80 transition-all duration-300 outline-none shadow-sm placeholder-slate-400" 
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded shadow-sm">↵</span>
@@ -445,7 +444,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                     initial={{ opacity: 0, y: -10 }} 
                     animate={{ opacity: 1, y: 0 }} 
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 top-14 w-[290px] sm:w-[340px] bg-white/95 backdrop-blur-xl p-3.5 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 z-50 md:hidden"
+                    className="absolute right-[-40px] sm:right-0 top-14 w-[calc(100vw-32px)] max-w-[340px] bg-white/95 backdrop-blur-xl p-3.5 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 z-50 md:hidden"
                   >
                     <div className="relative">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500" size={18} />
@@ -468,13 +467,13 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 {showSearchDropdown && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-[65px] md:top-[50px] w-[320px] md:w-[380px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 origin-top-right"
+                    className="absolute right-[-40px] sm:right-0 top-[65px] md:top-[50px] w-[calc(100vw-32px)] max-w-[380px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 origin-top-right"
                   >
                     <div className="bg-slate-50/50 px-5 py-3 border-b border-slate-100 flex justify-between items-center">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0">
                         {isSearching ? 'Mencari...' : 'Hasil Pencarian'}
                       </p>
-                      {searchQuery && <p className="text-[11px] font-semibold text-indigo-600 leading-none truncate max-w-[150px]">"{searchQuery}"</p>}
+                      {searchQuery && <p className="text-[11px] font-semibold text-indigo-600 leading-none truncate ml-2 max-w-[150px]">"{searchQuery}"</p>}
                     </div>
                     
                     <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
@@ -524,8 +523,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <h4 className="text-[13px] font-bold text-slate-900 leading-tight truncate group-hover/item:text-indigo-600 transition-colors">{event.title}</h4>
-                                  <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-1.5">
-                                    <Calendar size={12} className="text-slate-400 shrink-0"/> {new Date(event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-1.5 truncate w-full">
+                                    <Calendar size={12} className="text-slate-400 shrink-0"/> <span className="truncate">{new Date(event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                   </p>
                                 </div>
                                 <ArrowRight size={14} className="text-slate-300 opacity-0 group-hover/item:opacity-100 group-hover/item:text-indigo-500 group-hover/item:translate-x-1 transition-all shrink-0" />
@@ -556,8 +555,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <h4 className="text-[13px] font-bold text-slate-900 leading-tight truncate group-hover/item:text-slate-700 transition-colors">{ep.title}</h4>
-                                  <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-1.5">
-                                    <User size={12} className="text-slate-400 shrink-0"/> <span className="truncate">{ep.author_name}</span> • <span className={`font-bold ${ep.formatted_price === 'Gratis' ? 'text-emerald-600' : 'text-slate-800'}`}>{ep.formatted_price}</span>
+                                  <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-1.5 truncate w-full">
+                                    <User size={12} className="text-slate-400 shrink-0"/> <span className="truncate">{ep.author_name}</span> • <span className={`font-bold shrink-0 ${ep.formatted_price === 'Gratis' ? 'text-emerald-600' : 'text-slate-800'}`}>{ep.formatted_price}</span>
                                   </p>
                                 </div>
                                 <ArrowRight size={14} className="text-slate-300 opacity-0 group-hover/item:opacity-100 group-hover/item:text-slate-500 group-hover/item:translate-x-1 transition-all shrink-0" />
@@ -584,8 +583,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <h4 className="text-[13px] font-bold text-slate-900 leading-tight truncate group-hover/item:text-slate-600 transition-colors">{article.title}</h4>
-                                  <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-1.5">
-                                    <User size={12} className="text-slate-400 shrink-0"/> {article.author_name}
+                                  <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-1.5 truncate w-full">
+                                    <User size={12} className="text-slate-400 shrink-0"/> <span className="truncate">{article.author_name}</span>
                                   </p>
                                 </div>
                                 <ArrowRight size={14} className="text-slate-300 opacity-0 group-hover/item:opacity-100 group-hover/item:text-slate-500 group-hover/item:translate-x-1 transition-all shrink-0" />
@@ -605,7 +604,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                       {!isSearching && pageResults.length === 0 && eventResults.length === 0 && articleResults.length === 0 && eProductResults.length === 0 && (
                         <div className="p-10 flex flex-col items-center justify-center text-center text-slate-400">
                           <Search size={32} className="mb-4 text-slate-300" />
-                          <p className="text-[13px] font-bold text-slate-500 tracking-wide">Tidak ada hasil untuk "{searchQuery}"</p>
+                          <p className="text-[13px] font-bold text-slate-500 tracking-wide break-words w-full">Tidak ada hasil untuk "{searchQuery}"</p>
                           <p className="text-[11px] mt-1.5 text-slate-400">Coba gunakan kata kunci yang lebih umum.</p>
                         </div>
                       )}
@@ -617,7 +616,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
             </div>
             
             {/* NOTIFIKASI BELL */}
-            <div className="relative" ref={notifRef}>
+            <div className="relative shrink-0" ref={notifRef}>
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
                 className={`relative p-2.5 rounded-xl transition-all duration-300 ${showNotifications ? 'bg-indigo-50 text-indigo-600 shadow-sm border border-indigo-100' : 'text-slate-400 hover:text-slate-800 hover:bg-white hover:shadow-sm'}`}
@@ -634,12 +633,12 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 {showNotifications && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-[55px] w-[320px] md:w-[380px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 origin-top-right"
+                    className="absolute right-[-10px] sm:right-0 top-[55px] w-[calc(100vw-32px)] max-w-[380px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 origin-top-right"
                   >
                     <div className="bg-slate-50/50 px-5 py-4 border-b border-slate-100 flex justify-between items-center">
-                      <h3 className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">Pemberitahuan</h3>
+                      <h3 className="text-[11px] font-bold text-slate-800 uppercase tracking-widest shrink-0">Pemberitahuan</h3>
                       {unreadCount > 0 && (
-                        <button onClick={handleMarkAllAsRead} className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Tandai dibaca</button>
+                        <button onClick={handleMarkAllAsRead} className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 transition-colors shrink-0">Tandai dibaca</button>
                       )}
                     </div>
                     
@@ -666,14 +665,14 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                             <Link 
                               key={notif.id} href={targetUrl} 
                               onClick={() => { if (isUnread) handleMarkAllAsRead(); setShowNotifications(false); }} 
-                              className={`flex items-start gap-4 p-4 hover:bg-slate-50 transition-colors relative ${isUnread ? 'bg-indigo-50/30' : ''}`}
+                              className={`flex items-start gap-3 md:gap-4 p-4 hover:bg-slate-50 transition-colors relative ${isUnread ? 'bg-indigo-50/30' : ''}`}
                             >
                               {isUnread && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-full bg-indigo-500" />}
                               <div className={`w-10 h-10 rounded-full border ${bgIcon} ${iconColor} flex items-center justify-center shrink-0`}><Icon size={18} /></div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-bold text-slate-900 mb-1 line-clamp-1">{notif.data?.title || notif.data?.event_name}</p>
-                                <p className={`text-[12px] leading-relaxed ${isUnread ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>{notif.data?.message}</p>
-                                <p className="text-[10px] font-bold text-slate-400 mt-2.5 uppercase tracking-wide">{formatTimeAgo(notif.created_at)}</p>
+                                <p className="text-[12px] md:text-[13px] font-bold text-slate-900 mb-1 line-clamp-1">{notif.data?.title || notif.data?.event_name}</p>
+                                <p className={`text-[11px] md:text-[12px] leading-relaxed ${isUnread ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>{notif.data?.message}</p>
+                                <p className="text-[9px] md:text-[10px] font-bold text-slate-400 mt-2.5 uppercase tracking-wide">{formatTimeAgo(notif.created_at)}</p>
                               </div>
                             </Link>
                           );
@@ -688,8 +687,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           </div>
         </header>
 
-        <div className="flex-1 w-full py-8 md:py-10">
-          <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-10 w-full relative z-10">
+        <div className="flex-1 w-full py-6 md:py-10">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-10 w-full relative z-10">
             {children}
           </div>
         </div>
@@ -698,7 +697,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex flex-col items-center md:items-start gap-3.5">
               <div className="flex items-center gap-3">
-                <img src="/logo-amania.png" alt="Amania" className="h-6 w-auto object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
+                <img src="/logo-amania.png" alt="Amania" className="h-6 w-auto object-contain transition-all duration-300" />
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Amania.id</span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium text-center md:text-left max-w-sm leading-relaxed">
@@ -716,12 +715,13 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         </footer>
       </main>
 
-      {/* ════════ 🔥 FLOATING WHATSAPP BUTTON (LUXURY EMERALD) 🔥 ════════ */}
+      {/* ════════ 🔥 FLOATING WHATSAPP BUTTON 🔥 ════════ */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.5, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 1 }}
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[99]"
+        // 🔥 PENYESUAIAN PENTING DI SINI: bottom-24 untuk HP agar tidak bertabrakan dengan Mobile Sticky Bar
+        className="fixed bottom-24 md:bottom-8 right-5 md:right-8 z-[99]"
       >
         <Link 
           href="https://wa.me/628985477864" 
@@ -729,24 +729,20 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           rel="noopener noreferrer"
           className="relative block group"
         >
-          {/* Efek Aura Glowing Luar */}
           <div className="absolute inset-0 bg-[#25D366] rounded-full blur-xl opacity-20 group-hover:opacity-50 group-hover:scale-150 transition-all duration-500"></div>
           
-          {/* Tombol Utama */}
           <motion.div 
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             className="relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white rounded-full shadow-[0_10px_25px_-5px_rgba(37,211,102,0.5)] border border-white/20 overflow-hidden active:scale-95 transition-transform"
           >
-            {/* Kilauan (Shimmer) Efek Luxury */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>
             
-            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16" className="drop-shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16" className="drop-shadow-md w-7 h-7 md:w-[30px] md:h-[30px]">
               <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
             </svg>
           </motion.div>
 
-          {/* Label Tooltip Melayang */}
           <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none translate-x-2 group-hover:translate-x-0 hidden sm:block">
             <div className="bg-white/90 backdrop-blur-md text-slate-800 text-[11px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1)] whitespace-nowrap border border-slate-200">
               Hubungi Amania

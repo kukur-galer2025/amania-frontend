@@ -7,7 +7,7 @@ import {
   Calendar, MapPin, Search, AlertCircle, 
   Image as ImageIcon, Sparkles, 
   ChevronLeft, ChevronRight, User, Gem, Zap, CheckCircle2, ShieldCheck, ArrowRight,
-  MonitorPlay, BookOpen, LayoutGrid, Archive
+  MonitorPlay, BookOpen, LayoutGrid, Archive, Clock
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 
@@ -64,7 +64,9 @@ export default function EventsClient() {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const res = await apiFetch('/events');
+        // Tambahkan query parameter jika ada
+        const url = searchQuery ? `/events?search=${encodeURIComponent(searchQuery)}` : '/events';
+        const res = await apiFetch(url);
         if (!res.ok) throw new Error("Gagal terhubung ke server API");
         const data = await res.json();
         if (data.success) {
@@ -77,8 +79,15 @@ export default function EventsClient() {
         setLoading(false);
       }
     };
-    fetchEvents();
-  }, []);
+    
+    // Tambahkan debounce
+    const delayDebounceFn = setTimeout(() => {
+      fetchEvents();
+    }, 500)
+    
+    return () => clearTimeout(delayDebounceFn)
+
+  }, [searchQuery]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -86,16 +95,14 @@ export default function EventsClient() {
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      const isMatchSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            event.organizer?.name?.toLowerCase().includes(searchQuery.toLowerCase());
       const eventDate = new Date(event.start_time);
       const now = new Date();
 
-      if (filter === 'upcoming') return isMatchSearch && eventDate >= now;
-      if (filter === 'past') return isMatchSearch && eventDate < now;
-      return isMatchSearch; 
+      if (filter === 'upcoming') return eventDate >= now;
+      if (filter === 'past') return eventDate < now;
+      return true; 
     });
-  }, [events, searchQuery, filter]);
+  }, [events, filter]);
 
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const currentEvents = filteredEvents.slice(
@@ -106,6 +113,27 @@ export default function EventsClient() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 300, behavior: 'smooth' }); 
+  };
+
+  // --- Fungsi Bantuan ---
+  const getTimeLeft = (startTime: string) => {
+    const eventDate = new Date(startTime);
+    const now = new Date();
+    const diff = eventDate.getTime() - now.getTime();
+
+    if (diff <= 0) return null;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) {
+      return `Dimulai dalam ${days} hari ${hours} jam`;
+    } else if (hours > 0) {
+      return `Dimulai dalam ${hours} jam ${minutes} menit`;
+    } else {
+      return `Dimulai dalam ${minutes} menit`;
+    }
   };
 
   return (
@@ -258,6 +286,7 @@ export default function EventsClient() {
                   const isSuperadmin = !event.organizer || event.organizer.role === 'superadmin';
                   const organizerName = isSuperadmin ? 'Amania Official' : event.organizer.name;
                   const organizerAvatar = !isSuperadmin && event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
+                  const timeLeft = getTimeLeft(event.start_time);
 
                   return (
                     <motion.div 
@@ -276,28 +305,40 @@ export default function EventsClient() {
 
                         <div className="relative w-full aspect-[4/3] bg-slate-900 overflow-hidden shrink-0 flex items-center justify-center border-b border-slate-100">
                           
-                          <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 items-start">
-                            {isPast ? (
-                              <span className="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-slate-700 flex items-center gap-1.5">
-                                <CheckCircle2 size={12} /> Selesai
-                              </span>
-                            ) : event.quota === 0 ? (
-                              <span className="bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-rose-500 flex items-center gap-1.5">
-                                <AlertCircle size={12} /> Penuh
-                              </span>
-                            ) : event.quota <= 15 ? (
-                              <motion.span animate={{ opacity: [1, 0.8, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="bg-amber-500/95 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-amber-400 flex items-center gap-1.5">
-                                <Zap size={12} className="fill-white" /> Sisa {event.quota}
-                              </motion.span>
-                            ) : (
-                              <span className="bg-white/90 backdrop-blur-md text-slate-800 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-white/50 flex items-center gap-1.5">
-                                <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                          <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
+                            {/* Kiri - Status Event/Sisa Kuota */}
+                            <div className="flex flex-col gap-2 items-start">
+                              {isPast ? (
+                                <span className="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-slate-700 flex items-center gap-1.5">
+                                  <CheckCircle2 size={12} /> Selesai
                                 </span>
-                                Buka
-                              </span>
+                              ) : event.quota === 0 ? (
+                                <span className="bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-rose-500 flex items-center gap-1.5">
+                                  <AlertCircle size={12} /> Penuh
+                                </span>
+                              ) : event.quota <= 15 ? (
+                                <motion.span animate={{ opacity: [1, 0.8, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="bg-amber-500/95 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-amber-400 flex items-center gap-1.5">
+                                  <Zap size={12} className="fill-white" /> Sisa {event.quota}
+                                </motion.span>
+                              ) : (
+                                <span className="bg-white/90 backdrop-blur-md text-slate-800 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-white/50 flex items-center gap-1.5">
+                                  <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                  </span>
+                                  Buka
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Kanan - Info Waktu */}
+                             {timeLeft && !isPast && (
+                              <div className="bg-slate-900/80 backdrop-blur-md text-slate-100 text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm border border-slate-700 flex items-center gap-1.5">
+                                <Clock size={12} className="text-amber-400" />
+                                {timeLeft}
+                              </div>
                             )}
+
                           </div>
 
                           <div className={`w-full h-full relative transition-transform duration-700 ease-out group-hover:scale-105 ${isPast ? 'grayscale opacity-75' : ''}`}>

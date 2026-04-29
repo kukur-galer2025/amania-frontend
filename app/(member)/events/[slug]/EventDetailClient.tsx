@@ -7,7 +7,7 @@ import {
   ArrowLeft, Calendar, MapPin, Clock, ShieldCheck, 
   User, Share2, Ticket, AlertCircle, Loader2, CheckCircle2,
   Gem, Image as ImageIcon, BookOpen, Video, FileText, Lock, Briefcase, 
-  DownloadCloud, Sparkles, Info, Tag, ArrowRight, Users, Award 
+  DownloadCloud, Sparkles, Info, Tag, ArrowRight, Users, Award, Zap 
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -15,7 +15,6 @@ import { apiFetch } from '@/app/utils/api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // processQuillHtml — v3
-// Membersihkan HTML dari Quill agar kata tidak terpotong di tengah untuk Tampilan Web.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BASE_P_STYLE =
@@ -94,7 +93,7 @@ const processQuillHtml = (html: string): string => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER CONVERT HTML TO PLAIN TEXT (Khusus untuk WhatsApp Share)
+// HELPER CONVERT HTML TO PLAIN TEXT
 // ─────────────────────────────────────────────────────────────────────────────
 const stripHtmlToText = (html: string) => {
   if (!html) return '';
@@ -110,7 +109,7 @@ const stripHtmlToText = (html: string) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER ZONA WAKTU (ANTI TIMEZONE HELL)
+// HELPER ZONA WAKTU
 // ─────────────────────────────────────────────────────────────────────────────
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
@@ -130,6 +129,13 @@ export default function EventDetailClient({ slug }: { slug: string }) {
   const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('desc');
   const [selectedTier, setSelectedTier] = useState<'basic' | 'premium'>('basic');
   const [isSharing, setIsSharing] = useState(false);
+  
+  // STATE HITUNG MUNDUR (COUNTDOWN)
+  const [timeLeft, setTimeLeft] = useState<string | null>(null);
+
+  // STATE MODAL
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'login' | 'registered'>('login');
 
   const userData =
     typeof window !== 'undefined'
@@ -158,6 +164,39 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     };
     fetchEventDetail();
   }, [slug, router]);
+
+  // 🔥 EFEK COUNTDOWN (UPDATE SETIAP MENIT) 🔥
+  useEffect(() => {
+    if (!eventData?.start_time) return;
+
+    const updateTimer = () => {
+      const targetDate = parseSafeDate(eventData.start_time).getTime();
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+
+      if (days > 0) {
+        setTimeLeft(`${days} Hari ${hours} Jam Lagi`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours} Jam ${minutes} Mnt Lagi`);
+      } else {
+        setTimeLeft(`${minutes} Menit Lagi`);
+      }
+    };
+
+    updateTimer();
+    const intervalId = setInterval(updateTimer, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [eventData?.start_time]);
 
   const handleShare = async () => {
     if (isSharing) return;
@@ -243,15 +282,22 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
   const handleProceedToCheckout = () => {
     if (!userData) {
-      toast.error('Silakan masuk terlebih dahulu untuk mendaftar.');
-      sessionStorage.setItem('redirectAfterLogin', `/events/${slug}`);
-      router.push('/login');
+      setModalType('login');
+      setShowModal(true);
       return;
     }
+
+    if (eventData?.user_registration) {
+      setModalType('registered');
+      setShowModal(true);
+      return;
+    }
+
     if (eventData.quota <= 0) {
       toast.error('Maaf, kuota untuk program ini sudah habis.');
       return;
     }
+
     toast.loading('Mengarahkan ke pembayaran...', { duration: 1500 });
     router.push(`/checkout?slug=${slug}&tier=${selectedTier}`);
   };
@@ -374,6 +420,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                     <Sparkles size={12} className="text-amber-400" />
                     {eventData.certificate_tier !== 'none' ? 'Sertifikat Tersedia' : 'Amania Official'}
                   </span>
+                  
                   <span
                     className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg ${
                       isPast ? 'bg-rose-500/90 text-white' : 'bg-emerald-500/90 text-white'
@@ -382,7 +429,19 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                     {isPast ? <AlertCircle size={12} /> : <CheckCircle2 size={12} />}
                     {isPast ? 'Program Selesai' : 'Pendaftaran Dibuka'}
                   </span>
+
+                  {/* 🔥 BADGE HITUNG MUNDUR (DI HERO) 🔥 */}
+                  {timeLeft && !isPast && (
+                    <motion.span 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="px-3 py-1.5 bg-amber-500/90 backdrop-blur-md border border-amber-400 text-white rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg"
+                    >
+                      <Clock size={12} /> {timeLeft}
+                    </motion.span>
+                  )}
                 </div>
+
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.15] tracking-tight drop-shadow-2xl">
                   {eventData.title}
                 </h1>
@@ -561,21 +620,35 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         </div>
 
         {/* RIGHT COLUMN */}
-        {/* 🔥 UPDATE: Wrapper utama ditambahkan flex-col dan gap-6 untuk memberi jarak antara foto & container tiket */}
         <div className="order-1 lg:order-2 w-full lg:sticky lg:top-6 lg:self-start flex flex-col gap-6">
           
-          {/* 🔥 TAMBAHAN: FOTO EVENT SECARA KESELURUHAN (FULL POSTER) */}
-          {eventData.image && (
-            <div className="w-full bg-slate-50 rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-lg relative p-2">
-              <img
-                src={`${STORAGE_URL}/${eventData.image}`}
-                alt="Poster Program"
-                className="w-full h-auto max-h-[600px] object-contain rounded-[2rem]"
-              />
-            </div>
+          {/* 🔥 WIDGET HITUNG MUNDUR LUXURY (DI SIDEBAR / CARD KANAN) 🔥 */}
+          {timeLeft && !isPast && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-full flex items-center justify-between p-4 sm:p-5 rounded-[2rem] border bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/20 rounded-bl-full -z-10 blur-xl group-hover:bg-amber-400/40 transition-all duration-500" />
+              <div className="flex items-center gap-3.5 z-10">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-orange-500/30">
+                  <Clock size={22} />
+                </div>
+                <div>
+                  <p className="text-[10px] text-amber-700/80 font-black uppercase tracking-[0.15em] mb-1">
+                    Waktu Tersisa
+                  </p>
+                  <p className="text-sm sm:text-base font-black text-amber-950 uppercase tracking-wide drop-shadow-sm">
+                    {timeLeft}
+                  </p>
+                </div>
+              </div>
+              <div className="shrink-0 z-10 hidden sm:block">
+                 <Zap size={28} className="text-amber-500 opacity-60 animate-pulse" />
+              </div>
+            </motion.div>
           )}
 
-          {/* CONTAINER TIKET & PENYELENGGARA (Bawaan) */}
           <div className="bg-white border border-slate-200 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-10 opacity-50" />
 
@@ -695,7 +768,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
       </main>
 
       {/* MOBILE BOTTOM BAR */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 p-4 pb-safe z-50 lg:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 p-4 pb-safe z-[40] lg:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3">
         <div className="shrink-0 min-w-0 max-w-[40%]">
           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 truncate">
             {selectedTier === 'premium' ? 'Total (VIP)' : 'Total (Basic)'}
@@ -737,6 +810,82 @@ export default function EventDetailClient({ slug }: { slug: string }) {
         )}
       </div>
 
+      {/* 🔥 MODAL POPUP PENGECEKAN CHECKOUT */}
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => setShowModal(false)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-[400px] bg-white rounded-[2rem] shadow-2xl p-6 md:p-8 overflow-hidden z-10"
+            >
+              {modalType === 'login' ? (
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-rose-50 border border-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm">
+                    <Lock size={32} />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 mb-2">Akses Ditolak</h3>
+                  <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+                    Anda harus masuk ke akun Amania terlebih dahulu untuk melanjutkan pendaftaran program ini.
+                  </p>
+                  <div className="flex gap-3">
+                    <button onClick={() => setShowModal(false)} className="flex-1 py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
+                      Batal
+                    </button>
+                    <button 
+                      onClick={() => {
+                        sessionStorage.setItem('redirectAfterLogin', `/events/${slug}`);
+                        router.push('/login');
+                      }} 
+                      className="flex-1 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95"
+                    >
+                      Login Sekarang
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-emerald-50 border border-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm">
+                    <ShieldCheck size={32} />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 mb-2">Sudah Terdaftar</h3>
+                  <p className="text-sm text-slate-500 mb-4 leading-relaxed">
+                    Anda sudah terdaftar di program ini dengan akses tiket <strong className="text-indigo-600 uppercase tracking-widest">{eventData.user_registration?.tier}</strong>.
+                  </p>
+                  
+                  {eventData.user_registration?.status === 'pending' && (
+                    <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-xl mb-6 font-medium">
+                      Status tagihan Anda saat ini masih <strong>Pending</strong>. Silakan selesaikan pembayaran untuk mengaktifkan ruang kelas.
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 mt-6">
+                    <button onClick={() => setShowModal(false)} className="flex-1 py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
+                      Tutup
+                    </button>
+                    <Link 
+                      href={`/my-events/${slug}`} 
+                      className="flex-1 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-200 flex items-center justify-center transition-all active:scale-95"
+                    >
+                      Buka Kelas
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <style jsx global>{`
         .q-content {
           font-size: 0.95rem;
@@ -763,24 +912,20 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           white-space: normal !important;
         }
 
-        /* ── Formatting ── */
         .q-content strong, .q-content b { font-weight: 800; color: #0f172a; }
         .q-content em, .q-content i      { font-style: italic; }
         .q-content u                     { text-decoration: underline; }
         .q-content s                     { text-decoration: line-through; }
 
-        /* ── Headings ── */
         .q-content h1 { font-size:1.75rem; font-weight:900; color:#0f172a; margin:1.5rem 0 0.5rem !important; line-height:1.3; }
         .q-content h2 { font-size:1.5rem;  font-weight:800; color:#0f172a; margin:1.25rem 0 0.4rem !important; line-height:1.35; }
         .q-content h3 { font-size:1.25rem; font-weight:700; color:#0f172a; margin:1rem 0 0.35rem !important; line-height:1.4; }
         .q-content h4 { font-size:1.1rem;  font-weight:700; color:#1e293b; margin:0.75rem 0 0.25rem !important; }
 
-        /* ── Lists ── */
         .q-content ul { padding-left:1.5em; margin:0; list-style-type:disc; }
         .q-content ol { padding-left:1.5em; margin:0; list-style-type:decimal; }
         .q-content li { margin-bottom:0.2rem !important; }
 
-        /* ── Blockquote & Code ── */
         .q-content blockquote {
           border-left:4px solid #6366f1; margin:0.5rem 0; padding:0.5rem 1rem;
           background:#f1f5f9; border-radius:0 0.5rem 0.5rem 0;
@@ -795,17 +940,14 @@ export default function EventDetailClient({ slug }: { slug: string }) {
           border-radius:0.25rem; font-size:0.875em; color:#6366f1;
         }
 
-        /* ── Media ── */
         .q-content img, .q-content video, .q-content iframe {
           max-width:100%; height:auto; border-radius:0.75rem;
           margin:0.75rem 0; box-shadow:0 4px 20px rgba(0,0,0,0.08);
         }
 
-        /* ── Links ── */
         .q-content a { color:#4f46e5; text-decoration:underline; text-underline-offset:2px; }
         .q-content a:hover { color:#4338ca; }
 
-        /* ── Scrollbar ── */
         .custom-scrollbar::-webkit-scrollbar { display:none; }
         .custom-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
       `}</style>
