@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { 
-  Search, Trash2, Calendar, Mail, 
+  Search, Trash2, Calendar, Mail, Phone,
   Loader2, Inbox, ShieldCheck, User, 
   KeyRound, ChevronLeft, ChevronRight, X, UserPlus, Eye, EyeOff, UserCog,
-  Camera, UploadCloud, Edit2 
+  Camera, UploadCloud, Edit2, Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +15,7 @@ interface UserData {
   id: number;
   name: string;
   email: string;
+  phone?: string | null;
   role: string;
   avatar: string | null;
   created_at: string;
@@ -33,6 +34,10 @@ export default function AdminUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; 
 
+  // Modal Info
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [selectedInfoUser, setSelectedInfoUser] = useState<UserData | null>(null);
+
   // Modal Reset Password States
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -44,7 +49,7 @@ export default function AdminUsersPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [newUser, setNewUser] = useState({
-    name: '', email: '', password: '', role: 'organizer' 
+    name: '', email: '', phone: '', password: '', role: 'organizer' 
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -53,7 +58,7 @@ export default function AdminUsersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editUser, setEditUser] = useState({
-    id: 0, name: '', email: '', password: '', role: 'organizer'
+    id: 0, name: '', email: '', phone: '', password: '', role: 'organizer'
   });
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
   const [editAvatarPreview, setEditAvatarPreview] = useState<string | null>(null);
@@ -86,7 +91,8 @@ export default function AdminUsersPage() {
     return users.filter((u: UserData) => {
       const matchesSearch = 
         u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        u.email.toLowerCase().includes(searchTerm.toLowerCase());
+        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.phone && u.phone.toLowerCase().includes(searchTerm.toLowerCase()));
       
       let matchesFilter = true;
       if (roleFilter !== 'all') {
@@ -122,6 +128,11 @@ export default function AdminUsersPage() {
     } catch (error) {
       toast.error("Kesalahan sistem.", { id: loadToast });
     }
+  };
+
+  const openInfoModal = (user: UserData) => {
+    setSelectedInfoUser(user);
+    setIsInfoModalOpen(true);
   };
 
   const openResetModal = (user: UserData) => {
@@ -183,6 +194,7 @@ export default function AdminUsersPage() {
       const formData = new FormData();
       formData.append('name', newUser.name);
       formData.append('email', newUser.email);
+      if (newUser.phone) formData.append('phone', newUser.phone);
       formData.append('password', newUser.password);
       formData.append('role', newUser.role);
       if (avatarFile) formData.append('avatar', avatarFile);
@@ -197,7 +209,7 @@ export default function AdminUsersPage() {
       if (res.ok && json.success) {
         toast.success(json.message || "Akun berhasil dibuat", { id: loadToast });
         setIsAddModalOpen(false);
-        setNewUser({ name: '', email: '', password: '', role: 'organizer' });
+        setNewUser({ name: '', email: '', phone: '', password: '', role: 'organizer' });
         setAvatarFile(null);
         setAvatarPreview(null);
         fetchUsers(); 
@@ -216,6 +228,7 @@ export default function AdminUsersPage() {
       id: user.id,
       name: user.name,
       email: user.email,
+      phone: user.phone || '',
       password: '', 
       role: user.role
     });
@@ -224,7 +237,6 @@ export default function AdminUsersPage() {
     setIsEditModalOpen(true);
   };
 
-  // 🔥 PERBAIKAN: Method Spoofing menggunakan _method=PUT 🔥
   const submitEditUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editUser.password && editUser.password.length < 6) {
@@ -236,9 +248,10 @@ export default function AdminUsersPage() {
 
     try {
       const formData = new FormData();
-      formData.append('_method', 'PUT'); // 🔥 Trik agar Laravel membacanya sebagai PUT
+      formData.append('_method', 'PUT'); 
       formData.append('name', editUser.name);
       formData.append('email', editUser.email);
+      if (editUser.phone) formData.append('phone', editUser.phone);
       formData.append('role', editUser.role);
       
       if (editUser.password) {
@@ -249,7 +262,7 @@ export default function AdminUsersPage() {
       }
 
       const res = await apiFetch(`/admin/users/${editUser.id}`, {
-        method: 'POST', // 🔥 Tetap dikirim sebagai POST
+        method: 'POST', 
         body: formData
       }); 
       
@@ -316,7 +329,7 @@ export default function AdminUsersPage() {
         </div>
         <div className="relative w-full md:w-80 min-w-0">
           <Search className="pointer-events-none absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 shrink-0" />
-          <input type="text" placeholder="Cari nama atau email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="block w-full rounded-lg md:rounded-xl border border-slate-200 bg-slate-50 py-2.5 md:py-3 pl-9 md:pl-11 pr-3 md:pr-4 text-xs md:text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors shadow-inner min-w-0"/>
+          <input type="text" placeholder="Cari nama, email, no HP..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="block w-full rounded-lg md:rounded-xl border border-slate-200 bg-slate-50 py-2.5 md:py-3 pl-9 md:pl-11 pr-3 md:pr-4 text-xs md:text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors shadow-inner min-w-0"/>
         </div>
       </div>
 
@@ -348,8 +361,9 @@ export default function AdminUsersPage() {
                         </div>
                         <div className="ml-3 md:ml-4 min-w-0 flex-1">
                           <div className="text-xs md:text-sm font-bold text-slate-900 truncate w-full" title={user.name}>{user.name}</div>
-                          <div className="text-[9px] md:text-[10px] font-semibold text-slate-500 mt-0.5 flex items-center gap-1 md:gap-1.5 uppercase tracking-wider min-w-0 w-full" title={user.email}>
-                            <Mail size={10} className="text-slate-400 md:w-3 md:h-3 shrink-0" /><span className="truncate w-full">{user.email}</span>
+                          <div className="text-[9px] md:text-[10px] font-semibold text-slate-500 mt-0.5 flex flex-col gap-0.5 min-w-0 w-full" title={user.email}>
+                            <div className="flex items-center gap-1 md:gap-1.5"><Mail size={10} className="text-slate-400 md:w-3 md:h-3 shrink-0" /><span className="truncate w-full">{user.email}</span></div>
+                            {user.phone && <div className="flex items-center gap-1 md:gap-1.5"><Phone size={10} className="text-slate-400 md:w-3 md:h-3 shrink-0" /><span className="truncate w-full">{user.phone}</span></div>}
                           </div>
                         </div>
                       </div>
@@ -371,6 +385,10 @@ export default function AdminUsersPage() {
 
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-1.5 md:gap-2">
+                        <button onClick={() => openInfoModal(user)} className="inline-flex items-center justify-center p-1.5 md:p-2 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 rounded-lg transition-colors shadow-sm shrink-0" title="Detail Info">
+                          <Eye size={14} className="md:w-4 md:h-4 shrink-0" />
+                        </button>
+
                         <button onClick={() => openEditModal(user)} className="inline-flex items-center justify-center p-1.5 md:p-2 bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 rounded-lg transition-colors shadow-sm shrink-0" title="Edit Akun">
                           <Edit2 size={14} className="md:w-4 md:h-4 shrink-0" />
                         </button>
@@ -407,6 +425,53 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {/* ============================================================== */}
+      {/* 🔥 MODAL INFO USER 🔥 */}
+      {/* ============================================================== */}
+      <AnimatePresence>
+        {isInfoModalOpen && selectedInfoUser && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 w-full min-w-0">
+            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} className="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-100 min-w-0">
+              <div className="px-5 md:px-6 py-3.5 md:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 w-full min-w-0">
+                <h3 className="font-bold text-slate-900 flex items-center gap-2 text-sm md:text-base min-w-0 w-full"><div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg shrink-0"><Info size={16} className="shrink-0" /></div><span className="truncate">Detail Pengguna</span></h3>
+                <button onClick={() => setIsInfoModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-white p-1 md:p-1.5 rounded-md border border-slate-200 shadow-sm shrink-0"><X size={16} className="shrink-0" /></button>
+              </div>
+              <div className="p-6 flex flex-col items-center w-full min-w-0">
+                 <div className="w-24 h-24 rounded-full border-4 border-slate-100 overflow-hidden shadow-sm mb-4">
+                    <img src={getAvatarUrl(selectedInfoUser)} alt="avatar" className="w-full h-full object-cover" />
+                 </div>
+                 <h4 className="text-lg font-black text-slate-900 w-full text-center truncate">{selectedInfoUser.name}</h4>
+                 <div className="mt-1 mb-5">{getRoleBadge(selectedInfoUser.role)}</div>
+
+                 <div className="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div className="flex items-center gap-3 w-full min-w-0">
+                       <Mail size={16} className="text-slate-400 shrink-0" />
+                       <div className="min-w-0">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat Email</p>
+                          <p className="text-sm font-semibold text-slate-700 truncate">{selectedInfoUser.email}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-3 w-full min-w-0">
+                       <Phone size={16} className="text-slate-400 shrink-0" />
+                       <div className="min-w-0">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No. Handphone</p>
+                          <p className="text-sm font-semibold text-slate-700 truncate">{selectedInfoUser.phone || '-'}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-3 w-full min-w-0">
+                       <Calendar size={16} className="text-slate-400 shrink-0" />
+                       <div className="min-w-0">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tgl Bergabung</p>
+                          <p className="text-sm font-semibold text-slate-700 truncate">{new Date(selectedInfoUser.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB</p>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ============================================================== */}
       {/* MODAL RESET KATA SANDI */}
@@ -475,8 +540,9 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 w-full min-w-0">
-                  <div className="min-w-0 w-full"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">Nama Lengkap / Instansi</label><input type="text" required value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} placeholder="Misal: BEM Unsoed" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-w-0"/></div>
+                  <div className="min-w-0 w-full"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">Nama Lengkap</label><input type="text" required value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} placeholder="Misal: BEM Unsoed" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-w-0"/></div>
                   <div className="min-w-0 w-full"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">Alamat Email</label><input type="email" required value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} placeholder="admin@bem.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-w-0"/></div>
+                  <div className="min-w-0 w-full sm:col-span-2"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">No. Handphone (Opsional)</label><input type="tel" value={newUser.phone} onChange={(e) => setNewUser({...newUser, phone: e.target.value})} placeholder="0812xxxxxx" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-w-0"/></div>
                 </div>
 
                 <div className="pt-2 pb-4 w-full min-w-0">
@@ -532,6 +598,7 @@ export default function AdminUsersPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 w-full min-w-0">
                   <div className="min-w-0 w-full"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">Nama Lengkap</label><input type="text" required value={editUser.name} onChange={(e) => setEditUser({...editUser, name: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all min-w-0"/></div>
                   <div className="min-w-0 w-full"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">Alamat Email</label><input type="email" required value={editUser.email} onChange={(e) => setEditUser({...editUser, email: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all min-w-0"/></div>
+                  <div className="min-w-0 w-full sm:col-span-2"><label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide truncate w-full">No. Handphone</label><input type="tel" value={editUser.phone} onChange={(e) => setEditUser({...editUser, phone: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all min-w-0"/></div>
                 </div>
 
                 <div className="pt-2 pb-4 w-full min-w-0">

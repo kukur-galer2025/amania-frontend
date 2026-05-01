@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Newspaper, Sparkles, LogIn, Ticket,
   CalendarHeart, Info, Receipt, Settings2, Calendar, 
   CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, FileText,
-  MonitorPlay
+  MonitorPlay, ShieldAlert
 } from 'lucide-react';
 import { apiFetch } from '../utils/api'; 
 
@@ -38,6 +38,9 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [isMounted, setIsMounted] = useState(false);
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // 🔥 STATE PERINGATAN PROFIL BELUM LENGKAP 🔥
+  const [showIncompleteProfileAlert, setShowIncompleteProfileAlert] = useState(false);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -93,6 +96,15 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         const parsedUser = JSON.parse(userStr);
         if (parsedUser && typeof parsedUser === 'object' && parsedUser.name) {
           setUserData(parsedUser);
+          
+          // 🔥 CEK KELENGKAPAN PROFIL (Email & Phone) 🔥
+          // Modal tidak muncul jika user sedang berada di halaman edit profil, biar gak looping.
+          if ((!parsedUser.email || !parsedUser.phone) && pathname !== '/profil') {
+             setTimeout(() => {
+                setShowIncompleteProfileAlert(true);
+             }, 1000); // Muncul otomatis setelah 1 detik
+          }
+
           fetchNotifications(); 
         } else {
           throw new Error('Data user tidak lengkap atau corrupt');
@@ -119,7 +131,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [pathname]); // 🔥 Dependensi diubah menjadi pathname agar selalu dicek tiap pindah halaman
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -240,6 +252,37 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-100/40 blur-[100px] pointer-events-none z-0"></div>
       <div className="fixed bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-100/30 blur-[120px] pointer-events-none z-0"></div>
       <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-50/40 blur-[80px] pointer-events-none z-0"></div>
+
+      {/* ════════ 🔥 OVERLAY MODAL KELENGKAPAN PROFIL 🔥 ════════ */}
+      <AnimatePresence>
+        {showIncompleteProfileAlert && (
+          <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden"
+            >
+              <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-6 border border-rose-100 shadow-inner">
+                <ShieldAlert size={40} strokeWidth={2} />
+              </div>
+              <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Profil Belum Lengkap!</h2>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8">
+                Demi keamanan dan kenyamanan, mohon lengkapi <span className="font-bold text-slate-700">Nomor Handphone</span> dan <span className="font-bold text-slate-700">Email</span> Anda sebelum melanjutkan.
+              </p>
+              
+              <button 
+                onClick={() => {
+                  setShowIncompleteProfileAlert(false);
+                  router.push('/profil');
+                }}
+                className="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-colors shadow-lg flex items-center justify-center gap-2"
+              >
+                Lengkapi Profil Sekarang <ArrowRight size={18} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* OVERLAY ANIMASI LOGOUT FULL SCREEN */}
       <AnimatePresence>

@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, XCircle, Eye, Search, 
   Loader2, Ticket, X, Mail, User, CreditCard, 
-  AlertTriangle, MessageSquare, Filter, Calendar, MapPin, Hash, ShieldCheck, ChevronDown
+  AlertTriangle, MessageSquare, Filter, Calendar, MapPin, Hash, ShieldCheck, ChevronDown,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; 
@@ -25,6 +26,10 @@ export default function AdminRegistrationsPage() {
 
   // 🔥 STATE BARU UNTUK MODAL FILTER EVENT 🔥
   const [showEventFilterModal, setShowEventFilterModal] = useState(false);
+
+  // 🔥 STATE BARU UNTUK PAGINATION 🔥
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -140,6 +145,18 @@ export default function AdminRegistrationsPage() {
     return matchesStatus && matchesEvent && matchesSearch;
   }), [registrations, filterStatus, filterEvent, searchQuery]);
 
+  // 🔥 LOGIKA RESET PAGE KETIKA FILTER BERUBAH 🔥
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus, filterEvent, searchQuery]);
+
+  // 🔥 LOGIKA DATA PAGINATION 🔥
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePrevPage = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
+  const handleNextPage = () => { if (currentPage < totalPages) setCurrentPage(currentPage + 1); };
+
   if (loading) return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center gap-3 md:gap-4">
       <Loader2 className="animate-spin text-slate-400 md:w-8 md:h-8" size={28} />
@@ -181,7 +198,7 @@ export default function AdminRegistrationsPage() {
             ))}
           </div>
 
-          {/* 🔥 UPDATE: Filter Event menggunakan Button & Modal (Mobile Friendly) 🔥 */}
+          {/* Filter Event menggunakan Button & Modal (Mobile Friendly) */}
           <div className="relative w-full sm:w-auto">
             <button
               onClick={() => setShowEventFilterModal(true)}
@@ -213,8 +230,8 @@ export default function AdminRegistrationsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl md:rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+      <div className="bg-white border border-slate-200 rounded-xl md:rounded-2xl shadow-sm overflow-hidden flex flex-col h-full w-full min-w-0">
+        <div className="overflow-x-auto custom-scrollbar flex-1">
           <table className="min-w-full divide-y divide-slate-200 min-w-[700px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
@@ -225,7 +242,7 @@ export default function AdminRegistrationsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
-              {filteredData.length > 0 ? filteredData.map((reg) => {
+              {currentData.length > 0 ? currentData.map((reg) => {
                 
                 const isFree = parseFloat(reg.total_amount) === 0;
                 const isPremium = reg.tier === 'premium';
@@ -301,6 +318,36 @@ export default function AdminRegistrationsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* 🔥 UI PAGINATION 🔥 */}
+        {filteredData.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 md:px-6 py-3 md:py-4 gap-3 w-full min-w-0">
+            <div className="hidden sm:block min-w-0">
+              <p className="text-[10px] md:text-xs text-slate-500 font-medium truncate w-full">
+                Menampilkan <span className="font-bold text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-bold text-slate-900">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> dari <span className="font-bold text-slate-900">{filteredData.length}</span> pendaftar
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button 
+                onClick={handlePrevPage} 
+                disabled={currentPage === 1} 
+                className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-500 hover:border-indigo-600 hover:text-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shrink-0"
+              >
+                <ChevronLeft size={14} className="shrink-0" />
+              </button>
+              <div className="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-slate-200 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black text-slate-700 shadow-sm min-w-[60px] md:min-w-[80px] text-center uppercase tracking-widest shrink-0">
+                {currentPage} / {totalPages || 1}
+              </div>
+              <button 
+                onClick={handleNextPage} 
+                disabled={currentPage === totalPages || totalPages === 0} 
+                className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-500 hover:border-indigo-600 hover:text-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shrink-0"
+              >
+                <ChevronRight size={14} className="shrink-0" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 🔥 MODAL POPUP: FILTER PROGRAM EVENT 🔥 */}
