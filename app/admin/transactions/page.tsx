@@ -15,7 +15,7 @@ interface TransactionData {
   id: number;
   ticket_code: string;
   status: 'pending' | 'verified' | 'rejected';
-  total_amount: string | number; // Menghandle string decimal dari DB
+  total_amount: string | number;
   payment_proof: string | null;
   rejection_reason: string | null;
   created_at: string;
@@ -26,7 +26,6 @@ interface TransactionData {
 export default function AdminTransactionsPage() {
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [eventsList, setEventsList] = useState<{id: number, title: string}[]>([]);
-  const [stats, setStats] = useState({ totalRevenue: 0, pendingCount: 0, verifiedCount: 0 });
   const [loading, setLoading] = useState(true);
   
   // Search & Filters
@@ -44,7 +43,6 @@ export default function AdminTransactionsPage() {
   // Modal Proof
   const [proofImage, setProofImage] = useState<string | null>(null);
 
-  // 🔗 AMBIL STORAGE URL
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
   const fetchTransactions = async () => {
@@ -54,13 +52,6 @@ export default function AdminTransactionsPage() {
       
       if (res.ok && json.success) {
         setTransactions(json.data || []);
-        if (json.stats) {
-          setStats({
-            totalRevenue: Number(json.stats.total_revenue) || 0,
-            pendingCount: Number(json.stats.pending_count) || 0,
-            verifiedCount: Number(json.stats.verified_count) || 0
-          });
-        }
         if (json.events) {
           setEventsList(json.events);
         }
@@ -90,7 +81,32 @@ export default function AdminTransactionsPage() {
     }).format(numericValue);
   };
 
-  // --- FILTER LOGIC ---
+  // =========================================================================
+  // 🔥 LOGIKA STATISTIK REALTIME BERDASARKAN EVENT YANG DIPILIH 🔥
+  // =========================================================================
+  const dynamicStats = useMemo(() => {
+    // Hanya filter berdasarkan event yang dipilih agar angka stat card stabil
+    const filteredByEvent = eventFilter === 'all' 
+      ? transactions 
+      : transactions.filter(tx => tx.event?.id.toString() === eventFilter);
+
+    let totalRevenue = 0;
+    let pendingCount = 0;
+    let verifiedCount = 0;
+
+    filteredByEvent.forEach(tx => {
+      if (tx.status === 'verified') {
+        verifiedCount++;
+        totalRevenue += parseFloat(tx.total_amount?.toString() || '0');
+      } else if (tx.status === 'pending') {
+        pendingCount++;
+      }
+    });
+
+    return { totalRevenue, pendingCount, verifiedCount };
+  }, [transactions, eventFilter]);
+
+  // --- FILTER UNTUK TABEL BAWAH ---
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
       const searchLower = searchTerm.toLowerCase();
@@ -131,7 +147,7 @@ export default function AdminTransactionsPage() {
         </p>
       </div>
 
-      {/* 2. STATS WIDGETS */}
+      {/* 2. STATS WIDGETS (REALTIME BERDASARKAN FILTER EVENT) */}
       <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 overflow-x-auto custom-scrollbar pb-4 md:pb-0 snap-x">
         <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3 md:gap-4 hover:shadow-md transition-shadow min-w-[240px] md:min-w-0 snap-start shrink-0 flex-1">
           <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-50 text-emerald-600 rounded-lg md:rounded-full flex items-center justify-center shrink-0 border border-emerald-100">
@@ -139,7 +155,9 @@ export default function AdminTransactionsPage() {
           </div>
           <div className="min-w-0">
             <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5 md:mb-1">Total Pendapatan</p>
-            <h3 className="text-lg md:text-2xl font-black text-slate-900 truncate">{formatRupiah(stats.totalRevenue)}</h3>
+            <h3 className="text-lg md:text-2xl font-black text-slate-900 truncate transition-all duration-300">
+              {formatRupiah(dynamicStats.totalRevenue)}
+            </h3>
           </div>
         </div>
         
@@ -149,7 +167,9 @@ export default function AdminTransactionsPage() {
           </div>
           <div>
             <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5 md:mb-1">Menunggu Validasi</p>
-            <h3 className="text-lg md:text-2xl font-black text-slate-900">{stats.pendingCount} <span className="text-[10px] md:text-sm font-medium text-slate-500">transaksi</span></h3>
+            <h3 className="text-lg md:text-2xl font-black text-slate-900 transition-all duration-300">
+              {dynamicStats.pendingCount} <span className="text-[10px] md:text-sm font-medium text-slate-500">transaksi</span>
+            </h3>
           </div>
         </div>
 
@@ -159,7 +179,9 @@ export default function AdminTransactionsPage() {
           </div>
           <div>
             <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5 md:mb-1">Tiket Lunas</p>
-            <h3 className="text-lg md:text-2xl font-black text-slate-900">{stats.verifiedCount} <span className="text-[10px] md:text-sm font-medium text-slate-500">tiket</span></h3>
+            <h3 className="text-lg md:text-2xl font-black text-slate-900 transition-all duration-300">
+              {dynamicStats.verifiedCount} <span className="text-[10px] md:text-sm font-medium text-slate-500">tiket</span>
+            </h3>
           </div>
         </div>
       </div>
