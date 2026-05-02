@@ -15,67 +15,37 @@ import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// processQuillHtml — v3 (Fungsi Sakti untuk Merapikan HTML dari Admin)
+// processQuillHtml — v3
 // ─────────────────────────────────────────────────────────────────────────────
-const BASE_P_STYLE =
-  'margin:0;padding:0;line-height:1.7;overflow-wrap:break-word;word-break:normal;hyphens:none;-webkit-hyphens:none;';
-
+const BASE_P_STYLE = 'margin:0;padding:0;line-height:1.7;overflow-wrap:break-word;word-break:normal;hyphens:none;-webkit-hyphens:none;';
 const WC = 'a-zA-Z\\u00C0-\\u024F\\u1E00-\\u1EFF0-9';
 const IC = '(?:<\\/(?:span|strong|em|b|i|u|s|code|a|mark|sup|sub)[^>]*>\\s*)*';
 const IO = '(?:\\s*<(?:span|strong|em|b|i|u|s|code|a|mark|sup|sub)[^>]*>)*';
 
 const processQuillHtml = (html: string): string => {
   if (!html) return '';
-  let r = html.replace(/\r\n?/g, '\n');
-  r = r.replace(/[\u200B-\u200D\uFEFF]/g, ''); 
-  r = r.replace(/&shy;/gi, '');                
-  r = r.replace(/&nbsp;/gi, ' ');              
+  let r = html.replace(/\r\n?/g, '\n').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/&shy;/gi, '').replace(/&nbsp;/gi, ' ');              
+  
+  let prev = '';
+  while (prev !== r) { prev = r; r = r.replace(new RegExp(`([${WC}])${IC}<\\/p>[ \\t\\n]*<p(?:\\s[^>]*)?>[ \\t\\n]*${IO}([${WC}])`, 'g'), '$1$2'); }
+  
+  prev = '';
+  while (prev !== r) { prev = r; r = r.replace(new RegExp(`([${WC}])${IC}<br[ \\t]*\\/?>[ \\t\\n]*${IO}([${WC}])`, 'g'), '$1$2'); }
 
-  {
-    let prev = '';
-    while (prev !== r) {
-      prev = r;
-      r = r.replace(new RegExp(`([${WC}])${IC}<\\/p>[ \\t\\n]*<p(?:\\s[^>]*)?>[ \\t\\n]*${IO}([${WC}])`, 'g'), '$1$2');
-    }
-  }
-
-  {
-    let prev = '';
-    while (prev !== r) {
-      prev = r;
-      r = r.replace(new RegExp(`([${WC}])${IC}<br[ \\t]*\\/?>[ \\t\\n]*${IO}([${WC}])`, 'g'), '$1$2');
-    }
-  }
-
-  r = r.replace(new RegExp(`([${WC}])[ \\t]*\\n+[ \\t]*([${WC}])`, 'g'), '$1$2');
-  r = r.replace(/ {2,}/g, ' ');
+  r = r.replace(new RegExp(`([${WC}])[ \\t]*\\n+[ \\t]*([${WC}])`, 'g'), '$1$2').replace(/ {2,}/g, ' ');
   r = r.replace(/<p><\/p>/g, `<p style="${BASE_P_STYLE}min-height:1.617em;"></p>`);
   r = r.replace(/<p><br\s*\/?><\/p>/gi, `<p style="${BASE_P_STYLE}min-height:1.617em;"><br></p>`);
   r = r.replace(/<p(\s[^>]*)?>/g, (_, attrs = '') => {
-    if (attrs.includes('style=')) {
-      return `<p${attrs.replace(/style="([^"]*)"/, `style="${BASE_P_STYLE}$1"`)}>`;
-    }
+    if (attrs.includes('style=')) return `<p${attrs.replace(/style="([^"]*)"/, `style="${BASE_P_STYLE}$1"`)}>`;
     return `<p${attrs} style="${BASE_P_STYLE}">`;
   });
-
   return r;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HELPER CONVERT HTML TO PLAIN TEXT (Untuk WhatsApp Share)
-// ─────────────────────────────────────────────────────────────────────────────
 const stripHtmlToText = (html: string) => {
   if (!html) return '';
-  let text = html.replace(/<br\s*[\/]?>/gi, ' ').replace(/<\/p>/gi, ' ');
-  text = text.replace(/<[^>]*>?/gm, '');
-  text = text.replace(/&nbsp;/g, ' ')
-             .replace(/&amp;/g, '&')
-             .replace(/&lt;/g, '<')
-             .replace(/&gt;/g, '>')
-             .replace(/&quot;/g, '"')
-             .replace(/&#39;/g, "'")
-             .replace(/\s+/g, ' '); 
-  return text.trim();
+  let text = html.replace(/<br\s*[\/]?>/gi, ' ').replace(/<\/p>/gi, ' ').replace(/<[^>]*>?/gm, '');
+  return text.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim(); 
 };
 
 export default function MyEventDetailClient({ slug }: { slug: string }) {
@@ -85,12 +55,11 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('curriculum');
   const [isSharing, setIsSharing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   
-  // 🔥 STATE HITUNG MUNDUR (REAL TIME)
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
   useEffect(() => {
     if (!slug) return;
@@ -98,12 +67,18 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
     const fetchDetail = async () => {
       try {
         const res = await apiFetch(`/my-events/${slug}`);
-        if (!res.ok) throw new Error("Gagal mengambil detail");
-        const data = await res.json();
-        if (data.success) {
-          setEvent(data.data);
+        const contentType = res.headers.get("content-type");
+        
+        // Pengecekan Aman (Safe Parse) menghindari Error HTML/<!DOCTYPE>
+        if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            if (data.success) {
+                setEvent(data.data);
+            } else {
+                setEvent(null);
+            }
         } else {
-          setEvent(null);
+            throw new Error("Invalid response from server");
         }
       } catch (error) {
         toast.error("Gagal memuat detail program.");
@@ -114,19 +89,14 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
     fetchDetail();
   }, [slug]);
 
-  // 🔥 EFEK COUNTDOWN (UPDATE SETIAP MENIT) 🔥
   useEffect(() => {
     if (!event?.start_time) return;
 
     const updateTimer = () => {
       let safeStr = event.start_time.replace(' ', 'T');
-      if (!safeStr.includes('Z') && !safeStr.includes('+')) {
-        safeStr += '+07:00';
-      }
+      if (!safeStr.includes('Z') && !safeStr.includes('+')) safeStr += '+07:00';
       
-      const targetDate = new Date(safeStr).getTime();
-      const now = new Date().getTime();
-      const diff = targetDate - now;
+      const diff = new Date(safeStr).getTime() - new Date().getTime();
 
       if (diff <= 0) {
         setTimeLeft(null);
@@ -137,45 +107,42 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((diff / 1000 / 60) % 60);
 
-      if (days > 0) {
-        setTimeLeft(`${days} Hari ${hours} Jam Lagi`);
-      } else if (hours > 0) {
-        setTimeLeft(`${hours} Jam ${minutes} Mnt Lagi`);
-      } else {
-        setTimeLeft(`${minutes} Menit Lagi`);
-      }
+      if (days > 0) setTimeLeft(`${days} Hari ${hours} Jam Lagi`);
+      else if (hours > 0) setTimeLeft(`${hours} Jam ${minutes} Mnt Lagi`);
+      else setTimeLeft(`${minutes} Menit Lagi`);
     };
 
     updateTimer();
     const intervalId = setInterval(updateTimer, 60000);
-
     return () => clearInterval(intervalId);
   }, [event?.start_time]);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // DOWNLOAD POSTER 
+  // 🔥 FUNGSI DOWNLOAD POSTER (SAFE PARSE)
   // ─────────────────────────────────────────────────────────────────────────────
   const handleDownloadBanner = async () => {
-    if (!event?.image) return;
+    if (!event?.image || isDownloading) return;
+    setIsDownloading(true);
     
-    const tid = toast.loading("Mempersiapkan unduhan...");
+    const tid = toast.loading("Mempersiapkan unduhan poster...");
     try {
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${API_URL}/my-events/${event.slug}/download-poster`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(`/my-events/${event.slug}/download-poster`);
 
-      if (!response.ok) throw new Error("Gagal mengunduh file dari server");
+      if (!response.ok) {
+         const contentType = response.headers.get("content-type");
+         if (contentType && contentType.includes("application/json")) {
+             const errData = await response.json();
+             throw new Error(errData.message || "Gagal mengunduh poster dari server");
+         } else {
+             throw new Error("Server mengalami kendala (404/500).");
+         }
+      }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      
       const link = document.createElement('a');
       link.href = url;
+      
       link.download = `Poster-${event.slug}.jpg`;
       document.body.appendChild(link);
       link.click();
@@ -184,41 +151,40 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
       window.URL.revokeObjectURL(url);
       
       toast.success("Poster berhasil diunduh!", { id: tid });
-    } catch (error) {
-      console.error(error);
-      toast.error("Gagal mengunduh poster. Pastikan koneksi internet stabil.", { id: tid });
+    } catch (error: any) {
+      toast.error(error.message || "Gagal mengunduh poster.", { id: tid });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 🔥 FUNGSI BARU: DOWNLOAD MATERIAL/MODUL SECARA PAKSA 🔥
+  // 🔥 FUNGSI DOWNLOAD MATERIAL (SAFE PARSE)
   // ─────────────────────────────────────────────────────────────────────────────
   const handleDownloadMaterial = async (matId: number, matTitle: string) => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+
     const tid = toast.loading(`Mempersiapkan modul ${matTitle}...`);
     try {
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${API_URL}/my-events/materials/${matId}/download`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiFetch(`/my-events/materials/${matId}/download`);
 
       if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(errorData.message || "Gagal mengunduh modul.");
+         const contentType = response.headers.get("content-type");
+         if (contentType && contentType.includes("application/json")) {
+             const errData = await response.json();
+             throw new Error(errData.message || "Gagal mengunduh modul.");
+         } else {
+             throw new Error("Server mengalami kendala. Rute download mungkin salah.");
+         }
       }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      
       const link = document.createElement('a');
       link.href = url;
       
-      // Melakukan sanitasi sederhana pada nama judul agar tidak merusak extension
       const safeTitle = matTitle.replace(/[^a-zA-Z0-9 \-_]/g, '').replace(/\s+/g, '-');
-      // Menentukan tipe data: apakah PDF atau yang lain
       const fileExt = blob.type.includes('pdf') ? 'pdf' : 'zip'; 
 
       link.download = `${safeTitle}.${fileExt}`;
@@ -230,8 +196,9 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
       
       toast.success("Modul berhasil diunduh!", { id: tid });
     } catch (error: any) {
-      console.error(error);
       toast.error(error.message || "Gagal mengunduh modul. Silakan coba lagi.", { id: tid });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -242,48 +209,29 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
 
     const shareUrl = `${window.location.origin}/events/${event?.slug}`;
     const shareTitle = event?.title || 'Program Unggulan Amania';
-    
     let cleanDesc = stripHtmlToText(event?.description || '');
-    if (cleanDesc.length > 180) {
-      cleanDesc = cleanDesc.substring(0, 180).replace(/\s+\S*$/, "") + '...';
-    }
+    if (cleanDesc.length > 180) cleanDesc = cleanDesc.substring(0, 180).replace(/\s+\S*$/, "") + '...';
 
     const captionText = `🎓 *Yuk ikutan program "${shareTitle}" di Amania Nusantara!*\n\n📝 "${cleanDesc}"\n\n📍 *Cek detail & daftar di sini:*\n${shareUrl}`;
 
     try {
-      try {
-        await navigator.clipboard.writeText(captionText);
-      } catch (err) {
-        console.warn("Clipboard access denied", err);
-      }
+      try { await navigator.clipboard.writeText(captionText); } catch (err) {}
 
       if (navigator.share) {
         let sharedWithImage = false;
-
         if (event?.image) {
           try {
-            const imgUrl = `${STORAGE_URL}/${event.image}`;
-            const response = await fetch(imgUrl, { mode: 'cors' });
+            const response = await fetch(`${STORAGE_URL}/${event.image}`, { mode: 'cors' });
             const blob = await response.blob();
-            
-            const ext = blob.type.split('/')[1] || 'jpg';
-            const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
+            const file = new File([blob], `poster-${slug}.jpg`, { type: blob.type });
 
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               toast.success('Teks disalin! Silakan "Tempel" di WA.', { duration: 4000, icon: '📋' });
-
-              await navigator.share({
-                title: shareTitle,
-                text: captionText, 
-                files: [file]
-              });
+              await navigator.share({ title: shareTitle, text: captionText, files: [file] });
               sharedWithImage = true;
             }
-          } catch (imgError) {
-            console.warn("Gagal menyiapkan file gambar", imgError);
-          }
+          } catch (imgError) {}
         }
-
         if (!sharedWithImage) {
           await navigator.share({ title: shareTitle, text: captionText });
           toast.success('Berhasil membagikan tautan!');
@@ -292,9 +240,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
         toast.success('Teks dan tautan disalin ke clipboard!');
       }
     } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        toast.error('Terjadi kesalahan saat membagikan.');
-      }
+      if (error.name !== 'AbortError') toast.error('Terjadi kesalahan saat membagikan.');
     } finally {
       setIsSharing(false);
     }
@@ -324,7 +270,6 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
     );
   }
 
-  // 🔥 FORMAT TANGGAL DAN JAM (START & END) 🔥
   const startDate = new Date(event.start_time);
   const endDate = event.end_time ? new Date(event.end_time) : null;
   const isPast = endDate ? endDate < new Date() : startDate < new Date();
@@ -333,14 +278,11 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
   const endTimeStr = endDate ? endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':') : 'Selesai';
   const timeString = `${startTimeStr} - ${endTimeStr} WIB`;
 
-  // LOGIKA ORGANIZER
   const isSuperadmin = !event.organizer || event.organizer.role === 'superadmin';
   const organizerName = isSuperadmin ? 'Amania Official' : event.organizer.name;
   const organizerAvatar = !isSuperadmin && event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
 
-  // CEK TIER USER DARI BACKEND
   const userTier = event.user_registration?.tier; 
-
   const processedDescription = processQuillHtml(event.description || '');
 
   return (
@@ -381,7 +323,6 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
                  {isPast ? 'Telah Selesai' : 'Sedang Berjalan'}
               </span>
 
-              {/* 🔥 BADGE HITUNG MUNDUR (DI HERO) 🔥 */}
               {timeLeft && !isPast && (
                 <motion.span 
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -517,8 +458,13 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
                                    <Video size={14} className="shrink-0" /> Tonton Video
                                  </a>
                                ) : (
-                                 <button onClick={() => handleDownloadMaterial(mat.id, mat.title)} className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white px-4 py-2.5 rounded-xl transition-colors border border-emerald-100 hover:border-transparent shadow-sm">
-                                   <DownloadCloud size={14} className="shrink-0" /> Unduh Modul
+                                 <button 
+                                   onClick={() => handleDownloadMaterial(mat.id, mat.title)} 
+                                   disabled={isDownloading}
+                                   className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white px-4 py-2.5 rounded-xl transition-colors border border-emerald-100 hover:border-transparent shadow-sm disabled:opacity-50"
+                                 >
+                                   {isDownloading ? <Loader2 size={14} className="shrink-0 animate-spin" /> : <DownloadCloud size={14} className="shrink-0" />} 
+                                   Unduh Modul
                                  </button>
                                )}
                              </div>
@@ -686,8 +632,13 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
             )}
             
             {event.image && (
-              <button onClick={handleDownloadBanner} className="w-full py-2.5 md:py-3 rounded-xl text-[11px] md:text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition-colors flex justify-center items-center gap-1.5 border border-indigo-100 mb-3 shadow-sm">
-                <Download size={14} className="shrink-0" /> Simpan Poster Event
+              <button 
+                onClick={handleDownloadBanner} 
+                disabled={isDownloading}
+                className="w-full py-2.5 md:py-3 rounded-xl text-[11px] md:text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition-colors flex justify-center items-center gap-1.5 border border-indigo-100 mb-3 shadow-sm disabled:opacity-50"
+              >
+                {isDownloading ? <Loader2 size={14} className="shrink-0 animate-spin" /> : <Download size={14} className="shrink-0" />} 
+                Simpan Poster Event
               </button>
             )}
 
