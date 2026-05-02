@@ -6,7 +6,7 @@ import {
   Users, Presentation, Loader2, Calendar, CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api'; 
 
 interface EventStat {
   id: number;
@@ -25,13 +25,14 @@ export default function AdminReportsPage() {
   // State untuk form Filter & Export
   const [selectedEvent, setSelectedEvent] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedTier, setSelectedTier] = useState('all'); // 🔥 STATE BARU UNTUK FILTER TIER
   const [isExporting, setIsExporting] = useState(false);
 
   const fetchReportSummary = async () => {
     setLoading(true);
     try {
-      // 🔥 PENGGUNAAN APIFETCH 🔥
-      const res = await apiFetch(`/admin/reports?event_id=${selectedEvent}&status=${selectedStatus}`);
+      // 🔥 PENGGUNAAN APIFETCH (Telah memasukkan variabel tier) 🔥
+      const res = await apiFetch(`/admin/reports?event_id=${selectedEvent}&status=${selectedStatus}&tier=${selectedTier}`);
       const json = await res.json();
       
       if (res.ok && json.success) {
@@ -53,7 +54,7 @@ export default function AdminReportsPage() {
   // Otomatis refresh data tabel jika filter diubah
   useEffect(() => {
     fetchReportSummary();
-  }, [selectedEvent, selectedStatus]); 
+  }, [selectedEvent, selectedStatus, selectedTier]); 
 
   // --- FUNGSI DOWNLOAD PDF ---
   const handleExport = async (e: React.FormEvent) => {
@@ -62,8 +63,8 @@ export default function AdminReportsPage() {
     const loadToast = toast.loading("Menyusun dokumen PDF Amania...");
 
     try {
-      // 🔥 PENGGUNAAN APIFETCH UNTUK BLOB 🔥
-      const res = await apiFetch(`/admin/reports/export?event_id=${selectedEvent}&status=${selectedStatus}`);
+      // 🔥 PENGGUNAAN APIFETCH UNTUK BLOB (Memasukkan filter tier) 🔥
+      const res = await apiFetch(`/admin/reports/export?event_id=${selectedEvent}&status=${selectedStatus}&tier=${selectedTier}`);
       if (!res.ok) throw new Error("Gagal mengunduh file.");
 
       const blob = await res.blob();
@@ -158,6 +159,20 @@ export default function AdminReportsPage() {
                 </select>
               </div>
 
+              {/* 🔥 TIPE TIKET FILTER (BARU) 🔥 */}
+              <div>
+                <label className="block text-[10px] md:text-xs font-bold text-slate-700 mb-1.5 md:mb-2 uppercase tracking-wide">Tipe Tiket</label>
+                <select
+                  value={selectedTier}
+                  onChange={(e) => setSelectedTier(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg md:rounded-xl py-2.5 md:py-3 px-3 md:px-4 text-xs md:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all cursor-pointer"
+                >
+                  <option value="all">Semua Tipe Tiket</option>
+                  <option value="basic">Basic Pass</option>
+                  <option value="premium">Premium / VIP Pass</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-[10px] md:text-xs font-bold text-slate-700 mb-1.5 md:mb-2 uppercase tracking-wide">Status Pembayaran</label>
                 <select
@@ -197,7 +212,7 @@ export default function AdminReportsPage() {
           <div className="bg-white border border-slate-200 rounded-xl md:rounded-2xl shadow-sm overflow-hidden flex flex-col h-full min-h-[400px] md:min-h-[500px]">
             <div className="px-4 md:px-6 py-4 md:py-5 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-xs md:text-sm font-bold text-slate-800">Performa Program (Live Data)</h2>
-              <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 md:mt-1">Data dikalkulasi berdasarkan filter status dan program yang aktif.</p>
+              <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 md:mt-1">Data dikalkulasi berdasarkan filter status, tiket, dan program yang aktif.</p>
             </div>
 
             <div className="flex-1 overflow-x-auto p-0 custom-scrollbar">
