@@ -119,7 +119,6 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
     if (!event?.start_time) return;
 
     const updateTimer = () => {
-      // Perbaikan timezone yang aman
       let safeStr = event.start_time.replace(' ', 'T');
       if (!safeStr.includes('Z') && !safeStr.includes('+')) {
         safeStr += '+07:00';
@@ -154,7 +153,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
   }, [event?.start_time]);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // DOWNLOAD POSTER LANGSUNG TANPA TAB BARU
+  // DOWNLOAD POSTER 
   // ─────────────────────────────────────────────────────────────────────────────
   const handleDownloadBanner = async () => {
     if (!event?.image) return;
@@ -190,6 +189,52 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
       toast.error("Gagal mengunduh poster. Pastikan koneksi internet stabil.", { id: tid });
     }
   };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 🔥 FUNGSI BARU: DOWNLOAD MATERIAL/MODUL SECARA PAKSA 🔥
+  // ─────────────────────────────────────────────────────────────────────────────
+  const handleDownloadMaterial = async (matId: number, matTitle: string) => {
+    const tid = toast.loading(`Mempersiapkan modul ${matTitle}...`);
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${API_URL}/my-events/materials/${matId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+         const errorData = await response.json();
+         throw new Error(errorData.message || "Gagal mengunduh modul.");
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Melakukan sanitasi sederhana pada nama judul agar tidak merusak extension
+      const safeTitle = matTitle.replace(/[^a-zA-Z0-9 \-_]/g, '').replace(/\s+/g, '-');
+      // Menentukan tipe data: apakah PDF atau yang lain
+      const fileExt = blob.type.includes('pdf') ? 'pdf' : 'zip'; 
+
+      link.download = `${safeTitle}.${fileExt}`;
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Modul berhasil diunduh!", { id: tid });
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Gagal mengunduh modul. Silakan coba lagi.", { id: tid });
+    }
+  };
+
 
   const handleShare = async () => {
     if (isSharing) return;
@@ -467,10 +512,14 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
                                  <button className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-slate-400 bg-slate-50 px-4 py-2.5 rounded-xl cursor-not-allowed border border-slate-200">
                                    <Lock size={14} className="shrink-0" /> Terkunci
                                  </button>
-                               ) : (
-                                 <a href={`${STORAGE_URL}/${mat.file_path}`} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white px-4 py-2.5 rounded-xl transition-colors border border-indigo-100 hover:border-transparent shadow-sm">
-                                   <DownloadCloud size={14} className="shrink-0" /> {mat.type === 'video' ? 'Tonton Video' : 'Unduh Modul'}
+                               ) : mat.type === 'video' && mat.link ? (
+                                 <a href={mat.link} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white px-4 py-2.5 rounded-xl transition-colors border border-indigo-100 hover:border-transparent shadow-sm">
+                                   <Video size={14} className="shrink-0" /> Tonton Video
                                  </a>
+                               ) : (
+                                 <button onClick={() => handleDownloadMaterial(mat.id, mat.title)} className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white px-4 py-2.5 rounded-xl transition-colors border border-emerald-100 hover:border-transparent shadow-sm">
+                                   <DownloadCloud size={14} className="shrink-0" /> Unduh Modul
+                                 </button>
                                )}
                              </div>
                           </div>
@@ -498,14 +547,10 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
                               </div>
                               <div className="flex-1 min-w-0 w-full pt-1">
                                 <h4 className="text-xs md:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors w-full">{spk.name}</h4>
-                                
-                                {/* 👇 BAGIAN YANG DIPERBAIKI 👇 */}
                                 <p className="text-[11px] md:text-xs font-medium text-slate-500 flex items-start gap-1.5 mt-1 w-full leading-snug">
                                   <Briefcase size={12} className="text-indigo-400 shrink-0 mt-[2px]"/> 
                                   <span>{spk.role}</span>
                                 </p>
-                                {/* 👆 SELESAI DIPERBAIKI 👆 */}
-
                               </div>
                             </div>
                           ))}
