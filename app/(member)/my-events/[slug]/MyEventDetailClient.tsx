@@ -9,7 +9,7 @@ import {
   BookOpen, FileText, Video, AlertCircle, Share2, Award, 
   Sparkles, Zap, Ticket, Gem, ChevronRight, ShieldCheck,
   Loader2, User, Briefcase, ArrowRight, Lock, Info, Download,
-  ArrowLeft, DownloadCloud, Link as LinkIcon
+  ArrowLeft, DownloadCloud, Link as LinkIcon, PlayCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; 
@@ -368,29 +368,62 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
           
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 md:p-8 overflow-hidden w-full min-w-0">
             
-            {/* AKSES PRIVAT (LINK ZOOM) */}
-            {(event.join_link || event.join_instructions) && (
-              <div className="bg-indigo-50 border border-indigo-100 p-5 md:p-6 rounded-2xl md:rounded-[1.5rem] shadow-sm mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm md:text-base font-black text-indigo-900 flex items-center gap-2 mb-1.5">
-                    <LinkIcon size={18} className="text-indigo-600" /> Akses Pertemuan
-                  </h3>
-                  {event.join_instructions && (
-                    <p className="text-[11px] md:text-xs font-medium text-indigo-700/80 leading-relaxed break-words w-full">
-                      {event.join_instructions}
-                    </p>
-                  )}
-                </div>
-                {event.join_link && (
-                  <a
-                    href={event.join_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95"
-                  >
-                    <Video size={16} /> Gabung Pertemuan
-                  </a>
+            {/* AKSES PRIVAT (LINK ZOOM & REKAMAN) */}
+            {(event.join_link || event.join_instructions || event.recording_link) && (
+              <div className="bg-indigo-50 border border-indigo-100 p-5 md:p-6 rounded-2xl md:rounded-[1.5rem] shadow-sm mb-6 md:mb-8 flex flex-col items-start w-full gap-4">
+                
+                {/* 1. Baris Akses Live Pertemuan */}
+                {(event.join_link || event.join_instructions) && (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm md:text-base font-black text-indigo-900 flex items-center gap-2 mb-1.5">
+                        <LinkIcon size={18} className="text-indigo-600" /> Akses Pertemuan Live
+                      </h3>
+                      {event.join_instructions && (
+                        <p className="text-[11px] md:text-xs font-medium text-indigo-700/80 leading-relaxed break-words w-full">
+                          {event.join_instructions}
+                        </p>
+                      )}
+                    </div>
+                    {event.join_link && (
+                      <a
+                        href={event.join_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs md:text-sm rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95"
+                      >
+                        <Video size={16} /> Gabung Pertemuan
+                      </a>
+                    )}
+                  </div>
                 )}
+
+                {/* 2. Baris Akses Rekaman (Jika Ada) */}
+                {event.recording_link && (
+                  <>
+                    {(event.join_link || event.join_instructions) && <div className="w-full border-t border-indigo-100/60 my-1" />}
+                    
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm md:text-base font-black text-indigo-900 flex items-center gap-2 mb-1.5">
+                          <PlayCircle size={18} className="text-rose-500" /> Putar Ulang Rekaman
+                        </h3>
+                        <p className="text-[11px] md:text-xs font-medium text-indigo-700/80 leading-relaxed break-words w-full">
+                          Anda bisa menonton ulang sesi pertemuan yang telah lewat melalui tautan di samping.
+                        </p>
+                      </div>
+                      <a
+                        href={event.recording_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto px-6 py-3 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 font-bold text-xs md:text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95"
+                      >
+                        <PlayCircle size={16} /> Tonton Rekaman
+                      </a>
+                    </div>
+                  </>
+                )}
+
               </div>
             )}
 

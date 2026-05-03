@@ -66,8 +66,13 @@ export default function EditEventClient() {
   const [quota, setQuota] = useState('');
   const [basicPrice, setBasicPrice] = useState('0');
   const [premiumPrice, setPremiumPrice] = useState('');
+  
   const [certificateLink, setCertificateLink] = useState('');
   const [certificateTier, setCertificateTier] = useState<'all' | 'premium'>('all');
+  
+  // 🔥 STATE BARU UNTUK REKAMAN ZOOM 🔥
+  const [recordingLink, setRecordingLink] = useState('');
+  const [recordingTier, setRecordingTier] = useState<'all'|'premium'>('all');
   
   // State Akses Privat
   const [joinLink, setJoinLink] = useState('');
@@ -138,8 +143,13 @@ export default function EditEventClient() {
         setQuota(ev.quota?.toString() || ''); 
         setBasicPrice(ev.basic_price?.toString() || '0'); 
         setPremiumPrice(ev.premium_price?.toString() || ''); 
+        
         setCertificateLink(ev.certificate_link || '');
         setCertificateTier(ev.certificate_tier || 'all'); 
+        
+        // 🔥 LOAD DATA REKAMAN 🔥
+        setRecordingLink(ev.recording_link || '');
+        setRecordingTier(ev.recording_tier || 'all');
         
         setJoinLink(ev.join_link || '');
         setJoinInstructions(ev.join_instructions || '');
@@ -246,8 +256,15 @@ export default function EditEventClient() {
     if (joinInstructions.trim()) formData.append('join_instructions', joinInstructions.trim());
 
     if (premiumPrice.trim()) formData.append('premium_price', premiumPrice.trim());
+    
     if (certificateLink.trim()) formData.append('certificate_link', certificateLink.trim());
+    else formData.append('certificate_link', ''); // Kosongkan jika user hapus input
     formData.append('certificate_tier', certificateTier); 
+    
+    // 🔥 TAMBAHKAN REKAMAN KE PAYLOAD 🔥
+    if (recordingLink.trim()) formData.append('recording_link', recordingLink.trim());
+    else formData.append('recording_link', '');
+    formData.append('recording_tier', recordingTier);
     
     if (imageFile) formData.append('image', imageFile);
 
@@ -516,7 +533,7 @@ export default function EditEventClient() {
 
                   <div className="space-y-3 md:space-y-4 bg-indigo-50/50 p-3 md:p-4 rounded-xl border border-indigo-100">
                     <h3 className="text-[11px] md:text-xs font-bold text-indigo-900 flex items-center gap-1.5 md:gap-2"><Zap size={12} className="text-indigo-500 md:w-3.5 md:h-3.5" /> Akses Privat</h3>
-                    <p className="text-[9px] md:text-[10px] font-medium text-indigo-600/80 leading-tight">Hanya akan terlihat oleh peserta yang status tiketnya sudah Diverifikasi.</p>
+                    <p className="text-[9px] md:text-[10px] font-medium text-indigo-600/80 leading-tight">Hanya terlihat oleh peserta Diverifikasi.</p>
                     
                     <div className="space-y-2.5 md:space-y-3">
                       <div className="relative">
@@ -560,29 +577,66 @@ export default function EditEventClient() {
                   <h3 className="text-xs md:text-sm font-bold text-slate-900 flex items-center gap-1.5 md:gap-2 border-b border-slate-100 pb-2 md:pb-3 pt-2"><Award size={14} className="text-slate-400 md:w-4 md:h-4" /> Aset Tambahan</h3>
                   
                   <div className="space-y-3 md:space-y-4">
-                    <div className="space-y-1 md:space-y-1.5">
-                      <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Award size={10} className={`${validationErrors.certificate_link ? 'text-rose-500' : 'text-amber-500'} md:w-3 md:h-3`} /> Link E-Certificate</label>
-                      <div className="relative">
-                        <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
-                        <input type="url" value={certificateLink} onChange={(e) => { setCertificateLink(e.target.value); if(validationErrors.certificate_link) setValidationErrors({...validationErrors, certificate_link: []}); }} placeholder="https://..." className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.certificate_link ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                    
+                    {/* E-Certificate */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="space-y-1 md:space-y-1.5">
+                        <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Award size={10} className={`${validationErrors.certificate_link ? 'text-rose-500' : 'text-amber-500'} md:w-3 md:h-3`} /> Link E-Certificate</label>
+                        <div className="relative">
+                          <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
+                          <input type="url" value={certificateLink} onChange={(e) => { setCertificateLink(e.target.value); if(validationErrors.certificate_link) setValidationErrors({...validationErrors, certificate_link: []}); }} placeholder="https://..." className={`w-full bg-white border rounded-lg py-2 md:py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.certificate_link ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                        </div>
+                        {validationErrors.certificate_link && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.certificate_link[0]}</p>}
                       </div>
-                      {validationErrors.certificate_link && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.certificate_link[0]}</p>}
+
+                      <div className="space-y-1 md:space-y-1.5">
+                        <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <Lock size={10} className="text-rose-500 md:w-3 md:h-3" /> Akses Sertifikat
+                        </label>
+                        <select 
+                          value={certificateTier} 
+                          onChange={(e) => setCertificateTier(e.target.value as 'all'|'premium')} 
+                          className="w-full bg-white border border-slate-300 rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                        >
+                          <option value="all">Semua Peserta (Basic & VIP)</option>
+                          <option value="premium">Khusus Peserta VIP (Premium)</option>
+                        </select>
+                      </div>
                     </div>
-                    <div className="space-y-1 md:space-y-1.5">
-                      <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                        <Lock size={10} className="text-rose-500 md:w-3 md:h-3" /> Akses E-Certificate
-                      </label>
-                      <select 
-                        value={certificateTier} 
-                        onChange={(e) => setCertificateTier(e.target.value as 'all'|'premium')} 
-                        className="w-full bg-white border border-slate-300 rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                      >
-                        <option value="all">Semua Peserta (Basic & VIP)</option>
-                        <option value="premium">Khusus Peserta VIP (Premium)</option>
-                      </select>
+
+                    {/* 🔥 REKAMAN ZOOM (BARU) 🔥 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 pt-2 border-t border-slate-50">
+                      <div className="space-y-1 md:space-y-1.5">
+                        <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <Video size={10} className={`${validationErrors.recording_link ? 'text-rose-500' : 'text-blue-500'} md:w-3 md:h-3`} /> Link Rekaman
+                        </label>
+                        <div className="relative">
+                          <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" />
+                          <input type="url" value={recordingLink} onChange={(e) => { setRecordingLink(e.target.value); if(validationErrors.recording_link) setValidationErrors({...validationErrors, recording_link: []}); }} placeholder="URL Rekaman (Google Drive)" className={`w-full bg-white border rounded-lg py-2.5 pl-9 md:pl-10 pr-3 text-xs md:text-sm font-medium text-slate-900 outline-none transition-all ${validationErrors.recording_link ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
+                        </div>
+                        {validationErrors.recording_link && <p className="text-[10px] text-rose-500 font-bold mt-1 flex items-center gap-1"><AlertTriangle size={10}/> {validationErrors.recording_link[0]}</p>}
+                      </div>
+
+                      <div className="space-y-1 md:space-y-1.5">
+                        <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <Lock size={10} className="text-rose-500 md:w-3 md:h-3" /> Akses Rekaman
+                        </label>
+                        <select 
+                          value={recordingTier} 
+                          onChange={(e) => setRecordingTier(e.target.value as 'all'|'premium')} 
+                          className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                        >
+                          <option value="all">Semua Peserta (Basic & VIP)</option>
+                          <option value="premium">Khusus Peserta VIP (Premium)</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 
+                  <button type="submit" disabled={saving} className="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white py-3 md:py-3.5 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-70 shadow-sm">
+                    {saving ? <Loader2 size={14} className="animate-spin md:w-4 md:h-4" /> : <Save size={14} className="md:w-4 md:h-4" />}
+                    {saving ? 'Menyiapkan...' : 'Simpan Perubahan'}
+                  </button>
                 </div>
               </div>
             </motion.form>
