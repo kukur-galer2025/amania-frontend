@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Rocket, Users, FileText, 
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
-  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers
+  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -23,8 +23,9 @@ const ADMIN_PAGES = [
   { id: 'p6', title: 'Eksport Laporan (PDF)', link: '/admin/reports', icon: FileSpreadsheet },
   { id: 'p7', title: 'Kategori Artikel', link: '/admin/article-categories', icon: Tag },
   { id: 'p8', title: 'Semua Artikel', link: '/admin/articles', icon: FileText },
-  { id: 'p9a', title: 'Kategori E-Produk', link: '/admin/e-product-categories', icon: Layers }, // 🔥 BARU
+  { id: 'p9a', title: 'Kategori E-Produk', link: '/admin/e-product-categories', icon: Layers }, 
   { id: 'p9b', title: 'Kelola E-Produk Premium', link: '/admin/e-products', icon: ShoppingCart },
+  { id: 'p9c', title: 'Transaksi E-Produk', link: '/admin/e-product-transactions', icon: Receipt }, // 🔥 BARU
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
@@ -50,9 +51,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [unreadCount,       setUnreadCount]       = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const [searchQuery,            setSearchQuery]            = useState('');
-  const [isSearching,            setIsSearching]            = useState(false);
-  const [showSearchDropdown,     setShowSearchDropdown]     = useState(false);
+  const [searchQuery,             setSearchQuery]             = useState('');
+  const [isSearching,             setIsSearching]             = useState(false);
+  const [showSearchDropdown,      setShowSearchDropdown]      = useState(false);
   const [showMobileSearchInput, setShowMobileSearchInput] = useState(false); 
   const [pageResults,    setPageResults]    = useState<any[]>([]);
   const [userResults,    setUserResults]    = useState<any[]>([]);
@@ -123,9 +124,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const timer = setTimeout(async () => {
       const q = searchQuery.toLowerCase();
       let pages = ADMIN_PAGES;
-      // Sembunyikan menu Super Admin dari Organizer
-      if (adminRole !== 'superadmin') pages = pages.filter(p => !['/admin/users', '/admin/e-products', '/admin/e-product-categories'].includes(p.link));
+      // 🔥 SEMBUNYIKAN MENU KHUSUS SUPERADMIN DARI ORGANIZER 🔥
+      if (adminRole !== 'superadmin') {
+         pages = pages.filter(p => !['/admin/users', '/admin/e-products', '/admin/e-product-categories', '/admin/e-product-transactions'].includes(p.link));
+      }
       setPageResults(pages.filter(p => p.title.toLowerCase().includes(q)).slice(0, 3));
+      
       try {
         const res  = await apiFetch(`/admin/global-search?q=${encodeURIComponent(searchQuery)}`);
         const json = await res.json();
@@ -254,9 +258,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div>
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-400">Katalog Digital</p>
                   <div className="space-y-0.5">
-                    {/* 🔥 MENU BARU DITAMBAHKAN DI SINI 🔥 */}
                     <NavItem icon={Layers} label="Kategori E-Produk" href="/admin/e-product-categories" />
                     <NavItem icon={ShoppingCart} label="Kelola E-Produk" href="/admin/e-products" />
+                    {/* 🔥 MENU BARU: TRANSAKSI E-PRODUK 🔥 */}
+                    <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />
                   </div>
                 </div>
                 <div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; // 🔥 GANTI JADI useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation'; 
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, CheckCircle2, XCircle, ShieldCheck, 
@@ -9,7 +9,8 @@ import {
   CreditCard, Camera, Copy, Info, Check, Gem, AlertTriangle, User
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { apiFetch } from '@/app/utils/api'; 
+import Link from 'next/link';
 
 export default function CheckoutClient() {
   const router = useRouter();
@@ -26,6 +27,9 @@ export default function CheckoutClient() {
   const fileRef = useRef<HTMLInputElement>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 🔥 STATE BARU: CHECKBOX KONFIRMASI PROFIL 🔥
+  const [isProfileConfirmed, setIsProfileConfirmed] = useState(false);
   
   // STATE OVERLAY SUKSES & ERROR
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
@@ -91,6 +95,10 @@ export default function CheckoutClient() {
     
     if (priceToPay > 0 && !paymentProof) {
       return toast.error("Harap unggah bukti transfer pembayaran Anda.");
+    }
+
+    if (!isProfileConfirmed) {
+      return toast.error("Harap konfirmasi data profil Anda terlebih dahulu.");
     }
 
     setIsSubmitting(true);
@@ -537,9 +545,25 @@ export default function CheckoutClient() {
               </div>
             </div>
 
+            {/* 🔥 CHECKBOX KONFIRMASI PROFIL 🔥 */}
+            <label className="flex items-start gap-2.5 mb-4 p-3 md:p-4 border border-indigo-100 rounded-xl bg-indigo-50/30 cursor-pointer hover:bg-indigo-50/60 transition-colors w-full min-w-0">
+              <div className="relative flex items-center justify-center shrink-0 mt-0.5">
+                <input
+                  type="checkbox"
+                  className="peer appearance-none w-4 h-4 md:w-5 md:h-5 border-2 border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 focus:outline-none transition-all cursor-pointer"
+                  checked={isProfileConfirmed}
+                  onChange={(e) => setIsProfileConfirmed(e.target.checked)}
+                />
+                <Check size={12} className="absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity md:w-3.5 md:h-3.5" strokeWidth={3} />
+              </div>
+              <span className="text-[10px] md:text-xs text-slate-600 font-medium leading-relaxed break-words w-full">
+                Saya mengonfirmasi bahwa <strong>Nama, Gelar, dan Kontak</strong> saya sudah benar untuk keperluan penerbitan sertifikat. <Link href="/profil" className="text-indigo-600 font-bold hover:underline ml-1">Edit Profil di sini</Link>.
+              </span>
+            </label>
+
             <button 
               onClick={handleCheckout}
-              disabled={isSubmitting || showSuccessOverlay || showErrorOverlay}
+              disabled={isSubmitting || showSuccessOverlay || showErrorOverlay || !isProfileConfirmed}
               className="w-full py-3 md:py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-xs md:text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 md:gap-2 shadow-sm shrink-0 min-w-0 px-2"
             >
               {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-4 md:h-4 shrink-0" /> : <ShieldCheck size={16} className="md:w-4 md:h-4 shrink-0" />}
