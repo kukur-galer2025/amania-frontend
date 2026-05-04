@@ -89,31 +89,62 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
     const token = localStorage.getItem('token');
     
     const isTokenValid = token && token !== 'null' && token !== 'undefined' && token.length > 10;
-    const isUserStrValid = userStr && userStr !== 'null' && userStr !== 'undefined';
 
-    if (isTokenValid && isUserStrValid) {
-      try {
-        const parsedUser = JSON.parse(userStr);
-        if (parsedUser && typeof parsedUser === 'object' && parsedUser.name) {
-          setUserData(parsedUser);
-          
-          // 🔥 CEK KELENGKAPAN PROFIL (Email & Phone) 🔥
-          // Modal tidak muncul jika user sedang berada di halaman edit profil, biar gak looping.
-          if ((!parsedUser.email || !parsedUser.phone) && pathname !== '/profil') {
-             setTimeout(() => {
-                setShowIncompleteProfileAlert(true);
-             }, 1000); // Muncul otomatis setelah 1 detik
-          }
-
-          fetchNotifications(); 
-        } else {
-          throw new Error('Data user tidak lengkap atau corrupt');
-        }
-      } catch (error) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setUserData(null);
+    if (isTokenValid) {
+      // 1. Tampilkan UI seketika dari localStorage
+      if (userStr && userStr !== 'null' && userStr !== 'undefined') {
+         try {
+           const parsedUser = JSON.parse(userStr);
+           setUserData(parsedUser);
+         } catch(e) {}
       }
+
+      // 2. 🔥 TARIK DATA TERBARU & CEK CONSOLE LOG 🔥
+      const syncFreshUserData = async () => {
+         console.log("⏳ [SYNC] Memulai penarikan data profil dari database...");
+         console.time("⏱️ Waktu Respon API /user"); // Pelacak Kecepatan API
+
+         try {
+            const res = await apiFetch('/user');
+            console.timeEnd("⏱️ Waktu Respon API /user"); // Hentikan Pelacak
+
+            if (res.ok) {
+               const json = await res.json();
+               console.log("✅ [SYNC] Data berhasil ditarik:", json.data);
+
+               if (json.success && json.data) {
+                  const freshUser = json.data;
+                  
+                  // Update Cache
+                  setUserData(freshUser);
+                  localStorage.setItem('user', JSON.stringify(freshUser));
+                  
+                  // Evaluasi Kelengkapan (Tanpa Delay)
+                  const isProfileIncomplete = !freshUser.email || !freshUser.phone;
+                  console.log(`🔍 Status Profil: ${isProfileIncomplete ? 'BELUM LENGKAP ❌' : 'LENGKAP ✅'}`);
+
+                  if (isProfileIncomplete && pathname !== '/profil') {
+                     console.log("🚨 Menampilkan popup peringatan profil!");
+                     setShowIncompleteProfileAlert(true);
+                  } else {
+                     setShowIncompleteProfileAlert(false);
+                  }
+               }
+            } else if (res.status === 401) {
+               console.warn("⚠️ Token expired, mengarahkan ke halaman login.");
+               handleLogout('expired');
+            } else {
+               console.error("❌ API /user merespon dengan HTTP", res.status);
+            }
+         } catch (error) {
+            console.timeEnd("⏱️ Waktu Respon API /user");
+            console.error("❌ Gagal menghubungi server untuk sinkronisasi:", error);
+         }
+      };
+
+      syncFreshUserData();
+      fetchNotifications(); 
+
     } else {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
@@ -131,7 +162,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [pathname]); // 🔥 Dependensi diubah menjadi pathname agar selalu dicek tiap pindah halaman
+  }, [pathname]);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -141,18 +172,13 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const fetchNotifications = async () => {
     try {
       const res = await apiFetch('/notifications');
-      if (res.status === 401) {
-        handleLogout('expired');
-        return;
-      }
+      if (res.status === 401) return;
       const json = await res.json();
       if (res.ok && json.success) {
         setNotifications(json.notifications);
         setUnreadCount(json.unread_count);
       }
-    } catch (error) { 
-      console.error("Gagal ambil notifikasi", error); 
-    }
+    } catch (error) { }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -160,7 +186,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
       setUnreadCount(0);
       await apiFetch('/notifications/read', { method: 'POST' });
       fetchNotifications(); 
-    } catch (error) { console.error(error); }
+    } catch (error) {}
   };
 
   const formatTimeAgo = (dateString: string) => {
