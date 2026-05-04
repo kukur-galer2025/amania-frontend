@@ -25,7 +25,7 @@ const ADMIN_PAGES = [
   { id: 'p8', title: 'Semua Artikel', link: '/admin/articles', icon: FileText },
   { id: 'p9a', title: 'Kategori E-Produk', link: '/admin/e-product-categories', icon: Layers }, 
   { id: 'p9b', title: 'Kelola E-Produk Premium', link: '/admin/e-products', icon: ShoppingCart },
-  { id: 'p9c', title: 'Transaksi E-Produk', link: '/admin/e-product-transactions', icon: Receipt }, // 🔥 BARU
+  { id: 'p9c', title: 'Transaksi E-Produk', link: '/admin/e-product-transactions', icon: Receipt },
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
@@ -124,7 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const timer = setTimeout(async () => {
       const q = searchQuery.toLowerCase();
       let pages = ADMIN_PAGES;
-      // 🔥 SEMBUNYIKAN MENU KHUSUS SUPERADMIN DARI ORGANIZER 🔥
+      
       if (adminRole !== 'superadmin') {
          pages = pages.filter(p => !['/admin/users', '/admin/e-products', '/admin/e-product-categories', '/admin/e-product-transactions'].includes(p.link));
       }
@@ -224,25 +224,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-0.5"><NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" /></div>
             </div>
 
+            {/* 🔥 MENU DIGABUNG DISINI 🔥 */}
             <div>
               <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Program Utama</p>
               <div className="space-y-0.5">
                 <NavItem icon={Rocket} label="Kelola Event" href="/admin/events" />
                 <NavItem icon={Users} label="Pendaftar" href="/admin/registrations" />
-              </div>
-            </div>
-
-            <div>
-              <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Transaksi</p>
-              <div className="space-y-0.5">
                 <NavItem icon={Ticket} label="Kelola Tiket" href="/admin/tickets" />
                 <NavItem icon={CreditCard} label="Kelola Transaksi" href="/admin/transactions" />
+                <NavItem icon={FileSpreadsheet} label="Eksport Laporan" href="/admin/reports" />
               </div>
-            </div>
-
-            <div>
-              <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Laporan</p>
-              <div className="space-y-0.5"><NavItem icon={FileSpreadsheet} label="Eksport Laporan" href="/admin/reports" /></div>
             </div>
 
             <div>
@@ -260,7 +251,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <div className="space-y-0.5">
                     <NavItem icon={Layers} label="Kategori E-Produk" href="/admin/e-product-categories" />
                     <NavItem icon={ShoppingCart} label="Kelola E-Produk" href="/admin/e-products" />
-                    {/* 🔥 MENU BARU: TRANSAKSI E-PRODUK 🔥 */}
                     <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />
                   </div>
                 </div>

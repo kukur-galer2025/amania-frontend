@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, CheckCircle2, XCircle, ShieldCheck, 
   UploadCloud, Loader2, Image as ImageIcon, Ticket, 
-  CreditCard, Camera, Copy, Info, Check, Gem, AlertTriangle, User
+  CreditCard, Camera, Copy, Info, Check, Gem, AlertTriangle, User, X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; 
@@ -31,12 +31,18 @@ export default function CheckoutClient() {
   // 🔥 STATE BARU: CHECKBOX KONFIRMASI PROFIL 🔥
   const [isProfileConfirmed, setIsProfileConfirmed] = useState(false);
   
-  // STATE OVERLAY SUKSES & ERROR
+  // 🔥 STATE BARU: ERROR ANIMASI BUKTI TRANSFER 🔥
+  const [proofError, setProofError] = useState(false);
+
+  // STATE OVERLAY SUKSES & ERROR & MISSING PROOF
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
   const [showErrorOverlay, setShowErrorOverlay] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // 🔥 STATE BARU UNTUK MODAL BUKTI KOSONG 🔥
+  const [showMissingProofModal, setShowMissingProofModal] = useState(false);
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -80,6 +86,7 @@ export default function CheckoutClient() {
       if (file.size > 5 * 1024 * 1024) return toast.error("File terlalu besar (Maks 5MB)");
       setPaymentProof(file);
       setProofPreview(URL.createObjectURL(file));
+      setProofError(false); // Hilangkan error jika file sudah diisi
     }
   };
 
@@ -93,8 +100,14 @@ export default function CheckoutClient() {
       return; 
     }
     
+    // 🔥 LOGIKA NOTIFIKASI MODAL ERROR BUKTI TRANSFER 🔥
     if (priceToPay > 0 && !paymentProof) {
-      return toast.error("Harap unggah bukti transfer pembayaran Anda.");
+      setProofError(true); // Memicu animasi getar merah di area upload
+      setTimeout(() => setProofError(false), 1000); // Reset getar agar bisa dipicu lagi
+      
+      // Tampilkan Modal Popup Tengah
+      setShowMissingProofModal(true);
+      return;
     }
 
     if (!isProfileConfirmed) {
@@ -179,6 +192,61 @@ export default function CheckoutClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans overflow-x-hidden w-full">
       
+      {/* ==================================================== */}
+      {/* OVERLAY MODAL BUKTI TRANSFER KOSONG (OPTIMASI MOBILE) */}
+      {/* ==================================================== */}
+      <AnimatePresence>
+        {showMissingProofModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Latar Belakang (Klik untuk tutup) */}
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setShowMissingProofModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm w-full h-full"
+            />
+            
+            {/* Kotak Modal */}
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white p-6 sm:p-8 md:p-10 rounded-3xl md:rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col items-center text-center w-[95%] max-w-sm relative overflow-hidden z-10"
+            >
+              {/* Tombol Tutup X di Sudut Kanan Atas */}
+              <button 
+                onClick={() => setShowMissingProofModal(false)} 
+                className="absolute top-4 right-4 md:top-5 md:right-5 p-2 text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-4 md:mb-6 border border-rose-100 shadow-inner shrink-0 mt-2 md:mt-0">
+                <UploadCloud size={32} className="md:w-10 md:h-10" strokeWidth={2} />
+              </div>
+              <h2 className="text-lg md:text-2xl font-black text-slate-900 mb-2">Bukti Transfer Kosong!</h2>
+              <p className="text-xs md:text-sm font-medium text-slate-500 leading-relaxed mb-6 md:mb-8 px-1 md:px-2">
+                Anda memilih tiket Premium. Harap unggah tangkapan layar (screenshot) bukti transfer terlebih dahulu sebelum memproses pembayaran.
+              </p>
+              
+              <button 
+                onClick={() => {
+                  setShowMissingProofModal(false);
+                  // Memberikan sedikit delay agar animasi modal menutup dulu sebelum scroll di HP
+                  setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }, 150);
+                }}
+                className="w-full py-3.5 md:py-4 bg-slate-900 text-white text-xs md:text-sm font-bold rounded-xl md:rounded-2xl hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-900/20 flex items-center justify-center gap-2"
+              >
+                <Camera size={16} className="md:w-[18px] md:h-[18px]" /> Unggah Sekarang
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ==================================================== */}
       {/* OVERLAY SUKSES */}
       {/* ==================================================== */}
@@ -438,14 +506,21 @@ export default function CheckoutClient() {
                     )}
                   </div>
 
-                  {/* Upload Bukti */}
-                  <div className="pt-3 md:pt-4 border-t border-slate-100 w-full min-w-0">
-                    <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5 w-full min-w-0">
-                      <Camera size={14} className="text-slate-400 md:w-4 md:h-4 shrink-0" /> <span className="truncate flex-1">Unggah Bukti Transfer <span className="text-rose-500">*</span></span>
+                  {/* Upload Bukti - DENGAN EFEK GETAR ERROR */}
+                  <motion.div 
+                    animate={proofError ? { x: [-10, 10, -10, 10, 0] } : {}}
+                    transition={{ duration: 0.4 }}
+                    className="pt-3 md:pt-4 border-t border-slate-100 w-full min-w-0"
+                  >
+                    <label className={`text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5 w-full min-w-0 transition-colors ${proofError ? 'text-rose-500' : 'text-slate-500'}`}>
+                      <Camera size={14} className="shrink-0 md:w-4 md:h-4" /> <span className="truncate flex-1">Unggah Bukti Transfer <span className="text-rose-500">*</span></span>
                     </label>
                     <div 
                       onClick={() => fileRef.current?.click()} 
-                      className={`w-full h-32 md:h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative group min-w-0 ${proofPreview ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-300 bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-400'}`}
+                      className={`w-full h-32 md:h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative group min-w-0 
+                        ${proofError ? 'border-rose-500 bg-rose-50/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' 
+                        : proofPreview ? 'border-emerald-500 bg-emerald-50/10' 
+                        : 'border-slate-300 bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-400'}`}
                     >
                       {proofPreview ? (
                         <>
@@ -456,16 +531,16 @@ export default function CheckoutClient() {
                         </>
                       ) : (
                         <div className="text-center p-4 w-full min-w-0">
-                          <div className="w-8 h-8 md:w-10 md:h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 md:mb-3 text-slate-400 group-hover:text-indigo-600 transition-colors shrink-0">
+                          <div className={`w-8 h-8 md:w-10 md:h-10 bg-white border rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 md:mb-3 transition-colors shrink-0 ${proofError ? 'border-rose-200 text-rose-500' : 'border-slate-200 text-slate-400 group-hover:text-indigo-600'}`}>
                             <UploadCloud size={18} className="md:w-5 md:h-5 shrink-0" />
                           </div>
-                          <p className="text-[11px] md:text-xs font-semibold text-slate-700 mb-1 break-words w-full">Klik untuk memilih file</p>
-                          <p className="text-[9px] md:text-[10px] text-slate-500 truncate w-full">Maks. 5MB (JPG, PNG)</p>
+                          <p className={`text-[11px] md:text-xs font-semibold mb-1 break-words w-full ${proofError ? 'text-rose-600' : 'text-slate-700'}`}>Klik untuk memilih file</p>
+                          <p className={`text-[9px] md:text-[10px] truncate w-full ${proofError ? 'text-rose-400' : 'text-slate-500'}`}>Maks. 5MB (JPG, PNG)</p>
                         </div>
                       )}
                     </div>
                     <input type="file" ref={fileRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-                  </div>
+                  </motion.div>
 
                 </div>
               </motion.section>
