@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, CheckCircle2, XCircle, ShieldCheck, 
   UploadCloud, Loader2, Image as ImageIcon, Ticket, 
-  CreditCard, Camera, Copy, Info, Check, Gem, AlertTriangle, User, X
+  CreditCard, Camera, Copy, Info, Check, Gem, AlertTriangle, User, X, QrCode, Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; 
@@ -162,6 +162,17 @@ export default function CheckoutClient() {
       toast.error("Terjadi kesalahan koneksi ke server.");
       setIsSubmitting(false);
     } 
+  };
+
+  // 🔥 FUNGSI UNDUH GAMBAR QRIS 🔥
+  const downloadQris = () => {
+    const link = document.createElement('a');
+    link.href = '/qris-amania.jpeg'; // Pastikan path gambar sudah benar
+    link.download = 'QRIS-Pembayaran-Amania.jpeg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Gambar QRIS sedang diunduh...");
   };
 
   if (loading) return (
@@ -449,10 +460,54 @@ export default function CheckoutClient() {
                     <h2 className="text-sm md:text-base font-bold text-slate-900 break-words w-full">Metode & Bukti Pembayaran</h2>
                   </div>
 
-                  {/* Rekening Tujuan */}
+                  {/* Rekening Tujuan & QRIS */}
                   <div className="space-y-3 w-full min-w-0">
-                    <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider break-words w-full">Transfer Ke Rekening Berikut</label>
+                    <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider break-words w-full">Tujuan Transfer / Pembayaran</label>
                     
+                    {/* 🔥 TAMPILKAN QRIS JIKA DIAKTIFKAN OLEH ADMIN 🔥 */}
+                    {event?.use_qris && (
+                      <div className="p-5 md:p-8 bg-white border-2 border-indigo-100 rounded-2xl flex flex-col items-center justify-center text-center gap-4 shadow-sm relative overflow-hidden mb-5 mt-2">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
+                        
+                        <div className="flex items-center gap-2 justify-center mt-2">
+                           <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                              <QrCode size={20}/>
+                           </div>
+                           <h3 className="text-base md:text-lg font-black text-slate-900">Scan QRIS Amania</h3>
+                        </div>
+                        
+                        <p className="text-[11px] md:text-xs text-slate-500 font-medium -mt-2">Bisa dibayar dari semua <strong>E-Wallet</strong> & <strong>M-Banking</strong></p>
+
+                        {/* Gambar QRIS yang Lebih Besar */}
+                        <div className="w-full max-w-[260px] md:max-w-[320px] aspect-square border border-slate-200 rounded-2xl overflow-hidden p-2 bg-white shadow-inner mx-auto my-2">
+                          <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-contain" />
+                        </div>
+
+                        {/* Tombol Unduh Permanen (Selalu Tampil) */}
+                        <button 
+                          type="button" 
+                          onClick={downloadQris} 
+                          className="flex items-center gap-2 px-6 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs md:text-sm font-bold border border-indigo-200 transition-colors shadow-sm"
+                        >
+                          <Download size={16} /> Unduh / Simpan QRIS
+                        </button>
+
+                        {/* Notes Transfer & Nominal */}
+                        <div className="w-full bg-rose-50 border border-rose-100 rounded-xl p-4 mt-2">
+                          <p className="text-xs md:text-sm text-rose-600 font-black uppercase tracking-widest mb-1">
+                             ⚠️ Nominal Transfer
+                          </p>
+                          <p className="text-lg md:text-2xl font-black text-slate-900">
+                             Rp {priceToPay.toLocaleString('id-ID')}
+                          </p>
+                          <p className="text-[10px] md:text-xs text-rose-500 font-medium mt-2">
+                             Pastikan nominal sesuai. Jika dalam 1x24 jam belum diverifikasi, silakan hubungi Admin.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DAFTAR REKENING BANK */}
                     {((event?.bank_accounts || event?.bankAccounts))?.length > 0 ? (
                       (event.bank_accounts || event.bankAccounts).map((bank: any, idx: number) => {
                         const bankCode = bank.bank_code?.toLowerCase();
@@ -461,7 +516,6 @@ export default function CheckoutClient() {
                         return (
                           <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors group min-w-0 w-full">
                             <div className="flex items-center gap-3 md:gap-4 min-w-0 w-full">
-                              {/* Wadah Logo */}
                               <div className="w-12 md:w-14 h-8 md:h-10 bg-white rounded border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-sm overflow-hidden relative">
                                 <img 
                                   src={localLogoPath} 
@@ -470,22 +524,16 @@ export default function CheckoutClient() {
                                   onError={(e) => { 
                                     e.currentTarget.style.display = 'none';
                                     const parent = e.currentTarget.parentElement;
-                                    if (parent) {
-                                      parent.innerHTML = `<span class="text-[10px] font-black text-indigo-600 uppercase">${bank.bank_code?.substring(0, 3)}</span>`;
-                                    }
+                                    if (parent) parent.innerHTML = `<span class="text-[10px] font-black text-indigo-600 uppercase">${bank.bank_code?.substring(0, 3)}</span>`;
                                   }}
                                 />
                               </div>
-
-                              {/* Info Rekening */}
                               <div className="min-w-0 flex-1">
                                 <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 truncate w-full">{bank.bank_code}</p>
                                 <h4 className="text-xs md:text-sm font-black text-slate-900 tracking-tight break-words w-full">{bank.account_number}</h4>
                                 <p className="text-[11px] md:text-xs font-medium text-slate-500 truncate w-full">A/n {bank.account_holder}</p>
                               </div>
                             </div>
-
-                            {/* Tombol Salin */}
                             <button 
                               type="button"
                               onClick={() => {
@@ -500,9 +548,11 @@ export default function CheckoutClient() {
                         );
                       })
                     ) : (
-                      <div className="p-4 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 w-full min-w-0">
-                          <p className="text-[11px] md:text-xs font-medium text-slate-500 break-words w-full">Menunggu informasi rekening dari Amania.</p>
-                      </div>
+                      !event?.use_qris && (
+                        <div className="p-4 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 w-full min-w-0">
+                            <p className="text-[11px] md:text-xs font-medium text-slate-500 break-words w-full">Menunggu informasi rekening dari Amania.</p>
+                        </div>
+                      )
                     )}
                   </div>
 
@@ -519,8 +569,7 @@ export default function CheckoutClient() {
                       onClick={() => fileRef.current?.click()} 
                       className={`w-full h-32 md:h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative group min-w-0 
                         ${proofError ? 'border-rose-500 bg-rose-50/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' 
-                        : proofPreview ? 'border-emerald-500 bg-emerald-50/10' 
-                        : 'border-slate-300 bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-400'}`}
+                        : proofPreview ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-300 bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-400'}`}
                     >
                       {proofPreview ? (
                         <>
@@ -573,7 +622,7 @@ export default function CheckoutClient() {
               </div>
             </div>
 
-            {/* 🔥 KOTAK ORGANIZER/PENYELENGGARA 🔥 */}
+            {/* Organizer */}
             {event.organizer && (
               <div className="w-full min-w-0 mb-5 md:mb-6 pt-4 md:pt-5 border-t border-slate-100">
                 <h3 className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
@@ -620,7 +669,7 @@ export default function CheckoutClient() {
               </div>
             </div>
 
-            {/* 🔥 CHECKBOX KONFIRMASI PROFIL 🔥 */}
+            {/* CHECKBOX KONFIRMASI PROFIL */}
             <label className="flex items-start gap-2.5 mb-4 p-3 md:p-4 border border-indigo-100 rounded-xl bg-indigo-50/30 cursor-pointer hover:bg-indigo-50/60 transition-colors w-full min-w-0">
               <div className="relative flex items-center justify-center shrink-0 mt-0.5">
                 <input
@@ -645,14 +694,6 @@ export default function CheckoutClient() {
               <span className="truncate">{isSubmitting ? 'Memproses...' : (priceToPay === 0 ? 'Daftar Sekarang' : 'Konfirmasi Pembayaran')}</span>
             </button>
 
-            {priceToPay > 0 && (
-              <div className="mt-4 md:mt-5 flex items-start gap-1.5 md:gap-2 text-slate-500 w-full min-w-0">
-                <Info size={14} className="shrink-0 mt-0.5 text-slate-400 md:w-3.5 md:h-3.5" />
-                <p className="text-[9px] md:text-[10px] leading-relaxed break-words w-full">
-                  Proses verifikasi transfer memakan waktu maksimal 1x24 jam kerja Amania.
-                </p>
-              </div>
-            )}
           </div>
         </aside>
 

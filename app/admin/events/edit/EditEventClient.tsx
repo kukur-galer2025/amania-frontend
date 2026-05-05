@@ -12,7 +12,7 @@ import {
   Settings, BookOpen, Plus, FileText, Video, Trash2, 
   UserPlus, Camera, AlertTriangle, Users, DollarSign, Award,
   ChevronRight, PlusCircle, AlignLeft, Building, Hash, 
-  User, Tag, Star, Clock, Briefcase, Zap, Info, X, Lock
+  User, Tag, Star, Clock, Briefcase, Zap, Info, X, Lock, QrCode
 } from 'lucide-react'; 
 import { apiFetch } from '@/app/utils/api'; 
 
@@ -26,16 +26,13 @@ import 'react-quill-new/dist/quill.snow.css';
 const formatForDatetimeLocal = (dateStr: string) => {
   if (!dateStr) return '';
   
-  // Jika formatnya dari Laravel mengandung 'Z' (berarti format UTC ISO-8601)
   if (dateStr.endsWith('Z')) {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return '';
-    // Otomatis terjemahkan waktu UTC ke waktu WIB (Lokal Browser)
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
   
-  // Jika formatnya sudah string biasa seperti "2024-05-09 08:15:00"
   return dateStr.replace(' ', 'T').slice(0, 16);
 };
 
@@ -43,7 +40,6 @@ const formatForDatetimeLocal = (dateStr: string) => {
 const formatSubmitDate = (dt: string) => {
   if (!dt) return '';
   const formatted = dt.replace('T', ' ');
-  // Jika panjangnya 16 ("YYYY-MM-DD HH:mm"), tambahkan detik :00
   return formatted.length === 16 ? `${formatted}:00` : formatted;
 };
 
@@ -70,11 +66,9 @@ export default function EditEventClient() {
   const [certificateLink, setCertificateLink] = useState('');
   const [certificateTier, setCertificateTier] = useState<'all' | 'premium'>('all');
   
-  // 🔥 STATE BARU UNTUK REKAMAN ZOOM 🔥
   const [recordingLink, setRecordingLink] = useState('');
   const [recordingTier, setRecordingTier] = useState<'all'|'premium'>('all');
   
-  // State Akses Privat
   const [joinLink, setJoinLink] = useState('');
   const [joinInstructions, setJoinInstructions] = useState('');
   
@@ -82,8 +76,9 @@ export default function EditEventClient() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State: Array Multi Bank
+  // 🔥 STATE: BANK & QRIS MANUAL 🔥
   const [banks, setBanks] = useState<any[]>([]);
+  const [useQris, setUseQris] = useState(false);
 
   // State: Materi
   const [materials, setMaterials] = useState<any[]>([]);
@@ -102,13 +97,11 @@ export default function EditEventClient() {
   const [spkPhotoPreview, setSpkPhotoPreview] = useState<string | null>(null);
   const spkPhotoRef = useRef<HTMLInputElement>(null);
 
-  // State Custom Delete Modal
   const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, id: number | null, endpoint: 'materials' | 'speakers' | null}>({ 
     isOpen: false, id: null, endpoint: null 
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // State Validasi 422
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -136,7 +129,6 @@ export default function EditEventClient() {
         setDescription(ev.description || ''); 
         setVenue(ev.venue || '');
         
-        // Formatter akan otomatis mendeteksi zona waktu UTC atau Format biasa
         setStartTime(formatForDatetimeLocal(ev.start_time));
         setEndTime(formatForDatetimeLocal(ev.end_time));
         
@@ -147,12 +139,14 @@ export default function EditEventClient() {
         setCertificateLink(ev.certificate_link || '');
         setCertificateTier(ev.certificate_tier || 'all'); 
         
-        // 🔥 LOAD DATA REKAMAN 🔥
         setRecordingLink(ev.recording_link || '');
         setRecordingTier(ev.recording_tier || 'all');
         
         setJoinLink(ev.join_link || '');
         setJoinInstructions(ev.join_instructions || '');
+
+        // 🔥 LOAD STATUS QRIS 🔥
+        setUseQris(ev.use_qris ? true : false);
 
         if (ev.image) setImagePreview(`${STORAGE_URL}/${ev.image}`);
         
@@ -169,7 +163,7 @@ export default function EditEventClient() {
             });
             setBanks(mappedBanks);
         } else {
-            setBanks([{ bank_code: 'bca', account_number: '', account_holder: '', custom_bank_name: '' }]);
+            setBanks([]); // Dikosongkan agar bisa menghapus semua akun bank
         }
 
         setMaterials(ev.materials || []); 
@@ -220,19 +214,26 @@ export default function EditEventClient() {
     if (!startTime) errors.start_time = ["Waktu mulai wajib ditentukan."];
     if (!endTime) errors.end_time = ["Waktu selesai wajib ditentukan."];
     
-    // Validasi Logika Waktu
     if (startTime && endTime) {
       if (new Date(startTime) >= new Date(endTime)) {
         errors.end_time = ["Waktu selesai harus lebih lambat dari waktu mulai!"];
       }
     }
 
+    // Validasi Jika Berbayar
+    if ((parseInt(basicPrice) > 0 || parseInt(premiumPrice) > 0) && !useQris && banks.length === 0) {
+      errors.banks = ["Program berbayar wajib memiliki setidaknya 1 metode pembayaran (QRIS atau Rekening)."];
+    }
+
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
-      toast.error("Gagal menyimpan! Harap periksa form yang bertanda merah.");
-      
-      // Auto-switch ke tab detail jika error ada di form utama
-      if (activeTab !== 'detail') setActiveTab('detail');
+      if (errors.banks) {
+        toast.error(errors.banks[0]);
+        setActiveTab('bank');
+      } else {
+        toast.error("Gagal menyimpan! Harap periksa form yang bertanda merah.");
+        if (activeTab !== 'detail') setActiveTab('detail');
+      }
       return;
     }
 
@@ -245,7 +246,6 @@ export default function EditEventClient() {
     formData.append('description', description);
     formData.append('venue', venue.trim()); 
     
-    // Gunakan fungsi format yang aman untuk merubah ke Y-m-d H:i:s
     formData.append('start_time', formatSubmitDate(startTime));
     formData.append('end_time', formatSubmitDate(endTime)); 
     
@@ -258,14 +258,16 @@ export default function EditEventClient() {
     if (premiumPrice.trim()) formData.append('premium_price', premiumPrice.trim());
     
     if (certificateLink.trim()) formData.append('certificate_link', certificateLink.trim());
-    else formData.append('certificate_link', ''); // Kosongkan jika user hapus input
+    else formData.append('certificate_link', '');
     formData.append('certificate_tier', certificateTier); 
     
-    // 🔥 TAMBAHKAN REKAMAN KE PAYLOAD 🔥
     if (recordingLink.trim()) formData.append('recording_link', recordingLink.trim());
     else formData.append('recording_link', '');
     formData.append('recording_tier', recordingTier);
-    
+
+    // 🔥 KIRIM STATUS QRIS 🔥
+    formData.append('use_qris', useQris ? '1' : '0');
+
     if (imageFile) formData.append('image', imageFile);
 
     banks.forEach((bank, idx) => {
@@ -604,7 +606,7 @@ export default function EditEventClient() {
                       </div>
                     </div>
 
-                    {/* 🔥 REKAMAN ZOOM (BARU) 🔥 */}
+                    {/* REKAMAN ZOOM */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 pt-2 border-t border-slate-50">
                       <div className="space-y-1 md:space-y-1.5">
                         <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -653,6 +655,33 @@ export default function EditEventClient() {
                 <button type="button" onClick={addBank} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs md:text-sm font-medium transition-colors">
                   <PlusCircle size={14} className="text-indigo-500 md:w-4 md:h-4" /> Tambah Rekening
                 </button>
+              </div>
+
+              {/* 🔥 KOTAK TOGGLE QRIS AMANIA 🔥 */}
+              <div className="mb-6 md:mb-8 p-4 md:p-5 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 border border-orange-200 text-orange-600 overflow-hidden">
+                     {useQris ? (
+                       <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-cover" />
+                     ) : (
+                       <QrCode size={20} className="md:w-6 md:h-6" />
+                     )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs md:text-sm font-bold text-orange-900">Gunakan QRIS Amania (ShopeePay)</h4>
+                    <p className="text-[10px] md:text-xs font-medium text-orange-700/80 mt-0.5 max-w-sm">Aktifkan untuk menampilkan barcode QRIS statis di halaman checkout peserta.</p>
+                  </div>
+                </div>
+                {/* Switch Toggle */}
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={useQris} 
+                    onChange={(e) => setUseQris(e.target.checked)} 
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                </label>
               </div>
 
               <div className="space-y-4">
@@ -721,13 +750,9 @@ export default function EditEventClient() {
                       <input type="text" value={bank.account_holder} onChange={(e) => handleBankChange(index, 'account_holder', e.target.value)} placeholder="Nama Pemilik" className="w-full bg-white border border-slate-300 rounded-lg py-2 md:py-2.5 px-3 text-xs md:text-sm font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
                     </div>
 
-                    {banks.length > 1 ? (
-                      <button type="button" onClick={() => removeBank(index)} className="mt-2 md:mt-[22px] p-2 md:p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100 self-end md:self-auto w-full md:w-auto flex justify-center">
-                        <Trash2 size={16} />
-                      </button>
-                    ) : (
-                      <div className="w-[38px] hidden md:block"></div>
-                    )}
+                    <button type="button" onClick={() => removeBank(index)} className="mt-2 md:mt-[22px] p-2 md:p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100 self-end md:self-auto w-full md:w-auto flex justify-center">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
