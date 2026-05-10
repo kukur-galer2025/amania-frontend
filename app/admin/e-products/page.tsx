@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Search, Edit, Trash2, Image as ImageIcon, 
   FileText, CheckCircle2, XCircle, Loader2, PackageSearch, 
-  Eye, EyeOff, UploadCloud, Link as LinkIcon, Layers, AlertCircle, Info, User,AlertTriangle,CreditCard,SmartphoneNfc,Store
+  Eye, EyeOff, Layers, Info, User, AlertTriangle, CreditCard, SmartphoneNfc, Store, AlertCircle, ArrowUpRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // 🔥 WAJIB UNTUK REDIRECT 🔥
 
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
@@ -16,30 +18,27 @@ import 'react-quill-new/dist/quill.snow.css';
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false }); 
 
 export default function AdminEProductsPage() {
+  const router = useRouter();
+  
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]); 
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // State Modal Utama
+  // State Modal Utama (Hanya untuk BIKIN BARU)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
 
   // State Modal Info Tripay
   const [isTripayInfoOpen, setIsTripayInfoOpen] = useState(false);
 
-  // State Form 
+  // State Form Draft
   const [title, setTitle] = useState('');
   const [categoryId, setCategoryId] = useState(''); 
   const [description, setDescription] = useState(''); 
   const [price, setPrice] = useState<number | string>('');
-  const [isPublished, setIsPublished] = useState(true);
+  const [isPublished, setIsPublished] = useState(false); // Default Draft
   const [coverImage, setCoverImage] = useState<File | null>(null);
-  
-  const [fileType, setFileType] = useState<'upload' | 'link'>('upload');
-  const [filePath, setFilePath] = useState<File | null>(null);
-  const [fileLink, setFileLink] = useState('');
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -68,42 +67,18 @@ export default function AdminEProductsPage() {
     fetchData();
   }, []);
 
-  const openModal = (product: any = null) => {
-    if (product) {
-      setEditingId(product.id);
-      setTitle(product.title || '');
-      setCategoryId(product.e_product_category_id || '');
-      setDescription(product.description || '');
-      setPrice(product.price ?? '');
-      setIsPublished(product.is_published ?? true);
-      setCoverImage(null);
-      setFilePath(null);
-      
-      if (product.file_path && product.file_path.startsWith('http')) {
-        setFileType('link');
-        setFileLink(product.file_path || '');
-      } else {
-        setFileType('upload');
-        setFileLink('');
-      }
-    } else {
-      setEditingId(null);
-      setTitle('');
-      setCategoryId('');
-      setDescription('');
-      setPrice('');
-      setIsPublished(true);
-      setCoverImage(null);
-      setFilePath(null);
-      setFileType('upload');
-      setFileLink('');
-    }
+  const openModal = () => {
+    setTitle('');
+    setCategoryId('');
+    setDescription('');
+    setPrice('');
+    setIsPublished(false);
+    setCoverImage(null);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setTimeout(() => setEditingId(null), 300);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,17 +94,6 @@ export default function AdminEProductsPage() {
       toast.error("Harga tidak valid! Batas terendah absolut Tripay (QRIS/OVO/DANA) adalah Rp 1.000.");
       return;
     }
-
-    if (!editingId) {
-      if (fileType === 'upload' && !filePath) {
-        toast.error("File asli (E-Book/Template) wajib diupload!");
-        return;
-      }
-      if (fileType === 'link' && !fileLink) {
-        toast.error("Link Google Drive wajib diisi!");
-        return;
-      }
-    }
     
     if (!description || description.trim() === '<p><br></p>') {
         toast.error("Deskripsi produk tidak boleh kosong!");
@@ -137,7 +101,7 @@ export default function AdminEProductsPage() {
     }
 
     setIsSubmitting(true);
-    const loadToast = toast.loading(editingId ? "Menyimpan perubahan..." : "Mengunggah produk baru...");
+    const loadToast = toast.loading("Membuat draft E-Produk...");
 
     try {
       const formData = new FormData();
@@ -148,16 +112,8 @@ export default function AdminEProductsPage() {
       formData.append('is_published', isPublished ? '1' : '0');
       
       if (coverImage) formData.append('cover_image', coverImage);
-      
-      if (fileType === 'upload' && filePath) {
-        formData.append('file_upload', filePath);
-      } else if (fileType === 'link' && fileLink) {
-        formData.append('file_link', fileLink);
-      }
 
-      const url = editingId ? `/admin/e-products/${editingId}` : '/admin/e-products';
-      
-      const res = await apiFetch(url, {
+      const res = await apiFetch('/admin/e-products', {
         method: 'POST', 
         body: formData,
       }, true); 
@@ -165,9 +121,12 @@ export default function AdminEProductsPage() {
       const json = await res.json();
 
       if (res.ok && json.success) {
-        toast.success(json.message, { id: loadToast });
-        fetchData();
+        toast.success("Draft Dibuat! Mengarahkan ke Kelola Materi...", { id: loadToast });
         closeModal();
+        
+        // 🔥 OTOMATIS REDIRECT KE HALAMAN EDIT MATERI 🔥
+        router.push(`/admin/e-products/edit?id=${json.data.id}`);
+        
       } else {
         toast.error(json.message || "Gagal menyimpan produk.", { id: loadToast });
       }
@@ -179,7 +138,7 @@ export default function AdminEProductsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus produk ini beserta file aslinya secara permanen?")) return;
+    if (!confirm("Apakah Anda yakin ingin menghapus produk ini beserta SEMUA MATERINYA secara permanen?")) return;
 
     const loadToast = toast.loading("Menghapus produk...");
     try {
@@ -235,7 +194,7 @@ export default function AdminEProductsPage() {
               className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-full transition-all"
             />
           </div>
-          <button onClick={() => openModal()} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-[0_4px_15px_rgba(79,70,229,0.3)] shrink-0">
+          <button onClick={openModal} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-[0_4px_15px_rgba(79,70,229,0.3)] shrink-0">
             <Plus size={16} /> Tambah Produk
           </button>
         </div>
@@ -251,7 +210,7 @@ export default function AdminEProductsPage() {
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Kategori</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Harga (Rp)</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Status</th>
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px] text-right">Tindakan</th>
+                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px] text-right">Kelola Materi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -291,9 +250,12 @@ export default function AdminEProductsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {/* 🔥 PERBAIKAN: HAPUS CLASS OPACITY-0 DAN GROUP-HOVER 🔥 */}
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openModal(product)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-100 shadow-sm" title="Edit Data"><Edit size={16} /></button>
+                        {/* 🔥 TOMBOL MENGARAH KE HALAMAN EDIT 🔥 */}
+                        <Link href={`/admin/e-products/edit?id=${product.id}`} className="px-4 py-2 flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors border border-indigo-100" title="Kelola Materi & Edit">
+                          <Edit size={14} /> Kelola Materi
+                        </Link>
+                        
                         <button onClick={() => handleDelete(product.id)} className="p-2 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 shadow-sm" title="Hapus Permanen"><Trash2 size={16} /></button>
                       </div>
                     </td>
@@ -305,28 +267,28 @@ export default function AdminEProductsPage() {
         </div>
       </div>
 
-      {/* ════ MODAL TAMBAH/EDIT PRODUK (LUXURY SPLIT LAYOUT) ════ */}
+      {/* ════ MODAL TAMBAH PRODUK (DRAFT SAJA) ════ */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeModal} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-5xl bg-[#f8fafc] rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-4xl bg-[#f8fafc] rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]">
               
               {/* Modal Header */}
               <div className="px-8 py-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                     {editingId ? <Edit size={20} /> : <PackageSearch size={20} />}
+                     <PackageSearch size={20} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 leading-none">{editingId ? 'Edit Data E-Produk' : 'Upload Produk Baru'}</h2>
-                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">{editingId ? 'Ubah informasi atau materi' : 'Tambahkan ke katalog digital'}</p>
+                    <h2 className="text-xl font-black text-slate-900 leading-none">Buat E-Produk Baru</h2>
+                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Langkah 1: Informasi Dasar Produk</p>
                   </div>
                 </div>
                 <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 rounded-full transition-colors border border-transparent hover:border-rose-100"><XCircle size={24} /></button>
               </div>
 
-              {/* Modal Body - Split Layout */}
+              {/* Modal Body */}
               <div className="overflow-y-auto custom-scrollbar flex-1 p-6 md:p-8">
                 <form id="productForm" onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-6 md:gap-8">
                   
@@ -337,7 +299,7 @@ export default function AdminEProductsPage() {
                       
                       <div>
                         <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Judul Produk <span className="text-rose-500">*</span></label>
-                        <input type="text" required value={title || ''} onChange={(e) => setTitle(e.target.value)} placeholder="Cth: E-Book Panduan Investasi Saham" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
+                        <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Cth: E-Book Panduan Investasi Saham" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -351,18 +313,16 @@ export default function AdminEProductsPage() {
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Harga (Rp) <span className="text-rose-500">*</span></label>
-                            {/* 🔥 TOMBOL INFO TRIPAY 🔥 */}
                             <button type="button" onClick={() => setIsTripayInfoOpen(true)} className="text-indigo-500 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 p-1 rounded-md transition-colors" title="Lihat S&K Tripay">
                               <Info size={14} />
                             </button>
                           </div>
-                          <input type="number" required min="0" value={price ?? ''} onChange={(e) => setPrice(e.target.value)} placeholder="Isi 0 untuk Gratis" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
+                          <input type="number" required min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Isi 0 untuk Gratis" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
                         </div>
                       </div>
 
                       {/* 🔥 PERINGATAN LOGIKA HARGA TRIPAY 🔥 */}
                       <AnimatePresence>
-                        {/* Error Mutlak (Di bawah 1k) */}
                         {(Number(price) > 0 && Number(price) < 1000) && (
                           <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}} className="bg-rose-50 border border-rose-200 rounded-xl p-3 flex gap-3 items-start overflow-hidden">
                             <AlertCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />
@@ -373,7 +333,6 @@ export default function AdminEProductsPage() {
                           </motion.div>
                         )}
                         
-                        {/* Peringatan Cerdas (1k - 9.9k) VA & Indomaret Mati */}
                         {(Number(price) >= 1000 && Number(price) < 10000) && (
                           <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}} className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-3 items-start overflow-hidden">
                             <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
@@ -384,7 +343,6 @@ export default function AdminEProductsPage() {
                           </motion.div>
                         )}
 
-                        {/* Indikator Gratis */}
                         {Number(price) === 0 && String(price) !== '' && (
                            <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}} className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex gap-2 items-center overflow-hidden">
                              <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
@@ -397,17 +355,17 @@ export default function AdminEProductsPage() {
                       <div className="pt-2">
                         <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Deskripsi / Sales Copy <span className="text-rose-500">*</span></label>
                         <div className="bg-white rounded-xl overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 shadow-sm transition-all">
-                          <ReactQuill theme="snow" value={description || ''} onChange={setDescription} modules={quillModules} placeholder="Yakinkan calon pembeli dengan deskripsi yang menarik..." className="min-h-[200px]" />
+                          <ReactQuill theme="snow" value={description} onChange={setDescription} modules={quillModules} placeholder="Yakinkan calon pembeli dengan deskripsi yang menarik..." className="min-h-[200px]" />
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Kanan: Upload & Status */}
+                  {/* Kanan: Upload Cover & Info */}
                   <div className="w-full lg:w-80 shrink-0 space-y-6">
                     
                     <div className="bg-white p-6 rounded-[1.5rem] border border-slate-200 shadow-sm space-y-5">
-                      <h3 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2"><UploadCloud size={16} className="text-indigo-500"/> Media & Materi</h3>
+                      <h3 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2"><ImageIcon size={16} className="text-indigo-500"/> Cover Produk</h3>
                       
                       {/* COVER UPLOAD */}
                       <div>
@@ -425,49 +383,20 @@ export default function AdminEProductsPage() {
                           <p className="text-xs font-bold text-slate-700">{coverImage ? coverImage.name : 'Klik atau seret gambar'}</p>
                           <p className="text-[10px] text-slate-400 mt-1">PNG, JPG, WEBP (Rekomendasi 2:3)</p>
                         </div>
-                        {editingId && !coverImage && <p className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded mt-2 flex items-start gap-1"><Info size={12} className="shrink-0 mt-0.5"/> Biarkan kosong jika tidak ganti cover lama.</p>}
                       </div>
                       
                       <div className="h-px bg-slate-100 w-full my-2" />
                       
-                      {/* FILE MASTER UPLOAD / LINK */}
-                      <div>
-                        <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Materi Produk (Secret File)</label>
-                        <div className="flex bg-slate-100 p-1 rounded-xl mb-4 border border-slate-200/50">
-                          <button type="button" onClick={() => setFileType('upload')} className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors flex justify-center items-center gap-1.5 ${fileType === 'upload' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}><UploadCloud size={14}/> Upload</button>
-                          <button type="button" onClick={() => setFileType('link')} className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors flex justify-center items-center gap-1.5 ${fileType === 'link' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}><LinkIcon size={14}/> G-Drive</button>
+                      {/* INFO MATERI */}
+                      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-center">
+                        <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Layers size={20} />
                         </div>
-
-                        {fileType === 'upload' ? (
-                          <div className="relative border-2 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-4 text-center transition-colors group hover:bg-indigo-50">
-                            <input type="file" accept=".zip,.rar,.pdf" onChange={(e) => {
-                              const file = e.target.files ? e.target.files[0] : null;
-                              if (file && file.size > 50 * 1024 * 1024) { toast.error("Ukuran file asli maks 50 MB!"); e.target.value = ''; setFilePath(null); return; }
-                              setFilePath(file);
-                            }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                            <FileText className="mx-auto h-8 w-8 text-indigo-300 group-hover:text-indigo-500 mb-2 transition-colors" />
-                            <p className="text-xs font-bold text-indigo-900 truncate px-2">{filePath ? filePath.name : 'Pilih File ZIP/PDF'}</p>
-                            <p className="text-[10px] text-indigo-500 mt-1">Maksimal 50 MB</p>
-                          </div>
-                        ) : (
-                          <div>
-                            <input type="url" required value={fileLink || ''} onChange={(e) => setFileLink(e.target.value)} placeholder="https://drive.google.com/..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
-                            <p className="text-[10px] font-medium text-slate-500 mt-2 leading-relaxed">Pastikan link memiliki akses <strong>"Anyone with the link can view"</strong> agar pembeli bisa mengunduh.</p>
-                          </div>
-                        )}
-                        {editingId && fileType === 'upload' && !filePath && <p className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded mt-2 flex items-start gap-1"><Info size={12} className="shrink-0 mt-0.5"/> Biarkan kosong jika materi file tidak berubah.</p>}
+                        <h4 className="text-xs font-bold text-indigo-900 mb-1">Materi Multi-File</h4>
+                        <p className="text-[10px] text-indigo-600 font-medium">Anda dapat mengunggah file (PDF/ZIP) dan menyematkan link (Drive/Youtube) dalam jumlah tak terbatas setelah draft ini disimpan.</p>
                       </div>
                     </div>
                     
-                    {/* Status Publikasi */}
-                    <div className={`p-5 rounded-2xl border transition-colors flex items-start gap-3 cursor-pointer select-none shadow-sm ${isPublished ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`} onClick={() => setIsPublished(!isPublished)}>
-                      <input type="checkbox" checked={isPublished} readOnly className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mt-0.5 pointer-events-none" />
-                      <div>
-                        <p className={`text-sm font-bold ${isPublished ? 'text-emerald-800' : 'text-slate-700'}`}>Tampilkan ke Publik</p>
-                        <p className={`text-[10px] mt-1 ${isPublished ? 'text-emerald-600' : 'text-slate-500'}`}>Jika dicentang, produk akan muncul di katalog dan bisa dibeli pengguna.</p>
-                      </div>
-                    </div>
-
                   </div>
                 </form>
               </div>
@@ -476,8 +405,8 @@ export default function AdminEProductsPage() {
               <div className="px-8 py-5 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0 rounded-b-[2rem]">
                 <button type="button" onClick={closeModal} disabled={isSubmitting} className="px-6 py-3 text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 hover:text-slate-900 rounded-xl transition-colors shadow-sm">Batalkan</button>
                 <button type="submit" form="productForm" disabled={isSubmitting} className="flex items-center gap-2 px-8 py-3 text-sm font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-[0_4px_15px_rgba(79,70,229,0.3)] disabled:opacity-70 disabled:shadow-none active:scale-95">
-                  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
-                  {isSubmitting ? 'Memproses...' : (editingId ? 'Simpan Perubahan' : 'Upload Produk')}
+                  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <ArrowUpRight size={18} />}
+                  {isSubmitting ? 'Memproses...' : 'Lanjut ke Kelola Materi'}
                 </button>
               </div>
 

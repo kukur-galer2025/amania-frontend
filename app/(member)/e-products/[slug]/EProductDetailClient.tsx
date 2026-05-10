@@ -7,8 +7,8 @@ import {
   FileText, ArrowLeft, Loader2,
   ShoppingCart, UserCircle, ShieldCheck, Zap,
   Infinity as InfinityIcon, RefreshCw, Star,
-  MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, DownloadCloud, X, AlertCircle, Sparkles,
-  AlertTriangle, Crown
+  MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, X, AlertCircle, Sparkles,
+  AlertTriangle, Crown, Layers
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -172,10 +172,10 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
     } catch { toast.error('Kesalahan koneksi.', { id: tid }); setBtnLoading(false); }
   };
 
+  // 🔥 PERBAIKAN: ARAHKAN KE HALAMAN KOLEKSI SAYA 🔥
   const handleAccessProduct = () => {
-    if (!product?.file_path) { toast.error('Materi belum tersedia di server.'); return; }
-    if (product.file_path.startsWith('http')) { window.open(product.file_path, '_blank'); } 
-    else { window.open(`${STORAGE_URL}/${product.file_path}`, '_blank'); }
+    toast.success('Membuka ruang akses materi...');
+    router.push('/my-e-products');
   };
 
   const handleSubmitReview = async () => {
@@ -506,12 +506,12 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                 {isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-emerald-600 mb-8 md:mb-10">Akses premium gratis khusus Anda.</p>}
                 {isOwned && <p className="text-xs md:text-sm font-medium text-indigo-600 mb-8 md:mb-10">Bahan belajar sudah masuk di brankas Anda.</p>}
 
-                {/* TOMBOL AKSI (DESKTOP) */}
+                {/* 🔥 TOMBOL AKSI (DESKTOP) 🔥 */}
                 <div className="hidden lg:block w-full">
                   {isOwned ? (
                     <button onClick={handleAccessProduct} className="relative w-full py-4 md:py-5 rounded-2xl font-black text-white text-sm md:text-base bg-emerald-500 hover:bg-emerald-600 shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 overflow-hidden group">
                       <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-shimmer"></span>
-                      <DownloadCloud size={20} className="shrink-0 relative z-10" /> <span className="relative z-10">Buka Materi Sekarang</span>
+                      <Layers size={20} className="shrink-0 relative z-10" /> <span className="relative z-10">Buka di Koleksi Saya</span>
                     </button>
                   ) : (
                     <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative w-full py-4 md:py-5 rounded-2xl font-black text-white text-sm md:text-base bg-slate-900 hover:bg-indigo-600 shadow-[0_10px_30px_rgba(15,23,42,0.2)] hover:shadow-[0_10px_30px_rgba(79,70,229,0.4)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn">
@@ -582,9 +582,10 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
           </p>
         </div>
         
+        {/* 🔥 TOMBOL AKSI (MOBILE) 🔥 */}
         {isOwned ? (
           <button onClick={handleAccessProduct} className="flex-1 min-w-0 py-3 rounded-xl font-black text-white text-xs sm:text-sm bg-emerald-500 shadow-[0_4px_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-            <DownloadCloud size={16} className="shrink-0" /> <span className="truncate">Buka Materi</span>
+            <Layers size={16} className="shrink-0" /> <span className="truncate">Buka Koleksi</span>
           </button>
         ) : (
           <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative flex-1 min-w-0 py-3 rounded-xl font-black text-white text-xs sm:text-sm bg-slate-900 shadow-[0_4px_15px_rgba(15,23,42,0.3)] flex items-center justify-center gap-1.5 disabled:opacity-70 active:scale-95 transition-transform overflow-hidden group">

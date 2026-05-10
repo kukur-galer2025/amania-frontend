@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { 
   Search, CheckCircle2, XCircle, Clock, 
   Loader2, Inbox, Receipt, TrendingUp, Calendar, 
-  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight
+  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -18,6 +18,7 @@ interface TrxEProduct {
   amount: string | number;
   created_at: string;
   checkout_url: string | null;
+  payment_method: string | null; // 🔥 Tambahan field ini
   buyer: { name: string; email: string; phone: string | null };
   product: { id: number; title: string; price: number };
 }
@@ -262,8 +263,8 @@ export default function AdminEProductTransactionsPage() {
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[18%]">Waktu Transaksi</th>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">Invoice & Pembeli</th>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[25%]">E-Produk & Harga</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[12%]">Status</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[25%]">Aksi Manual</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[15%]">Status & Metode</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[22%]">Aksi Manual</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
@@ -313,29 +314,38 @@ export default function AdminEProductTransactionsPage() {
                       </div>
                     </td>
 
+                    {/* 🔥 KOLOM STATUS & METODE PEMBAYARAN 🔥 */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
-                      {(tx.status === 'PAID' || tx.status === 'SETTLED' || tx.status === 'success') && (
-                        <span className="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-50 px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 uppercase tracking-wider">
-                          <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Lunas
-                        </span>
-                      )}
-                      {tx.status === 'UNPAID' && (
-                        <span className="inline-flex items-center justify-center gap-1.5 rounded-md bg-amber-50 px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-bold text-amber-700 ring-1 ring-inset ring-amber-600/20 uppercase tracking-wider">
-                          <Clock size={10} className="md:w-3 md:h-3" /> Pending
-                        </span>
-                      )}
-                      {(tx.status === 'EXPIRED' || tx.status === 'FAILED') && (
-                        <span className="inline-flex items-center justify-center gap-1.5 rounded-md bg-rose-50 px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-bold text-rose-700 ring-1 ring-inset ring-rose-600/20 uppercase tracking-wider">
-                          <XCircle size={10} className="md:w-3 md:h-3" /> {tx.status}
-                        </span>
-                      )}
+                      <div className="flex flex-col items-center gap-1.5">
+                        {(tx.status === 'PAID' || tx.status === 'SETTLED' || tx.status === 'success') && (
+                          <span className="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-50 px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 uppercase tracking-wider">
+                            <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Lunas
+                          </span>
+                        )}
+                        {tx.status === 'UNPAID' && (
+                          <span className="inline-flex items-center justify-center gap-1.5 rounded-md bg-amber-50 px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-bold text-amber-700 ring-1 ring-inset ring-amber-600/20 uppercase tracking-wider">
+                            <Clock size={10} className="md:w-3 md:h-3" /> Pending
+                          </span>
+                        )}
+                        {(tx.status === 'EXPIRED' || tx.status === 'FAILED') && (
+                          <span className="inline-flex items-center justify-center gap-1.5 rounded-md bg-rose-50 px-2 md:px-2.5 py-1 text-[9px] md:text-[10px] font-bold text-rose-700 ring-1 ring-inset ring-rose-600/20 uppercase tracking-wider">
+                            <XCircle size={10} className="md:w-3 md:h-3" /> {tx.status}
+                          </span>
+                        )}
+
+                        {/* Label Metode Pembayaran (Jika Ada) */}
+                        {tx.payment_method && tx.amount > 0 && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-slate-500 uppercase">
+                            <CreditCard size={10} /> {tx.payment_method}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right min-w-0">
                        <div className="flex items-center justify-end gap-2">
                          
-                         {/* 🔥 TOMBOL LIHAT INVOICE TRIPAY (GANTI DARI LIHAT BUKTI GAMBAR) 🔥 */}
-                         {tx.checkout_url && (
+                         {tx.checkout_url && tx.amount > 0 && (
                            <a 
                              href={tx.checkout_url}
                              target="_blank"
@@ -346,7 +356,6 @@ export default function AdminEProductTransactionsPage() {
                            </a>
                          )}
 
-                         {/* TOMBOL TANDAI LUNAS */}
                          {tx.status === 'UNPAID' && (
                            <button 
                              onClick={() => handleMarkAsPaid(tx.id, tx.reference)}
