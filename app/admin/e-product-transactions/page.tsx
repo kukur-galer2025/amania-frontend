@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { 
   Search, CheckCircle2, XCircle, Clock, 
   Loader2, Inbox, Receipt, TrendingUp, Calendar, 
-  Filter, ChevronLeft, ChevronRight, AlertCircle, ShoppingCart, FileSpreadsheet
+  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -256,14 +256,14 @@ export default function AdminEProductTransactionsPage() {
       {/* 4. DATA TABLE */}
       <div className="bg-white border border-slate-200 rounded-xl md:rounded-2xl shadow-sm overflow-hidden flex flex-col h-full min-h-[400px]">
         <div className="overflow-x-auto custom-scrollbar flex-1">
-          <table className="min-w-full divide-y divide-slate-200 min-w-[800px]">
+          <table className="min-w-full divide-y divide-slate-200 min-w-[850px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[18%]">Waktu Transaksi</th>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">Invoice & Pembeli</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[30%]">E-Produk & Harga</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[15%]">Status</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[17%]">Aksi Manual</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[25%]">E-Produk & Harga</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[12%]">Status</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[25%]">Aksi Manual</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
@@ -332,18 +332,32 @@ export default function AdminEProductTransactionsPage() {
                     </td>
 
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right min-w-0">
-                       {tx.status === 'UNPAID' ? (
-                         <button 
-                           onClick={() => handleMarkAsPaid(tx.id, tx.reference)}
-                           disabled={actionLoadingId === tx.id}
-                           className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-indigo-200 hover:border-transparent disabled:opacity-50"
-                         >
-                           {actionLoadingId === tx.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} 
-                           Tandai Lunas
-                         </button>
-                       ) : (
-                         <span className="text-[10px] text-slate-300 italic">-</span>
-                       )}
+                       <div className="flex items-center justify-end gap-2">
+                         
+                         {/* 🔥 TOMBOL LIHAT INVOICE TRIPAY (GANTI DARI LIHAT BUKTI GAMBAR) 🔥 */}
+                         {tx.checkout_url && (
+                           <a 
+                             href={tx.checkout_url}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-slate-200"
+                           >
+                             <ArrowUpRight size={12} /> Cek Invoice
+                           </a>
+                         )}
+
+                         {/* TOMBOL TANDAI LUNAS */}
+                         {tx.status === 'UNPAID' && (
+                           <button 
+                             onClick={() => handleMarkAsPaid(tx.id, tx.reference)}
+                             disabled={actionLoadingId === tx.id}
+                             className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-indigo-200 hover:border-transparent disabled:opacity-50"
+                           >
+                             {actionLoadingId === tx.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} 
+                             Tandai Lunas
+                           </button>
+                         )}
+                       </div>
                     </td>
 
                   </tr>
@@ -385,6 +399,7 @@ export default function AdminEProductTransactionsPage() {
           </div>
         )}
       </div>
+
     </div>
   );
 }
