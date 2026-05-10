@@ -333,8 +333,8 @@ export default function AdminEProductTransactionsPage() {
                           </span>
                         )}
 
-                        {/* Label Metode Pembayaran (Jika Ada) */}
-                        {tx.payment_method && tx.amount > 0 && (
+                        {/* Label Metode Pembayaran (Jika Ada) dengan Number() Fix */}
+                        {tx.payment_method && Number(tx.amount) > 0 && (
                           <span className="inline-flex items-center gap-1 text-[9px] font-bold text-slate-500 uppercase">
                             <CreditCard size={10} /> {tx.payment_method}
                           </span>
@@ -345,7 +345,8 @@ export default function AdminEProductTransactionsPage() {
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right min-w-0">
                        <div className="flex items-center justify-end gap-2">
                          
-                         {tx.checkout_url && tx.amount > 0 && (
+                         {/* Fix Number() pada tx.amount */}
+                         {tx.checkout_url && Number(tx.amount) > 0 && (
                            <a 
                              href={tx.checkout_url}
                              target="_blank"
