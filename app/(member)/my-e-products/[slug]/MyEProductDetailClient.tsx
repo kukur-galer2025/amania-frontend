@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Link as LinkIcon, DownloadCloud, 
   Layers, CheckCircle2, PlayCircle, Loader2, BookOpen,
-  ChevronRight, Share2, Info, Star, Award
+  ChevronRight, Star, Award, LayoutGrid
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -47,7 +47,6 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
     fetchProductDetail();
   }, [slug]);
 
-  // 🔥 Fungsi Download Force via API Laravel 🔥
   const handleDownload = async () => {
     if (!activeMaterial) return;
 
@@ -88,18 +87,8 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
 
   if (loading) return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center w-full">
-      <div className="relative">
-        <Loader2 size={56} className="animate-spin text-amber-600" />
-        <motion.div 
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
-        </motion.div>
-      </div>
-      <h2 className="text-slate-400 font-bold tracking-[0.2em] uppercase text-[10px] mt-6 animate-pulse">
-        Membuka Brankas Digital...
-      </h2>
+      <Loader2 size={40} className="animate-spin text-amber-600 mb-4" />
+      <h2 className="text-sm font-bold text-slate-500 tracking-wider animate-pulse uppercase">Membuka Ruang Belajar...</h2>
     </div>
   );
 
@@ -113,215 +102,176 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
       {/* ════ BACKGROUND GLOW ════ */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-multiply"></div>
       
-      {/* ════ 1. TOP NAVIGATION BAR ════ */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div className="flex items-center gap-4">
-          <Link href="/my-e-products" className="group flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-900 border border-slate-200 rounded-xl transition-all duration-300 shadow-sm">
-            <ArrowLeft size={18} className="text-slate-400 group-hover:text-white transition-colors" />
-            <span className="text-sm font-bold text-slate-600 group-hover:text-white">Koleksi Saya</span>
-          </Link>
-          <div className="hidden sm:block h-8 w-[1px] bg-slate-200"></div>
-          <div className="min-w-0">
-             <h1 className="text-lg md:text-xl font-black text-slate-900 truncate tracking-tight">{product.title}</h1>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 self-end md:self-auto">
-           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full">
-              <CheckCircle2 size={14} className="text-emerald-500" />
-              <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">Akses Permanen</span>
-           </div>
-        </div>
-      </div>
-
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
-        {/* ════ 2. MAIN CONTENT AREA (LEFT) ════ */}
+        {/* ════ 1. MAIN CONTENT AREA (LEFT) ════ */}
         <div className="flex-1 w-full min-w-0">
           <AnimatePresence mode="wait">
             {activeMaterial ? (
               <motion.div 
                 key={activeMaterial.id}
-                initial={{ opacity: 0, y: 20 }} 
+                initial={{ opacity: 0, y: 15 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-[2.5rem] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col"
+                exit={{ opacity: 0, y: -15 }}
+                className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col"
               >
-                {/* 2A. HEADER MATERI (Banner Style) */}
-                <div className="relative w-full bg-slate-900 overflow-hidden pt-12 pb-12 px-6 md:px-12">
-                   {/* Background Elements */}
-                   <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-amber-500/15 to-transparent opacity-50"></div>
-                   <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-600/20 rounded-full blur-[80px]"></div>
+                {/* 🔥 2A. HEADER & VIEWER TERINTEGRASI (FULL BLACK) 🔥 */}
+                <div className="relative w-full bg-slate-950 overflow-hidden pt-8 pb-12 px-6 md:px-10 border-b border-slate-800">
+                   {/* Background Gradient */}
+                   <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/15 rounded-full blur-[80px]"></div>
 
-                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                      {/* Product Cover Mini inside Viewer */}
-                      <div className="w-32 h-44 md:w-40 md:h-56 shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.4)] border-2 border-white/10 group relative">
-                         <img 
-                          src={`${STORAGE_URL}/${product.cover_image}`} 
-                          alt="cover" 
-                          className="w-full h-full object-cover"
-                         />
-                         {/* 3D Book Spine */}
-                         <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-r from-white/30 to-transparent z-10" />
+                   {/* --- BARIS 1: NAV & STATUS --- */}
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10 border-b border-slate-800 pb-5">
+                      <Link href="/my-e-products" className="shrink-0 group flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700">
+                        <ArrowLeft size={16} className="text-slate-400 group-hover:text-amber-400 transition-colors" />
+                        <span className="text-xs font-bold text-slate-300 group-hover:text-white">Koleksi Saya</span>
+                      </Link>
+                      
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950 border border-emerald-800 rounded-full">
+                        <CheckCircle2 size={13} className="text-emerald-400" />
+                        <span className="text-[10px] font-black text-emerald-300 uppercase tracking-widest">Akses Resmi Terbuka</span>
                       </div>
+                   </div>
 
-                      <div className="text-center md:text-left flex-1 min-w-0">
-                         <div className="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-500/20 mb-4">
-                            {activeMaterial.type === 'link' ? <LinkIcon size={14}/> : <FileText size={14}/>}
-                            <span className="text-[10px] font-bold uppercase tracking-[0.1em]">Sedang Dipelajari</span>
+                   {/* --- BARIS 2: JUDUL PRODUK & MATERI --- */}
+                   <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
+                      <div className="text-left flex-1 min-w-0">
+                         {/* Judul Produk (Kecil di atas) */}
+                         <div className="flex items-center gap-2 text-amber-500/80 mb-2 truncate">
+                            <LayoutGrid size={13}/>
+                            <span className="text-xs font-medium tracking-tight truncate text-slate-400">{product.title}</span>
                          </div>
-                         <h2 className="text-2xl md:text-4xl font-black text-white leading-tight mb-4 tracking-tight">
+                         
+                         {/* Judul Materi Utama (Besar White) */}
+                         <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-4 tracking-tighter break-words">
                             {activeMaterial.title}
-                         </h2>
-                         <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                            <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                               <Award size={14} className="text-amber-500" />
-                               <span>Materi Eksklusif Amania</span>
+                         </h1>
+
+                         <div className="flex flex-wrap gap-3">
+                            <div className="inline-flex items-center gap-2 bg-slate-800 text-amber-400 px-3 py-1.5 rounded-full border border-slate-700 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                                {activeMaterial.type === 'link' ? <LinkIcon size={13}/> : <FileText size={13}/>}
+                                Materi {activeIndex + 1}
                             </div>
-                            <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                               <Star size={14} className="text-amber-400 fill-amber-400" />
-                               <span>Premium Quality</span>
+                             <div className="flex items-center gap-1.5 text-slate-400 text-xs py-1.5">
+                               <Award size={14} className="text-amber-500" />
+                               <span>Eksklusif Amania</span>
                             </div>
                          </div>
+                      </div>
+                      
+                      {/* Product Cover Mini */}
+                      <div className="hidden md:block w-28 h-36 shrink-0 rounded-xl overflow-hidden shadow-2xl border-2 border-slate-700 relative mt-2 bg-slate-900">
+                         {product.cover_image ? (
+                           <img src={`${STORAGE_URL}/${product.cover_image}`} alt="cover" className="w-full h-full object-cover" />
+                         ) : (
+                           <div className="w-full h-full flex items-center justify-center text-slate-700"><FileText size={24}/></div>
+                         )}
+                         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-r from-white/20 to-transparent z-10" />
                       </div>
                    </div>
                 </div>
 
-                {/* 2B. CONTENT ACTION CARD */}
-                <div className="p-8 md:p-16 flex flex-col items-center justify-center text-center">
-                   <div className="max-w-xl w-full">
-                      <div className="w-16 h-1 bg-amber-100 rounded-full mx-auto mb-10"></div>
+                {/* 🔥 2B. AREA AKSI UTAMA (CLEAN) 🔥 */}
+                <div className="p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center text-center bg-white">
+                   <div className="max-w-2xl w-full">
                       
-                      {/* NAMA MATERI DITAMPILKAN DI SINI */}
-                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl mb-4 border border-amber-100">
-                         <Layers size={16} />
-                         <span className="text-xs md:text-sm font-black uppercase tracking-widest">
-                           Materi {activeIndex + 1}
-                         </span>
+                      <div className="flex items-center justify-center gap-1.5 mb-5 text-amber-500">
+                        <Star size={16} className="fill-amber-500"/>
+                        <Star size={16} className="fill-amber-500"/>
+                        <Star size={16} className="fill-amber-500"/>
+                        <Star size={16} className="fill-amber-500"/>
+                        <Star size={16} className="fill-amber-500"/>
                       </div>
-                      
-                      <h3 className="text-2xl md:text-3xl font-black text-slate-900 mb-6 leading-tight">
-                        {activeMaterial.title}
-                      </h3>
-                      
-                      <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-10">
+
+                      <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-10 px-4">
                         {activeMaterial.type === 'link' 
-                          ? "Materi ini tersedia melalui tautan eksternal terverifikasi. Klik tombol di bawah untuk diarahkan ke ruang penyimpanan atau video pembelajaran secara aman."
-                          : "File materi telah dioptimasi untuk perangkat Anda. Klik tombol di bawah untuk menyimpannya langsung ke memori Anda tanpa membukanya di browser."
+                          ? "Materi ini tersedia melalui tautan eksternal yang aman dan terverifikasi. Klik tombol di bawah untuk membuka ruang penyimpanan atau video pembelajaran di tab baru."
+                          : "File materi Premium telah dioptimasi untuk perangkat Anda. Klik tombol di bawah untuk menyimpannya langsung ke penyimpanan lokal secara instan."
                         }
                       </p>
 
                       <button 
                         onClick={handleDownload}
-                        className="group relative w-full sm:w-auto inline-flex items-center justify-center gap-4 px-10 py-5 bg-slate-900 hover:bg-amber-600 text-white rounded-2xl font-black text-sm md:text-base transition-all duration-500 shadow-[0_15px_30px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_35px_rgba(245,158,11,0.3)] active:scale-95 overflow-hidden"
+                        className="group relative inline-flex items-center justify-center gap-3.5 px-10 py-4 md:py-5 bg-gradient-to-r from-orange-600 to-amber-700 hover:from-orange-700 hover:to-amber-800 text-white rounded-[1rem] font-black text-sm md:text-base transition-all duration-300 shadow-xl shadow-amber-900/20 active:scale-[0.98] overflow-hidden w-full sm:w-auto"
                       >
                          <div className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
-                         {activeMaterial.type === 'link' ? <PlayCircle size={22}/> : <DownloadCloud size={22}/>}
-                         <span>{activeMaterial.type === 'link' ? "Buka Akses Tautan" : "Download File Sekarang"}</span>
-                         <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                         {activeMaterial.type === 'link' ? <PlayCircle size={22} className="relative z-10"/> : <DownloadCloud size={22} className="relative z-10"/>}
+                         <span className="relative z-10">{activeMaterial.type === 'link' ? "Buka Tautan Materi" : "Download File Materi"}</span>
+                         <ChevronRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
                       </button>
 
-                      {/* Security Trust Badge */}
-                      <div className="mt-12 flex items-center justify-center gap-6 border-t border-slate-50 pt-8">
-                         <div className="flex flex-col items-center gap-1">
-                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                               <Info size={14}/>
-                            </div>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Aman</span>
-                         </div>
-                         <div className="flex flex-col items-center gap-1">
-                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                               <Share2 size={14}/>
-                            </div>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Resmi</span>
-                         </div>
-                      </div>
                    </div>
                 </div>
               </motion.div>
             ) : (
-              <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 p-20 flex flex-col items-center justify-center text-center shadow-sm">
-                 <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                    <BookOpen size={40} className="text-slate-300" />
-                 </div>
-                 <h3 className="text-2xl font-black text-slate-900">Kurikulum Belum Tersedia</h3>
-                 <p className="text-slate-500 mt-2 max-w-sm">Mohon maaf, admin belum mengunggah materi untuk produk ini. Silakan hubungi dukungan Amania.</p>
+              <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border-2 border-dashed border-slate-200 p-16 flex flex-col items-center justify-center text-center shadow-sm">
+                 <BookOpen size={48} className="text-slate-300 mb-5" />
+                 <h3 className="text-xl font-black text-slate-900">Kurikulum Belum Diunggah</h3>
+                 <p className="text-slate-500 mt-1.5 text-sm max-w-sm">Mohon maaf, Admin belum mengunggah materi untuk produk ini. Silakan hubungi dukungan jika ini adalah kesalahan.</p>
               </div>
             )}
           </AnimatePresence>
 
-          {/* Copyright Info */}
-          <div className="mt-8 p-5 bg-amber-50/50 border border-amber-100 rounded-2xl flex items-start gap-4">
-             <div className="shrink-0 w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600">
-                <Award size={18} />
-             </div>
-             <div>
-                <p className="text-xs font-bold text-amber-900 mb-1">Hak Cipta Terlindungi</p>
-                <p className="text-[10px] md:text-xs text-amber-800/70 leading-relaxed">
-                   Setiap materi yang Anda akses merupakan hak milik intelektual Amania dan Kreator. Tindakan penggandaan atau penyebaran secara ilegal akan ditindaklanjuti secara hukum.
-                </p>
-             </div>
-          </div>
         </div>
 
-        {/* ════ 3. SIDEBAR KURIKULUM (RIGHT) ════ */}
+        {/* ════ 2. SIDEBAR KURIKULUM (RIGHT) ════ */}
         <div className="w-full lg:w-[360px] xl:w-[400px] shrink-0 lg:sticky lg:top-24">
-           <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-[0_15px_40px_rgba(0,0,0,0.03)] overflow-hidden">
+           <div className="bg-white rounded-[2rem] lg:rounded-[2.5rem] border border-slate-200 shadow-[0_15px_40px_rgba(0,0,0,0.03)] overflow-hidden">
              
-             {/* Sidebar Header with Cover */}
-             <div className="p-6 bg-slate-50 border-b border-slate-100 flex flex-col gap-4">
+             {/* Sidebar Header */}
+             <div className="p-6 bg-slate-50 border-b border-slate-100">
                  <div className="flex gap-4 items-center">
-                   <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden shadow-md border border-white relative">
-                     <img src={`${STORAGE_URL}/${product.cover_image}`} alt="cover" className="w-full h-full object-cover" />
-                     <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-r from-white/40 to-transparent z-10" />
+                   <div className="w-12 h-16 shrink-0 rounded-lg overflow-hidden shadow border border-white relative bg-slate-900">
+                     {product.cover_image ? <img src={`${STORAGE_URL}/${product.cover_image}`} alt="cover" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-600"><FileText size={16}/></div>}
+                     <div className="absolute inset-y-0 left-0 w-0.5 bg-gradient-to-r from-white/40 to-transparent z-10" />
                    </div>
                    <div>
-                     <h3 className="font-black text-slate-900 text-sm leading-tight mb-1">Daftar Isi Materi</h3>
+                     <h3 className="font-black text-slate-950 text-sm leading-tight mb-1">Daftar Isi Materi</h3>
                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                       <Layers size={12} className="text-amber-500" /> {product.materials?.length || 0} Konten Tersedia
+                       <Layers size={12} className="text-amber-500" /> {product.materials?.length || 0} Konten Digital
                      </p>
                    </div>
                  </div>
              </div>
 
              {/* Playlist List */}
-             <div className="p-3 max-h-[500px] md:max-h-[600px] overflow-y-auto custom-scrollbar space-y-2">
+             <div className="p-3 max-h-[450px] lg:max-h-[60vh] overflow-y-auto custom-scrollbar space-y-1.5">
                 {product.materials?.map((mat: any, index: number) => {
                   const isActive = activeMaterial?.id === mat.id;
                   return (
                     <button
                       key={mat.id}
                       onClick={() => setActiveMaterial(mat)}
-                      className={`w-full text-left flex items-start gap-4 p-4 rounded-2xl transition-all duration-300 border ${
+                      className={`w-full text-left flex items-start gap-3.5 p-3.5 rounded-xl transition-all duration-200 border group ${
                         isActive 
-                          ? 'bg-gradient-to-r from-orange-600 to-amber-700 border-amber-800 shadow-[0_10px_20px_rgba(245,158,11,0.2)] text-white' 
-                          : 'bg-white border-transparent hover:border-slate-200 hover:bg-slate-50 text-slate-600'
+                          ? 'bg-slate-900 border-slate-800 shadow-md text-white' 
+                          : 'bg-white border-transparent hover:border-slate-100 hover:bg-slate-50 text-slate-700'
                       }`}
                     >
-                      <div className={`mt-0.5 shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border transition-colors ${
-                        isActive ? 'bg-white/20 border-white/20 text-white' : 'bg-slate-100 border-slate-100 text-slate-400'
+                      <div className={`mt-0.5 shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
+                        isActive ? 'bg-amber-500 border-amber-400 text-slate-900 shadow-inner' : 'bg-slate-100 border-slate-200 text-slate-400 group-hover:text-amber-500'
                       }`}>
-                        {mat.type === 'link' ? <LinkIcon size={16} /> : <FileText size={16} />}
+                        {mat.type === 'link' ? <LinkIcon size={14} /> : <FileText size={14} />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center mb-1">
-                           <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${isActive ? 'text-amber-200' : 'text-slate-400'}`}>
-                              Materi {index + 1}
-                           </span>
-                           {isActive && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
-                        </div>
-                        <p className={`text-xs md:text-sm font-bold leading-snug line-clamp-2 ${isActive ? 'text-white' : 'text-slate-700'}`}>
+                        <p className={`text-[13px] md:text-sm font-bold leading-snug break-words ${isActive ? 'text-white' : 'text-slate-800'}`}>
                           {mat.title}
                         </p>
+                        <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 block ${isActive ? 'text-amber-400' : 'text-slate-400'}`}>
+                            Materi {index + 1}
+                         </span>
                       </div>
+                      {isActive && <CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-1" />}
                     </button>
                   );
                 })}
              </div>
 
-             {/* Sidebar Footer Info */}
-             <div className="p-5 bg-slate-50/80 border-t border-slate-100 text-center">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aset Digital • Member Amania</p>
+             {/* Sidebar Footer */}
+             <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
+                  <BookOpen size={12}/> Hak Cipta Amania Nusantara Pro
+                </p>
              </div>
            </div>
         </div>
@@ -331,8 +281,8 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       `}</style>
     </div>
   );

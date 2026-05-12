@@ -208,7 +208,13 @@ export default function TransactionsClient() {
   const filteredEProducts = useMemo(() => {
     return eProductTransactions.filter(trx => {
       const query = searchQuery.toLowerCase();
-      const titleMatch = (trx.product?.title || '').toLowerCase().includes(query);
+
+      // 🔥 MENGAMBIL NAMA PRODUK DARI RELASI ITEMS 🔥
+      const productNames = trx.items && trx.items.length > 0 
+          ? trx.items.map((i: any) => i.product?.title).filter(Boolean).join(', ') 
+          : '';
+
+      const titleMatch = productNames.toLowerCase().includes(query);
       const refMatch = (trx.reference || '').toLowerCase().includes(query);
       const matchesSearch = titleMatch || refMatch;
 
@@ -238,8 +244,7 @@ export default function TransactionsClient() {
   }, [eProductTransactions, searchQuery, filterStatus]);
 
   useEffect(() => {
-    setSearchQuery('');
-    setFilterStatus('all');
+    searchQuery === '' && setFilterStatus('all');
   }, [activeTab]);
 
   if (loading) {
@@ -482,6 +487,14 @@ export default function TransactionsClient() {
                   
                   const isActuallyUnpaid = (s === 'unpaid' || s === 'pending') && !isTimeExpired;
 
+                  // 🔥 EKSTRAK DATA PRODUK DARI RELASI ITEMS 🔥
+                  const firstProduct = trx.items?.[0]?.product;
+                  const coverImage = firstProduct?.cover_image;
+                  const productNames = trx.items && trx.items.length > 0 
+                      ? trx.items.map((i: any) => i.product?.title).filter(Boolean).join(', ') 
+                      : null;
+                  const productSlug = firstProduct?.slug;
+
                   return (
                     <div key={`ep-${trx.id}`} className="bg-white border border-slate-200/80 rounded-[1.5rem] p-4 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(79,70,229,0.1)] hover:border-indigo-200 transition-all duration-300 group flex flex-col gap-4 w-full min-w-0">
                       
@@ -489,12 +502,12 @@ export default function TransactionsClient() {
                       <div className="flex flex-row items-start gap-4 md:gap-6 w-full">
                         {/* Thumbnail E-Product */}
                         <div className="w-20 sm:w-28 md:w-36 shrink-0 rounded-lg md:rounded-xl bg-slate-900 overflow-hidden border border-slate-200 relative shadow-sm flex items-center justify-center p-1.5 md:p-2" style={{ aspectRatio: '2/3' }}>
-                          {trx.product?.cover_image ? (
+                          {coverImage ? (
                             <React.Fragment>
                               <div className="absolute inset-0 z-0">
-                                <img src={`${STORAGE_URL}/${trx.product.cover_image}`} className="w-full h-full object-cover blur-lg opacity-40 scale-125" alt="blur-bg"/>
+                                <img src={`${STORAGE_URL}/${coverImage}`} className="w-full h-full object-cover blur-lg opacity-40 scale-125" alt="blur-bg"/>
                               </div>
-                              <img src={`${STORAGE_URL}/${trx.product.cover_image}`} alt={trx.product?.title} className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-md" />
+                              <img src={`${STORAGE_URL}/${coverImage}`} alt={productNames || 'Cover Produk'} className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-md" />
                             </React.Fragment>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-500"><FileText size={32} strokeWidth={1}/></div>
@@ -515,7 +528,7 @@ export default function TransactionsClient() {
                           </div>
 
                           <h3 className="text-sm sm:text-base md:text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 sm:line-clamp-3 leading-tight mb-2 w-full break-words">
-                            {trx.product?.title || <span className="italic text-slate-400">Produk tidak tersedia</span>}
+                            {productNames || <span className="italic text-slate-400">Produk tidak tersedia</span>}
                           </h3>
 
                           {trx.payment_method && (
@@ -550,7 +563,7 @@ export default function TransactionsClient() {
                                   <ReceiptText size={16} className="text-slate-400 shrink-0" /> <span className="truncate">E-Receipt</span>
                                 </a>
                               )}
-                              <Link href={`/e-products/${trx.product?.slug}`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/20 shrink-0 min-w-0">
+                              <Link href={productSlug ? `/my-e-products/${productSlug}` : `/my-e-products`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/20 shrink-0 min-w-0">
                                 <DownloadCloud size={16} className="shrink-0" /> <span className="truncate">Akses Produk</span>
                               </Link>
                             </React.Fragment>

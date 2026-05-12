@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { 
   Search, CheckCircle2, XCircle, Clock, 
   Loader2, Inbox, Receipt, TrendingUp, Calendar, 
-  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard
+  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard, Hash
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -18,9 +18,10 @@ interface TrxEProduct {
   amount: string | number;
   created_at: string;
   checkout_url: string | null;
-  payment_method: string | null; // 🔥 Tambahan field ini
+  payment_method: string | null;
   buyer: { name: string; email: string; phone: string | null };
-  product: { id: number; title: string; price: number };
+  // Karena sekarang pakai EProductOrderItem, product menjadi product_names (string gabungan)
+  product_names: string; 
 }
 
 export default function AdminEProductTransactionsPage() {
@@ -29,7 +30,7 @@ export default function AdminEProductTransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   
-  // 🔥 State Loading Eksport
+  // State Loading Eksport
   const [isExporting, setIsExporting] = useState(false);
   
   // Search & Filters
@@ -91,7 +92,7 @@ export default function AdminEProductTransactionsPage() {
     }
   };
 
-  // 🔥 FUNGSI EKSPORT PDF 🔥
+  // FUNGSI EKSPORT PDF
   const handleExportPDF = async () => {
     setIsExporting(true);
     const tid = toast.loading("Menyusun laporan PDF...");
@@ -131,8 +132,9 @@ export default function AdminEProductTransactionsPage() {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = 
         (tx.reference?.toLowerCase() || '').includes(searchLower) || 
+        (tx.tripay_reference?.toLowerCase() || '').includes(searchLower) || // Bisa cari via tripay ref juga
         (tx.buyer?.name?.toLowerCase() || '').includes(searchLower) ||
-        (tx.product?.title?.toLowerCase() || '').includes(searchLower);
+        (tx.product_names?.toLowerCase() || '').includes(searchLower);
       
       const normalizedStatus = tx.status === 'SETTLED' ? 'PAID' : tx.status;
       const matchesStatus = statusFilter === 'all' || normalizedStatus === statusFilter;
@@ -245,7 +247,7 @@ export default function AdminEProductTransactionsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 md:w-4 md:h-4" size={14} />
           <input
             type="text"
-            placeholder="Cari No. Invoice, Pembeli, E-Produk..."
+            placeholder="Cari Invoice, Tripay Ref, Pembeli..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-lg py-2.5 md:py-3 pl-9 pr-4 text-xs md:text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-inner"
@@ -260,25 +262,26 @@ export default function AdminEProductTransactionsPage() {
           <table className="min-w-full divide-y divide-slate-200 min-w-[850px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[18%]">Waktu Transaksi</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">Invoice & Pembeli</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[25%]">E-Produk & Harga</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[15%]">Status & Metode</th>
-                <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[22%]">Aksi Manual</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[15%]">Waktu Transaksi</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[22%]">Invoice & Tripay Ref</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">Info Pembeli</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">E-Produk & Harga</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[13%]">Status</th>
+                <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[10%]">Aksi</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
               
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 md:px-6 py-16 md:py-20 text-center">
+                  <td colSpan={6} className="px-4 md:px-6 py-16 md:py-20 text-center">
                     <Loader2 className="w-5 h-5 md:w-6 md:h-6 text-indigo-500 animate-spin mx-auto mb-2 md:mb-3" />
                     <p className="text-[10px] md:text-sm font-bold text-slate-400 tracking-wider">Memuat data transaksi e-produk...</p>
                   </td>
                 </tr>
               ) : currentTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 md:px-6 py-16 md:py-24 text-center">
+                  <td colSpan={6} className="px-4 md:px-6 py-16 md:py-24 text-center">
                     <Inbox className="w-8 h-8 md:w-10 md:h-10 text-slate-300 mx-auto mb-3 md:mb-4" strokeWidth={1.5} />
                     <h3 className="text-sm md:text-base font-bold text-slate-900">Tidak ada transaksi ditemukan</h3>
                     <p className="text-xs md:text-sm text-slate-500 mt-1">Sesuaikan filter atau kata kunci pencarian Anda.</p>
@@ -288,6 +291,7 @@ export default function AdminEProductTransactionsPage() {
                 currentTransactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors group">
                     
+                    {/* Kolom 1: Waktu */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap min-w-0">
                       <div className="text-xs md:text-sm font-medium text-slate-900 truncate w-full">
                         {new Date(tx.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -297,24 +301,39 @@ export default function AdminEProductTransactionsPage() {
                       </div>
                     </td>
 
+                    {/* Kolom 2: Invoice & Tripay Ref */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap min-w-0">
-                      <div className="text-[10px] md:text-xs font-black text-indigo-600 tracking-wide mb-0.5 md:mb-1 truncate w-full">
+                      <div className="text-[11px] md:text-xs font-black text-indigo-600 tracking-wide mb-1 truncate w-full">
                         {tx.reference}
                       </div>
+                      {/* 🔥 MENAMPILKAN TRIPAY REFERENCE 🔥 */}
+                      <div className="text-[9px] md:text-[10px] font-bold text-slate-500 flex items-center gap-1 truncate w-full" title={tx.tripay_reference || 'Tidak via Tripay'}>
+                        <Hash size={10} className="text-slate-400 shrink-0" /> 
+                        {tx.tripay_reference ? (
+                           <span className="truncate text-slate-600 font-mono tracking-tight">{tx.tripay_reference}</span>
+                        ) : (
+                           <span className="italic text-slate-400">Claim Manual / Gratis</span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Kolom 3: Pembeli */}
+                    <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap min-w-0">
                       <div className="text-xs md:text-sm font-semibold text-slate-900 truncate w-full" title={tx.buyer?.name}>{tx.buyer?.name}</div>
                       <div className="text-[9px] md:text-[10px] text-slate-500 truncate w-full">{tx.buyer?.email}</div>
                     </td>
 
+                    {/* Kolom 4: Produk & Harga */}
                     <td className="px-4 md:px-6 py-3 md:py-4 min-w-0">
-                      <div className="text-xs md:text-sm font-bold text-slate-900 w-full truncate flex items-center gap-1.5" title={tx.product?.title}>
-                        <ShoppingCart size={14} className="text-slate-400 shrink-0" /> {tx.product?.title}
+                      <div className="text-xs md:text-sm font-bold text-slate-900 w-full truncate flex items-center gap-1.5" title={tx.product_names}>
+                        <ShoppingCart size={14} className="text-slate-400 shrink-0" /> <span className="truncate">{tx.product_names}</span>
                       </div>
                       <div className="text-[11px] md:text-sm font-black text-emerald-600 mt-1 truncate w-full">
                         {formatRupiah(tx.amount)}
                       </div>
                     </td>
 
-                    {/* 🔥 KOLOM STATUS & METODE PEMBAYARAN 🔥 */}
+                    {/* Kolom 5: Status & Metode */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
                       <div className="flex flex-col items-center gap-1.5">
                         {(tx.status === 'PAID' || tx.status === 'SETTLED' || tx.status === 'success') && (
@@ -333,7 +352,6 @@ export default function AdminEProductTransactionsPage() {
                           </span>
                         )}
 
-                        {/* Label Metode Pembayaran (Jika Ada) dengan Number() Fix */}
                         {tx.payment_method && Number(tx.amount) > 0 && (
                           <span className="inline-flex items-center gap-1 text-[9px] font-bold text-slate-500 uppercase">
                             <CreditCard size={10} /> {tx.payment_method}
@@ -342,10 +360,10 @@ export default function AdminEProductTransactionsPage() {
                       </div>
                     </td>
 
+                    {/* Kolom 6: Aksi */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right min-w-0">
                        <div className="flex items-center justify-end gap-2">
                          
-                         {/* Fix Number() pada tx.amount */}
                          {tx.checkout_url && Number(tx.amount) > 0 && (
                            <a 
                              href={tx.checkout_url}
@@ -353,7 +371,7 @@ export default function AdminEProductTransactionsPage() {
                              rel="noopener noreferrer"
                              className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-slate-200"
                            >
-                             <ArrowUpRight size={12} /> Cek Invoice
+                             <ArrowUpRight size={12} /> Cek
                            </a>
                          )}
 
@@ -364,7 +382,7 @@ export default function AdminEProductTransactionsPage() {
                              className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-indigo-200 hover:border-transparent disabled:opacity-50"
                            >
                              {actionLoadingId === tx.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} 
-                             Tandai Lunas
+                             Lunas
                            </button>
                          )}
                        </div>
