@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, ArrowLeft, Loader2,
-  ShoppingCart, UserCircle, ShieldCheck, Zap,
+  ShoppingCart, UserCircle, ShieldCheck, 
   Infinity as InfinityIcon, RefreshCw, Star,
   MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, X, AlertCircle, Sparkles,
-  AlertTriangle, Crown, Layers
+  AlertTriangle, Crown, Layers, Share2, Link as LinkIcon, Banknote
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -35,6 +35,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   const [product,    setProduct]    = useState<any>(null);
   const [loading,    setLoading]    = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
   
   const [isOwned,    setIsOwned]    = useState(false); 
 
@@ -45,6 +46,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   
   const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [paymentChannels, setPaymentChannels] = useState<any[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<string>('');
   const [isLoadingChannels, setIsLoadingChannels] = useState(false);
@@ -89,6 +91,37 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       }
     })();
   }, [slug]);
+
+  // 🔥 FUNGSI TAMBAH KE KERANJANG 🔥
+  const handleAddToCart = async () => {
+    if (!userData) {
+      toast.error('Silakan masuk terlebih dahulu.');
+      sessionStorage.setItem('redirectAfterLogin', `/e-products/${slug}`);
+      router.push('/login'); return;
+    }
+
+    setCartLoading(true);
+    const tid = toast.loading('Menambahkan ke keranjang...');
+    try {
+      const res = await apiFetch('/cart', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ e_product_id: product.id })
+      });
+      const json = await res.json();
+      
+      if (res.ok && json.success) {
+        toast.success('Berhasil dimasukkan ke Keranjang!', { id: tid });
+        window.dispatchEvent(new Event('cartUpdated')); 
+      } else {
+        toast.error(json.message || 'Gagal menambahkan ke keranjang.', { id: tid });
+      }
+    } catch (error) {
+      toast.error('Kesalahan jaringan.', { id: tid });
+    } finally {
+      setCartLoading(false);
+    }
+  };
 
   const handleOpenPaymentModal = async () => {
     if (!userData) {
@@ -172,10 +205,20 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
     } catch { toast.error('Kesalahan koneksi.', { id: tid }); setBtnLoading(false); }
   };
 
-  // 🔥 PERBAIKAN: ARAHKAN KE HALAMAN KOLEKSI SAYA 🔥
   const handleAccessProduct = () => {
     toast.success('Membuka ruang akses materi...');
     router.push('/my-e-products');
+  };
+
+  // 🔥 FUNGSI SHARE 🔥
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareTitle = `Pelajari: ${product?.title} di Amania`;
+  const shareText = `Saya merekomendasikan produk digital premium "${product?.title}" ini. Sangat bermanfaat! Cek detailnya di sini: \n\n${shareUrl}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Link berhasil disalin!');
+    setIsShareModalOpen(false);
   };
 
   const handleSubmitReview = async () => {
@@ -215,6 +258,11 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   const isFree       = product?.price === 0;
   const originalPrice = product ? product.price * 10 : 0; 
   
+  // 🔥 UPDATE: Standarisasi nama Author & Avatar 🔥
+  const authorName = !product?.author?.name || product?.author?.name.toLowerCase() === 'admin amania' 
+    ? 'Amania Official' 
+    : product?.author?.name;
+
   const getAvatar = (user: any) => {
     if (!user?.avatar) return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=e2e8f0&color=334155&bold=true`;
     if (user.avatar.startsWith('http')) return user.avatar;
@@ -266,10 +314,15 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
       {/* HEADER NAV */}
       <div className="relative z-40 w-full pt-6 md:pt-8 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <Link href="/e-products" className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-bold text-xs md:text-sm transition-colors bg-white/60 hover:bg-white backdrop-blur-md shadow-sm px-5 py-2.5 rounded-full border border-slate-200/60">
-            <ArrowLeft size={16} /> Kembali ke Katalog
+            <ArrowLeft size={16} /> <span className="hidden sm:inline">Kembali ke Katalog</span><span className="sm:hidden">Kembali</span>
           </Link>
+
+          {/* Tombol Share */}
+          <button onClick={() => setIsShareModalOpen(true)} className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-bold text-xs md:text-sm transition-colors bg-white/60 hover:bg-white backdrop-blur-md shadow-sm px-5 py-2.5 rounded-full border border-slate-200/60">
+             <Share2 size={16} /> <span className="hidden sm:inline">Bagikan Produk</span><span className="sm:hidden">Bagikan</span>
+          </button>
         </div>
       </div>
 
@@ -286,7 +339,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                {/* Animated Floating Cover */}
                <motion.div 
                 animate={{ y: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                className="w-[240px] sm:w-[300px] md:w-[340px] max-w-full aspect-[2/3] shrink-0 rounded-[2rem] bg-white overflow-hidden relative shadow-[0_25px_50px_-12px_rgba(79,70,229,0.3)] border-4 border-white/60 group z-10 mx-auto md:mx-0"
+                className="w-[200px] sm:w-[260px] md:w-[320px] max-w-full aspect-[2/3] shrink-0 rounded-[2rem] bg-white overflow-hidden relative shadow-[0_25px_50px_-12px_rgba(79,70,229,0.3)] border-4 border-white/60 group z-10 mx-auto md:mx-0"
                >
                 {product.cover_image ? (
                   <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
@@ -318,7 +371,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                   <Crown size={14} className="text-indigo-500" /> {product.category?.name || 'Aset Eksklusif'}
                 </div>
                 
-                <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 leading-[1.15] tracking-tight mb-6 drop-shadow-sm break-words">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 leading-[1.15] tracking-tight mb-6 drop-shadow-sm break-words">
                   {product.title}
                 </h1>
 
@@ -335,14 +388,25 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                   </div>
                 </div>
 
-                {/* Author Box */}
-                <div className="bg-white border border-slate-200/60 rounded-2xl p-4 flex items-center gap-4 w-full md:w-max shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] overflow-hidden">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden shrink-0">
-                    {product.author?.avatar ? <img src={`${STORAGE_URL}/${product.author.avatar}`} alt="author" className="w-full h-full object-cover"/> : <UserCircle size={28} />}
+                {/* 🔥 UPDATE: Author Box -> Seller Box with Logo 🔥 */}
+                <div className="bg-white border border-slate-200/60 rounded-2xl p-4 flex items-center justify-center md:justify-start gap-4 w-full md:w-max shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] overflow-hidden mx-auto md:mx-0">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden shrink-0">
+                    {authorName === 'Amania Official' ? (
+                       <img src="/logo-amania.png" alt="Amania Official" className="w-6 h-6 md:w-8 md:h-8 object-contain" />
+                    ) : product.author?.avatar ? (
+                       <img src={`${STORAGE_URL}/${product.author.avatar}`} alt="seller" className="w-full h-full object-cover"/>
+                    ) : (
+                       <UserCircle size={28} />
+                    )}
                   </div>
                   <div className="text-left min-w-0">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Author / Kreator</p>
-                    <p className="text-sm md:text-base font-bold text-slate-900 truncate">{product.author?.name || 'Amania Official'}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Seller</p>
+                    <p className="text-sm md:text-base font-bold text-slate-900 truncate flex items-center gap-1.5">
+                      {authorName}
+                      {authorName === 'Amania Official' && (
+                        <img src="/logo-amania.png" alt="Amania" className="w-4 h-4 md:w-5 md:h-5 object-contain" />
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -385,17 +449,27 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
               ) : (
                 <div className="grid gap-4 mb-12 w-full">
                   {reviews.map((r: any) => (
-                    <div key={r.id} className="p-5 md:p-6 rounded-3xl bg-white border border-slate-100 flex gap-4 w-full min-w-0 hover:border-indigo-100 hover:shadow-[0_4px_20px_rgba(79,70,229,0.05)] transition-all duration-300">
-                      <img src={getAvatar(r.user)} alt="avatar" className="w-10 h-10 md:w-12 md:h-12 rounded-full shadow-sm shrink-0 border border-slate-100" />
+                    <div key={r.id} className="p-5 md:p-6 rounded-3xl bg-white border border-slate-100 flex flex-col sm:flex-row gap-4 w-full min-w-0 hover:border-indigo-100 hover:shadow-[0_4px_20px_rgba(79,70,229,0.05)] transition-all duration-300">
+                      <div className="flex items-center sm:items-start gap-4 w-full sm:w-auto shrink-0">
+                        <img src={getAvatar(r.user)} alt="avatar" className="w-10 h-10 md:w-12 md:h-12 rounded-full shadow-sm border border-slate-100" />
+                        <div className="min-w-0 sm:hidden flex-1">
+                          <p className="font-bold text-slate-900 text-sm truncate">{r.user?.name || 'Member Eksklusif'}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', {day: 'numeric', month:'short', year:'numeric'})}</p>
+                        </div>
+                      </div>
                       <div className="min-w-0 flex-1 w-full">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3 w-full">
+                        <div className="hidden sm:flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3 w-full">
                           <div className="min-w-0">
                             <p className="font-bold text-slate-900 text-sm truncate">{r.user?.name || 'Member Eksklusif'}</p>
-                            <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', {day: 'numeric', month:'short', year:'numeric'})}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', {day: 'numeric', month:'short', year:'numeric'})}</p>
                           </div>
                           <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-fit shrink-0">
                             <StarRow rating={r.rating} size={14} />
                           </div>
+                        </div>
+                        {/* Rating for mobile */}
+                        <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-fit shrink-0 mb-3 sm:hidden">
+                            <StarRow rating={r.rating} size={14} />
                         </div>
                         {r.review && <p className="text-xs md:text-sm text-slate-600 leading-relaxed break-words w-full">{r.review}</p>}
                       </div>
@@ -437,7 +511,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                       <StarRow rating={myRating} size={18} />
                       {myReview && <p className="text-xs md:text-sm text-emerald-900 mt-4 bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm break-words">{myReview}</p>}
                     </div>
-                    <button onClick={() => setSubmitted(false)} className="w-full sm:w-auto text-xs font-bold text-emerald-700 bg-emerald-200/50 hover:bg-emerald-200 px-6 py-3 rounded-xl transition-colors shrink-0">Edit Ulasan</button>
+                    <button onClick={() => setSubmitted(false)} className="w-full sm:w-auto text-xs font-bold text-emerald-700 bg-emerald-200/50 hover:bg-emerald-200 px-6 py-3 rounded-xl transition-colors shrink-0 mt-2 sm:mt-0">Edit Ulasan</button>
                   </div>
                 ) 
                 : (
@@ -472,7 +546,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.06)] overflow-hidden relative flex flex-col w-full group/vault">
               
-              <div className="p-6 md:p-10 relative z-10 bg-gradient-to-b from-white to-slate-50">
+              <div className="p-6 md:p-8 lg:p-10 relative z-10 bg-gradient-to-b from-white to-slate-50">
                 {/* INDIKATOR KEPEMILIKAN */}
                 {isOwned ? (
                   <div className="inline-flex items-center gap-2 mb-6 bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-2 rounded-xl w-fit shadow-sm">
@@ -481,7 +555,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                   </div>
                 ) : (
                   <div className="inline-flex items-center gap-2 mb-6 bg-indigo-50 border border-indigo-100 text-indigo-600 px-4 py-2 rounded-xl w-fit shadow-sm">
-                    <Zap size={14} className="fill-indigo-600" />
+                    <Banknote size={14} className="text-indigo-600" />
                     <p className="text-[10px] md:text-xs font-black uppercase tracking-widest">Investasi Aset</p>
                   </div>
                 )}
@@ -502,23 +576,34 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                   {isOwned ? 'Terverifikasi' : formatRupiah(product.price)}
                 </p>
                 
-                {!isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-slate-500 mb-8 md:mb-10">Pembayaran 1x. Tanpa biaya tersembunyi.</p>}
-                {isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-emerald-600 mb-8 md:mb-10">Akses premium gratis khusus Anda.</p>}
-                {isOwned && <p className="text-xs md:text-sm font-medium text-indigo-600 mb-8 md:mb-10">Bahan belajar sudah masuk di brankas Anda.</p>}
+                {!isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-slate-500 mb-8">Pembayaran 1x. Tanpa biaya tersembunyi.</p>}
+                {isFree && !isOwned && <p className="text-xs md:text-sm font-medium text-emerald-600 mb-8">Akses premium gratis khusus Anda.</p>}
+                {isOwned && <p className="text-xs md:text-sm font-medium text-indigo-600 mb-8">Bahan belajar sudah masuk di brankas Anda.</p>}
 
                 {/* 🔥 TOMBOL AKSI (DESKTOP) 🔥 */}
-                <div className="hidden lg:block w-full">
+                <div className="hidden lg:flex flex-col gap-3 w-full">
                   {isOwned ? (
                     <button onClick={handleAccessProduct} className="relative w-full py-4 md:py-5 rounded-2xl font-black text-white text-sm md:text-base bg-emerald-500 hover:bg-emerald-600 shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 overflow-hidden group">
                       <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-shimmer"></span>
                       <Layers size={20} className="shrink-0 relative z-10" /> <span className="relative z-10">Buka di Koleksi Saya</span>
                     </button>
                   ) : (
-                    <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative w-full py-4 md:py-5 rounded-2xl font-black text-white text-sm md:text-base bg-slate-900 hover:bg-indigo-600 shadow-[0_10px_30px_rgba(15,23,42,0.2)] hover:shadow-[0_10px_30px_rgba(79,70,229,0.4)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn">
-                      <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover/btn:animate-shimmer"></span>
-                      {btnLoading ? <Loader2 size={20} className="animate-spin shrink-0 relative z-10" /> : <ShoppingCart size={20} className="shrink-0 relative z-10" />}
-                      <span className="relative z-10">{isFree ? 'Klaim Gratis Sekarang' : 'Dapatkan Akses Sekarang'}</span>
-                    </button>
+                    <>
+                      {/* Tombol Beli Langsung (Buy Now) */}
+                      <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative w-full py-4 rounded-2xl font-black text-white text-sm md:text-base bg-emerald-600 hover:bg-emerald-700 shadow-[0_10px_30px_rgba(5,150,105,0.3)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn">
+                        <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover/btn:animate-shimmer"></span>
+                        {btnLoading ? <Loader2 size={20} className="animate-spin shrink-0 relative z-10" /> : <Banknote size={20} className="shrink-0 relative z-10 text-emerald-100" />}
+                        <span className="relative z-10">{isFree ? 'Klaim Gratis Sekarang' : 'Beli Langsung'}</span>
+                      </button>
+
+                      {/* Tombol Tambah ke Keranjang (Add to Cart) */}
+                      {!isFree && (
+                        <button onClick={handleAddToCart} disabled={cartLoading} className="relative w-full py-4 rounded-2xl font-black text-indigo-600 text-sm md:text-base bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-all flex items-center justify-center gap-2 disabled:opacity-70 group/cart">
+                           {cartLoading ? <Loader2 size={20} className="animate-spin shrink-0" /> : <ShoppingCart size={20} className="shrink-0 group-hover/cart:-translate-y-1 transition-transform" />}
+                           <span>Tambah ke Keranjang</span>
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -531,29 +616,29 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
               </div>
 
               {/* BENEFITS SECTION */}
-              <div className="bg-slate-50/50 border-t border-slate-100 p-6 md:p-10 flex flex-col gap-5 md:gap-6 w-full relative z-10">
+              <div className="bg-slate-50/50 border-t border-slate-100 p-6 md:p-8 flex flex-col gap-4 w-full relative z-10">
                 {BENEFITS.map((b) => (
                   <div key={b.label} className="flex gap-3 md:gap-4 w-full min-w-0 items-start">
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl ${b.bg} ${b.border} border flex items-center justify-center shrink-0`}>
-                      <b.icon size={20} strokeWidth={2.5}/>
+                    <div className={`w-10 h-10 rounded-xl ${b.bg} ${b.border} border flex items-center justify-center shrink-0`}>
+                      <b.icon size={18} strokeWidth={2.5}/>
                     </div>
                     <div className="flex-1 min-w-0 pt-0.5">
-                      <p className="font-bold text-slate-900 text-xs md:text-sm mb-1">{b.label}</p>
-                      <p className="text-[11px] md:text-xs font-medium text-slate-500 leading-relaxed">{b.desc}</p>
+                      <p className="font-bold text-slate-900 text-xs md:text-sm mb-0.5">{b.label}</p>
+                      <p className="text-[11px] font-medium text-slate-500 leading-relaxed">{b.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
               
               {/* 🔥 ANTI PIRACY WARNING PREMIUM 🔥 */}
-              <div className="bg-rose-50/50 border-t border-rose-100 p-5 md:p-8 w-full flex items-start gap-3 md:gap-4 relative z-10">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200">
-                  <AlertTriangle size={16} className="text-rose-500" />
+              <div className="bg-rose-50/50 border-t border-rose-100 p-5 md:p-6 w-full flex items-start gap-3 md:gap-4 relative z-10">
+                <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200">
+                  <AlertTriangle size={14} className="text-rose-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] md:text-xs font-black text-rose-900 mb-1.5 uppercase tracking-widest">Peringatan Lisensi</p>
-                  <p className="text-[10px] md:text-[11px] text-rose-700/80 leading-relaxed font-medium">
-                    Materi dilindungi Hukum Hak Cipta. <strong>Dilarang keras</strong> menggandakan atau memperjualbelikan aset ini tanpa izin resmi Amania.
+                  <p className="text-[10px] md:text-[11px] font-black text-rose-900 mb-1 uppercase tracking-widest">Peringatan Lisensi</p>
+                  <p className="text-[9px] md:text-[10px] text-rose-700/80 leading-relaxed font-medium">
+                    Materi dilindungi Hukum. <strong>Dilarang keras</strong> menggandakan atau memperjualbelikan aset ini tanpa izin resmi Amania.
                   </p>
                 </div>
               </div>
@@ -564,36 +649,42 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
       </div>
 
       {/* 🔥 MOBILE STICKY BOTTOM BAR (Khusus tampil di HP) 🔥 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3.5 pb-safe z-[50] lg:hidden shadow-[0_-15px_40px_rgba(0,0,0,0.1)] flex items-center justify-between gap-3 w-full">
-        <div className="shrink-0 flex flex-col justify-center min-w-0 max-w-[45%]">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 truncate w-full">
-            {isOwned ? 'Status Lisensi' : 'Investasi'}
-          </p>
-          
-          {/* 🔥 HARGA CORET MOBILE 🔥 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 pb-safe z-[50] lg:hidden shadow-[0_-15px_40px_rgba(0,0,0,0.1)] flex items-center justify-between gap-2.5 w-full">
+        
+        <div className="shrink-0 flex flex-col justify-center min-w-0 pl-1 w-[35%]">
+          {/* HARGA CORET MOBILE */}
           {!isFree && !isOwned && (
              <p className="text-[10px] font-bold text-slate-400 line-through decoration-rose-500/50 mb-0.5 truncate w-full">
                {formatRupiah(originalPrice)}
              </p>
           )}
-
-          <p className={`text-lg sm:text-xl font-black tracking-tight leading-none truncate w-full ${isFree || isOwned ? 'text-emerald-500' : 'text-slate-900'}`}>
+          <p className={`text-sm sm:text-base font-black tracking-tight leading-none truncate w-full ${isFree || isOwned ? 'text-emerald-500' : 'text-slate-900'}`}>
             {isOwned ? 'Akses Resmi' : formatRupiah(product.price)}
           </p>
         </div>
         
         {/* 🔥 TOMBOL AKSI (MOBILE) 🔥 */}
-        {isOwned ? (
-          <button onClick={handleAccessProduct} className="flex-1 min-w-0 py-3 rounded-xl font-black text-white text-xs sm:text-sm bg-emerald-500 shadow-[0_4px_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-            <Layers size={16} className="shrink-0" /> <span className="truncate">Buka Koleksi</span>
-          </button>
-        ) : (
-          <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative flex-1 min-w-0 py-3 rounded-xl font-black text-white text-xs sm:text-sm bg-slate-900 shadow-[0_4px_15px_rgba(15,23,42,0.3)] flex items-center justify-center gap-1.5 disabled:opacity-70 active:scale-95 transition-transform overflow-hidden group">
-            <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer"></span>
-            {btnLoading ? <Loader2 size={16} className="animate-spin shrink-0 relative z-10" /> : <ShoppingCart size={16} className="shrink-0 relative z-10" />}
-            <span className="truncate relative z-10">{isFree ? 'Klaim Gratis' : 'Beli Sekarang'}</span>
-          </button>
-        )}
+        <div className="flex-1 flex gap-2 justify-end w-[65%]">
+            {isOwned ? (
+              <button onClick={handleAccessProduct} className="w-full py-2.5 rounded-xl font-black text-white text-xs bg-emerald-500 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
+                <Layers size={14} className="shrink-0" /> <span className="truncate">Buka Koleksi</span>
+              </button>
+            ) : (
+              <>
+                 {!isFree && (
+                   <button onClick={handleAddToCart} disabled={cartLoading} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-xl font-black text-indigo-600 bg-indigo-50 border border-indigo-200 flex items-center justify-center active:scale-95 transition-transform">
+                     {cartLoading ? <Loader2 size={16} className="animate-spin" /> : <ShoppingCart size={16} />}
+                   </button>
+                 )}
+                 {/* Beli Langsung Mobile */}
+                 <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="flex-1 py-2.5 rounded-xl font-black text-white text-xs sm:text-sm bg-emerald-600 shadow-[0_4px_15px_rgba(5,150,105,0.3)] flex items-center justify-center gap-1.5 disabled:opacity-70 active:scale-95 transition-transform overflow-hidden group">
+                    <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer"></span>
+                    {btnLoading ? <Loader2 size={14} className="animate-spin shrink-0 relative z-10" /> : <Banknote size={16} className="shrink-0 relative z-10 text-emerald-100" />}
+                    <span className="truncate relative z-10">{isFree ? 'Klaim Gratis' : 'Beli Langsung'}</span>
+                 </button>
+              </>
+            )}
+        </div>
       </div>
 
       {/* 🔥 MODAL POPUP "AKSES TERKUNCI" 🔥 */}
@@ -614,7 +705,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
               </p>
               <div className="flex flex-col gap-2.5 w-full">
                 <button onClick={() => { setIsLockedModalOpen(false); handleOpenPaymentModal(); }} className="w-full py-3.5 md:py-4 rounded-xl font-black text-white text-xs md:text-sm bg-indigo-600 hover:bg-indigo-700 transition-all shadow-[0_8px_20px_rgba(79,70,229,0.2)] flex items-center justify-center gap-2">
-                  <ShoppingCart size={16} className="shrink-0" /> {isFree ? 'Klaim Akses Gratis' : 'Dapatkan Akses Resmi'}
+                  <Banknote size={16} className="shrink-0" /> {isFree ? 'Klaim Akses Gratis' : 'Dapatkan Akses Resmi'}
                 </button>
                 <button onClick={() => setIsLockedModalOpen(false)} className="w-full py-3 rounded-xl font-bold text-slate-500 text-xs md:text-sm hover:text-slate-900 hover:bg-slate-100 transition-colors">
                   Tutup Peringatan
@@ -687,10 +778,74 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                   <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate w-full flex items-center justify-center sm:justify-start gap-1"><ShieldCheck size={12}/> Tagihan Terenkripsi</p>
                   <p className="text-2xl md:text-3xl font-black text-slate-900 leading-none truncate w-full">{formatRupiah(product.price)}</p>
                 </div>
-                <button onClick={() => handleProcessCheckout()} disabled={!selectedChannel || btnLoading || !!channelError} className="w-full sm:w-auto px-8 py-3.5 md:py-4 bg-slate-900 hover:bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none text-white rounded-xl font-black text-sm transition-all shadow-[0_8px_20px_rgba(15,23,42,0.2)] hover:shadow-[0_8px_20px_rgba(79,70,229,0.3)] flex items-center justify-center gap-2 active:scale-95 shrink-0 min-w-0">
-                  {btnLoading ? <><Loader2 size={18} className="animate-spin shrink-0" /> <span className="truncate">Memproses...</span></> : <span className="truncate">Selesaikan Pembayaran</span>}
+                
+                <button onClick={() => handleProcessCheckout()} disabled={!selectedChannel || btnLoading || !!channelError} className="w-full sm:w-auto px-8 py-3.5 md:py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none text-white rounded-xl font-black text-sm transition-all shadow-[0_8px_20px_rgba(5,150,105,0.2)] hover:shadow-[0_8px_20px_rgba(5,150,105,0.4)] flex items-center justify-center gap-2 active:scale-95 shrink-0 min-w-0">
+                  {btnLoading ? <><Loader2 size={18} className="animate-spin shrink-0" /> <span className="truncate">Memproses...</span></> : <><Banknote size={18} className="shrink-0 text-emerald-100" /><span className="truncate">Selesaikan Pembayaran</span></>}
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 🔥 MODAL SHARE PRODUK 🔥 */}
+      <AnimatePresence>
+        {isShareModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsShareModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm w-full h-full" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-sm bg-white border border-slate-200 rounded-[2rem] shadow-2xl p-6 md:p-8 text-center overflow-hidden">
+              <button onClick={() => setIsShareModalOpen(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10">
+                <X size={16} />
+              </button>
+              
+              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-6">Bagikan Produk Ini</h3>
+              
+              {/* Product Preview in Share Modal */}
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 mb-6 flex gap-3 text-left w-full">
+                 <div className="w-16 h-20 bg-slate-200 rounded-lg overflow-hidden shrink-0 border border-slate-200">
+                    <img src={`${STORAGE_URL}/${product.cover_image}`} className="w-full h-full object-cover" alt="cover" />
+                 </div>
+                 <div className="flex flex-col justify-center min-w-0">
+                    <p className="text-xs font-black text-slate-900 line-clamp-2 leading-snug">{product.title}</p>
+                    <p className="text-[10px] font-bold text-slate-500 mt-1 flex items-center gap-1">
+                      {authorName === 'Amania Official' && <img src="/logo-amania.png" className="w-3 h-3 object-contain" />}
+                      {authorName}
+                    </p>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 w-full mb-6">
+                <a 
+                  href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} 
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 p-3 bg-green-50 hover:bg-green-100 text-green-600 rounded-2xl border border-green-100 transition-colors group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="group-hover:scale-110 transition-transform" viewBox="0 0 16 16">
+                    <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                  </svg>
+                  <span className="text-[10px] font-bold">WhatsApp</span>
+                </a>
+                
+                <a 
+                  href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`} 
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 p-3 bg-sky-50 hover:bg-sky-100 text-sky-500 rounded-2xl border border-sky-100 transition-colors group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="group-hover:scale-110 transition-transform" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/>
+                  </svg>
+                  <span className="text-[10px] font-bold">Telegram</span>
+                </a>
+
+                <button 
+                  onClick={handleCopyLink}
+                  className="flex flex-col items-center gap-2 p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl border border-slate-200 transition-colors group"
+                >
+                  <LinkIcon size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold">Salin Tautan</span>
+                </button>
+              </div>
+
             </motion.div>
           </div>
         )}

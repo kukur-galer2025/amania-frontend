@@ -4,10 +4,13 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, Search, X, SlidersHorizontal, Tag, Gift, Check,
-  Star, PackageSearch, ArrowRight, CheckCircle2, Crown, Library, 
-  FilterX, BookMarked, ShoppingBag, ShieldCheck, DownloadCloud, LayoutGrid, BookOpen, Award
+  Star, PackageSearch, CheckCircle2, Crown, Library, 
+  FilterX, BookMarked, ShieldCheck, DownloadCloud, LayoutGrid, BookOpen, Award,
+  ShoppingCart, Loader2, Layers, UserCircle, Eye, Banknote, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
 
 const SORT_OPTIONS = [
@@ -17,31 +20,65 @@ const SORT_OPTIONS = [
   { value: 'priciest',  label: 'Harga Tertinggi' },
 ];
 
+// 🔥 HELPER: Membersihkan tag HTML dan mengubah entitas HTML menjadi teks biasa
+const stripHtmlAndEntities = (html: string) => {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// 🔥 SKELETON CARD ANTI OVERFLOW 🔥
 const SkeletonCard = () => (
-  <div className="animate-pulse flex flex-col h-full bg-white p-2.5 md:p-3 rounded-[1.25rem] md:rounded-[1.5rem] border border-slate-100 shadow-sm">
-    <div className="rounded-[1rem] md:rounded-[1.25rem] bg-slate-100 mb-3 md:mb-4 w-full" style={{ aspectRatio: '2/3' }} />
-    <div className="h-2 md:h-2.5 bg-slate-200 rounded-full w-1/3 mb-2 md:mb-2.5" />
-    <div className="h-3 md:h-4 bg-slate-200 rounded-full w-full mb-1 md:mb-1.5" />
-    <div className="h-3 md:h-4 bg-slate-200 rounded-full w-3/4 mb-3 md:mb-4" />
-    <div className="h-4 md:h-5 bg-slate-200 rounded-full w-1/2 mt-auto" />
+  <div className="animate-pulse flex flex-row items-stretch bg-white p-3 md:p-4 rounded-[1.5rem] border border-slate-100 shadow-sm w-full">
+    <div className="rounded-[1rem] bg-slate-100 w-[100px] sm:w-[130px] min-h-[160px] shrink-0" />
+    <div className="flex flex-col flex-1 pl-4 py-2 min-w-0">
+      <div className="h-3 bg-slate-200 rounded-full w-1/3 mb-3" />
+      <div className="h-4 bg-slate-200 rounded-full w-full mb-2" />
+      <div className="h-4 bg-slate-200 rounded-full w-3/4 mb-4" />
+      <div className="mt-auto flex flex-col gap-2 border-t border-slate-100 pt-3">
+        <div className="h-4 bg-slate-200 rounded-full w-1/2" />
+        <div className="flex gap-2 w-full mt-1">
+          <div className="h-8 bg-slate-200 rounded-xl flex-[0.8]" />
+          <div className="h-8 bg-slate-200 rounded-xl flex-[1.2]" />
+        </div>
+      </div>
+    </div>
   </div>
 );
 
 export default function EProductsClient() {
+  const router = useRouter();
   const [products,          setProducts]          = useState<any[]>([]);
   const [categories,        setCategories]        = useState<string[]>([]);
   const [loading,           setLoading]           = useState(true);
   const [search,            setSearch]            = useState('');
   
-  const [priceFilter,       setPriceFilter]       = useState<'all' | 'free'>('all');
+  // 🔥 UPDATE: Tambah 'owned' ke state priceFilter 🔥
+  const [priceFilter,       setPriceFilter]       = useState<'all' | 'free' | 'owned'>('all');
   const [sort,              setSort]              = useState('newest');
   const [selectedCategory,  setSelectedCategory]  = useState('Semua');
   
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [addingCartId,      setAddingCartId]      = useState<number | null>(null);
 
-  const storageUrl  = process.env.NEXT_PUBLIC_STORAGE_URL || '';
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [productToBuy,       setProductToBuy]       = useState<any>(null);
+  const [paymentChannels,    setPaymentChannels]    = useState<any[]>([]);
+  const [selectedChannel,    setSelectedChannel]    = useState<string>('');
+  const [isLoadingChannels,  setIsLoadingChannels]  = useState(false);
+  const [btnLoading,         setBtnLoading]         = useState(false);
+  const [channelError,       setChannelError]       = useState<string | null>(null);
 
-  /* ─── Fetch Data ─── */
+  const storageUrl  = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -66,7 +103,6 @@ export default function EProductsClient() {
     })();
   }, []);
 
-  /* ─── Derived Data ─── */
   const filtered = useMemo(() => {
     let list = [...products];
     if (search.trim()) {
@@ -74,14 +110,16 @@ export default function EProductsClient() {
       list = list.filter(p => p.title?.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
     }
     
+    // 🔥 UPDATE: Filter untuk produk Gratis atau Sudah Dimiliki 🔥
     if (priceFilter === 'free') list = list.filter(p => p.price === 0);
+    else if (priceFilter === 'owned') list = list.filter(p => p.is_purchased === true);
+    
     if (selectedCategory !== 'Semua') list = list.filter(p => p.category?.name === selectedCategory);
     
-    if      (sort === 'top_rated') list.sort((a, b) => (parseFloat(b.reviews_avg_rating)||0) - (parseFloat(a.reviews_avg_rating)||0));
+    if (sort === 'top_rated') list.sort((a, b) => (parseFloat(b.reviews_avg_rating)||0) - (parseFloat(a.reviews_avg_rating)||0));
     else if (sort === 'cheapest')  list.sort((a, b) => a.price - b.price);
     else if (sort === 'priciest')  list.sort((a, b) => b.price - a.price);
     else list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    
     return list;
   }, [products, search, sort, priceFilter, selectedCategory]);
 
@@ -91,54 +129,99 @@ export default function EProductsClient() {
   const currentSort = SORT_OPTIONS.find(o => o.value === sort)!;
   const hasFilters  = search !== '' || priceFilter !== 'all' || selectedCategory !== 'Semua' || sort !== 'newest';
 
-  const clearAll = () => { 
-    setSearch(''); 
-    setPriceFilter('all'); 
-    setSelectedCategory('Semua'); 
-    setSort('newest'); 
+  const clearAll = () => { setSearch(''); setPriceFilter('all'); setSelectedCategory('Semua'); setSort('newest'); };
+  const scrollToCatalog = () => { document.getElementById('katalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+
+  const handleAddToCart = async (e: React.MouseEvent, productId: number) => {
+    e.preventDefault(); e.stopPropagation();
+    const userStr = localStorage.getItem('user');
+    if (!userStr || userStr === 'null') { toast.error('Silakan masuk terlebih dahulu.'); router.push('/login'); return; }
+    setAddingCartId(productId);
+    const tid = toast.loading('Memproses...');
+    try {
+      const res = await apiFetch('/cart', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ e_product_id: productId })
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch { json = { success: false, message: 'Terjadi kesalahan sistem.' }; }
+      toast.dismiss(tid);
+      if (res.ok && json.success) {
+        window.dispatchEvent(new CustomEvent('showCartModal', {
+          detail: { type: 'success', title: 'Berhasil Masuk!', message: 'Produk telah ditambahkan ke keranjang belanja Anda.' }
+        }));
+      } else {
+        window.dispatchEvent(new CustomEvent('showCartModal', {
+          detail: { type: 'error', title: 'Pemberitahuan', message: json.message || 'Produk gagal dimasukkan.' }
+        }));
+      }
+    } catch { toast.dismiss(tid); toast.error('Kesalahan jaringan.'); } finally { setAddingCartId(null); }
   };
 
-  const scrollToCatalog = () => {
-    document.getElementById('katalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleOpenPaymentModal = async (e: React.MouseEvent, product: any) => {
+    e.preventDefault(); e.stopPropagation();
+    const token = localStorage.getItem('token');
+    if (!token) { toast.error('Silakan login terlebih dahulu'); router.push('/login'); return; }
+    setProductToBuy(product);
+    setIsPaymentModalOpen(true);
+    setIsLoadingChannels(true);
+    setChannelError(null);
+    try {
+      const res = await apiFetch('/checkout/payment-channels', { headers: { 'Authorization': `Bearer ${token}` } });
+      const json = await res.json();
+      if (res.ok && json.success) setPaymentChannels(json.data);
+      else setChannelError(json.message || "Gagal memuat metode pembayaran.");
+    } catch { setChannelError("Kesalahan jaringan."); } finally { setIsLoadingChannels(false); }
   };
+
+  const handleProcessCheckout = async () => {
+    if (!selectedChannel) { toast.error("Pilih metode pembayaran!"); return; }
+    setBtnLoading(true);
+    try {
+      const res = await apiFetch('/checkout/e-product', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ e_product_id: productToBuy.id, method: selectedChannel })
+      });
+      const json = await res.json();
+      if (json.success && json.checkout_url) window.location.href = json.checkout_url;
+      else toast.error(json.message || "Gagal memproses pesanan.");
+    } catch { toast.error("Kesalahan jaringan."); } finally { setBtnLoading(false); }
+  };
+
+  const groupedChannels = paymentChannels.reduce((acc, c) => {
+    if (c.active) { if (!acc[c.group]) acc[c.group] = []; acc[c.group].push(c); }
+    return acc;
+  }, {} as Record<string, any[]>);
 
   return (
     <div className="font-sans bg-[#F8FAFC] min-h-screen text-slate-900 w-full flex flex-col relative overflow-x-hidden">
       
-      {/* ══════════ 1. LUXURY HERO SECTION ══════════ */}
+      {/* --- HERO --- */}
       <section className="relative w-full bg-[#0a0f1c] overflow-hidden rounded-b-[2.5rem] md:rounded-b-[4rem] shadow-2xl border-b border-indigo-900/50 pb-12 pt-8 md:pt-16 md:pb-24">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2000" 
-            className="w-full h-full object-cover opacity-15 mix-blend-luminosity" 
-            alt="Premium Library Background" 
-          />
+          <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2000" className="w-full h-full object-cover opacity-15 mix-blend-luminosity" alt="Background" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c]/90 via-[#0a0f1c]/80 to-[#0a0f1c]"></div>
           <div className="absolute -top-24 -left-24 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-600/20 blur-[100px] md:blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-amber-500/10 blur-[80px] md:blur-[100px] rounded-full pointer-events-none" />
         </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
+        <div className="relative z-10 max-w-7xl mx-auto px-5 flex flex-col lg:flex-row items-center justify-between gap-10">
           <div className="w-full lg:w-1/2 text-center lg:text-left pt-4">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-400/20 rounded-full text-amber-300 text-[10px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6 shadow-sm">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-400/20 rounded-full text-amber-300 text-[10px] md:text-xs font-black uppercase tracking-widest mb-6">
               <Crown size={14} className="text-amber-400" /> Edisi Premium
             </motion.div>
-            
-            <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-[1.15] md:leading-[1.1] mb-4 md:mb-6">
-              Tingkatkan <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-orange-500">Skill Digital</span><br className="hidden md:block"/> Anda Hari Ini.
+            <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-[1.15] mb-6">
+              Tingkatkan <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-400 to-orange-600">Skill Digital</span><br className="hidden md:block"/> Anda Hari Ini.
             </motion.h1>
-            
-            <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-300 text-xs sm:text-sm md:text-base font-medium max-w-xl mx-auto lg:mx-0 mb-6 md:mb-8 leading-relaxed px-2 md:px-0">
-              Dapatkan akses eksklusif ke koleksi e-book, modul pembelajaran, dan template berkualitas industri yang disusun oleh para ahli Amania.
+            <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-300 text-xs sm:text-sm md:text-base font-medium max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
+              Dapatkan akses eksklusif ke koleksi digital terbaik untuk akselerasi karir profesional Anda.
             </motion.p>
-            
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 md:gap-4 w-full sm:w-auto px-4 md:px-0">
-              <button onClick={scrollToCatalog} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-xl text-sm font-black transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_12px_30px_rgba(79,70,229,0.5)] active:scale-95 shrink-0">
-                <Search size={16} className="md:w-[18px] md:h-[18px]" /> Eksplorasi Katalog
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <button onClick={scrollToCatalog} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-600 to-amber-700 hover:from-orange-500 hover:to-amber-600 text-white rounded-xl text-sm font-black transition-all shadow-[0_8px_20px_rgba(245,158,11,0.3)] active:scale-95">
+                <Search size={16} /> Eksplorasi Katalog
               </button>
-              <Link href="/events" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-sm font-bold backdrop-blur-md transition-all active:scale-95 shrink-0">
-                <BookOpen size={16} className="md:w-[18px] md:h-[18px] text-indigo-300" /> Lihat Kelas Live
-              </Link>
             </motion.div>
           </div>
 
@@ -172,27 +255,23 @@ export default function EProductsClient() {
         </div>
       </section>
 
-      {/* Trust Badges (Horizontal Scroll on Mobile) */}
+      {/* Trust Badges */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
          <div className="bg-white rounded-[1rem] md:rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 p-3 md:p-6 flex overflow-x-auto custom-scrollbar md:flex-wrap md:justify-between items-center gap-4 md:gap-6 snap-x snap-mandatory">
-            
             <div className="flex items-center gap-2.5 md:gap-3 shrink-0 snap-start px-2 md:px-0">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600"><DownloadCloud size={16} className="md:w-5 md:h-5"/></div>
               <div className="text-left"><p className="text-xs md:text-sm font-black text-slate-900 leading-none mb-1">Akses Instan</p><p className="text-[9px] md:text-[10px] text-slate-500 font-medium leading-none">Bisa langsung diunduh</p></div>
             </div>
             <div className="hidden md:block w-px h-10 bg-slate-200 shrink-0"></div>
-            
             <div className="flex items-center gap-2.5 md:gap-3 shrink-0 snap-start px-2 md:px-0">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600"><ShieldCheck size={16} className="md:w-5 md:h-5"/></div>
               <div className="text-left"><p className="text-xs md:text-sm font-black text-slate-900 leading-none mb-1">Kualitas Terjamin</p><p className="text-[9px] md:text-[10px] text-slate-500 font-medium leading-none">Original & Legal</p></div>
             </div>
             <div className="hidden md:block w-px h-10 bg-slate-200 shrink-0"></div>
-            
             <div className="flex items-center gap-2.5 md:gap-3 shrink-0 snap-start px-2 md:px-0 pr-4 md:pr-0">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-amber-50 rounded-full flex items-center justify-center text-amber-600"><Star size={16} className="md:w-5 md:h-5"/></div>
               <div className="text-left"><p className="text-xs md:text-sm font-black text-slate-900 leading-none mb-1">Rating Tinggi</p><p className="text-[9px] md:text-[10px] text-slate-500 font-medium leading-none">Diulas oleh komunitas</p></div>
             </div>
-            
          </div>
       </div>
 
@@ -226,9 +305,7 @@ export default function EProductsClient() {
               >
                 <SlidersHorizontal size={14} className="md:w-[18px] md:h-[18px]" />
                 <span>Filter & Urutkan</span>
-                {hasFilters && (
-                   <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-rose-500 ml-1"></span>
-                )}
+                {hasFilters && <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-rose-500 ml-1"></span>}
               </button>
             </div>
           </div>
@@ -245,9 +322,10 @@ export default function EProductsClient() {
                   </span>
                 )}
                 {priceFilter !== 'all' && (
-                  <span className="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg bg-emerald-50 text-emerald-700 text-[10px] md:text-xs font-bold border border-emerald-200 shadow-sm shrink-0">
-                    <Gift size={10} className="md:w-3 md:h-3 opacity-70" /> Gratis
-                    <button onClick={() => setPriceFilter('all')} className="hover:bg-emerald-200 p-0.5 rounded-sm transition-colors ml-0.5 md:ml-1"><X size={12} className="md:w-3.5 md:h-3.5" /></button>
+                  <span className={`inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-bold border shadow-sm shrink-0 ${priceFilter === 'owned' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                    {priceFilter === 'owned' ? <CheckCircle2 size={10} className="md:w-3 md:h-3 opacity-70" /> : <Gift size={10} className="md:w-3 md:h-3 opacity-70" />} 
+                    {priceFilter === 'owned' ? 'Dimiliki' : 'Gratis'}
+                    <button onClick={() => setPriceFilter('all')} className={`p-0.5 rounded-sm transition-colors ml-0.5 md:ml-1 ${priceFilter === 'owned' ? 'hover:bg-indigo-200' : 'hover:bg-emerald-200'}`}><X size={12} className="md:w-3.5 md:h-3.5" /></button>
                   </span>
                 )}
                 {sort !== 'newest' && (
@@ -265,31 +343,24 @@ export default function EProductsClient() {
         </div>
       </div>
 
-      {/* ══════════ 3. GRID KATALOG UTAMA (LUXURY CARD) ══════════ */}
+      {/* ══════════ 3. GRID KATALOG UTAMA (LUXURY HORIZONTAL CARD) ══════════ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 w-full flex-1">
         
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 md:mb-10 border-b border-slate-200 pb-4 md:pb-6">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-indigo-100 flex items-center justify-center shrink-0 shadow-inner border border-indigo-200">
-              <Library size={20} className="md:w-7 md:h-7 text-indigo-600" />
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 border-b border-slate-200 pb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 border border-amber-200">
+              <Library size={24} className="text-amber-700" />
             </div>
             <div>
-              <h2 className="text-lg md:text-3xl font-black text-slate-900 leading-none mb-1 md:mb-2">Jelajahi Pustaka</h2>
-              <p className="text-[10px] md:text-sm text-slate-500 font-medium">Koleksi digital terbaik untuk akselerasi karir.</p>
+              <h2 className="text-xl md:text-3xl font-black text-slate-900 leading-none mb-2">Jelajahi Pustaka</h2>
+              <p className="text-[10px] md:text-sm text-slate-500 font-medium">Koleksi digital premium pilihan Amania.</p>
             </div>
-          </div>
-          <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-slate-100 rounded-lg md:rounded-xl border border-slate-200 w-fit shrink-0">
-            <PackageSearch size={14} className="md:w-4 md:h-4 text-slate-400" />
-            <span className="text-[10px] md:text-xs font-black text-slate-700">
-              {loading ? 'Menghitung...' : `${filtered.length} Ditemukan`}
-            </span>
           </div>
         </div>
 
         {loading ? (
-          // GRID MOBILE: 2 Kolom, LAPTOP: 4/5 Kolom
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-8">
-            {[...Array(10)].map((_, i) => <SkeletonCard key={i} />)}
+          <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 md:gap-8">
+            {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center text-center py-16 md:py-24 bg-white rounded-[2rem] md:rounded-[3rem] border border-dashed border-slate-300 shadow-sm mx-2 md:mx-0">
@@ -303,87 +374,104 @@ export default function EProductsClient() {
             </button>
           </motion.div>
         ) : (
-          <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-8">
+          <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 md:gap-8">
             <AnimatePresence mode="popLayout">
               {filtered.map((p, idx) => {
                 const free  = p.price === 0;
                 const avg   = parseFloat(p.reviews_avg_rating) || 0;
                 const owned = p.is_purchased === true;
                 const originalPrice = p.price * 10;
+                const isAdding = addingCartId === p.id;
+                const authorName = !p.author?.name || p.author?.name.toLowerCase() === 'admin amania' ? 'Amania Official' : p.author.name;
 
                 return (
-                  <motion.div key={p.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(idx * 0.02, 0.2) } }} exit={{ opacity: 0, scale: 0.94 }}>
-                    <Link href={`/e-products/${p.slug}`} className="group flex flex-col h-full w-full bg-white p-2.5 sm:p-3 md:p-4 rounded-[1.25rem] sm:rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.05)] md:shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_40px_-10px_rgba(79,70,229,0.15)] hover:border-indigo-200 hover:-translate-y-1.5 md:hover:-translate-y-2 transition-all duration-500">
+                  <motion.div key={p.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: Math.min(idx * 0.05, 0.3) } }} exit={{ opacity: 0, scale: 0.95 }} className="relative group h-full">
+                    <div className="absolute -inset-1 bg-gradient-to-br from-orange-500/0 to-amber-900/0 group-hover:from-orange-500/10 group-hover:to-amber-900/10 rounded-[2rem] blur-xl transition-all duration-500 z-0"></div>
 
-                      {/* Cover Buku */}
-                      <div className="relative w-full rounded-[1rem] sm:rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden bg-slate-900 mb-3 md:mb-4 shadow-inner" style={{ aspectRatio: '2/3' }}>
-                        {p.cover_image
-                          ? <img src={`${storageUrl}/${p.cover_image}`} alt={p.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                          : <div className="absolute inset-0 flex items-center justify-center text-slate-500 bg-slate-100"><FileText size={32} className="md:w-12 md:h-12" strokeWidth={1} /></div>
-                        }
-                        {/* Luxury Dark Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/10 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-
-                        {/* Badges Overlays */}
-                        <div className="absolute top-2 left-2 md:top-3 md:left-3 flex flex-col gap-1.5 md:gap-2 z-10">
+                    <div className="relative z-10 flex flex-row items-stretch h-full w-full bg-white p-3 sm:p-4 rounded-[1.5rem] border border-slate-100 shadow-sm group-hover:border-amber-200 transition-all duration-500 cursor-pointer overflow-hidden" onClick={() => router.push(`/e-products/${p.slug}`)}>
+                      
+                      {/* COVER */}
+                      <div className="relative w-[105px] sm:w-[130px] min-h-[160px] shrink-0 rounded-[1rem] overflow-hidden bg-slate-900 shadow-md">
+                        {p.cover_image ? <img src={`${storageUrl}/${p.cover_image}`} alt={p.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> : <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-300"><FileText size={32}/></div>}
+                        <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-r from-white/30 to-transparent z-10" />
+                        <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-20">
                           {owned ? (
-                            <span className="flex items-center gap-1 md:gap-1.5 bg-indigo-600/95 backdrop-blur-md border border-indigo-400/50 text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg shadow-xl">
-                              <CheckCircle2 size={10} className="md:w-3 md:h-3" strokeWidth={2.5} /> <span className="hidden sm:inline">Dimiliki</span>
-                            </span>
+                            <span className="bg-indigo-600/90 backdrop-blur-md text-white text-[8px] font-black uppercase px-2 py-1 rounded-md shadow-lg flex items-center gap-1"><CheckCircle2 size={10}/> Dimiliki</span>
                           ) : free ? (
-                            <span className="flex items-center gap-1 md:gap-1.5 bg-emerald-500/95 backdrop-blur-md border border-emerald-400/50 text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg shadow-xl">
-                              <Gift size={10} className="md:w-3 md:h-3" strokeWidth={2.5} /> <span className="hidden sm:inline">Gratis</span>
-                            </span>
+                            <span className="bg-emerald-500/90 backdrop-blur-md text-white text-[8px] font-black uppercase px-2 py-1 rounded-md shadow-lg flex items-center gap-1"><Gift size={10}/> Gratis</span>
                           ) : (
-                            <span className="flex items-center gap-1 md:gap-1.5 bg-gradient-to-r from-amber-400 to-orange-400 backdrop-blur-md border border-amber-300/50 text-amber-950 text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg shadow-xl">
-                              <Crown size={10} className="md:w-3 md:h-3" strokeWidth={2.5} /> <span className="hidden sm:inline">Premium</span>
-                            </span>
+                            <span className="bg-orange-600/90 backdrop-blur-md text-white text-[8px] font-black uppercase px-2 py-1 rounded-md shadow-lg flex items-center gap-1"><Crown size={10}/> Premium</span>
                           )}
                         </div>
                       </div>
 
-                      {/* Info Buku */}
-                      <div className="flex flex-col flex-1 px-0.5 md:px-1.5">
-                        <div className="flex items-center justify-between mb-2 md:mb-3 gap-1">
-                           <p className="text-[8px] md:text-[10px] text-indigo-600 font-bold uppercase tracking-widest truncate bg-indigo-50 border border-indigo-100 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-[4px] md:rounded-md max-w-[65%]" title={p.category?.name}>{p.category?.name || 'Umum'}</p>
-                           {avg > 0 && (
-                            <div className="flex items-center gap-0.5 md:gap-1 text-amber-600 bg-amber-50 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-[4px] md:rounded-md border border-amber-200/50 shrink-0">
-                              <Star size={8} className="md:w-3 md:h-3 fill-amber-500" /> <span className="text-[9px] md:text-[11px] font-black mt-0.5">{avg.toFixed(1)}</span>
-                            </div>
-                          )}
+                      {/* CONTENT */}
+                      <div className="flex flex-col flex-1 min-w-0 pl-4 py-0.5 justify-between relative">
+                        <div className="absolute top-1 right-1 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-amber-500 hidden sm:block">
+                          <ChevronRight size={18} strokeWidth={2.5} />
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-2 pr-6">
+                             <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">
+                               <p className="text-[9px] text-amber-800 font-black uppercase tracking-widest truncate max-w-[90px]">{p.category?.name || 'Umum'}</p>
+                             </div>
+                             {avg > 0 && <div className="flex items-center gap-1 text-amber-600 shrink-0"><Star size={12} className="fill-amber-500" /><span className="text-[10px] font-black">{avg.toFixed(1)}</span></div>}
+                          </div>
+                          <h3 className="text-[14px] sm:text-[16px] font-black text-slate-900 line-clamp-2 leading-[1.3] group-hover:text-orange-700 transition-colors mb-2 pr-4">{p.title}</h3>
+                          {p.description && <p className="text-[10px] sm:text-[11px] text-slate-500 line-clamp-2 leading-relaxed mb-3 pr-2">{stripHtmlAndEntities(p.description)}</p>}
                         </div>
                         
-                        <h3 className="text-[12px] sm:text-[14px] md:text-[17px] font-black text-slate-900 line-clamp-2 leading-[1.3] group-hover:text-indigo-600 transition-colors mb-3 md:mb-5" title={p.title}>
-                          {p.title}
-                        </h3>
-                        
-                        <div className="mt-auto pt-2.5 md:pt-4 border-t border-slate-100/80">
-                          {/* Harga Coret Diskon 90% */}
-                          {!owned && !free && (
-                            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 md:mb-1.5 flex-wrap sm:flex-nowrap">
-                              <span className="text-[9px] md:text-[11px] font-bold text-slate-400 line-through decoration-rose-500/50 truncate max-w-full">
-                                {formatRupiah(originalPrice)}
-                              </span>
-                              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-rose-600 bg-rose-50 border border-rose-100 px-1 md:px-1.5 py-0.5 rounded-[4px] md:rounded-md shrink-0">
-                                90% OFF
-                              </span>
-                            </div>
-                          )}
+                        {/* FOOTER ACTION */}
+                        <div className="mt-auto w-full">
+                          <div className="flex items-center gap-1.5 mb-2.5">
+                             {authorName === 'Amania Official' ? <div className="w-4 h-4 rounded-full border border-amber-100 flex items-center justify-center p-0.5 shrink-0"><img src="/logo-amania.png" className="w-full h-full object-contain" /></div> : <UserCircle size={14} className="text-slate-400 shrink-0" />}
+                             <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 truncate">{authorName}</span>
+                          </div>
 
-                          <div className="flex items-center justify-between">
-                            <div className="flex flex-col min-w-0 pr-1">
-                               <span className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 hidden sm:block">Investasi</span>
-                               <p className={`text-[13px] sm:text-base md:text-xl font-black tracking-tight truncate w-full ${owned ? 'text-indigo-600' : free ? 'text-emerald-600' : 'text-slate-900'}`}>
-                                 {owned ? 'Buka' : formatRupiah(p.price)}
-                               </p>
+                          <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-3">
+                            <div className="flex flex-wrap items-center gap-2 w-full">
+                              {!owned && !free && (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] font-bold text-slate-400 line-through decoration-rose-500/50">{formatRupiah(originalPrice)}</span>
+                                  <span className="text-[8px] font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">90% OFF</span>
+                                </div>
+                              )}
+                              <p className={`text-[15px] sm:text-[17px] font-black whitespace-nowrap w-full ${owned ? 'text-indigo-600' : free ? 'text-emerald-600' : 'text-slate-900'}`}>{owned ? 'Akses Resmi' : formatRupiah(p.price)}</p>
                             </div>
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
-                               <ArrowRight size={12} className="sm:w-[14px] sm:h-[14px] md:w-4 md:h-4 group-hover:translate-x-0.5 transition-transform" />
+
+                            <div className="flex items-center gap-1.5 sm:gap-2 w-full mt-0.5">
+                              {owned ? (
+                                /* 🔥 BUKA KOLEKSI: OREN-COKELAT 🔥 */
+                                <button onClick={(e) => { e.stopPropagation(); router.push('/my-e-products'); }} className="w-full py-2.5 rounded-xl font-black text-white text-[11px] sm:text-xs bg-gradient-to-r from-orange-600 to-amber-800 hover:from-orange-700 hover:to-amber-900 flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md shadow-amber-900/20">
+                                  <Layers size={14}/> <span>Buka Koleksi</span>
+                                </button>
+                              ) : (
+                                <>
+                                  <button onClick={(e) => { e.stopPropagation(); router.push(`/e-products/${p.slug}`); }} className="flex-[0.8] py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center gap-1 active:scale-95 transition-all shadow-sm">
+                                    <Eye size={12} className="shrink-0 text-slate-500"/> <span className="text-[10px] sm:text-[11px]">Detail</span>
+                                  </button>
+
+                                  {!free && (
+                                    /* 🔥 TAMBAH KERANJANG: OREN-COKELAT 🔥 */
+                                    <button onClick={(e) => handleAddToCart(e, p.id)} disabled={isAdding} className="w-[36px] h-[36px] shrink-0 rounded-xl font-black text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 flex items-center justify-center active:scale-95 transition-all disabled:opacity-50 shadow-sm">
+                                      {isAdding ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={16} />}
+                                    </button>
+                                  )}
+                                  
+                                  {/* 🔥 BELI LANGSUNG: KUNCI DI WARNA HIJAU (EMERALD) 🔥 */}
+                                  <button onClick={(e) => handleOpenPaymentModal(e, p)} className="flex-[1.2] py-2.5 rounded-xl font-black text-white text-[10px] sm:text-[11px] bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-1.5 active:scale-95 transition-all relative overflow-hidden group/btn shadow-md shadow-emerald-600/20 border border-emerald-500">
+                                    <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover/btn:animate-shimmer"></span>
+                                    <Banknote size={14} className="shrink-0 relative z-10 sm:w-[16px] sm:h-[16px]" />
+                                    <span className="relative z-10">{free ? 'Gratis' : 'Beli'}</span>
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -391,6 +479,50 @@ export default function EProductsClient() {
           </motion.div>
         )}
       </main>
+
+      {/* --- MODAL PEMBAYARAN --- */}
+      <AnimatePresence>
+        {isPaymentModalOpen && productToBuy && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPaymentModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]">
+              <div className="p-5 md:p-6 border-b border-slate-100 flex justify-between items-center bg-amber-50/30">
+                <div><h3 className="text-lg md:text-xl font-black text-slate-900">Pilih Pembayaran</h3><p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Transaksi Aman & Terenkripsi</p></div>
+                <button onClick={()=>setIsPaymentModalOpen(false)} className="p-2 bg-white border border-slate-200 rounded-full text-slate-400 hover:text-rose-500"><X size={18}/></button>
+              </div>
+              <div className="p-5 md:p-6 overflow-y-auto custom-scrollbar flex-1">
+                {isLoadingChannels ? (
+                  <div className="py-20 text-center"><Loader2 size={36} className="animate-spin text-amber-600 mx-auto mb-4"/><p className="text-xs font-bold text-slate-400">Menyiapkan metode...</p></div>
+                ) : (
+                  <div className="space-y-6">
+                    {(Object.entries(groupedChannels) as [string, any[]][]).map(([group, channels]) => (
+                      <div key={group}>
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div> {group}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 md:gap-3">
+                          {channels.map((c: any) => (
+                            <button key={c.code} onClick={()=>setSelectedChannel(c.code)} className={`flex items-center gap-3 p-3 rounded-[1rem] border-2 transition-all ${selectedChannel===c.code ? 'border-amber-600 bg-amber-50 shadow-md' : 'border-slate-200 hover:border-amber-200 bg-white'}`}>
+                              <div className="w-10 h-6 shrink-0 bg-white rounded flex items-center justify-center p-0.5"><img src={c.icon_url} className="max-w-full max-h-full object-contain" alt={c.name}/></div>
+                              <span className="text-xs font-bold text-slate-700 truncate">{c.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="p-5 md:p-6 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="w-full sm:w-auto text-center sm:text-left"><p className="text-[10px] font-black text-slate-400 uppercase mb-1">Total Tagihan</p><p className="text-xl md:text-2xl font-black text-slate-900">{formatRupiah(productToBuy.price)}</p></div>
+                
+                {/* 🔥 BAYAR SEKARANG: KUNCI DI WARNA HIJAU (EMERALD) 🔥 */}
+                <button onClick={handleProcessCheckout} disabled={!selectedChannel || btnLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg shadow-emerald-600/20 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 transition-all flex items-center justify-center gap-2">
+                  {btnLoading ? <Loader2 className="animate-spin" size={18}/> : <Banknote size={18}/>} {btnLoading ? 'Memproses...' : 'Bayar Sekarang'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ══════════ 4. MODAL FILTER (Mobile Optimized) ══════════ */}
       <AnimatePresence>
@@ -446,19 +578,25 @@ export default function EProductsClient() {
                   <h4 className="text-[11px] md:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                     <LayoutGrid size={14} /> Tipe Akses
                   </h4>
-                  <div className="flex flex-col sm:flex-row gap-2.5 md:gap-3">
+                  <div className="flex flex-wrap gap-2.5 md:gap-3">
                     {[
                       { val: 'all',  label: 'Semua Produk' },
                       { val: 'free', label: 'Hanya Gratis' },
-                    ].map(({ val, label }) => (
+                      { val: 'owned', label: 'Sudah Dimiliki' },
+                    ].map(({ val, label }) => {
+                      const isActive = priceFilter === val;
+                      const activeBg = val === 'owned' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-sm' : 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm';
+                      const hoverBg = val === 'owned' ? 'hover:border-indigo-300' : 'hover:border-emerald-300';
+                      
+                      return (
                       <button
                         key={val} 
                         onClick={() => setPriceFilter(val as any)}
-                        className={`flex-1 px-4 py-2.5 md:py-3 rounded-xl border text-xs font-bold transition-all text-center sm:text-left ${priceFilter === val ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300'}`}
+                        className={`flex-1 min-w-[120px] px-4 py-2.5 md:py-3 rounded-xl border text-xs font-bold transition-all text-center sm:text-left ${isActive ? activeBg : `bg-white border-slate-200 text-slate-600 ${hoverBg}`}`}
                       >
                         {label}
                       </button>
-                    ))}
+                    )})}
                   </div>
                 </div>
 
@@ -510,6 +648,7 @@ export default function EProductsClient() {
         .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
         
         html { scroll-behavior: smooth; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
       `}</style>
     </div>
   );

@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileText, Search, ArrowRight, PlaySquare, 
-  LayoutTemplate, CheckCircle2, Sparkles, Clock, Layers
+  LayoutTemplate, CheckCircle2, Sparkles, Clock, Layers, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,7 @@ import { apiFetch } from '@/app/utils/api';
 import toast from 'react-hot-toast';
 
 export default function MyEProductsClient() {
-  const router = useRouter(); // 🔥 WAJIB ADA UNTUK PINDAH HALAMAN
+  const router = useRouter(); 
   const [purchases, setPurchases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -55,14 +55,17 @@ export default function MyEProductsClient() {
           <div className="h-10 w-64 bg-slate-200 rounded-lg mb-4"></div>
           <div className="h-5 w-96 bg-slate-200 rounded-md"></div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 md:gap-8">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white p-2 rounded-3xl border border-slate-100 shadow-sm animate-pulse">
-              <div className="w-full aspect-[4/3] bg-slate-200 rounded-2xl mb-4"></div>
-              <div className="px-3 pb-3">
-                <div className="h-5 w-3/4 bg-slate-200 rounded-md mb-2"></div>
-                <div className="h-4 w-1/2 bg-slate-200 rounded-md mb-6"></div>
-                <div className="h-10 w-full bg-slate-100 rounded-xl"></div>
+            <div key={i} className="bg-white p-3 md:p-4 rounded-[1.5rem] border border-slate-100 shadow-sm animate-pulse flex flex-row items-stretch w-full">
+              <div className="rounded-[1rem] bg-slate-100 w-[100px] sm:w-[130px] min-h-[160px] shrink-0" />
+              <div className="flex flex-col flex-1 pl-4 py-2 min-w-0">
+                <div className="h-3 bg-slate-200 rounded-full w-1/3 mb-3" />
+                <div className="h-4 bg-slate-200 rounded-full w-full mb-2" />
+                <div className="h-4 bg-slate-200 rounded-full w-3/4 mb-4" />
+                <div className="mt-auto flex flex-col gap-2 border-t border-slate-100 pt-3">
+                  <div className="h-10 bg-slate-200 rounded-xl w-full" />
+                </div>
               </div>
             </div>
           ))}
@@ -72,33 +75,33 @@ export default function MyEProductsClient() {
   }
 
   return (
-    <div className="w-full relative z-10">
+    <div className="w-full relative z-10 pb-20">
       
       {/* BACKGROUND MESH GLOW */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[80px] -z-10 pointer-events-none mix-blend-multiply"></div>
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[80px] -z-10 pointer-events-none mix-blend-multiply"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-multiply"></div>
+      <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-multiply"></div>
 
       {/* HEADER SECTION */}
-      <div className="mb-10 md:mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="max-w-2xl relative">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-bold mb-4 shadow-sm">
-            <Sparkles size={14} className="animate-pulse" /> Akses Eksklusif
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 text-[10px] sm:text-xs font-black uppercase tracking-widest mb-5 shadow-sm">
+            <Sparkles size={14} className="text-amber-500" /> Aset Premium
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4 leading-tight">
             Koleksi Digital Anda
           </h1>
-          <p className="text-slate-500 text-sm md:text-base leading-relaxed font-medium">
-            Ruang kerja pintar Anda. Kelola dan akses seluruh modul, rekaman, dan template premium yang telah Anda miliki.
+          <p className="text-slate-500 text-xs sm:text-sm md:text-base leading-relaxed font-medium max-w-xl">
+            Ruang belajar pintar Anda. Akses dan pelajari seluruh materi, e-book, serta template premium yang telah Anda miliki selamanya.
           </p>
         </div>
         
         {purchases.length > 0 && (
-          <div className="shrink-0 flex items-center gap-2.5 text-sm font-semibold text-slate-700 bg-white/80 backdrop-blur-md border border-slate-200/60 px-5 py-2.5 rounded-2xl shadow-sm">
+          <div className="shrink-0 flex items-center gap-2.5 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-200 px-5 py-3 rounded-2xl shadow-sm">
             <span className="flex h-2.5 w-2.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            {purchases.length} Aset Digital
+            {purchases.length} Aset Terbuka
           </div>
         )}
       </div>
@@ -106,92 +109,129 @@ export default function MyEProductsClient() {
       {/* EMPTY STATE */}
       {purchases.length === 0 ? (
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} 
-          className="relative bg-white/50 backdrop-blur-xl border-2 border-dashed border-slate-300 hover:border-indigo-300 rounded-[2rem] p-12 md:p-24 flex flex-col items-center justify-center text-center transition-colors group">
+          className="relative bg-white border-2 border-dashed border-slate-300 hover:border-amber-300 rounded-[2rem] p-12 md:p-24 flex flex-col items-center justify-center text-center transition-colors group shadow-sm">
           
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-indigo-50/30 rounded-[2rem] -z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-50/30 rounded-[2rem] -z-10"></div>
           
-          <div className="w-24 h-24 bg-white text-indigo-500 rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-indigo-500/10 group-hover:-translate-y-2 transition-transform duration-500 border border-slate-100 relative">
-             <Search size={36} strokeWidth={1.5} />
-             <div className="absolute -top-3 -right-3 bg-rose-500 text-white p-1.5 rounded-xl shadow-lg transform rotate-12">
+          <div className="w-24 h-24 bg-slate-50 text-amber-500 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner group-hover:-translate-y-2 transition-transform duration-500 border border-slate-100 relative">
+             <Layers size={36} strokeWidth={2} />
+             <div className="absolute -top-3 -right-3 bg-indigo-600 text-white p-2 rounded-xl shadow-lg transform rotate-12">
                <Sparkles size={16} />
              </div>
           </div>
           
-          <h3 className="text-2xl font-extrabold text-slate-900 mb-3 tracking-tight">Belum Ada Aset Digital</h3>
-          <p className="text-slate-500 mb-10 max-w-lg text-sm md:text-base leading-relaxed font-medium">
-            Koleksi Anda masih kosong. Investasikan waktu Anda dengan mempelajari materi eksklusif dari katalog premium kami.
+          <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Koleksi Masih Kosong</h3>
+          <p className="text-slate-500 mb-10 max-w-md text-sm md:text-base leading-relaxed font-medium">
+            Mulai investasi pada karir Anda. Jelajahi dan kumpulkan berbagai materi eksklusif dari katalog Amania.
           </p>
-          <Link href="/e-products" className="px-8 py-3.5 bg-slate-900 hover:bg-indigo-600 text-white rounded-2xl text-sm font-bold transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-indigo-600/30 active:scale-95 flex items-center gap-2.5">
+          <Link href="/e-products" className="px-8 py-4 bg-gradient-to-r from-orange-600 to-amber-700 hover:from-orange-500 hover:to-amber-600 text-white rounded-2xl text-sm font-black transition-all duration-300 shadow-lg shadow-amber-900/20 active:scale-95 flex items-center gap-2.5">
             Eksplorasi Katalog <ArrowRight size={16} />
           </Link>
         </motion.div>
       ) : (
-        /* GRID PRODUK */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {purchases.map((purchase, index) => {
-            const product = purchase.product;
-            if (!product) return null;
-            
-            const badge = getProductBadge(product.title);
+        /* GRID PRODUK (HORIZONTAL STYLE) */
+        <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 md:gap-8">
+          <AnimatePresence mode="popLayout">
+            {purchases.map((purchase, index) => {
+              const product = purchase.product;
+              if (!product) return null;
+              
+              const badge = getProductBadge(product.title);
 
-            return (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
-                key={purchase.id} 
-                className="group bg-white p-2 rounded-[1.5rem] border border-slate-200/80 hover:border-indigo-200 flex flex-col hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 relative overflow-hidden"
-              >
-                <div className="w-full aspect-[4/3] bg-slate-100 relative rounded-2xl overflow-hidden mb-4">
-                  {product.cover_image ? (
-                    <img 
-                      src={`${STORAGE_URL}/${product.cover_image}`} 
-                      alt={product.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
-                      <FileText size={36} strokeWidth={1} />
+              return (
+                <motion.div 
+                  key={purchase.id} 
+                  layout 
+                  initial={{ opacity: 0, y: 20 }} 
+                  animate={{ opacity: 1, y: 0, transition: { delay: Math.min(index * 0.05, 0.3) } }} 
+                  exit={{ opacity: 0, scale: 0.95 }} 
+                  className="relative group h-full"
+                >
+                  {/* GLOW EFFECT BACKGROUND */}
+                  <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/0 via-amber-500/0 to-orange-400/0 group-hover:from-indigo-500/10 group-hover:via-amber-500/10 group-hover:to-orange-400/10 rounded-[2rem] blur-xl transition-all duration-700 ease-out z-0"></div>
+
+                  <div className="relative z-10 flex flex-row items-stretch h-full w-full bg-white p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-100 shadow-sm group-hover:border-amber-200 transition-all duration-500 cursor-pointer overflow-hidden"
+                       onClick={() => router.push(`/my-e-products/${product.slug}`)}>
+                    
+                    {/* --- LEFT: Cover Image with Adaptive Height --- */}
+                    <div className="relative w-[100px] sm:w-[130px] min-h-[150px] shrink-0 rounded-[1rem] sm:rounded-[1.25rem] overflow-hidden bg-slate-900 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.1)] group-hover:shadow-[8px_0_25px_-5px_rgba(245,158,11,0.25)] transition-shadow duration-500">
+                      {product.cover_image ? (
+                        <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 text-slate-300">
+                          <FileText size={32} />
+                        </div>
+                      )}
+                      
+                      {/* 3D Book Spine Effect */}
+                      <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-r from-white/40 to-transparent mix-blend-overlay z-10 pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/5 to-transparent opacity-60 transition-opacity duration-300 z-10" />
+
+                      {/* Status Badges Overlays */}
+                      <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-20">
+                        <span className="bg-emerald-500/90 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                          <CheckCircle2 size={10} strokeWidth={3} /> Lunas
+                        </span>
+                      </div>
+                      
+                      {/* Tipe Dokumen */}
+                      <div className="absolute bottom-2 left-2 z-20">
+                         <span className="bg-white/20 backdrop-blur-md border border-white/30 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+                           {badge.icon} {badge.label}
+                         </span>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-80"></div>
-                  <div className="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm flex items-center gap-1 border border-white/20">
-                    <CheckCircle2 size={10} /> Lunas
-                  </div>
-                  <div className="absolute bottom-3 left-3">
-                    <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-xl text-[10px] font-bold tracking-wide flex items-center gap-1.5 border border-white/30 shadow-lg">
-                      {badge.icon} {badge.label}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="px-3 pb-3 flex flex-col flex-1">
-                  <h3 className="font-extrabold text-slate-900 text-[15px] leading-snug mb-1.5 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                    {product.title}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 mb-5">
-                    <span className="text-[11px] font-semibold text-slate-500">
-                      By {product.author?.name || 'Amania Official'}
-                    </span>
-                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                    <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                      <Clock size={10} /> {new Date(purchase.created_at).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
-                    </span>
+                    {/* --- RIGHT: Konten & Aksi --- */}
+                    <div className="flex flex-col flex-1 min-w-0 pl-3 sm:pl-5 py-0.5 justify-between relative h-full">
+                      
+                      {/* Arrow Hint */}
+                      <div className="absolute top-1 right-1 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-amber-500 hidden sm:block">
+                        <ChevronRight size={18} strokeWidth={2.5} />
+                      </div>
+
+                      <div>
+                        {/* Kategori */}
+                        <div className="flex items-center gap-2 mb-2 pr-6">
+                           <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">
+                             <p className="text-[9px] sm:text-[10px] text-amber-800 font-black uppercase tracking-widest truncate max-w-[100px]">{product.category?.name || 'Umum'}</p>
+                           </div>
+                        </div>
+                        
+                        {/* Title */}
+                        <h3 className="text-[14px] sm:text-[16px] md:text-[17px] font-black text-slate-900 line-clamp-2 leading-[1.3] group-hover:text-orange-700 transition-colors mb-2 pr-4" title={product.title}>
+                          {product.title}
+                        </h3>
+
+                        {/* Info Author & Tanggal (Mobile Stacked) */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-medium text-slate-500 mb-3 pr-2">
+                           <span className="truncate">By <strong className="text-slate-700">{product.author?.name || 'Amania Official'}</strong></span>
+                           <span className="hidden sm:inline-block w-1 h-1 bg-slate-300 rounded-full shrink-0"></span>
+                           <span className="flex items-center gap-1 shrink-0 text-slate-400">
+                             <Clock size={10} className="shrink-0" /> 
+                             {new Date(purchase.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                           </span>
+                        </div>
+                      </div>
+                      
+                      {/* --- Area Bawah (Tombol Buka) --- */}
+                      <div className="mt-auto w-full pt-3 border-t border-slate-100">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); router.push(`/my-e-products/${product.slug}`); }}
+                          className="w-full py-2.5 rounded-xl font-black text-white text-[11px] sm:text-xs bg-gradient-to-r from-orange-600 to-amber-800 hover:from-orange-700 hover:to-amber-900 flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md shadow-amber-900/20 group/btn"
+                        >
+                          <Layers size={14} className="shrink-0 group-hover/btn:rotate-12 transition-transform" /> 
+                          <span>Akses Materi</span>
+                        </button>
+                      </div>
+
+                    </div>
                   </div>
-                  
-                  <div className="mt-auto">
-                    {/* 🔥 TOMBOL PINDAH HALAMAN SLUG 🔥 */}
-                    <button 
-                      onClick={() => router.push(`/my-e-products/${product.slug}`)}
-                      className="w-full py-3 bg-slate-900 hover:bg-indigo-600 text-white rounded-xl text-[13px] font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-indigo-500/30 active:scale-95 group/btn"
-                    >
-                      Buka Ruang Akses <ArrowRight size={14} className="text-slate-400 group-hover/btn:text-white transition-all group-hover/btn:translate-x-1" />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
       )}
 
     </div>

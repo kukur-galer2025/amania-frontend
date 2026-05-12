@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Newspaper, Sparkles, LogIn, Ticket,
   CalendarHeart, Info, Receipt, Settings2, Calendar, 
   CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, FileText,
-  MonitorPlay, ShieldAlert
+  MonitorPlay, ShieldAlert, ShoppingBag, Trash2
 } from 'lucide-react';
 import { apiFetch } from '../utils/api'; 
 
@@ -38,15 +38,25 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [isMounted, setIsMounted] = useState(false);
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // 🔥 STATE PERINGATAN PROFIL BELUM LENGKAP 🔥
   const [showIncompleteProfileAlert, setShowIncompleteProfileAlert] = useState(false);
 
+  // STATE NOTIFIKASI
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
 
+  // 🔥 STATE KERANJANG BELANJA & POPUP MODAL 🔥
+  const [cartCount, setCartCount] = useState(0);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [showCartDropdown, setShowCartDropdown] = useState(false);
+  const cartRef = useRef<HTMLDivElement>(null);
+  
+  const [cartModal, setCartModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
+
+  // STATE SEARCH
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -55,13 +65,10 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const [eventResults, setEventResults] = useState<any[]>([]);
   const [articleResults, setArticleResults] = useState<any[]>([]);
   const [eProductResults, setEProductResults] = useState<any[]>([]);
-  
   const searchRef = useRef<HTMLDivElement>(null);
 
   const [logoutState, setLogoutState] = useState<{ isLoggingOut: boolean, msg: string, type: 'success' | 'error' }>({
-    isLoggingOut: false,
-    msg: '',
-    type: 'success'
+    isLoggingOut: false, msg: '', type: 'success'
   });
 
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -72,78 +79,123 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
       msg: reason === 'expired' ? 'Sesi Anda telah habis. Membawa Anda ke halaman login...' : 'Sesi Anda telah berakhir. Sampai jumpa kembali!',
       type: reason === 'expired' ? 'error' : 'success'
     });
-
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUserData(null);
+    setTimeout(() => { router.push('/login'); }, 2000);
+  };
 
-    setTimeout(() => {
-      router.push('/login');
-    }, 2000);
+  const fetchCartData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await apiFetch('/cart');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.summary) {
+          setCartCount(json.summary.total_items);
+          setCartItems(json.data); 
+        }
+      }
+    } catch (error) {}
+  };
+
+  // 🔥 FUNGSI HAPUS ITEM DARI KERANJANG (MENGGUNAKAN MODAL) 🔥
+  const handleRemoveFromCart = async (e: React.MouseEvent, cartId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const res = await apiFetch(`/cart/${cartId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const json = await res.json();
+      
+      if (res.ok && json.success) {
+        fetchCartData(); 
+        setShowCartDropdown(false); // Sembunyikan dropdown agar modal terlihat
+        setCartModal({
+          isOpen: true,
+          type: 'success',
+          title: 'Berhasil Dihapus',
+          message: 'Produk berhasil dihapus dari keranjang belanja Anda.'
+        });
+      } else {
+        fetchCartData(); // Sinkronisasi ulang jika terjadi error 404
+        setCartModal({
+          isOpen: true,
+          type: 'error',
+          title: 'Pemberitahuan',
+          message: json.message || 'Item tidak ditemukan atau sudah dihapus.'
+        });
+      }
+    } catch (error) {
+      setCartModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Kesalahan',
+        message: 'Gagal terhubung ke server. Periksa koneksi Anda.'
+      });
+    }
   };
 
   useEffect(() => {
-    setIsMounted(true);
+    const handleShowCartModal = (e: any) => {
+      setCartModal({
+        isOpen: true,
+        type: e.detail.type,
+        title: e.detail.title,
+        message: e.detail.message
+      });
+      if (e.detail.type === 'success') fetchCartData();
+    };
+
+    window.addEventListener('showCartModal', handleShowCartModal);
+    window.addEventListener('cartUpdated', fetchCartData); 
     
+    return () => {
+      window.removeEventListener('showCartModal', handleShowCartModal);
+      window.removeEventListener('cartUpdated', fetchCartData);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsMounted(true);
     const userStr = localStorage.getItem('user');
     const token = localStorage.getItem('token');
-    
     const isTokenValid = token && token !== 'null' && token !== 'undefined' && token.length > 10;
 
     if (isTokenValid) {
-      // 1. Tampilkan UI seketika dari localStorage
       if (userStr && userStr !== 'null' && userStr !== 'undefined') {
-         try {
-           const parsedUser = JSON.parse(userStr);
-           setUserData(parsedUser);
-         } catch(e) {}
+         try { setUserData(JSON.parse(userStr)); } catch(e) {}
       }
 
-      // 2. 🔥 TARIK DATA TERBARU & CEK CONSOLE LOG 🔥
       const syncFreshUserData = async () => {
-         console.log("⏳ [SYNC] Memulai penarikan data profil dari database...");
-         console.time("⏱️ Waktu Respon API /user"); // Pelacak Kecepatan API
-
          try {
             const res = await apiFetch('/user');
-            console.timeEnd("⏱️ Waktu Respon API /user"); // Hentikan Pelacak
-
             if (res.ok) {
                const json = await res.json();
-               console.log("✅ [SYNC] Data berhasil ditarik:", json.data);
-
                if (json.success && json.data) {
                   const freshUser = json.data;
-                  
-                  // Update Cache
                   setUserData(freshUser);
                   localStorage.setItem('user', JSON.stringify(freshUser));
-                  
-                  // Evaluasi Kelengkapan (Tanpa Delay)
                   const isProfileIncomplete = !freshUser.email || !freshUser.phone;
-                  console.log(`🔍 Status Profil: ${isProfileIncomplete ? 'BELUM LENGKAP ❌' : 'LENGKAP ✅'}`);
-
                   if (isProfileIncomplete && pathname !== '/profil') {
-                     console.log("🚨 Menampilkan popup peringatan profil!");
                      setShowIncompleteProfileAlert(true);
                   } else {
                      setShowIncompleteProfileAlert(false);
                   }
                }
             } else if (res.status === 401) {
-               console.warn("⚠️ Token expired, mengarahkan ke halaman login.");
                handleLogout('expired');
-            } else {
-               console.error("❌ API /user merespon dengan HTTP", res.status);
             }
-         } catch (error) {
-            console.timeEnd("⏱️ Waktu Respon API /user");
-            console.error("❌ Gagal menghubungi server untuk sinkronisasi:", error);
-         }
+         } catch (error) { console.error(error); }
       };
 
       syncFreshUserData();
       fetchNotifications(); 
+      fetchCartData(); 
 
     } else {
       localStorage.removeItem('user');
@@ -152,13 +204,11 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
     }
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) setShowNotifications(false);
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSearchDropdown(false);
-        setShowMobileSearchInput(false); 
+        setShowSearchDropdown(false); setShowMobileSearchInput(false); 
       }
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) setShowCartDropdown(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -213,46 +263,33 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
-      setShowSearchDropdown(false);
-      setPageResults([]); setEventResults([]); setArticleResults([]); setEProductResults([]);
+      setShowSearchDropdown(false); setPageResults([]); setEventResults([]); setArticleResults([]); setEProductResults([]);
       return;
     }
-
-    setShowSearchDropdown(true);
-    setIsSearching(true);
-
+    setShowSearchDropdown(true); setIsSearching(true);
     const delayDebounceFn = setTimeout(async () => {
       const queryLower = searchQuery.toLowerCase();
       const localPages = STATIC_PAGES.filter(p => p.title.toLowerCase().includes(queryLower));
       setPageResults(localPages.slice(0, 3));
-
       try {
         const res = await apiFetch(`/global-search?q=${encodeURIComponent(searchQuery)}`);
         const json = await res.json();
-
         if (res.ok && json.success) {
-          setEventResults(json.events || []);
-          setArticleResults(json.articles || []);
-          setEProductResults(json.eproducts || []);
+          setEventResults(json.events || []); setArticleResults(json.articles || []); setEProductResults(json.eproducts || []);
         } else {
           setEventResults([]); setArticleResults([]); setEProductResults([]);
         }
       } catch (error) {
         setEventResults([]); setArticleResults([]); setEProductResults([]);
-      } finally {
-        setIsSearching(false);
-      }
+      } finally { setIsSearching(false); }
     }, 400);
-
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
   const handleSearchEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
       router.push(`/events?search=${encodeURIComponent(searchQuery)}`);
-      setShowSearchDropdown(false);
-      setShowMobileSearchInput(false);
-      setSearchQuery('');
+      setShowSearchDropdown(false); setShowMobileSearchInput(false); setSearchQuery('');
     }
   };
 
@@ -274,87 +311,99 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-[#F4F7FB] text-slate-800 flex font-sans relative w-full overflow-hidden">
       
-      {/* Abstract Ambient Orbs */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-100/40 blur-[100px] pointer-events-none z-0"></div>
       <div className="fixed bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-100/30 blur-[120px] pointer-events-none z-0"></div>
       <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-50/40 blur-[80px] pointer-events-none z-0"></div>
 
-      {/* ════════ 🔥 OVERLAY MODAL KELENGKAPAN PROFIL 🔥 ════════ */}
+      {/* 🔥 MODAL STATUS KERANJANG (GLOBAL POPUP DI TENGAH) 🔥 */}
       <AnimatePresence>
-        {showIncompleteProfileAlert && (
+        {cartModal.isOpen && (
           <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div 
               initial={{ scale: 0.9, opacity: 0, y: 20 }} 
               animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
               className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden"
             >
-              <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-6 border border-rose-100 shadow-inner">
-                <ShieldAlert size={40} strokeWidth={2} />
-              </div>
-              <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Profil Belum Lengkap!</h2>
-              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8">
-                Demi keamanan dan kenyamanan, mohon lengkapi <span className="font-bold text-slate-700">Nomor Handphone</span> dan <span className="font-bold text-slate-700">Email</span> Anda sebelum melanjutkan.
-              </p>
-              
               <button 
-                onClick={() => {
-                  setShowIncompleteProfileAlert(false);
-                  router.push('/profil');
-                }}
-                className="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-colors shadow-lg flex items-center justify-center gap-2"
+                onClick={() => setCartModal({ ...cartModal, isOpen: false })} 
+                className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"
               >
-                Lengkapi Profil Sekarang <ArrowRight size={18} />
+                <X size={16} strokeWidth={3} />
               </button>
+              
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-inner border ${
+                cartModal.type === 'success' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-rose-50 text-rose-500 border-rose-100'
+              }`}>
+                {cartModal.type === 'success' ? <CheckCircle2 size={40} /> : <AlertCircle size={40} />}
+              </div>
+
+              <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-2">{cartModal.title}</h2>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8">{cartModal.message}</p>
+              
+              {/* TOMBOL MODAL DISESUAIKAN DENGAN KONTEKS HAPUS ATAU TAMBAH */}
+              <div className="flex flex-col gap-3 w-full">
+                {cartModal.type === 'success' ? (
+                  cartModal.title === 'Berhasil Dihapus' ? (
+                    <button onClick={() => setCartModal({ ...cartModal, isOpen: false })} className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2">
+                      Tutup
+                    </button>
+                  ) : (
+                    <>
+                      <button onClick={() => { setCartModal({ ...cartModal, isOpen: false }); router.push('/cart'); }} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2">
+                        <ShoppingCart size={18}/> Lihat Keranjang
+                      </button>
+                      <button onClick={() => setCartModal({ ...cartModal, isOpen: false })} className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors">
+                        Lanjut Belanja
+                      </button>
+                    </>
+                  )
+                ) : (
+                  <button onClick={() => setCartModal({ ...cartModal, isOpen: false })} className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-lg shadow-slate-200 flex items-center justify-center gap-2">
+                    Tutup Peringatan
+                  </button>
+                )}
+              </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* OVERLAY ANIMASI LOGOUT FULL SCREEN */}
+      {/* MODAL PROFIL */}
+      <AnimatePresence>
+        {showIncompleteProfileAlert && (
+          <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden">
+              <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-6 border border-rose-100 shadow-inner"><ShieldAlert size={40} strokeWidth={2} /></div>
+              <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Profil Belum Lengkap!</h2>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8">Demi keamanan dan kenyamanan, mohon lengkapi <span className="font-bold text-slate-700">Nomor Handphone</span> dan <span className="font-bold text-slate-700">Email</span> Anda sebelum melanjutkan.</p>
+              <button onClick={() => { setShowIncompleteProfileAlert(false); router.push('/profil'); }} className="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-colors shadow-lg flex items-center justify-center gap-2">Lengkapi Profil Sekarang <ArrowRight size={18} /></button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL LOGOUT */}
       <AnimatePresence>
         {logoutState.isLoggingOut && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-            className="fixed inset-0 z-[9999] bg-white/60 backdrop-blur-2xl flex flex-col items-center justify-center p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-              className="bg-white/90 p-10 md:p-14 rounded-[2.5rem] shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden backdrop-blur-md"
-            >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] bg-white/60 backdrop-blur-2xl flex flex-col items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.8, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5, duration: 0.8 }} className="bg-white/90 p-10 md:p-14 rounded-[2.5rem] shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col items-center text-center max-w-sm w-full relative overflow-hidden backdrop-blur-md">
               <div className={`absolute top-0 w-full h-2 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
               <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-15 ${logoutState.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-
               <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-inner ${logoutState.type === 'success' ? 'bg-emerald-50 text-emerald-500 border border-emerald-100' : 'bg-rose-50 text-rose-500 border border-rose-100'}`}>
-                {logoutState.type === 'success' ? (
-                  <CheckCircle2 size={48} strokeWidth={2.5} />
-                ) : (
-                  <AlertCircle size={48} strokeWidth={2.5} />
-                )}
+                {logoutState.type === 'success' ? <CheckCircle2 size={48} strokeWidth={2.5} /> : <AlertCircle size={48} strokeWidth={2.5} />}
               </div>
-              
-              <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
-                {logoutState.type === 'success' ? 'Logout Berhasil' : 'Sesi Kedaluwarsa'}
-              </h2>
-              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8 px-2">
-                {logoutState.msg}
-              </p>
-              
-              <div className="flex items-center gap-3 text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest">
-                <Loader2 size={16} className="animate-spin" /> Memuat...
-              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{logoutState.type === 'success' ? 'Logout Berhasil' : 'Sesi Kedaluwarsa'}</h2>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8 px-2">{logoutState.msg}</p>
+              <div className="flex items-center gap-3 text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* OVERLAY MENU MOBILE */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden"
-          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden" />
         )}
       </AnimatePresence>
 
@@ -411,7 +460,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
               </div>
             </div>
-
             <div>
               <p className="px-3.5 mb-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Ruang Pembelajaran</p>
               <div className="space-y-1">
@@ -423,7 +471,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={Receipt} label="Riwayat Transaksi" href="/transactions" />
               </div>
             </div>
-
             <div>
               <p className="px-3.5 mb-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Reputasi & Jaringan</p>
               <div className="space-y-1">
@@ -431,7 +478,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={MessageSquare} label="Komunitas" href="/community" />
               </div>
             </div>
-
             <div>
               <p className="px-3.5 mb-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Pusat Informasi</p>
               <div className="space-y-1">
@@ -477,10 +523,9 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
             <div className="sm:hidden font-black text-slate-900 tracking-tight text-xl shrink-0">Amania</div>
           </div>
           
-          <div className="flex items-center gap-2 md:gap-6 shrink-0">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {/* MESIN PENCARI PINTAR */}
             <div className="relative group" ref={searchRef}>
-              
               <div className="hidden md:block">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                 <input 
@@ -506,24 +551,16 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 {showMobileSearchInput ? <X size={20} className="text-slate-800" /> : <Search size={20} />}
               </button>
 
-              {/* Mobile Search Input Overlay */}
               <AnimatePresence>
                 {showMobileSearchInput && (
                   <motion.div 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    exit={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                     className="absolute right-[-40px] sm:right-0 top-14 w-[calc(100vw-32px)] max-w-[340px] bg-white/95 backdrop-blur-xl p-3.5 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 z-50 md:hidden"
                   >
                     <div className="relative">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500" size={18} />
                       <input 
-                        id="mobile-search"
-                        type="text" 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleSearchEnter}
-                        placeholder="Ketik lalu Enter..." 
+                        id="mobile-search" type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearchEnter} placeholder="Ketik lalu Enter..." 
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-[13px] text-slate-800 font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none placeholder-slate-400 shadow-inner" 
                       />
                     </div>
@@ -677,13 +714,93 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                           <p className="text-[11px] mt-1.5 text-slate-400">Coba gunakan kata kunci yang lebih umum.</p>
                         </div>
                       )}
-
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
             
+            {/* 🔥 IKON & DROPDOWN KERANJANG BELANJA 🔥 */}
+            {userData && (
+              <div className="relative shrink-0" ref={cartRef}
+                   onMouseEnter={() => setShowCartDropdown(true)}
+                   onMouseLeave={() => setShowCartDropdown(false)}
+              >
+                <Link 
+                  href="/cart" 
+                  className="relative p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm rounded-xl transition-all duration-300 block"
+                >
+                  <ShoppingCart size={20} strokeWidth={2} />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0 right-0 w-4.5 h-4.5 bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-[2px] border-white translate-x-1/4 -translate-y-1/4 shadow-sm animate-in zoom-in duration-300">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Pop-up Dropdown Keranjang */}
+                <AnimatePresence>
+                  {showCartDropdown && cartCount > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+                      animate={{ opacity: 1, y: 0, scale: 1 }} 
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }} 
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-[-10px] sm:right-0 top-[55px] w-[calc(100vw-32px)] max-w-[340px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden z-50 origin-top-right flex flex-col"
+                    >
+                      <div className="bg-slate-50/50 px-5 py-3 border-b border-slate-100 flex justify-between items-center shrink-0">
+                        <h3 className="text-[11px] font-bold text-slate-800 uppercase tracking-widest flex items-center gap-1.5"><ShoppingBag size={14} className="text-indigo-500"/> Keranjang ({cartCount})</h3>
+                      </div>
+                      
+                      <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-2 flex-1">
+                        {cartItems.slice(0, 3).map((item) => (
+                          <div key={item.id} className="relative flex items-center p-2.5 hover:bg-slate-50 rounded-xl transition-colors group/citem">
+                            <Link href={`/e-products/${item.product.slug}`} className="flex items-center gap-3 flex-1 min-w-0 pr-10" onClick={() => setShowCartDropdown(false)}>
+                              <div className="w-12 h-[68px] overflow-hidden rounded-lg border border-slate-200 shrink-0 bg-slate-100 relative">
+                                 {item.product.cover_image ? (
+                                   <img src={`${STORAGE_URL}/${item.product.cover_image}`} alt={item.product.title} className="w-full h-full object-cover group-hover/citem:scale-110 transition-transform duration-500" />
+                                 ) : (
+                                   <div className="w-full h-full flex items-center justify-center"><FileText size={16} className="text-slate-300"/></div>
+                                 )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[11px] sm:text-xs font-bold text-slate-900 line-clamp-2 leading-snug group-hover/citem:text-indigo-600 transition-colors">{item.product.title}</p>
+                                <p className="text-[10px] sm:text-[11px] font-black text-indigo-600 mt-1">
+                                  {item.product.price === 0 ? 'GRATIS' : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product.price)}
+                                </p>
+                              </div>
+                            </Link>
+
+                            {/* 🔥 TOMBOL HAPUS - ADA DI LUAR TAG LINK AGAR TIDAK BENTROK 🔥 */}
+                            <button
+                              onClick={(e) => handleRemoveFromCart(e, item.id)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 w-[32px] h-[32px] flex items-center justify-center rounded-full bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-95 z-10 border border-rose-100 hover:border-rose-500"
+                              title="Hapus dari Keranjang"
+                            >
+                              <Trash2 size={16} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        ))}
+
+                        {/* Jika lebih dari 3 barang */}
+                        {cartCount > 3 && (
+                          <div className="text-center py-2.5 border-t border-slate-50 mt-1">
+                            <p className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit mx-auto">+{cartCount - 3} produk lainnya</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-3 border-t border-slate-100 bg-white shrink-0">
+                        <Link href="/cart" onClick={() => setShowCartDropdown(false)} className="flex w-full py-2.5 bg-slate-900 hover:bg-indigo-600 text-white justify-center items-center gap-2 rounded-xl text-[11px] font-bold transition-all shadow-md active:scale-95">
+                          <ShoppingCart size={14}/> Lihat Semua Keranjang
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
             {/* NOTIFIKASI BELL */}
             <div className="relative shrink-0" ref={notifRef}>
               <button 
@@ -702,7 +819,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 {showNotifications && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2 }}
-                    className="absolute right-[-10px] sm:right-0 top-[55px] w-[calc(100vw-32px)] max-w-[380px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 origin-top-right"
+                    className="absolute right-[-10px] sm:right-0 top-[55px] w-[calc(100vw-32px)] max-w-[380px] bg-white/95 backdrop-blur-xl border border-white/80 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden z-50 origin-top-right"
                   >
                     <div className="bg-slate-50/50 px-5 py-4 border-b border-slate-100 flex justify-between items-center">
                       <h3 className="text-[11px] font-bold text-slate-800 uppercase tracking-widest shrink-0">Pemberitahuan</h3>
@@ -789,7 +906,6 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
         initial={{ opacity: 0, scale: 0.5, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 1 }}
-        // 🔥 PENYESUAIAN PENTING DI SINI: bottom-24 untuk HP agar tidak bertabrakan dengan Mobile Sticky Bar
         className="fixed bottom-24 md:bottom-8 right-5 md:right-8 z-[99]"
       >
         <Link 
