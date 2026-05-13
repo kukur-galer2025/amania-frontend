@@ -270,7 +270,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
              {/* Sidebar Footer */}
              <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
-                  <BookOpen size={12}/> Hak Cipta Amania Nusantara Pro
+                  <BookOpen size={12}/> Hak Cipta Amania Nusantara
                 </p>
              </div>
            </div>
