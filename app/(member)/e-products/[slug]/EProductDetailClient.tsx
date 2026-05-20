@@ -108,16 +108,24 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ e_product_id: product.id })
       });
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch { json = { success: false, message: 'Terjadi kesalahan sistem.' }; }
       
+      toast.dismiss(tid);
+
       if (res.ok && json.success) {
-        toast.success('Berhasil dimasukkan ke Keranjang!', { id: tid });
-        window.dispatchEvent(new Event('cartUpdated')); 
+        window.dispatchEvent(new CustomEvent('showCartModal', {
+          detail: { type: 'success', title: 'Berhasil Masuk!', message: 'Produk telah ditambahkan ke keranjang belanja Anda.' }
+        }));
       } else {
-        toast.error(json.message || 'Gagal menambahkan ke keranjang.', { id: tid });
+        window.dispatchEvent(new CustomEvent('showCartModal', {
+          detail: { type: 'error', title: 'Pemberitahuan', message: json.message || 'Produk gagal dimasukkan.' }
+        }));
       }
     } catch (error) {
-      toast.error('Kesalahan jaringan.', { id: tid });
+      toast.dismiss(tid);
+      toast.error('Kesalahan jaringan.');
     } finally {
       setCartLoading(false);
     }
