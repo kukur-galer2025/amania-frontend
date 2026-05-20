@@ -385,11 +385,19 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
                 {/* Social Proof Badges */}
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-8">
-                  <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm shrink-0">
-                    <Star size={16} className="fill-amber-400 text-amber-400" />
-                    <span className="text-sm font-black text-slate-800">{avgRating > 0 ? avgRating.toFixed(1) : '5.0'}</span>
-                    <span className="text-xs font-bold text-slate-400">({totalReviews} Ulasan)</span>
-                  </div>
+                  {avgRating > 0 ? (
+                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm shrink-0">
+                      <Star size={16} className="fill-amber-400 text-amber-400" />
+                      <span className="text-sm font-black text-slate-800">{avgRating.toFixed(1)}</span>
+                      <span className="text-xs font-bold text-slate-400">({totalReviews} Ulasan)</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm shrink-0">
+                      <Star size={16} className="text-slate-300" />
+                      <span className="text-sm font-bold text-slate-500">Belum ada rating</span>
+                      <span className="text-xs font-medium text-slate-400">({totalReviews} Ulasan)</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm shrink-0">
                     <ShieldCheck size={16} className="text-emerald-500" />
                     <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Terverifikasi Original</span>

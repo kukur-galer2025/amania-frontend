@@ -487,10 +487,14 @@ export default function BerandaClient() {
                             {formatRupiah(product.price)}
                           </p>
 
-                          {avgRating > 0 && (
+                          {avgRating > 0 ? (
                             <div className="flex items-center gap-0.5 shrink-0 bg-white border border-slate-200 px-2 py-0.5 rounded-lg shadow-sm">
                               <Star size={10} className="fill-amber-400 text-amber-400" />
                               <span className="text-[10px] font-black text-slate-700">{avgRating.toFixed(1)}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-0.5 shrink-0 bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 rounded-lg">
+                              <span className="text-[9px] font-bold text-slate-400">Belum ada rating</span>
                             </div>
                           )}
                         </div>

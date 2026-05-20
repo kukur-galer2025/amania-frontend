@@ -412,10 +412,15 @@ export default function EProductsClient() {
                         </div>
 
                         {/* Rating badge top right */}
-                        {avg > 0 && (
+                        {avg > 0 ? (
                           <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg shadow-sm">
                             <Star size={12} className="fill-amber-400 text-amber-400" />
                             <span className="text-[11px] font-black text-amber-700">{avg.toFixed(1)}</span>
+                          </div>
+                        ) : (
+                          <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md px-2 py-1 rounded-lg shadow-sm border border-slate-100/50">
+                            <Star size={12} className="text-slate-300" />
+                            <span className="text-[10px] font-bold text-slate-500">Belum ada rating</span>
                           </div>
                         )}
 

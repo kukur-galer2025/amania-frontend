@@ -334,7 +334,7 @@ export default function CoursesClient() {
                       </div>
 
                       {/* Rating */}
-                      {(course.avg_rating > 0 || course.reviews_count > 0) && (
+                      {course.avg_rating > 0 ? (
                         <div className="flex items-center gap-2 mb-4">
                           <div className="flex items-center gap-0.5">
                             {[1, 2, 3, 4, 5].map(star => (
@@ -345,8 +345,13 @@ export default function CoursesClient() {
                               />
                             ))}
                           </div>
-                          <span className="text-xs font-black text-amber-600">{course.avg_rating || 0}</span>
+                          <span className="text-xs font-black text-amber-600">{parseFloat(course.avg_rating).toFixed(1)}</span>
                           <span className="text-[10px] text-slate-400 font-medium">({course.reviews_count || 0})</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 mb-4">
+                          <Star size={13} className="text-slate-350" />
+                          <span className="text-xs font-bold text-slate-500">Belum ada rating</span>
                         </div>
                       )}
 

@@ -354,7 +354,7 @@ export default function CourseDetailClient() {
 
               {/* Stats bar */}
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-                {(course.avg_rating > 0) && (
+                {course.avg_rating > 0 ? (
                   <>
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5">
@@ -362,7 +362,16 @@ export default function CourseDetailClient() {
                           <Star key={s} size={14} className={s <= Math.round(course.avg_rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'} />
                         ))}
                       </div>
-                      <span className="text-sm font-black text-amber-600">{course.avg_rating}</span>
+                      <span className="text-sm font-black text-amber-600">{parseFloat(course.avg_rating).toFixed(1)}</span>
+                      <span className="text-xs text-slate-400 font-medium">({course.reviews_count || 0})</span>
+                    </div>
+                    <div className="w-px h-5 bg-slate-200 hidden sm:block" />
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1.5">
+                      <Star size={14} className="text-slate-300" />
+                      <span className="text-sm font-bold text-slate-500">Belum ada rating</span>
                       <span className="text-xs text-slate-400 font-medium">({course.reviews_count || 0})</span>
                     </div>
                     <div className="w-px h-5 bg-slate-200 hidden sm:block" />
@@ -772,7 +781,15 @@ export default function CourseDetailClient() {
                   <div className="flex items-center gap-3 mt-2">
                     <span className="text-[10px] font-bold text-white/70 flex items-center gap-1"><BookOpen size={11} /> {(course.sections || []).length} Bab</span>
                     <span className="text-[10px] font-bold text-white/70 flex items-center gap-1"><Video size={11} /> {totalLessons} Lesson</span>
-                    {course.avg_rating > 0 && <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1"><Star size={11} className="fill-amber-300" /> {course.avg_rating}</span>}
+                    {course.avg_rating > 0 ? (
+                      <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
+                        <Star size={11} className="fill-amber-300" /> {parseFloat(course.avg_rating).toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-white/50 flex items-center gap-1">
+                        <Star size={11} /> Belum ada rating
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
