@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Search, Edit, Trash2, Image as ImageIcon, 
   FileText, CheckCircle2, XCircle, Loader2, PackageSearch, 
-  Eye, EyeOff, Layers, Info, User, AlertTriangle, CreditCard, SmartphoneNfc, Store, AlertCircle, ArrowUpRight
+  Eye, EyeOff, Layers, Info, User, AlertTriangle, CreditCard, SmartphoneNfc, Store, AlertCircle, ArrowUpRight,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -24,6 +25,10 @@ export default function AdminEProductsPage() {
   const [categories, setCategories] = useState<any[]>([]); 
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // State Modal Utama (Hanya untuk BIKIN BARU)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -163,6 +168,17 @@ export default function AdminEProductsPage() {
 
   const filteredProducts = products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const quillModules = {
     toolbar: [
       [{ 'header': [2, 3, false] }],
@@ -219,7 +235,7 @@ export default function AdminEProductsPage() {
               ) : filteredProducts.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-16 text-center text-slate-500"><PackageSearch size={48} className="mx-auto mb-4 text-slate-300" /><p className="font-bold text-slate-700 text-base">Katalog Kosong</p><p className="text-xs">Belum ada produk yang ditambahkan.</p></td></tr>
               ) : (
-                filteredProducts.map((product) => (
+                currentProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
@@ -265,6 +281,38 @@ export default function AdminEProductsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* ════ PAGINATION FOOTER ════ */}
+        {!loading && filteredProducts.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 bg-slate-50/50 px-6 py-4 gap-3">
+            <div className="hidden sm:block min-w-0">
+              <p className="text-xs text-slate-500 font-medium truncate w-full">
+                Menampilkan <span className="font-bold text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> hingga <span className="font-bold text-slate-900">{Math.min(currentPage * itemsPerPage, filteredProducts.length)}</span> dari <span className="font-bold text-slate-900">{filteredProducts.length}</span> produk digital
+              </p>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end shrink-0">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center rounded-lg bg-white px-4 py-2 text-xs font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm flex-1 sm:flex-none justify-center"
+              >
+                <ChevronLeft size={14} className="mr-1 text-slate-400" /> <span className="hidden sm:inline">Sebelumnya</span><span className="sm:hidden">Prev</span>
+              </button>
+              
+              <div className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-700 shadow-sm min-w-[70px] text-center">
+                 {currentPage} / {totalPages || 1}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="relative inline-flex items-center rounded-lg bg-white px-4 py-2 text-xs font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm flex-1 sm:flex-none justify-center"
+              >
+                <span className="hidden sm:inline">Selanjutnya</span><span className="sm:hidden">Next</span> <ChevronRight size={14} className="ml-1 text-slate-400" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ════ MODAL TAMBAH PRODUK (DRAFT SAJA) ════ */}

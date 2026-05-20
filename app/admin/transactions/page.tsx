@@ -290,8 +290,8 @@ export default function AdminTransactionsPage() {
                       <div className="text-xs md:text-sm font-semibold text-slate-900 truncate w-full" title={tx.user?.name}>{tx.user?.name}</div>
                     </td>
 
-                    <td className="px-4 md:px-6 py-3 md:py-4 min-w-0">
-                      <div className="text-xs md:text-sm font-bold text-slate-900 w-full truncate" title={tx.event?.title}>
+                    <td className="px-4 md:px-6 py-3 md:py-4 max-w-[200px] md:max-w-[250px] min-w-0">
+                      <div className="text-xs md:text-sm font-bold text-slate-900 truncate" title={tx.event?.title}>
                         {tx.event?.title}
                       </div>
                       <div className="text-[11px] md:text-sm font-black text-emerald-600 mt-0.5 md:mt-1 truncate w-full">
