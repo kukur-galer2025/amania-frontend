@@ -7,7 +7,8 @@ import {
   LayoutDashboard, Rocket, Users, FileText, 
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
-  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt
+  CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt,
+  GraduationCap, BookOpen, Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -26,6 +27,9 @@ const ADMIN_PAGES = [
   { id: 'p9a', title: 'Kategori E-Produk', link: '/admin/e-product-categories', icon: Layers }, 
   { id: 'p9b', title: 'Kelola E-Produk Premium', link: '/admin/e-products', icon: ShoppingCart },
   { id: 'p9c', title: 'Transaksi E-Produk', link: '/admin/e-product-transactions', icon: Receipt },
+  { id: 'p11a', title: 'Kategori Kursus', link: '/admin/course-categories', icon: Tag },
+  { id: 'p11b', title: 'Kelola Kursus Online', link: '/admin/courses', icon: GraduationCap },
+  { id: 'p11c', title: 'Transaksi Kursus', link: '/admin/course-transactions', icon: Receipt },
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
@@ -252,6 +256,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <NavItem icon={Layers} label="Kategori E-Produk" href="/admin/e-product-categories" />
                     <NavItem icon={ShoppingCart} label="Kelola E-Produk" href="/admin/e-products" />
                     <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />
+                  </div>
+                </div>
+                <div>
+                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-400">Kursus Online</p>
+                  <div className="space-y-0.5">
+                    <NavItem icon={Tag} label="Kategori Kursus" href="/admin/course-categories" />
+                    <NavItem icon={GraduationCap} label="Kelola Kursus" href="/admin/courses" />
+                    <NavItem icon={Receipt} label="Transaksi Kursus" href="/admin/course-transactions" />
                   </div>
                 </div>
                 <div>

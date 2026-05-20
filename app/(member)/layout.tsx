@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Newspaper, Sparkles, LogIn, Ticket,
   CalendarHeart, Info, Receipt, Settings2, Calendar, 
   CheckCircle2, AlertCircle, ArrowRight, Menu, X, Loader2, HelpCircle, ShoppingCart, FileText,
-  MonitorPlay, ShieldAlert, ShoppingBag, Trash2
+  MonitorPlay, ShieldAlert, ShoppingBag, Trash2, GraduationCap
 } from 'lucide-react';
 import { apiFetch } from '../utils/api'; 
 
@@ -18,10 +18,12 @@ const STATIC_PAGES = [
   { id: 'sp-1', title: 'Beranda / Dashboard', link: '/beranda', icon: Home },
   { id: 'sp-2', title: 'Webinar / Event', link: '/events', icon: MonitorPlay },
   { id: 'sp-2b', title: 'E-Produk Premium', link: '/e-products', icon: ShoppingCart },
+  { id: 'sp-2c', title: 'Kursus Online', link: '/courses', icon: GraduationCap },
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
   { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
   { id: 'sp-5', title: 'Event Saya', link: '/my-events', icon: CalendarHeart },
   { id: 'sp-5b', title: 'Koleksi E-Produk', link: '/my-e-products', icon: FileText },
+  { id: 'sp-5c', title: 'Kursus Saya', link: '/my-courses', icon: GraduationCap },
   { id: 'sp-6', title: 'Kalender Jadwal', link: '/calendar', icon: Calendar },
   { id: 'sp-7', title: 'Riwayat Transaksi', link: '/transactions', icon: Receipt },
   { id: 'sp-8', title: 'Papan Peringkat', link: '/leaderboard', icon: Trophy },
@@ -457,6 +459,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={Home} label="Beranda" href="/beranda" />
                 <NavLink icon={MonitorPlay} label="Webinar / Event" href="/events" />
                 <NavLink icon={ShoppingCart} label="E-Produk Premium" href="/e-products" />
+                <NavLink icon={GraduationCap} label="Kursus Online" href="/courses" />
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
               </div>
             </div>
@@ -466,6 +469,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 {userData && <NavLink icon={Ticket} label="Tiket Aktif" href="/dashboard/ticket" />}
                 <NavLink icon={CalendarHeart} label="Event Saya" href="/my-events" />
                 {userData && <NavLink icon={FileText} label="Koleksi E-Produk" href="/my-e-products" />}
+                {userData && <NavLink icon={GraduationCap} label="Kursus Saya" href="/my-courses" />}
                 <NavLink icon={Award} label="Sertifikat Kelulusan" href="/certificates" />
                 <NavLink icon={Calendar} label="Kalender" href="/calendar" />
                 <NavLink icon={Receipt} label="Riwayat Transaksi" href="/transactions" />

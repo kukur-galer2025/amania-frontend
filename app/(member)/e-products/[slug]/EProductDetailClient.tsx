@@ -256,7 +256,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
   const totalReviews = product?.reviews_count || reviews.length;
   const avgRating    = parseFloat(product?.reviews_avg_rating) || 0;
   const isFree       = product?.price === 0;
-  const originalPrice = product ? product.price * 10 : 0; 
+  const originalPrice = product ? product.price * 5 : 0; 
   
   // 🔥 UPDATE: Standarisasi nama Author & Avatar 🔥
   const authorName = !product?.author?.name || product?.author?.name.toLowerCase() === 'admin amania' 
@@ -567,7 +567,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                       {formatRupiah(originalPrice)}
                     </span>
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md">
-                      90% OFF
+                      80% OFF
                     </span>
                   </div>
                 )}
