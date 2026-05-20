@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Trophy, Loader2, Award, Search, Hash, BookOpen, ShoppingBag, Target, Crown, Star
+  Trophy, Loader2, Award, Search, Hash, BookOpen, ShoppingBag, Target, Crown, Star, GraduationCap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -13,7 +13,7 @@ export default function LeaderboardClient() {
   const [loading, setLoading] = useState(true);
   
   const [activeFilter, setActiveFilter] = useState<'all' | 'month' | 'week'>('all');
-  const [activeCategory, setActiveCategory] = useState<'all' | 'event' | 'eproduct'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'event' | 'eproduct' | 'course'>('all');
   
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -122,23 +122,24 @@ export default function LeaderboardClient() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="flex flex-col gap-4 pt-6 max-w-xl mx-auto">
             
             {/* Filter 1: Kategori Peringkat */}
-            <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] flex border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full relative z-20">
+            <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-[1.25rem] flex overflow-x-auto custom-scrollbar border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full relative z-20 gap-1 md:gap-0">
               {[
                 { id: 'all', label: 'Global', icon: Target, activeColor: 'text-indigo-700', activeBg: 'bg-indigo-50 border-indigo-100 shadow-indigo-500/10' },
                 { id: 'event', label: 'Event', icon: BookOpen, activeColor: 'text-blue-700', activeBg: 'bg-blue-50 border-blue-100 shadow-blue-500/10' },
-                { id: 'eproduct', label: 'E-Produk', icon: ShoppingBag, activeColor: 'text-emerald-700', activeBg: 'bg-emerald-50 border-emerald-100 shadow-emerald-500/10' }
+                { id: 'eproduct', label: 'E-Produk', icon: ShoppingBag, activeColor: 'text-emerald-700', activeBg: 'bg-emerald-50 border-emerald-100 shadow-emerald-500/10' },
+                { id: 'course', label: 'Kursus Online', icon: GraduationCap, activeColor: 'text-violet-700', activeBg: 'bg-violet-50 border-violet-100 shadow-violet-500/10' }
               ].map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id as any)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-2 md:px-4 py-3 rounded-xl text-[11px] md:text-sm font-bold transition-all duration-300 border ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 md:px-4 py-3 rounded-xl text-[11px] md:text-sm font-bold transition-all duration-300 border shrink-0 md:shrink ${
                     activeCategory === cat.id 
                       ? `${cat.activeColor} ${cat.activeBg} shadow-sm scale-100` 
                       : 'text-slate-500 border-transparent hover:bg-slate-100/50 hover:text-slate-800 scale-95 hover:scale-100'
                   }`}
                 >
                   <cat.icon size={16} className={activeCategory === cat.id ? '' : 'text-slate-400'} />
-                  <span className="truncate">{cat.label}</span>
+                  <span>{cat.label}</span>
                 </button>
               ))}
             </div>
@@ -195,7 +196,13 @@ export default function LeaderboardClient() {
                    <span>Peserta Amania</span>
                  </div>
                  <span className="hidden xs:block pr-2 text-right">
-                   {activeCategory === 'event' ? 'Total Event' : activeCategory === 'eproduct' ? 'Total E-Produk' : 'Total Pencapaian'}
+                   {activeCategory === 'event' 
+                     ? 'Total Event' 
+                     : activeCategory === 'eproduct' 
+                       ? 'Total E-Produk' 
+                       : activeCategory === 'course' 
+                         ? 'Total Kursus' 
+                         : 'Total Pencapaian'}
                  </span>
               </div>
 
@@ -211,6 +218,7 @@ export default function LeaderboardClient() {
                       
                       const eventCount = user.registrations_count || 0;
                       const eProductCount = user.e_products_count || 0;
+                      const courseCount = user.courses_count || 0;
 
                       return (
                         <div 
@@ -250,6 +258,11 @@ export default function LeaderboardClient() {
                                       <ShoppingBag size={10} /> {eProductCount} E-Produk
                                     </span>
                                   )}
+                                  {(activeCategory === 'all' || activeCategory === 'course') && courseCount > 0 && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 border border-violet-100 rounded text-[9px] font-bold text-violet-700">
+                                      <GraduationCap size={10} /> {courseCount} Kursus
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -271,6 +284,14 @@ export default function LeaderboardClient() {
                                 <span className="text-xs font-black">{eProductCount}</span>
                                 <span className="text-[9px] font-bold uppercase tracking-widest hidden sm:inline">E-Produk</span>
                                 <ShoppingBag size={14} className="sm:hidden" />
+                              </div>
+                            )}
+
+                            {(activeCategory === 'all' || activeCategory === 'course') && courseCount > 0 && (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 border border-violet-100 shadow-sm text-violet-700 transition-transform hover:-translate-y-0.5">
+                                <span className="text-xs font-black">{courseCount}</span>
+                                <span className="text-[9px] font-bold uppercase tracking-widest hidden sm:inline">Kursus</span>
+                                <GraduationCap size={14} className="sm:hidden" />
                               </div>
                             )}
                             
