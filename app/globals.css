@@ -1,8 +1,32 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════
+   TAILWIND v4: Class-based dark mode variant
+   ═══════════════════════════════════════════════════════ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES
+   ═══════════════════════════════════════════════════════ */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --muted: #64748b;
+}
+
+.dark {
+  --background: #0B1120;
+  --foreground: #e2e8f0;
+  --card-bg: #111827;
+  --card-border: rgba(51, 65, 85, 0.5);
+  --input-bg: #1e293b;
+  --input-border: #334155;
+  --muted: #94a3b8;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -12,26 +36,135 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Matikan tombol mata bawaan Edge/IE */
+/* ═══════════════════════════════════════════════════════
+   DARK MODE: Form Elements (Global)
+   These rarely have dark: variants so it's safe to override
+   ═══════════════════════════════════════════════════════ */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+.dark textarea,
+.dark select {
+  background-color: var(--input-bg);
+  color: var(--foreground);
+  border-color: var(--input-border);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #6366f1;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE: Scrollbar
+   ═══════════════════════════════════════════════════════ */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE: Rich Text Content (Quill Editor / HTML)
+   ═══════════════════════════════════════════════════════ */
+.dark .q-content,
+.dark .q-content p,
+.dark .q-content span,
+.dark .q-content li,
+.dark .html-content,
+.dark .html-content p,
+.dark .html-content span,
+.dark .html-content li {
+  color: #cbd5e1 !important;
+}
+
+.dark .q-content h1,
+.dark .q-content h2,
+.dark .q-content h3,
+.dark .q-content h4,
+.dark .html-content h1,
+.dark .html-content h2,
+.dark .html-content h3,
+.dark .html-content h4 {
+  color: #f1f5f9 !important;
+}
+
+.dark .q-content strong,
+.dark .q-content b,
+.dark .html-content strong,
+.dark .html-content b {
+  color: #e2e8f0 !important;
+}
+
+.dark .q-content blockquote,
+.dark .html-content blockquote {
+  border-left-color: #6366f1 !important;
+  background-color: rgba(99, 102, 241, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+.dark .q-content pre,
+.dark .html-content pre {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+.dark .q-content code,
+.dark .html-content code {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+  color: #c7d2fe !important;
+}
+
+.dark .q-content a,
+.dark .html-content a {
+  color: #818cf8 !important;
+}
+.dark .q-content a:hover,
+.dark .html-content a:hover {
+  color: #a5b4fc !important;
+}
+
+.dark .q-content img,
+.dark .html-content img {
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE: Selection
+   ═══════════════════════════════════════════════════════ */
+.dark ::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #e2e8f0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Hide browser password reveal buttons
+   ═══════════════════════════════════════════════════════ */
 input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
-
-/* Matikan tombol mata bawaan Chrome (jika ada di versi tertentu) */
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button {
   visibility: hidden;
@@ -39,11 +172,28 @@ input::-webkit-credentials-auto-fill-button {
   pointer-events: none;
 }
 
-/* Scrollbar hide utility for horizontal scroll containers */
+/* ═══════════════════════════════════════════════════════
+   Scrollbar hide utility
+   ═══════════════════════════════════════════════════════ */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Custom scrollbar for light mode */
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ═══════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════ */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }
