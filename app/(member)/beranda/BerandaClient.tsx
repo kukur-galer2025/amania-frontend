@@ -90,8 +90,8 @@ export default function BerandaClient() {
  </div>
  {/* Neon overlays */}
  <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/95 to-indigo-950/40"/>
- <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-indigo-50 dark:bg-indigo-500/20 blur-[150px] rounded-full pointer-events-none"/>
- <div className="absolute -bottom-45 -left-45 w-[500px] h-[500px] bg-amber-50 dark:bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"/>
+ <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-indigo-500/20 dark:bg-indigo-500/20 blur-[150px] rounded-full pointer-events-none"/>
+ <div className="absolute -bottom-45 -left-45 w-[500px] h-[500px] bg-amber-500/10 dark:bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"/>
 
  <div className="relative z-10 px-6 py-16 md:py-24 md:px-16 lg:px-20 max-w-4xl w-full">
  <motion.div
@@ -588,8 +588,8 @@ export default function BerandaClient() {
  {/* 7. CTA KOMUNITAS */}
  <section className="px-4 sm:px-6 lg:px-8 pb-12 pt-8 max-w-7xl mx-auto w-full min-w-0 relative z-10">
  <div className="bg-slate-950 rounded-[3rem] p-10 md:p-16 relative overflow-hidden shadow-2xl dark:shadow-black/25 flex flex-col lg:flex-row items-center justify-between gap-10 border border-slate-900 w-full min-w-0">
- <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50 dark:bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none animate-pulse"/>
- <div className="absolute bottom-0 left-0 w-85 h-85 bg-amber-50 dark:bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"/>
+ <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/20 dark:bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none animate-pulse"/>
+ <div className="absolute bottom-0 left-0 w-85 h-85 bg-amber-500/10 dark:bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"/>
 
  <div className="relative z-10 text-center lg:text-left max-w-2xl space-y-4 min-w-0 w-full">
  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800/30 backdrop-blur-md rounded-xl text-amber-300 text-xs font-black tracking-wider uppercase">
