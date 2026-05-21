@@ -45,6 +45,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
  // 🌙 DARK MODE STATE
  const [isDarkMode, setIsDarkMode] = useState(false);
+ const [showDarkModeModal, setShowDarkModeModal] = useState(false);
 
  // STATE NOTIFIKASI
  const [showNotifications, setShowNotifications] = useState(false);
@@ -438,8 +439,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <aside className={`fixed top-0 left-0 h-screen w-[270px] bg-white dark:bg-slate-800/70 dark:bg-slate-900/90 backdrop-blur-2xl border-r border-white dark:border-slate-700/50 flex flex-col z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.3)]' : '-translate-x-full'}`}>
  <div className="h-[72px] px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-700/40 dark:border-slate-800 shrink-0 bg-transparent">
  <Link href="/beranda" className="flex items-center gap-3 group">
- <img src="/logo-amania.png" alt="Logo Amania" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300"/>
- <span className="text-[22px] font-black tracking-tight text-slate-900 dark:text-slate-100 dark:text-white mt-1">Amania</span>
+ <img src="/logo-amania.png" alt="Logo Amania" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300 dark:brightness-0 dark:invert"/>
  </Link>
  <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 lg:hidden text-slate-400 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg">
  <X size={20} />
@@ -510,8 +510,23 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <div>
  <p className="px-3.5 mb-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Pusat Informasi</p>
  <div className="space-y-1">
- <NavLink icon={Info} label="Tentang Amania" href="/tentang-kami"/>
- <NavLink icon={HelpCircle} label="Pusat Bantuan & FAQ" href="/support"/>
+  <NavLink icon={Info} label="Tentang Amania" href="/tentang-kami"/>
+  <NavLink icon={HelpCircle} label="Pusat Bantuan & FAQ" href="/support"/>
+  
+  {/* Info Dark Mode Mobile Only */}
+  <button 
+  onClick={() => { setIsMobileMenuOpen(false); setShowDarkModeModal(true); }}
+  className="md:hidden w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-indigo-600 dark:hover:text-white"
+  >
+  <div className="relative">
+  <Info size={18} className="text-amber-500" />
+  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+  </span>
+  </div>
+  Info Dark Mode Beta
+  </button>
  </div>
  </div>
  </nav>
@@ -549,10 +564,24 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  </span>
  </div>
  {/* Logo Mobile Only */}
- <div className="sm:hidden font-black text-slate-900 dark:text-slate-100 dark:text-white tracking-tight text-xl shrink-0">Amania</div>
+ <Link href="/beranda" className="sm:hidden shrink-0 block">
+ <img src="/logo-amania.png" alt="Amania" className="h-7 w-auto object-contain dark:brightness-0 dark:invert"/>
+ </Link>
  </div>
  
- <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+  <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+  {/* INFO DARK MODE (Desktop Only) */}
+  <button 
+  onClick={() => setShowDarkModeModal(true)}
+  className="relative hidden md:flex items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-200 dark:border-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors shrink-0"
+  >
+  <Info size={16} className="animate-pulse" />
+  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wider hidden sm:block">Info</span>
+  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+  </span>
+  </button>
  {/* 🌙 DARK MODE TOGGLE */}
  <button
  onClick={toggleDarkMode}
@@ -944,7 +973,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <div className="max-w-[1400px] mx-auto px-5 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
  <div className="flex flex-col items-center md:items-start gap-3.5">
  <div className="flex items-center gap-3">
- <img src="/logo-amania.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300"/>
+ <img src="/logo-amania.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert"/>
  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Amania.id</span>
  </div>
  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center md:text-left max-w-sm leading-relaxed">
@@ -988,15 +1017,41 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
  </svg>
  </motion.div>
-
- <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-transform duration-300 pointer-events-none translate-x-2 group-hover:translate-x-0 hidden sm:block">
- <div className="bg-white dark:bg-slate-800/90 backdrop-blur-md text-slate-800 dark:text-slate-200 text-[11px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.4)] whitespace-nowrap border border-slate-200 dark:border-slate-700/50">
- Hubungi Amania
- <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 border-y-4 border-y-transparent border-l-4 border-l-white/90 backdrop-blur-md"></div>
- </div>
- </div>
  </Link>
  </motion.div>
+
+  {/* DARK MODE INFO MODAL */}
+  <AnimatePresence>
+  {showDarkModeModal && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+  <motion.div 
+  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+  className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+  onClick={() => setShowDarkModeModal(false)}
+  />
+  <motion.div 
+  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+  animate={{ opacity: 1, scale: 1, y: 0 }}
+  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+  className="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl relative z-10 text-center border border-slate-100 dark:border-slate-700/50"
+  >
+  <div className="w-16 h-16 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-amber-100 dark:border-amber-500/20">
+  <Info size={28} className="text-amber-500" />
+  </div>
+  <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Dark Mode Beta</h3>
+  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+  Fitur <strong>Dark Mode</strong> saat ini sedang dalam tahap pengembangan. Jika Anda menemukan warna yang kurang kontras di beberapa halaman, mohon dimaklumi ya! 🛠️
+  </p>
+  <button 
+  onClick={() => setShowDarkModeModal(false)}
+  className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl font-bold transition-colors"
+  >
+  Mengerti
+  </button>
+  </motion.div>
+  </div>
+  )}
+  </AnimatePresence>
 
  <style jsx global>{`
  .custom-scrollbar::-webkit-scrollbar { width: 5px; }

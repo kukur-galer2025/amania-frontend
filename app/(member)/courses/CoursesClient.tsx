@@ -64,14 +64,14 @@ export default function CoursesClient() {
  }
  };
 
- const getLevelColor = (lvl: string) => {
- switch (lvl) {
- case 'beginner': return 'bg-emerald-50 dark:bg-emerald-500/90 text-white';
- case 'intermediate': return 'bg-amber-50 dark:bg-amber-500/90 text-white';
- case 'advanced': return 'bg-rose-50 dark:bg-rose-500/90 text-white';
- default: return 'bg-slate-50 dark:bg-[#0B1120]0/90 text-white';
- }
- };
+  const getLevelColor = (lvl: string) => {
+  switch (lvl) {
+  case 'beginner': return 'bg-emerald-500 dark:bg-emerald-500/90 text-white';
+  case 'intermediate': return 'bg-amber-500 dark:bg-amber-500/90 text-white';
+  case 'advanced': return 'bg-rose-500 dark:bg-rose-500/90 text-white';
+  default: return 'bg-slate-700 dark:bg-[#0B1120]/90 text-white';
+  }
+  };
 
  const filteredCourses = courses.filter(c => {
  const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,7 +96,7 @@ export default function CoursesClient() {
  }} />
  
  {/* Ambient Glow Orbs */}
- <div className="absolute top-[-30%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-50 dark:bg-emerald-500/20 blur-[120px]"/>
+ <div className="absolute top-[-30%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-500/20 dark:bg-emerald-500/20 blur-[120px]"/>
  <div className="absolute bottom-[-40%] left-[-5%] w-[400px] h-[400px] rounded-full bg-teal-400/15 blur-[100px]"/>
  <div className="absolute top-[50%] left-[30%] w-[300px] h-[300px] rounded-full bg-cyan-500/10 blur-[80px]"/>
 
@@ -280,10 +280,10 @@ export default function CoursesClient() {
  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
  
  {/* Play button overlay */}
- <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-transform duration-500">
- <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-800/20 backdrop-blur-md border border-white dark:border-slate-700/30 flex items-center justify-center shadow-2xl dark:shadow-black/25 group-hover:scale-100 scale-75 transition-transform duration-500">
- <PlayCircle size={28} className="text-white ml-0.5"/>
- </div>
+  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-transform duration-500">
+  <div className="w-14 h-14 rounded-full bg-white/30 dark:bg-slate-800/20 backdrop-blur-md border border-white/50 dark:border-slate-700/30 flex items-center justify-center shadow-2xl dark:shadow-black/25 group-hover:scale-100 scale-75 transition-transform duration-500">
+  <PlayCircle size={28} className="text-white ml-0.5"/>
+  </div>
  </div>
 
  {/* Top badges */}
@@ -294,9 +294,9 @@ export default function CoursesClient() {
  </span>
  
  {/* Price badge */}
- {course.price === 0 ? (
- <span className="px-3 py-1.5 rounded-lg text-xs font-black shadow-lg dark:shadow-black/20 backdrop-blur-md bg-emerald-50 dark:bg-emerald-500/90 text-white">
- GRATIS
+  {course.price === 0 ? (
+  <span className="px-3 py-1.5 rounded-lg text-xs font-black shadow-lg dark:shadow-black/20 backdrop-blur-md bg-emerald-500 dark:bg-emerald-500/90 text-white">
+  GRATIS
  </span>
  ) : (
  <div className="flex flex-col items-end gap-0.5">

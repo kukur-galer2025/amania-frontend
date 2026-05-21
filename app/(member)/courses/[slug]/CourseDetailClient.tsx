@@ -315,10 +315,16 @@ export default function CourseDetailClient() {
  backdrop-filter: blur(20px);
  -webkit-backdrop-filter: blur(20px);
  }
+ .dark .glass-card {
+ background: rgba(30,41,59,0.7);
+ }
  .glass-card-strong {
  background: rgba(255,255,255,0.85);
  backdrop-filter: blur(24px);
  -webkit-backdrop-filter: blur(24px);
+ }
+ .dark .glass-card-strong {
+ background: rgba(15,23,42,0.85);
  }
  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -520,7 +526,7 @@ export default function CourseDetailClient() {
  <div key={section.id} className="border border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden hover:border-emerald-200/60 group/section">
  <button
  onClick={() => toggleSection(section.id)}
- className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4 bg-gradient-to-r from-slate-50/80 to-white hover:from-emerald-50/30 hover:to-white transition-transform text-left"
+ className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4 bg-gradient-to-r from-slate-50/80 to-white dark:from-slate-800/80 dark:to-slate-900/80 hover:from-emerald-50/30 hover:to-white dark:hover:from-slate-700/80 dark:hover:to-slate-800/80 transition-transform text-left"
  >
  <div className="flex items-center gap-3 min-w-0">
  <span className={`w-7 h-7 rounded-lg bg-gradient-to-br ${getLevelGradient(course.level)} text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-sm dark:shadow-black/10`}>{sIdx + 1}</span>
@@ -537,10 +543,10 @@ export default function CourseDetailClient() {
  <AnimatePresence>
  {expandedSections.has(section.id) && (
  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: 'easeInOut' }} className="overflow-hidden">
- <div className="divide-y divide-slate-100 dark:divide-slate-700/30 bg-white dark:bg-slate-800/300 dark:bg-slate-800">
+ <div className="divide-y divide-slate-100 dark:divide-slate-700/50 bg-white dark:bg-slate-800">
  {(section.lessons || []).map((lesson: any, lIdx: number) => (
  <motion.div key={lesson.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: lIdx * 0.04 }}
- className="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-emerald-50 dark:bg-emerald-500/10/30 group/lesson">
+ className="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-emerald-50 dark:hover:bg-slate-700/50 group/lesson">
  <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
  {lesson.is_preview ? (
  <PlayCircle size={17} className="text-emerald-500 group-hover/lesson:scale-110 transition-transform"/>
@@ -591,7 +597,7 @@ export default function CourseDetailClient() {
  </div>
 
  {/* Rating Summary - ENHANCED */}
- <div className="flex flex-col sm:flex-row items-center gap-5 mb-6 md:mb-8 p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/60 to-amber-50/80 rounded-2xl border border-amber-100 dark:border-amber-800/60 shadow-inner">
+ <div className="flex flex-col sm:flex-row items-center gap-5 mb-6 md:mb-8 p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/60 to-amber-50/80 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/80 rounded-2xl border border-amber-100 dark:border-slate-700/50 shadow-inner">
  <div className="text-center shrink-0">
  <p className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-amber-500 to-orange-500 leading-none">{course.avg_rating || '0'}</p>
  <div className="flex items-center gap-0.5 mt-2 justify-center">
@@ -623,7 +629,7 @@ export default function CourseDetailClient() {
 
  {/* Review Form (for enrolled users) */}
  {isEnrolled && (
- <div className="mb-6 md:mb-8 p-4 sm:p-5 bg-gradient-to-br from-slate-50/80 to-white rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-inner">
+ <div className="mb-6 md:mb-8 p-4 sm:p-5 bg-gradient-to-br from-slate-50/80 to-white dark:from-slate-800/80 dark:to-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-inner">
  <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
  <Star size={14} className="text-amber-400 fill-amber-400"/>
  {course.user_review ? 'Update Ulasan Anda' : 'Beri Rating & Ulasan'}
@@ -673,7 +679,7 @@ export default function CourseDetailClient() {
  ))}
  </div>
  ) : (
- <div className="text-center py-10 bg-gradient-to-br from-slate-50/80 to-white rounded-2xl border border-slate-200 dark:border-slate-700/50 border-dashed">
+ <div className="text-center py-10 bg-gradient-to-br from-slate-50/80 to-white dark:from-slate-800/80 dark:to-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-700/50 border-dashed">
  <div className="w-14 h-14 mx-auto mb-3 bg-gradient-to-br from-slate-100 to-slate-50 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700/50">
  <ThumbsUp size={24} className="text-slate-300 dark:text-slate-500"/>
  </div>
@@ -694,7 +700,7 @@ export default function CourseDetailClient() {
  {/* Animated accent line */}
  <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 animate-gradient-shift"/>
 
- <div className="p-5 sm:p-6 md:p-8 relative z-10 bg-gradient-to-b from-white/90 to-slate-50/90">
+ <div className="p-5 sm:p-6 md:p-8 relative z-10 bg-gradient-to-b from-white/90 to-slate-50/90 dark:from-slate-800/90 dark:to-slate-900/90">
  {/* Ownership indicator */}
  {isEnrolled ? (
  <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-black/10">
@@ -748,7 +754,7 @@ export default function CourseDetailClient() {
  </div>
 
  {/* Benefits - ENHANCED */}
- <div className="border-t border-slate-100 dark:border-slate-700/50/80 p-5 sm:p-6 md:p-7 flex flex-col gap-3.5 w-full relative z-10 bg-gradient-to-b from-slate-50/50 to-white/50">
+ <div className="border-t border-slate-100 dark:border-slate-700/50 p-5 sm:p-6 md:p-7 flex flex-col gap-3.5 w-full relative z-10 bg-gradient-to-b from-slate-50/50 to-white/50 dark:from-slate-800/50 dark:to-slate-900/50">
  {BENEFITS.map((b, idx) => (
  <motion.div key={b.label} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + idx * 0.08 }}
  className="flex gap-3 w-full min-w-0 items-start group/benefit hover:bg-white/5 dark:hover:bg-slate-700/500 dark:hover:bg-slate-800/50 p-2 -m-2 rounded-xl">
