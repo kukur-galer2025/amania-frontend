@@ -57,10 +57,10 @@ export default function AdminDashboardPage() {
   }
 
   const STAT_CARDS = [
-    { title: 'Total Pendapatan', value: `Rp ${stats.total_pendapatan.toLocaleString('id-ID')}`, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-    { title: 'Total Peserta', value: stats.total_peserta.toLocaleString('id-ID'), icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-    { title: 'Tiket Terjual', value: stats.tiket_terjual.toLocaleString('id-ID'), icon: Ticket, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { title: 'Menunggu Verifikasi', value: stats.menunggu_verifikasi.toLocaleString('id-ID'), icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+    { title: 'Total Pendapatan', value: `Rp ${Number(stats.total_pendapatan).toLocaleString('id-ID')}`, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { title: 'Total Peserta', value: Number(stats.total_peserta).toLocaleString('id-ID'), icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+    { title: 'Tiket Terjual', value: Number(stats.tiket_terjual).toLocaleString('id-ID'), icon: Ticket, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { title: 'Menunggu Verifikasi', value: Number(stats.menunggu_verifikasi).toLocaleString('id-ID'), icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
   ];
 
   return (
