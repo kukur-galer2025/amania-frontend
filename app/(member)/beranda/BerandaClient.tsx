@@ -98,7 +98,7 @@ export default function BerandaClient() {
  initial={{ opacity: 0, y: 15 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.5 }}
- className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800/30 backdrop-blur-xl border border-slate-200/30 dark:border-slate-700/20 rounded-full text-amber-300 text-xs font-black tracking-wider uppercase mb-6 shadow-xl dark:shadow-black/20 shrink-0"
+ className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full text-amber-300 text-xs font-black tracking-wider uppercase mb-6 shadow-xl shrink-0"
  >
  <Sparkles size={14} className="text-amber-400 animate-pulse"/>
  <span>Pusat Pembelajaran Interaktif Amania</span>
@@ -154,7 +154,7 @@ export default function BerandaClient() {
  <PlayCircle size={20} className="shrink-0"/>
  <span>Lanjutkan Belajar</span>
  </Link>
- <Link href="/events" className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800/30 backdrop-blur-md border border-slate-200/30 dark:border-slate-700/20 hover:bg-white dark:hover:bg-slate-700 dark:bg-slate-800/20 text-white rounded-2xl font-bold transition-transform shadow-sm dark:shadow-black/10 flex items-center justify-center gap-2 hover:scale-105 shrink-0">
+ <Link href="/events" className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white rounded-2xl font-bold transition-transform shadow-sm flex items-center justify-center gap-2 hover:scale-105 shrink-0">
  <span>Eksplorasi Katalog</span>
  <ArrowRight size={18} />
  </Link>
@@ -592,7 +592,7 @@ export default function BerandaClient() {
  <div className="absolute bottom-0 left-0 w-85 h-85 bg-amber-500/10 dark:bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"/>
 
  <div className="relative z-10 text-center lg:text-left max-w-2xl space-y-4 min-w-0 w-full">
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800/30 backdrop-blur-md rounded-xl text-amber-300 text-xs font-black tracking-wider uppercase">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-amber-300 text-xs font-black tracking-wider uppercase">
  <Users size={12} className="text-amber-400"/>
  <span>Amania Exclusive Community</span>
  </div>
