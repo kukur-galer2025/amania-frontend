@@ -168,12 +168,12 @@ export default function BerandaClient() {
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
 
  <Link href="/dashboard/ticket" className="group bg-gradient-to-br from-indigo-700 to-violet-900 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl dark:shadow-black/25 shadow-indigo-900/10 hover:shadow-indigo-500/20 hover:-translate-y-1.5 transition-transform duration-300 w-full border border-indigo-600/30">
- <div className="absolute top-0 right-0 w-36 h-36 bg-white dark:bg-slate-800/30 rounded-full blur-[40px] transition-transform duration-500 group-hover:scale-150"></div>
+ <div className="absolute top-0 right-0 w-36 h-36 bg-white/20 dark:bg-white/10 rounded-full blur-[40px] transition-transform duration-500 group-hover:scale-150"></div>
  <div className="relative z-10 flex items-center justify-between text-white mb-8 w-full">
  <div className="w-14 h-14 bg-white dark:bg-slate-800/15 backdrop-blur-md rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
  <Ticket size={28} className="text-amber-300"/>
  </div>
- <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800/30 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20">
+ <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center border border-white/30 dark:border-white/10">
  <ArrowRight size={18} className="text-white opacity-80 group-hover:opacity-100 group-hover:translate-x-1.5 transition-transform shrink-0"/>
  </div>
  </div>
@@ -184,12 +184,12 @@ export default function BerandaClient() {
  </Link>
 
  <Link href="/transactions" className="group bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl dark:shadow-black/25 shadow-emerald-900/10 hover:shadow-emerald-500/20 hover:-translate-y-1.5 transition-transform duration-300 w-full border border-emerald-500/30">
- <div className="absolute bottom-0 right-0 w-36 h-36 bg-white dark:bg-slate-800/30 rounded-full blur-[40px] transition-transform duration-500 group-hover:scale-150"></div>
+ <div className="absolute bottom-0 right-0 w-36 h-36 bg-white/20 dark:bg-white/10 rounded-full blur-[40px] transition-transform duration-500 group-hover:scale-150"></div>
  <div className="relative z-10 flex items-center justify-between text-white mb-8 w-full">
  <div className="w-14 h-14 bg-white dark:bg-slate-800/15 backdrop-blur-md rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
  <Receipt size={28} className="text-emerald-300"/>
  </div>
- <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800/30 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20">
+ <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center border border-white/30 dark:border-white/10">
  <ArrowRight size={18} className="text-white opacity-80 group-hover:opacity-100 group-hover:translate-x-1.5 transition-transform shrink-0"/>
  </div>
  </div>

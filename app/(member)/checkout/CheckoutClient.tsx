@@ -372,7 +372,7 @@ export default function CheckoutClient() {
  onClick={() => setTicketType('free')}
  className={`relative p-4 md:p-5 rounded-xl border-2 cursor-pointer transition-transform duration-300 flex flex-col h-full min-w-0 w-full ${
  ticketType === 'free' 
- ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10/30 shadow-sm dark:shadow-black/10' 
+ ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm dark:shadow-black/10' 
  : 'border-slate-200 dark:border-slate-700/50 bg-white dark:bg-[#111827] hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600'
  }`}
  >
@@ -409,7 +409,7 @@ export default function CheckoutClient() {
  event.premium_price === 0 || !event.premium_price 
  ? 'opacity-50 cursor-not-allowed border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-[#111827]'
  : ticketType === 'premium' 
- ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10/20 shadow-sm dark:shadow-black/10 cursor-pointer' 
+ ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 shadow-sm dark:shadow-black/10 cursor-pointer' 
  : 'border-slate-200 dark:border-slate-700/50 bg-white dark:bg-[#111827] hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 cursor-pointer'
  }`}
  >
@@ -569,7 +569,7 @@ export default function CheckoutClient() {
  onClick={() => fileRef.current?.click()} 
  className={`w-full h-32 md:h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-transform overflow-hidden relative group min-w-0 
  ${proofError ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 shadow-[0_0_15px_rgba(244,63,94,0.2)]' 
- : proofPreview ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10/10' : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-[#111827] hover:bg-indigo-50 dark:hover:bg-indigo-50 dark:bg-indigo-500/10/50 hover:border-indigo-400'}`}
+ : proofPreview ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-[#111827] hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:border-indigo-400'}`}
  >
  {proofPreview ? (
  <>
@@ -580,7 +580,7 @@ export default function CheckoutClient() {
  </>
  ) : (
  <div className="text-center p-4 w-full min-w-0">
- <div className={`w-8 h-8 md:w-10 md:h-10 bg-white dark:bg-[#111827] border rounded-full flex items-center justify-center shadow-sm dark:shadow-black/10 mx-auto mb-2 md:mb-3 shrink-0 ${proofError ? 'border-rose-200 text-rose-500' : 'border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 group-hover:text-indigo-600 dark:text-indigo-400'}`}>
+ <div className={`w-8 h-8 md:w-10 md:h-10 bg-white dark:bg-[#111827] border rounded-full flex items-center justify-center shadow-sm dark:shadow-black/10 mx-auto mb-2 md:mb-3 shrink-0 ${proofError ? 'border-rose-200 text-rose-500' : 'border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`}>
  <UploadCloud size={18} className="md:w-5 md:h-5 shrink-0"/>
  </div>
  <p className={`text-[11px] md:text-xs font-semibold mb-1 break-words w-full ${proofError ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}`}> Klik untuk memilih file</p>
@@ -670,7 +670,7 @@ export default function CheckoutClient() {
  </div>
 
  {/* CHECKBOX KONFIRMASI PROFIL */}
- <label className="flex items-start gap-2.5 mb-4 p-3 md:p-4 border border-indigo-100 dark:border-indigo-500/20 rounded-xl bg-indigo-50 dark:bg-indigo-500/10/30 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-50 dark:bg-indigo-500/10/60 w-full min-w-0">
+ <label className="flex items-start gap-2.5 mb-4 p-3 md:p-4 border border-indigo-100 dark:border-indigo-500/20 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/20 w-full min-w-0">
  <div className="relative flex items-center justify-center shrink-0 mt-0.5">
  <input
  type="checkbox"

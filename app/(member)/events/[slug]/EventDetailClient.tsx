@@ -662,7 +662,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  onClick={() => setSelectedTier('basic')}
  className={`w-full p-4 sm:p-5 rounded-2xl border-2 transition-transform flex justify-between items-center text-left ${
  selectedTier === 'basic'
- ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10/50 shadow-md dark:shadow-black/15 shadow-indigo-500/10'
+ ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 shadow-md dark:shadow-black/15 shadow-indigo-500/10'
  : 'border-slate-100 dark:border-slate-700/50 bg-white dark:bg-[#111827] hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 opacity-70'
  }`}
  >
@@ -684,7 +684,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  onClick={() => setSelectedTier('premium')}
  className={`w-full p-4 sm:p-5 rounded-2xl border-2 transition-transform flex justify-between items-center text-left ${
  selectedTier === 'premium'
- ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10/50 shadow-md dark:shadow-black/15 shadow-amber-500/10'
+ ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 shadow-md dark:shadow-black/15 shadow-amber-500/10'
  : 'border-slate-100 dark:border-slate-700/50 bg-white dark:bg-[#111827] hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 opacity-70'
  }`}
  >
