@@ -461,7 +461,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
  className="glass-card-strong border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full md:w-max shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-black/20 overflow-hidden mx-auto md:mx-0 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] dark:hover:shadow-black/30 transition-shadow duration-300 group">
  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
  {authorName === 'Amania Official' ? (
- <img src="/logo-amania.png" alt="Amania Official" className="w-6 h-6 md:w-8 md:h-8 object-contain"/>
+ <img src="/logo-amania.png" alt="Amania Official" className="w-6 h-6 md:w-8 md:h-8 object-contain dark:invert"/>
  ) : product.author?.avatar ? (
  <img src={`${STORAGE_URL}/${product.author.avatar}`} alt="seller" className="w-full h-full object-cover"/>
  ) : (
@@ -473,7 +473,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
  <p className="text-sm md:text-base font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
  {authorName}
  {authorName === 'Amania Official' && (
- <img src="/logo-amania.png" alt="Amania" className="w-4 h-4 md:w-5 md:h-5 object-contain"/>
+ <BadgeCheck size={16} className="text-blue-500 shrink-0" />
  )}
  </p>
  </div>

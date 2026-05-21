@@ -97,7 +97,7 @@ export default function MyEventsClient() {
  className="w-full h-full object-cover opacity-20 mix-blend-luminosity scale-105"
  />
  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/70 to-slate-950/90"/>
- <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-50 dark:bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none"/>
+ <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/20 dark:bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none"/>
  </div>
 
  <div className="relative z-10 px-6 max-w-3xl mx-auto flex flex-col items-center w-full min-w-0">
@@ -207,7 +207,7 @@ export default function MyEventsClient() {
  {/* Lencana VIP / Basic */}
  <div className="absolute top-4 left-4 z-20">
  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-xl dark:shadow-black/20 backdrop-blur-md border ${
- reg.tier === 'premium' ? 'bg-amber-50 dark:bg-amber-500/90 text-white border-amber-400' : 'bg-white dark:bg-slate-800/95 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700/50'
+ reg.tier === 'premium' ? 'bg-amber-500 dark:bg-amber-500/90 text-white border-amber-400' : 'bg-white dark:bg-slate-800/95 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700/50'
  }`}>
  {reg.tier === 'premium' ? <Award size={12} className="shrink-0"/> : <Shield size={12} className="shrink-0 text-indigo-600 dark:text-indigo-400"/>}
  <span className="truncate">{reg.tier === 'premium' ? 'VIP Access' : 'Basic Pass'}</span>
@@ -222,14 +222,14 @@ export default function MyEventsClient() {
  <CheckCircle2 size={12} /> Selesai
  </span>
  ) : (
- <span className="bg-indigo-50 dark:bg-indigo-500 text-indigo-50 text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-indigo-400 flex items-center gap-1 shadow-xl dark:shadow-black/20 shadow-indigo-500/30">
+ <span className="bg-indigo-500 dark:bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-indigo-400 flex items-center gap-1 shadow-xl dark:shadow-black/20 shadow-indigo-500/30">
  <CheckCircle2 size={12} className="text-white"/> Kelas Aktif
  </span>
  )}
 
  {/* 🔥 BADGE HITUNG MUNDUR LUXURY 🔥 */}
  {timeLeft && !isPast && (
- <span className="bg-amber-50 dark:bg-amber-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-amber-400 flex items-center gap-1.5 shadow-xl dark:shadow-black/20">
+ <span className="bg-amber-500 dark:bg-amber-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-amber-400 flex items-center gap-1.5 shadow-xl dark:shadow-black/20">
  <Clock size={12} className="text-white shrink-0"/>
  {timeLeft}
  </span>
