@@ -169,14 +169,14 @@ export default function MyEProductsClient() {
 
  {/* Status Badges Overlays */}
  <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-20">
- <span className="bg-emerald-50 dark:bg-emerald-500/90 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md shadow-lg dark:shadow-black/20 flex items-center gap-1">
+ <span className="bg-emerald-500 dark:bg-emerald-500/90 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md shadow-lg dark:shadow-black/20 flex items-center gap-1">
  <CheckCircle2 size={10} strokeWidth={3} /> Lunas
  </span>
  </div>
  
  {/* Tipe Dokumen */}
  <div className="absolute bottom-2 left-2 z-20">
- <span className="bg-white dark:bg-slate-800/20 backdrop-blur-md border border-white dark:border-slate-700/30 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-md shadow-sm dark:shadow-black/10 flex items-center gap-1">
+ <span className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-md shadow-sm dark:shadow-black/10 flex items-center gap-1">
  {badge.icon} {badge.label}
  </span>
  </div>

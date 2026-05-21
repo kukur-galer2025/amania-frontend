@@ -106,7 +106,6 @@ export default function ArticlesClient() {
  <ChevronLeft size={14}/> Beranda Utama
  </Link>
  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-2 md:gap-3 break-words">
- <img src="/logo-amania.png" alt="Amania" className="h-6 md:h-8 w-auto object-contain shrink-0"/>
  Amania <span className="text-red-600 shrink-0">News</span>
  </h1>
  <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-1 font-medium">Kabar terbaru seputar teknologi, edukasi, dan karir.</p>

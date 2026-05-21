@@ -21,9 +21,9 @@ const extractYouTubeId = (url: string): string | null => {
 };
 
 const BENEFITS = [
- { icon: InfinityIcon, label: 'Akses Selamanya', desc: 'Sekali bayar, akses video seumur hidup.', gradient: 'from-amber-500 to-orange-500', bg: 'bg-gradient-to-br from-amber-50 to-orange-50', border: 'border-amber-200/60' },
- { icon: RefreshCw, label: 'Update Berkala', desc: 'Gratis update materi jika ada pembaruan.', gradient: 'from-blue-500 to-cyan-500', bg: 'bg-gradient-to-br from-blue-50 to-cyan-50', border: 'border-blue-200/60' },
- { icon: ShieldCheck, label: 'Sertifikat Kelulusan', desc: 'Dapatkan sertifikat setelah menyelesaikan kursus.', gradient: 'from-emerald-500 to-teal-500', bg: 'bg-gradient-to-br from-emerald-50 to-teal-50', border: 'border-emerald-200/60' },
+  { icon: InfinityIcon, label: 'Akses Selamanya', desc: 'Sekali bayar, akses video seumur hidup.', gradient: 'from-amber-500 to-orange-500', bg: 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10', border: 'border-amber-200/60 dark:border-amber-500/20' },
+  { icon: RefreshCw, label: 'Update Berkala', desc: 'Gratis update materi jika ada pembaruan.', gradient: 'from-blue-500 to-cyan-500', bg: 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10', border: 'border-blue-200/60 dark:border-blue-500/20' },
+  { icon: ShieldCheck, label: 'Sertifikat Kelulusan', desc: 'Dapatkan sertifikat setelah menyelesaikan kursus.', gradient: 'from-emerald-500 to-teal-500', bg: 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10', border: 'border-emerald-200/60 dark:border-emerald-500/20' },
 ];
 
 function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
@@ -451,22 +451,22 @@ export default function CourseDetailClient() {
  </>
  )}
  <div className="flex items-center gap-1.5">
- <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/60">
- <BookOpen size={12} className="text-emerald-500"/>
+ <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/60">
+ <BookOpen size={12} className="text-emerald-500 dark:text-emerald-400"/>
  </div>
  <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">{course.sections?.length || 0} Bab</span>
  </div>
  <div className="w-px h-4 bg-slate-200 hidden sm:block"/>
  <div className="flex items-center gap-1.5">
- <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20">
- <Video size={12} className="text-indigo-500"/>
+ <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-500/10 dark:to-violet-500/10 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20">
+ <Video size={12} className="text-indigo-500 dark:text-indigo-400"/>
  </div>
  <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">{totalLessons} Lesson</span>
  </div>
  <div className="w-px h-4 bg-slate-200 hidden sm:block"/>
  <div className="flex items-center gap-1.5">
- <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center border border-amber-100 dark:border-amber-800/60">
- <Clock size={12} className="text-amber-500"/>
+ <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 flex items-center justify-center border border-amber-100 dark:border-amber-800/60">
+ <Clock size={12} className="text-amber-500 dark:text-amber-400"/>
  </div>
  <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">{totalDuration} Mnt</span>
  </div>
@@ -474,7 +474,7 @@ export default function CourseDetailClient() {
  <>
  <div className="w-px h-4 bg-slate-200 hidden sm:block"/>
  <div className="flex items-center gap-1.5">
- <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border border-slate-200 dark:border-slate-700/50">
+ <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-500/10 dark:to-slate-600/10 flex items-center justify-center border border-slate-200 dark:border-slate-700/50">
  <Users size={12} className="text-slate-500 dark:text-slate-400"/>
  </div>
  <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">{course.students_count} Siswa</span>
@@ -491,7 +491,7 @@ export default function CourseDetailClient() {
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-emerald-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
  <div className="flex items-center gap-3 mb-5 md:mb-6 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-700/50/80 relative">
- <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200/40 shrink-0 shadow-sm dark:shadow-black/10">
+ <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-500/10 dark:to-teal-500/10 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200/40 shrink-0 shadow-sm dark:shadow-black/10">
  <Sparkles size={18} />
  </div>
  <div>
@@ -508,8 +508,8 @@ export default function CourseDetailClient() {
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-indigo-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
- <div className="flex items-center gap-3 mb-5 md:mb-6 relative">
- <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-violet-100 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-200/40 shrink-0 shadow-sm dark:shadow-black/10">
+ <div className="flex items-center gap-3 mb-6 md:mb-8 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-700/50/80 relative">
+ <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-500/10 dark:to-violet-500/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-200/40 shrink-0 shadow-sm dark:shadow-black/10">
  <BookOpen size={18} />
  </div>
  <div>
@@ -586,8 +586,8 @@ export default function CourseDetailClient() {
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-amber-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
- <div className="flex items-center gap-3 mb-5 md:mb-6 relative">
- <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center text-amber-500 border border-amber-200/40 shrink-0 shadow-sm dark:shadow-black/10">
+ <div className="flex items-center gap-3 mb-6 md:mb-8 relative">
+ <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-500/10 dark:to-orange-500/10 rounded-xl flex items-center justify-center text-amber-500 dark:text-amber-400 border border-amber-200/40 shrink-0 shadow-sm dark:shadow-black/10">
  <MessageSquare size={18} />
  </div>
  <div>
