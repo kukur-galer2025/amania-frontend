@@ -106,7 +106,7 @@ export default function CoursesClient() {
  {/* Badge */}
  <motion.div 
  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
- className="inline-flex items-center gap-2 bg-white dark:bg-slate-800/30 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200/30 dark:border-slate-700/20 mb-6"
+ className="inline-flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 dark:border-slate-700/20 mb-6"
  >
  <div className="w-5 h-5 rounded-full bg-emerald-400/30 flex items-center justify-center">
  <Sparkles size={11} className="text-emerald-300"/>
@@ -135,15 +135,15 @@ export default function CoursesClient() {
  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
  className="flex items-center gap-3 flex-wrap mb-8 md:mb-0"
  >
- <div className="flex items-center gap-2 bg-white dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-slate-200/30 dark:border-slate-700/20">
+ <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/10 dark:border-slate-700/20">
  <PlayCircle size={14} className="text-emerald-300"/>
  <span className="text-xs font-bold text-white/80">{courses.length}+ Kursus</span>
  </div>
- <div className="flex items-center gap-2 bg-white dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-slate-200/30 dark:border-slate-700/20">
+ <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/10 dark:border-slate-700/20">
  <Users size={14} className="text-teal-300"/>
  <span className="text-xs font-bold text-white/80">Instruktur Pro</span>
  </div>
- <div className="flex items-center gap-2 bg-white dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-slate-200/30 dark:border-slate-700/20">
+ <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/10 dark:border-slate-700/20">
  <Star size={14} className="text-amber-300 fill-amber-300"/>
  <span className="text-xs font-bold text-white/80">Rating 4.9</span>
  </div>
@@ -164,7 +164,7 @@ export default function CoursesClient() {
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
  placeholder="Cari kursus atau instruktur..."
- className="w-full bg-white dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl py-4 pl-16 pr-6 text-sm font-semibold text-white placeholder-white/40 focus:bg-white dark:bg-slate-800/15 focus:ring-2 focus:ring-emerald-500/30 border border-slate-200/30 dark:border-slate-700/20 outline-none shadow-2xl dark:shadow-black/25 shadow-black/20 transition-transform"
+ className="w-full bg-white/10 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl py-4 pl-16 pr-6 text-sm font-semibold text-white placeholder-white/40 focus:bg-white/20 dark:bg-slate-800/15 focus:ring-2 focus:ring-emerald-500/30 border border-white/10 dark:border-slate-700/20 outline-none shadow-2xl dark:shadow-black/25 shadow-black/20 transition-transform"
  />
  </div>
  </motion.div>
