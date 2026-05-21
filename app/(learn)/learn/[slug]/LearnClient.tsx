@@ -272,7 +272,7 @@ export default function LearnClient() {
           {ytId ? (
             <iframe
               key={ytId}
-              src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1`}
+              src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="w-full h-full"
