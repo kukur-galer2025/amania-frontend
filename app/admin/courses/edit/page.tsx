@@ -673,7 +673,7 @@ export default function AdminCourseEditPage() {
                     {extractYouTubeId(lessonYoutubeUrl) && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                         <div className="aspect-video bg-black">
-                          <iframe src={`https://www.youtube.com/embed/${extractYouTubeId(lessonYoutubeUrl)}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
+                          <iframe src={`https://www.youtube.com/embed/${extractYouTubeId(lessonYoutubeUrl)}`} referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
                         </div>
                         <div className="px-4 py-2 bg-slate-50 flex items-center gap-2 text-[10px] font-bold text-emerald-600">
                           <CheckCircle2 size={12} /> Video YouTube berhasil terdeteksi
