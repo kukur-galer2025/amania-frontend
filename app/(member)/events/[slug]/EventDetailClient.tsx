@@ -850,7 +850,15 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  } catch(e) {}
 
  const locStr = eventData?.venue || 'Offline';
- const priceStr = eventData?.basic_price === 0 ? 'GRATIS!' : 'Rp ' + (eventData?.basic_price || 0).toLocaleString('id-ID');
+ let priceStr = '';
+ const basicPrice = eventData?.basic_price || 0;
+ const premiumPrice = eventData?.premium_price || 0;
+ 
+ if (premiumPrice > 0) {
+ priceStr = `\n▫️ Basic: ${basicPrice === 0 ? '*GRATIS*' : 'Rp ' + basicPrice.toLocaleString('id-ID')}\n▫️ VIP: Rp ${premiumPrice.toLocaleString('id-ID')}`;
+ } else {
+ priceStr = basicPrice === 0 ? '*GRATIS!*' : 'Rp ' + basicPrice.toLocaleString('id-ID');
+ }
 
  const shareIntro = `🎉 *INFO EVENT MENARIK!* 🎉\n\nYuk tingkatkan skill kamu dengan ikutan program eksklusif:\n🎓 *"${shareTitle}"*\n\n${fullDesc.substring(0, 150)}...\n\n🗓 *WAKTU & TEMPAT:*\nHari/Tgl: ${dateStr}\nWaktu: ${timeStr}\nLokasi: ${locStr}\n\n💰 *BIAYA:* ${priceStr}\n\nJangan sampai ketinggalan! 🔥\n📍 *Cek detail & daftar sekarang di sini:*\n`;
  const bcText = `${shareIntro}${shareUrl}\n\n_Powered by Amania Nusantara_`;
