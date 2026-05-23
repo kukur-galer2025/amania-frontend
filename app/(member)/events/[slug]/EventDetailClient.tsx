@@ -861,7 +861,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  }
 
  const shareIntro = `🎉 *INFO EVENT MENARIK!* 🎉\n\nYuk tingkatkan skill kamu dengan ikutan program eksklusif:\n🎓 *"${shareTitle}"*\n\n${fullDesc.substring(0, 150)}...\n\n🗓 *WAKTU & TEMPAT:*\nHari/Tgl: ${dateStr}\nWaktu: ${timeStr}\nLokasi: ${locStr}\n\n💰 *BIAYA:* ${priceStr}\n\nJangan sampai ketinggalan! 🔥\n📍 *Cek detail & daftar sekarang di sini:*\n`;
- const bcText = `${shareIntro}${shareUrl}\n\n_Powered by Amania Nusantara_`;
+ const bcText = `${shareIntro}${shareUrl}\n\n_Powered by Amania.id_`;
  
  const waUrl = `https://wa.me/?text=${encodeURIComponent(bcText)}`;
  const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(bcText)}`;

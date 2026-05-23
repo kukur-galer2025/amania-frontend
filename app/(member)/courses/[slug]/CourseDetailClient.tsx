@@ -958,8 +958,8 @@ export default function CourseDetailClient() {
  {isShareModalOpen && (() => {
  const cleanDesc = course.description 
  ? course.description.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g,"'").replace(/\s+/g, ' ').trim().substring(0, 150) + '...'
- : 'Kursus premium dari Amania Nusantara!';
- const bcText = `🎓 *${course.title}*\n\n${cleanDesc}\n\n📚 ${(course.sections || []).length} Bab · ${totalLessons} Lesson\n⭐ Rating: ${course.avg_rating || 0}/5\n💰 ${course.price === 0 ? 'GRATIS!' : formatRupiah(course.price) + ' (Diskon 80%)'}\n\n🔗 Daftar sekarang:\n${shareUrl}\n\n_Powered by Amania Nusantara_`;
+ : 'Kursus premium dari Amania.id!';
+ const bcText = `🎓 *${course.title}*\n\n${cleanDesc}\n\n📚 ${(course.sections || []).length} Bab · ${totalLessons} Lesson\n⭐ Rating: ${course.avg_rating || 0}/5\n💰 ${course.price === 0 ? 'GRATIS!' : formatRupiah(course.price) + ' (Diskon 80%)'}\n\n🔗 Daftar sekarang:\n${shareUrl}\n\n_Powered by Amania.id_`;
  const waUrl = `https://wa.me/?text=${encodeURIComponent(bcText)}`;
  const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(bcText)}`;
  return (

@@ -931,8 +931,8 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                 {isShareModalOpen && (() => {
                     const cleanDesc = product.description
                         ? product.description.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim().substring(0, 150) + '...'
-                        : 'Produk digital premium dari Amania Nusantara!';
-                    const bcText = `📦 *${product.title}*\n\n${cleanDesc}\n\n⭐ Rating: ${avgRating > 0 ? avgRating.toFixed(1) + '/5' : 'Baru'} (${totalReviews} ulasan)\n👤 Seller: ${authorName}\n💰 ${isFree ? 'GRATIS!' : formatRupiah(product.price) + ' (Diskon 80%)'}\n\n🔗 Lihat detail:\n${shareUrl}\n\n_Powered by Amania Nusantara_`;
+                        : 'Produk digital premium dari Amania.id!';
+                    const bcText = `📦 *${product.title}*\n\n${cleanDesc}\n\n⭐ Rating: ${avgRating > 0 ? avgRating.toFixed(1) + '/5' : 'Baru'} (${totalReviews} ulasan)\n👤 Seller: ${authorName}\n💰 ${isFree ? 'GRATIS!' : formatRupiah(product.price) + ' (Diskon 80%)'}\n\n🔗 Lihat detail:\n${shareUrl}\n\n_Powered by Amania.id_`;
                     const waUrl = `https://wa.me/?text=${encodeURIComponent(bcText)}`;
                     const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(bcText)}`;
                     return (
