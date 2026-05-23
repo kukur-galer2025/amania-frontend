@@ -62,6 +62,9 @@ export default function CourseDetailClient() {
  const [submittingReview, setSubmittingReview] = useState(false);
  const [hoverRating, setHoverRating] = useState(0);
 
+ // Recommendations
+ const [recommendedCourses, setRecommendedCourses] = useState<any[]>([]);
+
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
  const userData = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
 
@@ -92,6 +95,21 @@ export default function CourseDetailClient() {
  } finally {
  setLoading(false);
  }
+
+ // Fetch Recommendations
+ try {
+ const recRes = await apiFetch('/courses');
+ const recJson = await recRes.json();
+ if (recRes.ok && recJson.success) {
+ const allCourses = recJson.data || [];
+ const filtered = allCourses.filter((c: any) => c.slug !== slug);
+ // Sort by created_at desc (or just take first 2)
+ setRecommendedCourses(filtered.slice(0, 2));
+ }
+ } catch (err) {
+ console.error('Failed to fetch recommendations', err);
+ }
+
  };
  fetchCourse();
  }, [slug]);
@@ -260,7 +278,7 @@ export default function CourseDetailClient() {
  const isEnrolled = course?.is_enrolled;
 
  // Share
- const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+ const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/courses/${course?.id || slug}` : '';
  const handleCopyLink = () => {
  navigator.clipboard.writeText(shareUrl);
  toast.success('Link berhasil disalin!');
@@ -398,10 +416,7 @@ export default function CourseDetailClient() {
  <Tag size={11} /> {course.category?.name || 'Umum'}
  </span>
  </div>
- {/* Play indicator */}
- <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white dark:border-slate-700/30 group-hover:bg-white/5 dark:hover:bg-slate-700/50 group-hover:scale-110 transition-transform duration-500 shrink-0">
- <PlayCircle size={20} className="text-white sm:w-6 sm:h-6"/>
- </div>
+ {/* Play indicator removed */}
  </div>
  </div>
  </div>
@@ -490,7 +505,7 @@ export default function CourseDetailClient() {
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-emerald-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
- <div className="flex items-center gap-3 mb-5 md:mb-6 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-700/50/80 relative">
+ <div className="flex items-center gap-3 mb-5 md:mb-6 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-700/50 relative">
  <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-500/10 dark:to-teal-500/10 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200/40 shrink-0 shadow-sm dark:shadow-black/10">
  <Sparkles size={18} />
  </div>
@@ -499,7 +514,7 @@ export default function CourseDetailClient() {
  <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Apa yang akan Anda pelajari</p>
  </div>
  </div>
- <div className="prose prose-sm prose-slate max-w-none text-slate-600 dark:text-slate-400 leading-relaxed [&_img]:rounded-xl [&_img]:shadow-md dark:shadow-black/15 [&_strong]:text-slate-800 dark:text-slate-200 [&_strong]:font-extrabold" dangerouslySetInnerHTML={{ __html: course.description || '<p>Belum ada deskripsi.</p>' }} />
+ <div className="prose prose-sm prose-slate max-w-none break-normal whitespace-normal overflow-hidden text-slate-600 dark:text-slate-400 leading-relaxed [&_img]:rounded-xl [&_img]:shadow-md dark:shadow-black/15 [&_strong]:text-slate-800 dark:text-slate-200 [&_strong]:font-extrabold" dangerouslySetInnerHTML={{ __html: course.description || '<p>Belum ada deskripsi.</p>' }} />
  </motion.div>
 
  {/* Curriculum - ENHANCED */}
@@ -508,7 +523,7 @@ export default function CourseDetailClient() {
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-indigo-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
- <div className="flex items-center gap-3 mb-6 md:mb-8 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-700/50/80 relative">
+ <div className="flex items-center gap-3 mb-6 md:mb-8 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-700/50 relative">
  <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-500/10 dark:to-violet-500/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-200/40 shrink-0 shadow-sm dark:shadow-black/10">
  <BookOpen size={18} />
  </div>
@@ -659,7 +674,7 @@ export default function CourseDetailClient() {
  <div className="space-y-3">
  {(course.reviews || []).slice(0, 10).map((review: any, idx: number) => (
  <motion.div key={review.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + idx * 0.05 }}
- className="flex gap-3 p-4 glass-card rounded-xl border border-slate-100 dark:border-slate-700/50/80 hover:border-emerald-100 dark:border-emerald-800/80 hover:shadow-[0_4px_20px_rgba(16,185,129,0.06)] transition-transform duration-300 group/review">
+ className="flex gap-3 p-4 glass-card rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-emerald-100 dark:border-emerald-800/80 hover:shadow-[0_4px_20px_rgba(16,185,129,0.06)] transition-transform duration-300 group/review">
  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm dark:shadow-black/10 group-hover/review:scale-105 transition-transform">
  {(review.user?.name || 'A').charAt(0).toUpperCase()}
  </div>
@@ -688,6 +703,7 @@ export default function CourseDetailClient() {
  </div>
  )}
  </motion.div>
+
  </div>
 
  {/* RIGHT: Checkout Sidebar - ENHANCED */}
@@ -774,6 +790,63 @@ export default function CourseDetailClient() {
  </div>
  </div>
 
+ {/* Rekomendasi Kursus (Full Width - Boxed) */}
+ {recommendedCourses.length > 0 && (
+ <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="mt-8 mb-12 w-full">
+ <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+ <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+ <div>
+ <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+ <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
+ <Sparkles size={20} className="text-emerald-500"/>
+ </div>
+ Rekomendasi Kursus
+ </h2>
+ <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1.5 ml-12">Tingkatkan skill Anda dengan kursus pilihan kami.</p>
+ </div>
+ <Link href="/courses" className="shrink-0 px-5 py-2.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-xl transition-colors flex items-center gap-2 border border-slate-200 dark:border-slate-700/50">
+ Lihat Semua <ArrowLeft size={16} className="rotate-180"/>
+ </Link>
+ </div>
+ 
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
+ {recommendedCourses.slice(0, 4).map((rec) => (
+ <Link key={rec.id} href={`/courses/${rec.slug}`} className="group block bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-[0_20px_60px_rgba(16,185,129,0.12)] hover:border-emerald-200/60 transition-all duration-500 hover:-translate-y-1.5 h-full flex flex-col">
+ <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-700/50">
+ {rec.thumbnail ? (
+ <img src={`${STORAGE_URL}/${rec.thumbnail}`} alt={rec.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+ ) : (
+ <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-800 dark:to-slate-800"><GraduationCap size={40} className="text-emerald-300 dark:text-slate-600"/></div>
+ )}
+ {/* Gradient overlay */}
+ <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+ 
+ <div className="absolute top-3 right-3 flex items-start">
+ {rec.price === 0 ? (
+ <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg shadow-lg backdrop-blur-md">GRATIS</span>
+ ) : (
+ <span className="px-2.5 py-1 bg-white dark:bg-slate-800/90 backdrop-blur-md text-slate-900 dark:text-white text-[10px] font-black rounded-lg shadow-lg border border-slate-100 dark:border-slate-700">{formatRupiah(rec.price)}</span>
+ )}
+ </div>
+ </div>
+ <div className="p-4 flex-1 flex flex-col">
+ <div className="flex items-center gap-1.5 mb-2.5">
+ <div className="w-1 h-1 rounded-full bg-emerald-500"/>
+ <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">{rec.category?.name || 'Umum'}</span>
+ </div>
+ <h3 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 leading-snug">{rec.title}</h3>
+ <div className="mt-auto flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-semibold border-t border-slate-100 dark:border-slate-700/50 pt-3">
+ <div className="flex items-center gap-1.5"><BookOpen size={12}/> {rec.sections_count || rec.sections?.length || 0} Bab</div>
+ <div className="flex items-center gap-1.5"><Star size={12} className={rec.avg_rating > 0 ? "text-amber-400 fill-amber-400" : "text-slate-300"}/> {rec.avg_rating > 0 ? parseFloat(rec.avg_rating).toFixed(1) : 'Baru'}</div>
+ </div>
+ </div>
+ </Link>
+ ))}
+ </div>
+ </div>
+ </motion.div>
+ )}
+
  {/* 🔥 MOBILE STICKY BOTTOM BAR - ENHANCED 🔥 */}
  <div className="fixed bottom-0 left-0 right-0 glass-card-strong border-t border-slate-200 dark:border-slate-700/50 p-3 pb-safe z-[50] lg:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.08)] flex items-center justify-between gap-2.5 w-full">
  <div className="shrink-0 flex flex-col justify-center min-w-0 pl-1 w-[35%]">
@@ -814,7 +887,7 @@ export default function CourseDetailClient() {
  {/* Accent line */}
  <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 animate-gradient-shift shrink-0"/>
  
- <div className="p-4 sm:p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50/80 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white w-full shrink-0">
+ <div className="p-4 sm:p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white w-full shrink-0">
  <div className="min-w-0 pr-4">
  <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white truncate w-full">Metode Pembayaran</h3>
  <p className="text-[9px] md:text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest truncate w-full">Sistem Terenkripsi Aman</p>
@@ -865,7 +938,7 @@ export default function CourseDetailClient() {
  </div>
  )}
  </div>
- <div className="p-4 sm:p-5 md:p-6 bg-white dark:bg-[#111827] border-t border-slate-100 dark:border-slate-700/50/80 flex flex-col sm:flex-row items-center justify-between gap-3 w-full shrink-0">
+ <div className="p-4 sm:p-5 md:p-6 bg-white dark:bg-[#111827] border-t border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row items-center justify-between gap-3 w-full shrink-0">
  <div className="text-center sm:text-left w-full sm:w-auto min-w-0">
  <p className="text-[8px] md:text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1 truncate w-full flex items-center justify-center sm:justify-start gap-1"><ShieldCheck size={11} /> Tagihan Terenkripsi</p>
  <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-none truncate w-full">{formatRupiah(course.price)}</p>

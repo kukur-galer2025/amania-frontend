@@ -973,7 +973,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <div className="max-w-[1400px] mx-auto px-5 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
  <div className="flex flex-col items-center md:items-start gap-3.5">
  <div className="flex items-center gap-3">
- <img src="/logo-amania.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert"/>
+ <img src="/logo-mini.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert"/>
  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Amania.id</span>
  </div>
  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center md:text-left max-w-sm leading-relaxed">

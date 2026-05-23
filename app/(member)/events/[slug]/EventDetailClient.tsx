@@ -7,7 +7,8 @@ import {
  ArrowLeft, Calendar, MapPin, Clock, ShieldCheck, 
  User, Share2, Ticket, AlertCircle, Loader2, CheckCircle2,
  Gem, Image as ImageIcon, BookOpen, Video, FileText, Lock, Briefcase, 
- DownloadCloud, Sparkles, Info, Tag, ArrowRight, Users, Award, Zap 
+ DownloadCloud, Sparkles, Info, Tag, ArrowRight, Users, Award, Zap,
+ X, Link as LinkIcon, CalendarHeart
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -129,7 +130,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  const [loading, setLoading] = useState(true);
  const [activeTab, setActiveTab] = useState<'desc' | 'curriculum'>('desc');
  const [selectedTier, setSelectedTier] = useState<'basic' | 'premium'>('basic');
- const [isSharing, setIsSharing] = useState(false);
+ const [isShareModalOpen, setIsShareModalOpen] = useState(false);
  
  // STATE HITUNG MUNDUR (COUNTDOWN)
  const [timeLeft, setTimeLeft] = useState<string | null>(null);
@@ -199,66 +200,10 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  return () => clearInterval(intervalId);
  }, [eventData?.start_time]);
 
- const handleShare = async () => {
- if (isSharing) return;
- setIsSharing(true);
-
- const shareUrl = window.location.href;
- const shareTitle = eventData?.title || 'Program Unggulan Amania';
- 
- const fullDesc = stripHtmlToText(eventData?.description || '');
-
- const shareIntro = `*Halo! Yuk ikutan program"${shareTitle}"di Amania Nusantara.*\n\n${fullDesc.substring(0, 150)}...\n\n📍 *Cek detail & pendaftarannya di sini:*\n`;
- const captionText = `${shareIntro}${shareUrl}`;
-
- try {
- try {
- await navigator.clipboard.writeText(captionText);
- } catch (err) {
- console.warn("Clipboard access denied", err);
- }
-
- if (navigator.share) {
- let sharedWithImage = false;
-
- if (eventData?.image) {
- try {
- const imgUrl = `${STORAGE_URL}/${eventData.image}`;
- const response = await fetch(imgUrl, { mode: 'cors' });
- const blob = await response.blob();
- 
- const ext = blob.type.split('/')[1] || 'jpg';
- const file = new File([blob], `poster-${slug}.${ext}`, { type: blob.type });
-
- if (navigator.canShare && navigator.canShare({ files: [file] })) {
- toast.success('Teks & Deskripsi disalin! Silakan"Paste/Tempel"di kolom pesan.', { duration: 6000, icon: '📋' });
-
- await navigator.share({
- title: shareTitle,
- text: captionText, 
- files: [file]
- });
- sharedWithImage = true;
- }
- } catch (imgError) {
- console.warn("Gagal menyiapkan file gambar", imgError);
- }
- }
-
- if (!sharedWithImage) {
- await navigator.share({ title: shareTitle, text: captionText });
- toast.success('Berhasil membagikan tautan!');
- }
- } else {
- toast.success('Teks deskripsi utuh dan tautan disalin ke clipboard!');
- }
- } catch (error: any) {
- if (error.name !== 'AbortError') {
- toast.error('Terjadi kesalahan saat membagikan.');
- }
- } finally {
- setIsSharing(false);
- }
+ const handleShare = () => setIsShareModalOpen(true);
+ const handleCopyLink = () => {
+ navigator.clipboard.writeText(window.location.href);
+ toast.success('Link disalin ke clipboard!');
  };
 
  const handleDownloadBanner = async () => {
@@ -389,11 +334,10 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  </Link>
  <button
  onClick={handleShare}
- disabled={isSharing}
- className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-transform shadow-sm dark:shadow-black/10 disabled:opacity-50 disabled:cursor-wait"
+ className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-transform shadow-sm dark:shadow-black/10"
  >
- {isSharing ? <Loader2 size={14} className="animate-spin"/> : <Share2 size={14} />} 
- <span>{isSharing ? 'Mempersiapkan...' : 'Bagikan'}</span>
+ <Share2 size={14} /> 
+ <span>Bagikan</span>
  </button>
  </div>
 
@@ -420,13 +364,13 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  className="space-y-4 max-w-4xl"
  >
  <div className="flex flex-wrap gap-2 mb-2">
- <span className="px-3 py-1.5 bg-white dark:bg-slate-800/30 backdrop-blur-md border border-slate-200/30 dark:border-slate-700/20 text-white rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+ <span className="px-3 py-1.5 bg-white/20 dark:bg-slate-800/30 backdrop-blur-md border border-slate-200/30 dark:border-slate-700/20 text-white rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
  <Sparkles size={12} className="text-amber-400"/>
  {eventData.certificate_tier !== 'none' ? 'Sertifikat Tersedia' : 'Amania Official'}
  </span>
  <span
- className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg dark:shadow-black/20 ${
- isPast ? 'bg-rose-50 dark:bg-rose-500/90 text-white' : 'bg-emerald-50 dark:bg-emerald-500/90 text-white'
+ className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg dark:shadow-black/20 text-white ${
+ isPast ? 'bg-rose-500 dark:bg-rose-600' : 'bg-emerald-500 dark:bg-emerald-600'
  }`}
  >
  {isPast ? <AlertCircle size={12} /> : <CheckCircle2 size={12} />}
@@ -887,6 +831,84 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  </motion.div>
  </div>
  )}
+ </AnimatePresence>
+
+ {/* 🔥 SHARE MODAL WITH BROADCAST 🔥 */}
+ <AnimatePresence>
+ {isShareModalOpen && (() => {
+ const shareUrl = `${window.location.origin}/events/${eventData?.id || slug}`;
+ const shareTitle = eventData?.title || 'Program Unggulan Amania';
+ const fullDesc = stripHtmlToText(eventData?.description || '');
+
+ let dateStr = '-';
+ let timeStr = '-';
+ try {
+ const d = new Date(eventData?.start_time);
+ dateStr = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+ const tEnd = new Date(eventData?.end_time);
+ timeStr = `${d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':')} - ${tEnd.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':')} WIB`;
+ } catch(e) {}
+
+ const locStr = eventData?.venue || 'Offline';
+ const priceStr = eventData?.basic_price === 0 ? 'GRATIS!' : 'Rp ' + (eventData?.basic_price || 0).toLocaleString('id-ID');
+
+ const shareIntro = `🎉 *INFO EVENT MENARIK!* 🎉\n\nYuk tingkatkan skill kamu dengan ikutan program eksklusif:\n🎓 *"${shareTitle}"*\n\n${fullDesc.substring(0, 150)}...\n\n🗓 *WAKTU & TEMPAT:*\nHari/Tgl: ${dateStr}\nWaktu: ${timeStr}\nLokasi: ${locStr}\n\n💰 *BIAYA:* ${priceStr}\n\nJangan sampai ketinggalan! 🔥\n📍 *Cek detail & daftar sekarang di sini:*\n`;
+ const bcText = `${shareIntro}${shareUrl}\n\n_Powered by Amania Nusantara_`;
+ 
+ const waUrl = `https://wa.me/?text=${encodeURIComponent(bcText)}`;
+ const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(bcText)}`;
+
+ return (
+ <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+ <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsShareModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-md"/>
+ <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+ className="relative w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_25px_70px_rgba(0,0,0,0.2)] overflow-hidden">
+ <button onClick={() => setIsShareModalOpen(false)} className="absolute top-3 right-3 md:top-4 md:right-4 p-2 text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-white bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-700/50 rounded-full z-10 backdrop-blur-sm">
+ <X size={16} />
+ </button>
+
+ {/* Preview Card */}
+ <div className="relative aspect-[2.2/1] overflow-hidden bg-gradient-to-br from-indigo-600 to-indigo-900">
+ {eventData?.image && (
+ <img src={`${STORAGE_URL}/${eventData.image}`} alt={eventData.title} className="w-full h-full object-cover opacity-30"/>
+ )}
+ <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"/>
+ <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+ <span className="text-[8px] sm:text-[9px] font-black text-indigo-300 uppercase tracking-widest mb-1 block">Bagikan Program</span>
+ <h3 className="text-sm sm:text-base font-black text-white leading-snug line-clamp-2">{eventData?.title}</h3>
+ <div className="flex items-center gap-3 mt-2">
+ <span className="text-[9px] sm:text-[10px] font-bold text-white/70 flex items-center gap-1"><CalendarHeart size={10} /> {dateStr}</span>
+ <span className="text-[9px] sm:text-[10px] font-bold text-white/70 flex items-center gap-1"><MapPin size={10} /> {eventData?.venue || 'Offline'}</span>
+ </div>
+ </div>
+ </div>
+
+ {/* Broadcast Preview */}
+ <div className="p-4 sm:p-5">
+ <p className="text-[9px] sm:text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2">Preview Broadcast</p>
+ <div className="bg-gradient-to-r from-slate-50 to-white border border-slate-200 dark:border-slate-700/50 rounded-xl p-3 sm:p-4 text-[11px] sm:text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium whitespace-pre-line max-h-28 overflow-y-auto custom-scrollbar">
+ {bcText}
+ </div>
+ </div>
+
+ {/* Action Buttons */}
+ <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex flex-col gap-2">
+ <a href={waUrl} target="_blank" rel="noopener noreferrer" className="w-full py-2.5 sm:py-3 bg-[#25D366] hover:bg-[#1fb855] text-white font-bold text-sm rounded-xl transition-transform shadow-md dark:shadow-black/15 flex items-center justify-center gap-2 active:scale-95">
+ <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+ Bagikan via WhatsApp
+ </a>
+ <a href={tgUrl} target="_blank" rel="noopener noreferrer" className="w-full py-2.5 sm:py-3 bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold text-sm rounded-xl transition-transform shadow-md dark:shadow-black/15 flex items-center justify-center gap-2 active:scale-95">
+ <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+ Bagikan via Telegram
+ </a>
+ <button onClick={handleCopyLink} className="w-full py-2.5 sm:py-3 bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold text-sm rounded-xl border border-slate-200 dark:border-slate-700/50 flex items-center justify-center gap-2 active:scale-95">
+ <LinkIcon size={16} /> Salin Link
+ </button>
+ </div>
+ </motion.div>
+ </div>
+ );
+ })()}
  </AnimatePresence>
 
  <style jsx global>{`
