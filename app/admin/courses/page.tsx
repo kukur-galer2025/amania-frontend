@@ -28,6 +28,9 @@ export default function AdminCoursesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<number | null>(null);
+
   const [title, setTitle] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [description, setDescription] = useState('');
@@ -124,8 +127,15 @@ export default function AdminCoursesPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus kursus ini beserta SEMUA MATERI (section & lesson) secara permanen?")) return;
+  const handleDeleteClick = (id: number) => {
+    setCourseToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!courseToDelete) return;
+    setDeleteModalOpen(false);
+    const id = courseToDelete;
 
     const loadToast = toast.loading("Menghapus kursus...");
     try {
@@ -140,6 +150,8 @@ export default function AdminCoursesPage() {
       }
     } catch {
       toast.error("Terjadi kesalahan sistem.", { id: loadToast });
+    } finally {
+      setCourseToDelete(null);
     }
   };
 
@@ -268,7 +280,7 @@ export default function AdminCoursesPage() {
                           <Link href={`/admin/courses/edit?id=${course.id}`} className="px-4 py-2 flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors border border-emerald-100" title="Kelola Materi & Edit">
                             <Edit size={14} /> Kelola
                           </Link>
-                          <button onClick={() => handleDelete(course.id)} className="p-2 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 shadow-sm" title="Hapus Permanen"><Trash2 size={16} /></button>
+                          <button onClick={() => handleDeleteClick(course.id)} className="p-2 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 shadow-sm" title="Hapus Permanen"><Trash2 size={16} /></button>
                         </div>
                       </td>
                     </tr>
@@ -393,6 +405,32 @@ export default function AdminCoursesPage() {
                 </button>
               </div>
 
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL KONFIRMASI HAPUS */}
+      <AnimatePresence>
+        {deleteModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle size={32} />
+              </div>
+              <h2 className="text-xl font-black text-slate-900 mb-2">Hapus Kursus Permanen?</h2>
+              <p className="text-sm text-slate-500 mb-6">
+                Apakah Anda yakin ingin menghapus kursus ini beserta <strong className="text-rose-500">SEMUA MATERI</strong> (section & lesson)? Tindakan ini tidak dapat dibatalkan.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                  Batal
+                </button>
+                <button onClick={confirmDelete} className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-500/30">
+                  Ya, Hapus!
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

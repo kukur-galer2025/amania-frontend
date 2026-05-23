@@ -69,6 +69,13 @@ export default function AdminCourseEditPage() {
   const [sectionTitle, setSectionTitle] = useState('');
   const [sectionSaving, setSectionSaving] = useState(false);
 
+  // Deletion modals state
+  const [deleteSectionModalOpen, setDeleteSectionModalOpen] = useState(false);
+  const [sectionToDelete, setSectionToDelete] = useState<number | null>(null);
+
+  const [deleteLessonModalOpen, setDeleteLessonModalOpen] = useState(false);
+  const [lessonToDelete, setLessonToDelete] = useState<number | null>(null);
+
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
   const fetchCourse = useCallback(async () => {
@@ -182,14 +189,22 @@ export default function AdminCourseEditPage() {
     }
   };
 
-  const handleDeleteSection = async (sectionId: number) => {
-    if (!confirm('Hapus section ini beserta semua lesson di dalamnya?')) return;
+  const handleDeleteSectionClick = (sectionId: number) => {
+    setSectionToDelete(sectionId);
+    setDeleteSectionModalOpen(true);
+  };
+
+  const confirmDeleteSection = async () => {
+    if (!sectionToDelete) return;
+    setDeleteSectionModalOpen(false);
+    const sectionId = sectionToDelete;
+
     try {
       const res = await apiFetch(`/admin/courses/${courseId}/sections/${sectionId}`, { method: 'DELETE' });
       const json = await res.json();
       if (res.ok && json.success) { toast.success('Section dihapus!'); fetchCourse(); }
       else toast.error('Gagal menghapus section.');
-    } catch { toast.error('Terjadi kesalahan server.'); }
+    } catch { toast.error('Terjadi kesalahan server.'); } finally { setSectionToDelete(null); }
   };
 
   // Lesson CRUD
@@ -267,14 +282,22 @@ export default function AdminCourseEditPage() {
     }
   };
 
-  const handleDeleteLesson = async (lessonId: number) => {
-    if (!confirm('Hapus lesson ini secara permanen?')) return;
+  const handleDeleteLessonClick = (lessonId: number) => {
+    setLessonToDelete(lessonId);
+    setDeleteLessonModalOpen(true);
+  };
+
+  const confirmDeleteLesson = async () => {
+    if (!lessonToDelete) return;
+    setDeleteLessonModalOpen(false);
+    const lessonId = lessonToDelete;
+
     try {
       const res = await apiFetch(`/admin/courses/${courseId}/lessons/${lessonId}`, { method: 'DELETE' });
       const json = await res.json();
       if (res.ok && json.success) { toast.success('Lesson dihapus!'); fetchCourse(); }
       else toast.error('Gagal menghapus lesson.');
-    } catch { toast.error('Terjadi kesalahan server.'); }
+    } catch { toast.error('Terjadi kesalahan server.'); } finally { setLessonToDelete(null); }
   };
 
   const toggleSection = (sectionId: number) => {
@@ -471,7 +494,7 @@ export default function AdminCourseEditPage() {
                         <button onClick={(e) => { e.stopPropagation(); openSectionModal(section); }} className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Section">
                           <Edit size={14} />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteSection(section.id); }} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus Section">
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteSectionClick(section.id); }} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus Section">
                           <Trash2 size={14} />
                         </button>
                         {expandedSections.has(section.id) ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
@@ -526,7 +549,7 @@ export default function AdminCourseEditPage() {
                                       <button onClick={() => openLessonModal(section.id, lesson)} className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                                         <Edit size={13} />
                                       </button>
-                                      <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus">
+                                      <button onClick={() => handleDeleteLessonClick(lesson.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus">
                                         <Trash2 size={13} />
                                       </button>
                                     </div>
@@ -728,6 +751,58 @@ export default function AdminCourseEditPage() {
                 <button onClick={handleSaveLesson} disabled={lessonSaving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm disabled:opacity-70 active:scale-95">
                   {lessonSaving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                   {lessonSaving ? 'Menyimpan...' : 'Simpan Lesson'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL KONFIRMASI HAPUS SECTION */}
+      <AnimatePresence>
+        {deleteSectionModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteSectionModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle size={32} />
+              </div>
+              <h2 className="text-xl font-black text-slate-900 mb-2">Hapus Section / Bab?</h2>
+              <p className="text-sm text-slate-500 mb-6">
+                Apakah Anda yakin ingin menghapus section ini beserta <strong className="text-rose-500">SEMUA LESSON</strong> di dalamnya? Tindakan ini tidak dapat dibatalkan.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button onClick={() => setDeleteSectionModalOpen(false)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                  Batal
+                </button>
+                <button onClick={confirmDeleteSection} className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-500/30">
+                  Ya, Hapus!
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL KONFIRMASI HAPUS LESSON */}
+      <AnimatePresence>
+        {deleteLessonModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteLessonModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle size={32} />
+              </div>
+              <h2 className="text-xl font-black text-slate-900 mb-2">Hapus Lesson?</h2>
+              <p className="text-sm text-slate-500 mb-6">
+                Apakah Anda yakin ingin menghapus lesson ini secara permanen?
+              </p>
+              <div className="flex gap-3 w-full">
+                <button onClick={() => setDeleteLessonModalOpen(false)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                  Batal
+                </button>
+                <button onClick={confirmDeleteLesson} className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-500/30">
+                  Ya, Hapus!
                 </button>
               </div>
             </motion.div>
