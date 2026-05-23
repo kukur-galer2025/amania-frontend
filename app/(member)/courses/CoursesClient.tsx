@@ -327,10 +327,25 @@ export default function CoursesClient() {
 
  {/* Instructor */}
  <div className="flex items-center gap-2.5 mb-4">
+ {(!course.instructor || course.instructor.role === 'superadmin' || course.instructor.name === 'Admin Amania') ? (
+ <>
+ <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+ <img src="/logo-mini.png" alt="Amania Official" className="w-4 h-4 object-contain dark:brightness-0 dark:invert" />
+ </div>
+ <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Amania Official</span>
+ </>
+ ) : (
+ <>
+ {course.instructor?.avatar ? (
+ <img src={`${STORAGE_URL}/${course.instructor.avatar}`} alt={course.instructor.name} className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700/50 shrink-0" />
+ ) : (
  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center shrink-0">
  <User size={13} className="text-slate-400 dark:text-slate-400"/>
  </div>
- <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{course.instructor?.name || 'Amania Team'}</span>
+ )}
+ <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{course.instructor.name}</span>
+ </>
+ )}
  </div>
 
  {/* Rating */}

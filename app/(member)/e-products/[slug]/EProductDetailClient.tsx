@@ -461,7 +461,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                     className="glass-card-strong border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full md:w-max shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-black/20 overflow-hidden mx-auto md:mx-0 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] dark:hover:shadow-black/30 transition-shadow duration-300 group">
                                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
                                         {authorName === 'Amania Official' ? (
-                                            <img src="/logo-amania.png" alt="Amania Official" className="w-6 h-6 md:w-8 md:h-8 object-contain dark:invert" />
+                                            <img src="/logo-mini.png" alt="Amania Official" className="w-5 h-5 md:w-6 md:h-6 object-contain dark:brightness-0 dark:invert" />
                                         ) : product.author?.avatar ? (
                                             <img src={`${STORAGE_URL}/${product.author.avatar}`} alt="seller" className="w-full h-full object-cover" />
                                         ) : (
@@ -956,7 +956,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         <h3 className="text-sm sm:text-base font-black text-white leading-snug line-clamp-2">{product.title}</h3>
                                         <div className="flex items-center gap-3 mt-2">
                                             <span className="text-[9px] sm:text-[10px] font-bold text-white/70 flex items-center gap-1">
-                                                {authorName === 'Amania Official' && <img src="/logo-amania.png" className="w-3 h-3 object-contain" />}
+                                                {authorName === 'Amania Official' && <img src="/logo-mini.png" className="w-3 h-3 object-contain brightness-0 invert" />}
                                                 {authorName}
                                             </span>
                                             {avgRating > 0 ? (

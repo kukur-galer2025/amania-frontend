@@ -314,11 +314,11 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
 
  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 md:pt-16 pb-8 md:pb-12 relative z-10 w-full min-w-0">
  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 w-full min-w-0">
- <span className="inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 bg-indigo-50 dark:bg-indigo-500/20 text-indigo-300 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border border-indigo-400/30 backdrop-blur-sm shrink-0">
+ <span className="inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 bg-indigo-500/20 text-indigo-200 dark:text-indigo-300 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border border-indigo-400/30 backdrop-blur-sm shrink-0">
  <BookOpen size={10} className="shrink-0"/> Ruang Belajar
  </span>
  
- <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border backdrop-blur-sm shrink-0 ${isPast ? 'bg-slate-800/80 text-slate-300 dark:text-slate-500 border-slate-700' : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-400 border-emerald-400/30'}`}>
+ <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border backdrop-blur-sm shrink-0 ${isPast ? 'bg-slate-800/80 text-slate-300 border-slate-700' : 'bg-emerald-500/20 text-emerald-300 dark:text-emerald-400 border-emerald-400/30'}`}>
  {isPast ? <CheckCircle2 size={10} className="shrink-0"/> : <Zap size={10} className="shrink-0"/>} 
  {isPast ? 'Telah Selesai' : 'Sedang Berjalan'}
  </span>
@@ -327,7 +327,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <motion.span 
  initial={{ opacity: 0, scale: 0.9 }}
  animate={{ opacity: 1, scale: 1 }}
- className="px-3 py-1.5 bg-amber-50 dark:bg-amber-500/90 backdrop-blur-md border border-amber-400 text-white rounded-md text-[9px] md:text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg dark:shadow-black/20 shrink-0"
+ className="px-3 py-1.5 bg-amber-500/90 backdrop-blur-md border border-amber-400 text-white rounded-md text-[9px] md:text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg dark:shadow-black/20 shrink-0"
  >
  <Clock size={12} /> {timeLeft}
  </motion.span>
@@ -340,20 +340,20 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
 
  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 lg:gap-8 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 p-4 sm:p-5 rounded-2xl backdrop-blur-md w-full sm:w-fit min-w-0 shadow-lg dark:shadow-black/20">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0"><Calendar size={18}/></div>
+ <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0"><Calendar size={18}/></div>
  <div>
  <p className="text-[10px] text-slate-400 dark:text-slate-400 uppercase tracking-widest font-bold mb-0.5">Jadwal Mulai</p>
- <p className="text-xs sm:text-sm text-white font-semibold">{startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+ <p className="text-xs sm:text-sm text-slate-900 dark:text-white font-semibold">{startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
  </div>
  </div>
  
- <div className="w-px h-10 bg-white dark:bg-slate-800/30 hidden sm:block shrink-0"></div>
+ <div className="w-px h-10 bg-slate-200 dark:bg-slate-800/30 hidden sm:block shrink-0"></div>
  
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0"><Clock size={18}/></div>
+ <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0"><Clock size={18}/></div>
  <div>
  <p className="text-[10px] text-slate-400 dark:text-slate-400 uppercase tracking-widest font-bold mb-0.5">Waktu Pelaksanaan</p>
- <p className="text-xs sm:text-sm text-white font-semibold">{timeString}</p>
+ <p className="text-xs sm:text-sm text-slate-900 dark:text-white font-semibold">{timeString}</p>
  </div>
  </div>
  </motion.div>

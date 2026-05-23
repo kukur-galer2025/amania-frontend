@@ -428,17 +428,34 @@ export default function CourseDetailClient() {
  {course.title}
  </motion.h1>
 
- {/* Instructor - ENHANCED */}
  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
- className="flex items-center gap-3 mb-5">
- <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200/60 flex items-center justify-center shadow-sm dark:shadow-black/10">
- <User size={18} className="text-emerald-500"/>
- </div>
- <div>
- <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{course.instructor?.name || 'Amania Team'}</p>
- <p className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-widest">Instruktur</p>
- </div>
- </motion.div>
+  className="flex items-center gap-3 mb-5">
+  {(!course.instructor || course.instructor.role === 'superadmin' || course.instructor.name === 'Admin Amania') ? (
+  <>
+  <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm dark:shadow-black/10">
+  <img src="/logo-mini.png" alt="Amania Official" className="w-5 h-5 object-contain dark:brightness-0 dark:invert" />
+  </div>
+  <div>
+  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Amania Official</p>
+  <p className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-widest">Amania Team</p>
+  </div>
+  </>
+  ) : (
+  <>
+  {course.instructor?.avatar ? (
+  <img src={`${STORAGE_URL}/${course.instructor.avatar}`} alt={course.instructor.name} className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-black/10" />
+  ) : (
+  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200/60 flex items-center justify-center shadow-sm dark:shadow-black/10">
+  <User size={18} className="text-emerald-500"/>
+  </div>
+  )}
+  <div>
+  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{course.instructor.name}</p>
+  <p className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-widest">Instruktur</p>
+  </div>
+  </>
+  )}
+  </motion.div>
 
  {/* Stats bar - ENHANCED */}
  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}

@@ -458,7 +458,7 @@ export default function EProductsClient() {
                         {/* Author */}
                         <div className="flex items-center gap-2 mb-3 pt-2">
                           {authorName === 'Amania Official'
-                            ? <div className="w-5 h-5 rounded-full border border-amber-100 dark:border-amber-900/50 flex items-center justify-center p-0.5 shrink-0"><img src="/logo-amania.png" className="w-full h-full object-contain" /></div>
+                            ? <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0"><img src="/logo-mini.png" className="w-3.5 h-3.5 object-contain dark:brightness-0 dark:invert" /></div>
                             : <UserCircle size={16} className="text-slate-300 shrink-0" />
                           }
                           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 truncate">{authorName}</span>
