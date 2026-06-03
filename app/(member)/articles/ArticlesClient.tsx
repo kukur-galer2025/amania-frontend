@@ -368,8 +368,8 @@ export default function ArticlesClient() {
  color: #334155; /* dark handled by globals */ 
  width: 100%;
  word-break: normal;
- overflow-wrap: anywhere;
- hyphens: auto;
+ overflow-wrap: break-word;
+ white-space: normal;
  overflow-x: hidden;
  }
  @media (min-width: 768px) {
