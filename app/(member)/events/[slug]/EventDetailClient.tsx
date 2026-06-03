@@ -90,7 +90,7 @@ const processQuillHtml = (html: string): string => {
  return `<p${attrs} style="${BASE_P_STYLE}">`;
  });
 
- return r;
+ return r.replace(/&nbsp;/g, ' ');
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

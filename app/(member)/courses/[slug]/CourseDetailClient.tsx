@@ -531,7 +531,7 @@ export default function CourseDetailClient() {
  <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Apa yang akan Anda pelajari</p>
  </div>
  </div>
- <div className="prose prose-sm prose-slate max-w-none break-normal whitespace-normal overflow-hidden text-slate-600 dark:text-slate-400 leading-relaxed [&_img]:rounded-xl [&_img]:shadow-md dark:shadow-black/15 [&_strong]:text-slate-800 dark:text-slate-200 [&_strong]:font-extrabold" dangerouslySetInnerHTML={{ __html: course.description || '<p>Belum ada deskripsi.</p>' }} />
+ <div className="prose prose-sm prose-slate max-w-none break-normal whitespace-normal overflow-hidden text-slate-600 dark:text-slate-400 leading-relaxed [&_img]:rounded-xl [&_img]:shadow-md dark:shadow-black/15 [&_strong]:text-slate-800 dark:text-slate-200 [&_strong]:font-extrabold" dangerouslySetInnerHTML={{ __html: (course.description || '<p>Belum ada deskripsi.</p>').replace(/&nbsp;/g, ' ') }} />
  </motion.div>
 
  {/* Curriculum - ENHANCED */}

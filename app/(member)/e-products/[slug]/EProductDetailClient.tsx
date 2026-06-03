@@ -322,7 +322,8 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
  background-size: 200% 200%;
  animation: gradient-shift 4s ease infinite; 
  }
- .html-content { font-size: 1.05rem; line-height: 1.85; color: #475569; word-break: normal; overflow-wrap: break-word; white-space: normal; }
+ .html-content { font-size: 1.05rem; line-height: 1.85; color: #475569; }
+ .html-content, .html-content * { word-break: normal !important; word-wrap: normal !important; overflow-wrap: break-word !important; white-space: normal !important; }
  .dark .html-content { color: #cbd5e1; }
  .html-content p { margin-bottom: 1.5em; max-width: 100%; overflow-x: hidden; }
  .html-content img, .html-content video, .html-content iframe { max-width: 100%; height: auto; border-radius: 1rem; margin: 1.5rem 0; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
@@ -496,7 +497,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                     <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Apa yang akan Anda dapatkan</p>
                                 </div>
                             </div>
-                            <div className="html-content w-full" dangerouslySetInnerHTML={{ __html: product.description }} />
+                            <div className="html-content w-full" dangerouslySetInnerHTML={{ __html: product.description.replace(/&nbsp;/g, ' ') }} />
                         </motion.div>
 
                         {/* 3. SEKSI ULASAN - ENHANCED */}

@@ -39,7 +39,7 @@ const processQuillHtml = (html: string): string => {
  if (attrs.includes('style=')) return `<p${attrs.replace(/style="([^"]*)"/, `style="${BASE_P_STYLE}$1"`)}>`;
  return `<p${attrs} style="${BASE_P_STYLE}">`;
  });
- return r;
+ return r.replace(/&nbsp;/g, ' ');
 };
 
 const stripHtmlToText = (html: string) => {
