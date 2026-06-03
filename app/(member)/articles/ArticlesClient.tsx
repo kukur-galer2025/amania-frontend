@@ -367,9 +367,9 @@ export default function ArticlesClient() {
  line-height: 1.7; 
  color: #334155; /* dark handled by globals */ 
  width: 100%;
- word-wrap: break-word;
- overflow-wrap: break-word;
- word-break: break-word;
+ word-break: normal;
+ overflow-wrap: anywhere;
+ hyphens: auto;
  overflow-x: hidden;
  }
  @media (min-width: 768px) {
