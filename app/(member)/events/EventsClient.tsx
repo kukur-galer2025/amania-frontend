@@ -283,9 +283,9 @@ export default function EventsClient() {
  {currentEvents.map((event) => {
  const isPast = new Date(event.end_time) < new Date();
  const isFree = event.basic_price === 0;
- const isSuperadmin = !event.organizer || event.organizer.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : event.organizer.name;
- const organizerAvatar = !isSuperadmin && event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
+ const isSuperadmin = true;
+ const organizerName = event.organizer?.name || 'Amania Official';
+ const organizerAvatar = event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
  const timeLeft = getTimeLeft(event.start_time);
 
  return (

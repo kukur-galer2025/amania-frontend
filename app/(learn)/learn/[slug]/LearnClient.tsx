@@ -5,13 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  GraduationCap, Clock, BookOpen, Video, ChevronDown, ChevronUp,
+  GraduationCap, Clock, BookOpen, Video, ChevronDown, ChevronUp, Award,
   PlayCircle, CheckCircle2, Loader2, ArrowLeft, ArrowRight,
   ChevronLeft, Menu, X, Check, Lock, FileText, Download, Type,
-  Sun, Moon
+  Sun, Moon, MessageSquare, Send, Trash2
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 import toast from 'react-hot-toast';
+import ExamClient from './ExamClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -35,6 +36,14 @@ export default function LearnClient() {
   const [markingComplete, setMarkingComplete] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
   const [isDark, setIsDark] = useState(true);
+  
+  const [showExam, setShowExam] = useState(false);
+  
+  // Q&A State
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [activeTab, setActiveTab] = useState<'materi' | 'diskusi'>('materi');
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
 
   // Theme classes helper
   const t = {
@@ -89,6 +98,58 @@ export default function LearnClient() {
     fetchCourseLearn();
   }, [slug, router]);
 
+  useEffect(() => {
+    if (activeLessonId) {
+      fetchComments();
+      setActiveTab('materi');
+    }
+  }, [activeLessonId]);
+
+  const fetchComments = async () => {
+    try {
+      const res = await apiFetch(`/courses/lessons/${activeLessonId}/comments`);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setComments(json.data);
+      }
+    } catch {
+      console.error('Failed to fetch comments');
+    }
+  };
+
+  const submitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    try {
+      const res = await apiFetch(`/courses/lessons/${activeLessonId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ body: newComment, parent_id: replyingTo })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setNewComment('');
+        setReplyingTo(null);
+        fetchComments();
+        toast.success('Komentar terkirim!');
+      }
+    } catch {
+      toast.error('Gagal mengirim komentar.');
+    }
+  };
+
+  const deleteComment = async (id: number) => {
+    if(!confirm('Hapus komentar ini?')) return;
+    try {
+      const res = await apiFetch(`/courses/lessons/comments/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchComments();
+        toast.success('Komentar dihapus.');
+      }
+    } catch {
+      toast.error('Gagal menghapus.');
+    }
+  };
+
   const allLessons = useMemo(() => {
     if (!courseData) return [];
     return (courseData.sections || []).flatMap((s: any) => (s.lessons || []).map((l: any) => ({ ...l, sectionTitle: s.title })));
@@ -120,6 +181,14 @@ export default function LearnClient() {
 
   const goToLesson = (lessonId: number) => {
     setActiveLessonId(lessonId);
+    setShowExam(false);
+    setMobileSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goToExam = () => {
+    setActiveLessonId(null);
+    setShowExam(true);
     setMobileSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -249,6 +318,24 @@ export default function LearnClient() {
             </AnimatePresence>
           </div>
         ))}
+        
+        {/* Ujian Akhir Button in Sidebar */}
+        {courseData.has_exam && (
+          <div className="mt-4 px-4 pb-6">
+            <button
+              onClick={goToExam}
+              className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all border-2 ${showExam ? 'bg-amber-500/10 border-amber-500 text-amber-500' : `${t.sectionBg} border-slate-200 hover:border-amber-400 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}`}
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${showExam ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                 <Award size={16} />
+              </div>
+              <div className="text-left">
+                 <p className="text-xs font-black uppercase tracking-widest">Syarat Kelulusan</p>
+                 <p className="text-sm font-bold">Ujian Akhir</p>
+              </div>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -361,6 +448,17 @@ export default function LearnClient() {
             {isDark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
+          {/* Certificate button */}
+          {courseData.certificate && (
+            <a 
+              href={`${API_URL}/my-courses/${slug}/certificate?token=${typeof window !== 'undefined' ? localStorage.getItem('token') || '' : ''}`} 
+              target="_blank" 
+              className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 text-[10px] font-black hover:scale-105 transition-all"
+            >
+              <Award size={14} /> Sertifikat
+            </a>
+          )}
+
           {/* Progress pill */}
           <div className={`hidden sm:flex items-center gap-2 ${t.pill} rounded-full px-3 py-1.5`}>
             <div className={`w-16 sm:w-20 h-1.5 ${t.pillTrack} rounded-full overflow-hidden`}>
@@ -369,12 +467,20 @@ export default function LearnClient() {
             <span className="text-[10px] font-black text-emerald-500">{progress}%</span>
           </div>
 
-          {/* Sidebar toggle */}
+          {/* Desktop Sidebar Toggle */}
           <button
-            onClick={() => { setSidebarOpen(!sidebarOpen); setMobileSidebarOpen(!mobileSidebarOpen); }}
-            className={`p-1.5 sm:p-2 ${t.hover} rounded-lg transition-colors`}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={`hidden lg:flex p-1.5 sm:p-2 ${t.hover} rounded-lg transition-colors`}
           >
-            {(sidebarOpen || mobileSidebarOpen) ? <X size={18} className={t.textMuted} /> : <Menu size={18} className={t.textMuted} />}
+            {sidebarOpen ? <X size={18} className={t.textMuted} /> : <Menu size={18} className={t.textMuted} />}
+          </button>
+
+          {/* Mobile Sidebar Toggle */}
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className={`lg:hidden flex p-1.5 sm:p-2 ${t.hover} rounded-lg transition-colors`}
+          >
+            <Menu size={18} className={t.textMuted} />
           </button>
         </div>
       </div>
@@ -384,12 +490,19 @@ export default function LearnClient() {
         {/* ── MAIN CONTENT ── */}
         <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'lg:mr-[360px]' : ''}`}>
 
-          {/* Lesson Content */}
-          <div className={t.contentBg}>
-            <div className="max-w-6xl mx-auto">
-              {renderLessonContent()}
-            </div>
-          </div>
+          {showExam ? (
+            <ExamClient slug={slug} isDark={isDark} onPassed={() => {
+              // Refresh course data to fetch certificate if generated
+              window.location.reload();
+            }} />
+          ) : (
+            <>
+              {/* Lesson Content */}
+              <div className={t.contentBg}>
+                <div className="max-w-6xl mx-auto">
+                  {renderLessonContent()}
+                </div>
+              </div>
 
           {/* Lesson Info + Controls */}
           <div className="max-w-6xl mx-auto px-4 md:px-8 py-5 md:py-8 space-y-5 md:space-y-6">
@@ -435,14 +548,115 @@ export default function LearnClient() {
                     <span className="hidden sm:inline">Selanjutnya</span> <ArrowRight size={14} />
                   </button>
                 </div>
+
+                {/* Tabs */}
+                <div className={`flex items-center gap-4 border-b ${t.barBorder} mt-8`}>
+                  <button onClick={() => setActiveTab('materi')} className={`pb-3 text-sm font-bold transition-all border-b-2 ${activeTab === 'materi' ? 'border-emerald-500 text-emerald-500' : 'border-transparent ' + t.textMuted}`}>
+                    Ringkasan Materi
+                  </button>
+                  <button onClick={() => setActiveTab('diskusi')} className={`pb-3 text-sm font-bold transition-all border-b-2 flex items-center gap-2 ${activeTab === 'diskusi' ? 'border-emerald-500 text-emerald-500' : 'border-transparent ' + t.textMuted}`}>
+                    Ruang Diskusi <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'diskusi' ? 'bg-emerald-500 text-white' : t.pill}`}>{comments.length}</span>
+                  </button>
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === 'materi' && (
+                  <div className={`prose ${isDark ? 'prose-invert' : ''} max-w-none py-4 text-sm`}>
+                    {activeLesson.description ? (
+                      <div dangerouslySetInnerHTML={{ __html: activeLesson.description }} />
+                    ) : (
+                      <p className={t.textFaint + ' italic'}>Tidak ada ringkasan materi.</p>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'diskusi' && (
+                  <div className="py-4 space-y-6">
+                    <form onSubmit={submitComment} className="mb-8 relative">
+                      {replyingTo && (
+                         <div className="flex justify-between items-center bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded-t-xl text-xs font-bold border border-emerald-500/20 border-b-0">
+                           <span>Membalas komentar...</span>
+                           <button type="button" onClick={() => setReplyingTo(null)} className="hover:text-emerald-400"><X size={14}/></button>
+                         </div>
+                      )}
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Ada yang ingin ditanyakan atau didiskusikan?"
+                        className={`w-full p-4 text-sm ${t.bg} ${t.text} border ${t.barBorder} rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none ${replyingTo ? 'rounded-t-none border-t-0' : ''}`}
+                        rows={3}
+                      />
+                      <button type="submit" disabled={!newComment.trim()} className="absolute right-3 bottom-3 p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-400 disabled:opacity-50">
+                        <Send size={16} />
+                      </button>
+                    </form>
+
+                    <div className="space-y-6">
+                      {comments.length === 0 ? (
+                         <div className={`text-center py-8 ${t.textMuted}`}>
+                           <MessageSquare size={32} className="mx-auto mb-2 opacity-50" />
+                           <p className="text-sm font-medium">Belum ada diskusi di lesson ini.</p>
+                         </div>
+                      ) : (
+                        comments.map((comment) => (
+                          <div key={comment.id} className="flex gap-4">
+                             <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold shrink-0">
+                                {comment.user?.name?.charAt(0).toUpperCase()}
+                             </div>
+                             <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                   <span className={`font-bold text-sm ${t.text}`}>{comment.user?.name}</span>
+                                   {(comment.user?.role === 'superadmin' || comment.user?.role === 'creator') && (
+                                      <span className="text-[9px] px-1.5 py-0.5 bg-sky-500 text-white font-bold rounded">Instruktur</span>
+                                   )}
+                                   <span className={`text-[10px] ${t.textFaint}`}>{new Date(comment.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <p className={`text-sm ${t.textMuted} whitespace-pre-wrap`}>{comment.body}</p>
+                                <div className="flex items-center gap-4 mt-2">
+                                   <button onClick={() => setReplyingTo(comment.id)} className="text-xs font-bold text-emerald-500 hover:underline">Balas</button>
+                                   <button onClick={() => deleteComment(comment.id)} className="text-xs font-bold text-red-500 hover:underline">Hapus</button>
+                                </div>
+
+                                {/* Replies */}
+                                {comment.replies && comment.replies.length > 0 && (
+                                   <div className="mt-4 space-y-4 border-l-2 border-emerald-500/20 pl-4">
+                                      {comment.replies.map((reply: any) => (
+                                         <div key={reply.id} className="flex gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-slate-500/20 text-slate-500 flex items-center justify-center font-bold text-xs shrink-0">
+                                                {reply.user?.name?.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                  <span className={`font-bold text-sm ${t.text}`}>{reply.user?.name}</span>
+                                                  {(reply.user?.role === 'superadmin' || reply.user?.role === 'creator') && (
+                                                      <span className="text-[9px] px-1.5 py-0.5 bg-sky-500 text-white font-bold rounded">Instruktur</span>
+                                                  )}
+                                                  <span className={`text-[10px] ${t.textFaint}`}>{new Date(reply.created_at).toLocaleDateString()}</span>
+                                                </div>
+                                                <p className={`text-sm ${t.textMuted} whitespace-pre-wrap`}>{reply.body}</p>
+                                                <button onClick={() => deleteComment(reply.id)} className="text-xs font-bold text-red-500 hover:underline mt-2">Hapus</button>
+                                            </div>
+                                         </div>
+                                      ))}
+                                   </div>
+                                )}
+                             </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
+          </>
+          )}
         </div>
 
         {/* ── DESKTOP SIDEBAR ── */}
         <aside className={`hidden lg:block fixed right-0 top-0 w-[360px] h-screen ${t.sidebar} border-l ${t.barBorder} z-20 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          <SidebarContent />
+          {SidebarContent({ isMobile: false })}
         </aside>
 
         {/* Toggle button when sidebar closed */}
@@ -458,7 +672,7 @@ export default function LearnClient() {
             <>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileSidebarOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" />
               <motion.aside initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className={`fixed right-0 top-0 w-[85vw] max-w-[340px] h-screen ${t.mobileSidebar} shadow-2xl z-50 lg:hidden`}>
-                <SidebarContent isMobile />
+                {SidebarContent({ isMobile: true })}
               </motion.aside>
             </>
           )}

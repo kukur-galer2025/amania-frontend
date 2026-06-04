@@ -278,9 +278,9 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  const endTimeStr = endDate ? endDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':') : 'Selesai';
  const timeString = `${startTimeStr} - ${endTimeStr} WIB`;
 
- const isSuperadmin = !event.organizer || event.organizer.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : event.organizer.name;
- const organizerAvatar = !isSuperadmin && event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
+  const isSuperadmin = true;
+  const organizerName = event.organizer?.name || 'Amania Official';
+  const organizerAvatar = event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
 
  const userTier = event.user_registration?.tier; 
  const processedDescription = processQuillHtml(event.description || '');

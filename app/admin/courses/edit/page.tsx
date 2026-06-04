@@ -13,6 +13,7 @@ import { apiFetch } from '@/app/utils/api';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
+import CourseExamManager from './CourseExamManager';
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -569,6 +570,8 @@ export default function AdminCourseEditPage() {
               </div>
             )}
           </div>
+
+          <CourseExamManager courseId={courseId!} />
         </div>
       </div>
 

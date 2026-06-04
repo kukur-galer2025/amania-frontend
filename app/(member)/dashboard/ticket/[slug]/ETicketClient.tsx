@@ -119,8 +119,8 @@ export default function ETicketClient({ slug }: { slug: string }) {
  const eventDate = new Date(ticketData.event?.start_time);
  
  // 🔥 LOGIKA ORGANIZER 🔥
- const isSuperadmin = !ticketData.event?.organizer || ticketData.event?.organizer?.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : ticketData.event?.organizer?.name;
+  const isSuperadmin = true;
+  const organizerName = ticketData.event?.organizer?.name || 'Amania Official';
 
  return (
  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="max-w-5xl mx-auto pb-12 pt-2 md:pt-4 px-2 sm:px-0 w-full min-w-0 overflow-x-hidden">

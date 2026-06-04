@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Users, CreditCard, Ticket, AlertCircle, 
-  ArrowUpRight, Clock, CheckCircle2, MoreVertical
+  ArrowUpRight, Clock, CheckCircle2, GraduationCap, ShoppingCart
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -16,6 +16,9 @@ export default function AdminDashboardPage() {
     total_peserta: 0,
     tiket_terjual: 0,
     menunggu_verifikasi: 0,
+    is_creator: false,
+    total_courses: 0,
+    total_eproducts: 0,
   });
   const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
 
@@ -32,6 +35,9 @@ export default function AdminDashboardPage() {
             total_peserta: json.data.total_peserta,
             tiket_terjual: json.data.tiket_terjual,
             menunggu_verifikasi: json.data.menunggu_verifikasi,
+            is_creator: json.data.is_creator || false,
+            total_courses: json.data.total_courses || 0,
+            total_eproducts: json.data.total_eproducts || 0,
           });
           setRecentRegistrations(json.data.recent_registrations);
         } else {
@@ -56,7 +62,10 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const STAT_CARDS = [
+  const STAT_CARDS = stats.is_creator ? [
+    { title: 'Total Kursus Saya', value: Number(stats.total_courses).toLocaleString('id-ID'), icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+    { title: 'Total E-Produk Saya', value: Number(stats.total_eproducts).toLocaleString('id-ID'), icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+  ] : [
     { title: 'Total Pendapatan', value: `Rp ${Number(stats.total_pendapatan).toLocaleString('id-ID')}`, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
     { title: 'Total Peserta', value: Number(stats.total_peserta).toLocaleString('id-ID'), icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
     { title: 'Tiket Terjual', value: Number(stats.tiket_terjual).toLocaleString('id-ID'), icon: Ticket, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
@@ -95,63 +104,74 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div>
-              <h3 className="text-sm md:text-base font-bold text-slate-900">Pendaftaran Terbaru</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-slate-500 mt-0.5">Segera verifikasi tiket yang berstatus pending.</p>
+              <h3 className="text-sm md:text-base font-bold text-slate-900">{stats.is_creator ? 'Aktivitas Kursus' : 'Pendaftaran Terbaru'}</h3>
+              <p className="text-[10px] md:text-[11px] font-medium text-slate-500 mt-0.5">{stats.is_creator ? 'Pantau perkembangan kursus Anda.' : 'Segera verifikasi tiket yang berstatus pending.'}</p>
             </div>
-            <Link href="/admin/registrations" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg md:bg-transparent md:px-0 md:py-0 shrink-0">
-              Kelola <span className="hidden sm:inline">Semua</span> <ArrowUpRight size={14} />
-            </Link>
+            {!stats.is_creator && (
+              <Link href="/admin/registrations" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg md:bg-transparent md:px-0 md:py-0 shrink-0">
+                Kelola <span className="hidden sm:inline">Semua</span> <ArrowUpRight size={14} />
+              </Link>
+            )}
           </div>
           
-          <div className="flex-1 overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[500px]">
-              <thead>
-                <tr className="border-b border-slate-100 text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white">
-                  <th className="px-4 md:px-6 py-3 md:py-4">Peserta</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4">Program</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {recentRegistrations.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-4 md:px-6 py-8 md:py-10 text-center text-xs md:text-sm font-medium text-slate-400">
-                      Belum ada data pendaftaran terbaru.
-                    </td>
+          {!stats.is_creator && (
+            <div className="flex-1 overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white">
+                    <th className="px-4 md:px-6 py-3 md:py-4">Peserta</th>
+                    <th className="px-4 md:px-6 py-3 md:py-4">Program</th>
+                    <th className="px-4 md:px-6 py-3 md:py-4">Status</th>
                   </tr>
-                ) : (
-                  recentRegistrations.map((reg) => (
-                    <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <p className="text-xs md:text-sm font-bold text-slate-900">{reg.name}</p>
-                        <p className="text-[9px] md:text-[10px] font-medium text-slate-400 flex items-center gap-1 mt-0.5">
-                          <Clock size={10} className="md:w-3 md:h-3" /> {reg.date}
-                        </p>
-                      </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <p className="text-[11px] md:text-xs font-semibold text-slate-600 line-clamp-1">{reg.event}</p>
-                      </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        {reg.status === 'pending' ? (
-                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-amber-200/60">
-                            <AlertCircle size={10} className="md:w-3 md:h-3" /> Pending
-                          </span>
-                        ) : reg.status === 'verified' ? (
-                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-emerald-200/60">
-                            <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Verified
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-rose-200/60">
-                            <AlertCircle size={10} className="md:w-3 md:h-3" /> Ditolak
-                          </span>
-                        )}
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {recentRegistrations.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 md:px-6 py-8 md:py-10 text-center text-xs md:text-sm font-medium text-slate-400">
+                        Belum ada data pendaftaran terbaru.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    recentRegistrations.map((reg) => (
+                      <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="px-4 md:px-6 py-3 md:py-4">
+                          <p className="text-xs md:text-sm font-bold text-slate-900">{reg.name}</p>
+                          <p className="text-[9px] md:text-[10px] font-medium text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Clock size={10} className="md:w-3 md:h-3" /> {reg.date}
+                          </p>
+                        </td>
+                        <td className="px-4 md:px-6 py-3 md:py-4">
+                          <p className="text-[11px] md:text-xs font-semibold text-slate-600 line-clamp-1">{reg.event}</p>
+                        </td>
+                        <td className="px-4 md:px-6 py-3 md:py-4">
+                          {reg.status === 'pending' ? (
+                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-amber-200/60">
+                              <AlertCircle size={10} className="md:w-3 md:h-3" /> Pending
+                            </span>
+                          ) : reg.status === 'verified' ? (
+                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-emerald-200/60">
+                              <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Verified
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-rose-200/60">
+                              <AlertCircle size={10} className="md:w-3 md:h-3" /> Ditolak
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {stats.is_creator && (
+            <div className="flex-1 p-8 flex flex-col items-center justify-center text-center bg-slate-50/50">
+              <GraduationCap size={40} className="text-indigo-200 mb-4" />
+              <h4 className="text-lg font-bold text-slate-800">Mulai Berkarya!</h4>
+              <p className="text-sm text-slate-500 max-w-md mt-2">Buat kursus online Anda yang pertama dan bagikan e-produk unggulan Anda kepada para peserta Amania.</p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -159,10 +179,18 @@ export default function AdminDashboardPage() {
           <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6">
             <h3 className="text-sm md:text-base font-bold text-slate-900 mb-3 md:mb-4">Aksi Cepat</h3>
             <div className="space-y-2 md:space-y-3">
-              <Link href="/admin/events" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
-                <span className="text-[11px] md:text-xs font-bold">Kelola Event</span>
-                <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
-              </Link>
+              {!stats.is_creator && (
+                <Link href="/admin/events" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
+                  <span className="text-[11px] md:text-xs font-bold">Kelola Event</span>
+                  <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
+                </Link>
+              )}
+              {stats.is_creator && (
+                <Link href="/admin/courses" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
+                  <span className="text-[11px] md:text-xs font-bold">Buat Kursus Baru</span>
+                  <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
+                </Link>
+              )}
               <Link href="/admin/article-categories" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
                 <span className="text-[11px] md:text-xs font-bold">Tulis Artikel / Berita</span>
                 <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />

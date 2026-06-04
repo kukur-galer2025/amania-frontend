@@ -179,8 +179,8 @@ export default function MyEventsClient() {
  <AnimatePresence mode="popLayout">
  {filteredEvents.map((reg, idx) => {
  const isPast = new Date(reg.event?.end_time || reg.event?.start_time) < new Date();
- const isSuperadmin = !reg.event?.organizer || reg.event?.organizer?.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : reg.event?.organizer?.name;
+ const isSuperadmin = true;
+ const organizerName = reg.event?.organizer?.name || 'Amania Official';
  const isFree = reg.event?.basic_price === 0;
  
  // 🔥 AMBIL DATA WAKTU TERSISA

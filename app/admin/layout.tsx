@@ -8,7 +8,7 @@ import {
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
   CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt,
-  GraduationCap, BookOpen, Video
+  GraduationCap, BookOpen, Video, MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -30,6 +30,7 @@ const ADMIN_PAGES = [
   { id: 'p11a', title: 'Kategori Kursus', link: '/admin/course-categories', icon: Tag },
   { id: 'p11b', title: 'Kelola Kursus Online', link: '/admin/courses', icon: GraduationCap },
   { id: 'p11c', title: 'Transaksi Kursus', link: '/admin/course-transactions', icon: Receipt },
+  { id: 'p11d', title: 'Ruang Diskusi Q&A', link: '/admin/discussions', icon: MessageSquare },
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
@@ -72,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!token || !userStr) { router.replace('/login'); return; }
     try {
       const user = JSON.parse(userStr);
-      if (user.role !== 'superadmin' && user.role !== 'organizer') { router.replace('/beranda'); return; }
+      if (user.role !== 'superadmin' && user.role !== 'creator') { router.replace('/beranda'); return; }
       setAdminName(user.name);
       setAdminRole(user.role);
       setIsAuthorized(true);
@@ -211,7 +212,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div>
               <p className="text-lg font-black tracking-tight text-slate-900 leading-none">Amania</p>
               <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-0.5">
-                {adminRole === 'superadmin' ? 'Super Admin Panel' : 'Organizer Panel'}
+                {adminRole === 'superadmin' ? 'Super Admin Panel' : 'Creator Panel'}
               </p>
             </div>
           </Link>
@@ -228,48 +229,53 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-0.5"><NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" /></div>
             </div>
 
-            {/* 🔥 MENU DIGABUNG DISINI 🔥 */}
-            <div>
-              <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Program Utama</p>
-              <div className="space-y-0.5">
-                <NavItem icon={Rocket} label="Kelola Event" href="/admin/events" />
-                <NavItem icon={Users} label="Pendaftar" href="/admin/registrations" />
-                <NavItem icon={Ticket} label="Kelola Tiket" href="/admin/tickets" />
-                <NavItem icon={CreditCard} label="Kelola Transaksi" href="/admin/transactions" />
-                <NavItem icon={FileSpreadsheet} label="Eksport Laporan" href="/admin/reports" />
-              </div>
-            </div>
-
-            <div>
-              <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
-              <div className="space-y-0.5">
-                <NavItem icon={Tag}      label="Kategori Artikel" href="/admin/article-categories" />
-                <NavItem icon={FileText} label="Semua Artikel"    href="/admin/articles" />
-              </div>
-            </div>
-
             {adminRole === 'superadmin' && (
+              <>
+                <div>
+                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Program Utama</p>
+                  <div className="space-y-0.5">
+                    <NavItem icon={Rocket} label="Kelola Event" href="/admin/events" />
+                    <NavItem icon={Users} label="Pendaftar" href="/admin/registrations" />
+                    <NavItem icon={Ticket} label="Kelola Tiket" href="/admin/tickets" />
+                    <NavItem icon={CreditCard} label="Kelola Transaksi" href="/admin/transactions" />
+                    <NavItem icon={FileSpreadsheet} label="Eksport Laporan" href="/admin/reports" />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
+                  <div className="space-y-0.5">
+                    <NavItem icon={Tag}      label="Kategori Artikel" href="/admin/article-categories" />
+                    <NavItem icon={FileText} label="Semua Artikel"    href="/admin/articles" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {(adminRole === 'superadmin' || adminRole === 'creator') && (
               <>
                 <div>
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-400">Katalog Digital</p>
                   <div className="space-y-0.5">
-                    <NavItem icon={Layers} label="Kategori E-Produk" href="/admin/e-product-categories" />
+                    {adminRole === 'superadmin' && <NavItem icon={Layers} label="Kategori E-Produk" href="/admin/e-product-categories" />}
                     <NavItem icon={ShoppingCart} label="Kelola E-Produk" href="/admin/e-products" />
-                    <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />
+                    {adminRole === 'superadmin' && <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />}
                   </div>
                 </div>
                 <div>
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-400">Kursus Online</p>
                   <div className="space-y-0.5">
-                    <NavItem icon={Tag} label="Kategori Kursus" href="/admin/course-categories" />
+                    {adminRole === 'superadmin' && <NavItem icon={Tag} label="Kategori Kursus" href="/admin/course-categories" />}
                     <NavItem icon={GraduationCap} label="Kelola Kursus" href="/admin/courses" />
-                    <NavItem icon={Receipt} label="Transaksi Kursus" href="/admin/course-transactions" />
+                    {adminRole === 'superadmin' && <NavItem icon={Receipt} label="Transaksi Kursus" href="/admin/course-transactions" />}
                   </div>
                 </div>
-                <div>
-                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Pengaturan</p>
-                  <div className="space-y-0.5"><NavItem icon={UserCog} label="Kelola User" href="/admin/users" /></div>
-                </div>
+                {adminRole === 'superadmin' && (
+                  <div>
+                    <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Pengaturan</p>
+                    <div className="space-y-0.5"><NavItem icon={UserCog} label="Kelola User" href="/admin/users" /></div>
+                  </div>
+                )}
               </>
             )}
           </nav>
@@ -283,10 +289,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-slate-800 leading-tight truncate">{adminName}</p>
               <p className="text-[10px] font-semibold text-indigo-500 mt-0.5">
-                {adminRole === 'superadmin' ? 'Super Admin' : 'Organizer'}
+                {adminRole === 'superadmin' ? 'Super Admin' : 'Creator'}
               </p>
             </div>
           </div>
+          <Link href="/admin/profile"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all group mb-1">
+            <UserCog size={17} className="group-hover:-translate-x-0.5 transition-transform flex-shrink-0" />
+            <span className="text-sm font-bold">Edit Profil</span>
+          </Link>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-all group">
             <LogOut size={17} className="group-hover:-translate-x-0.5 transition-transform flex-shrink-0" />
@@ -490,7 +501,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="text-right">
                 <p className="text-sm font-bold text-slate-800 leading-none">{adminName}</p>
                 <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-0.5">
-                  {adminRole === 'superadmin' ? 'Super Admin' : 'Organizer'}
+                  {adminRole === 'superadmin' ? 'Super Admin' : 'Creator'}
                 </p>
               </div>
               <div className="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-700 font-black text-sm shadow-sm">
@@ -510,7 +521,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <nav className="fixed bottom-0 inset-x-0 z-40 lg:hidden">
         <div className="bg-white/90 backdrop-blur-xl border-t border-slate-200 px-2 pb-safe">
           <div className="flex items-center justify-around">
-            {BOTTOM_NAV.map(({ icon: Icon, label, href }) => {
+            {BOTTOM_NAV.filter(nav => {
+               if (adminRole === 'creator' && ['/admin/events', '/admin/transactions'].includes(nav.href)) return false;
+               if (adminRole === 'superadmin' && ['/admin/courses'].includes(nav.href)) return true; // Just example
+               return true;
+            }).map(({ icon: Icon, label, href }) => {
               if (href === '__MENU__') {
                 return (
                   <button key="menu" onClick={() => setIsMobileMenuOpen(true)}

@@ -53,7 +53,7 @@ export default function LoginClient() {
         setTimeout(() => {
           // 🔥 PERBAIKAN: Redirect Organizer dan Superadmin ke Dashboard Admin 🔥
           const userRole = data.data.user.role;
-          if (userRole === 'superadmin' || userRole === 'organizer') {
+          if (userRole === 'superadmin' || userRole === 'creator') {
             router.push('/admin/dashboard');
           } else {
             router.push('/beranda');
@@ -93,7 +93,7 @@ export default function LoginClient() {
           setTimeout(() => {
             // 🔥 PERBAIKAN: Redirect Organizer dan Superadmin ke Dashboard Admin 🔥
             const userRole = json.data.user.role;
-            if (userRole === 'superadmin' || userRole === 'organizer') {
+            if (userRole === 'superadmin' || userRole === 'creator') {
               router.push('/admin/dashboard');
             } else {
               router.push('/beranda');

@@ -290,12 +290,11 @@ export default function EventDetailClient({ slug }: { slug: string }) {
  const eventDate = parseSafeDate(eventData.start_time);
  const isPast = parseSafeDate(eventData.end_time) < new Date();
  
- const isSuperadmin = !eventData.organizer || eventData.organizer.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : eventData.organizer.name;
- const organizerAvatar =
- !isSuperadmin && eventData.organizer?.avatar
- ? `${STORAGE_URL}/${eventData.organizer.avatar}`
- : null;
+ const isSuperadmin = true;
+ const organizerName = eventData.organizer?.name || 'Amania Official';
+ const organizerAvatar = eventData.organizer?.avatar
+     ? `${STORAGE_URL}/${eventData.organizer.avatar}`
+     : null;
 
  const formatTimeRange = (start: string, end: string) => {
  if (!start || !end) return '';

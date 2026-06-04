@@ -196,9 +196,9 @@ export default function CheckoutClient() {
  );
 
  // 🔥 LOGIKA ORGANIZER 🔥
- const isSuperadmin = !event.organizer || event.organizer.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : event.organizer.name;
- const organizerAvatar = !isSuperadmin && event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
+  const isSuperadmin = true;
+  const organizerName = event.organizer?.name || 'Amania Official';
+  const organizerAvatar = event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
 
  return (
  <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] pb-24 font-sans overflow-x-hidden w-full">

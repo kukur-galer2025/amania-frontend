@@ -13,7 +13,7 @@ export default function AdminCategoriesPage() {
   const [name, setName] = useState('');
   
   // 🔥 STATE UNTUK MENAMPUNG ROLE USER YANG LOGIN 🔥
-  const [userRole, setUserRole] = useState<string>('organizer'); 
+  const [userRole, setUserRole] = useState<string>('superadmin'); 
 
   // State khusus untuk Custom Delete Modal
   const [deleteModal, setDeleteModal] = useState<{ show: boolean, id: number | null }>({ show: false, id: null });
@@ -24,7 +24,7 @@ export default function AdminCategoriesPage() {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      setUserRole(parsedUser.role || 'organizer');
+      setUserRole(parsedUser.role || 'superadmin');
     }
     fetchCategories(); 
   }, []);

@@ -28,7 +28,7 @@ export default function AdminUsersPage() {
   
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | 'superadmin' | 'organizer' | 'user'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'superadmin' | 'user' | 'creator'>('all');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [newUser, setNewUser] = useState({
-    name: '', email: '', phone: '', password: '', role: 'organizer' 
+    name: '', email: '', phone: '', password: '', role: 'user'
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export default function AdminUsersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editUser, setEditUser] = useState({
-    id: 0, name: '', email: '', phone: '', password: '', role: 'organizer'
+    id: 0, name: '', email: '', phone: '', password: '', role: 'user'
   });
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
   const [editAvatarPreview, setEditAvatarPreview] = useState<string | null>(null);
@@ -209,7 +209,7 @@ export default function AdminUsersPage() {
       if (res.ok && json.success) {
         toast.success(json.message || "Akun berhasil dibuat", { id: loadToast });
         setIsAddModalOpen(false);
-        setNewUser({ name: '', email: '', phone: '', password: '', role: 'organizer' });
+        setNewUser({ name: '', email: '', phone: '', password: '', role: 'user' });
         setAvatarFile(null);
         setAvatarPreview(null);
         fetchUsers(); 
@@ -286,14 +286,16 @@ export default function AdminUsersPage() {
     if (roleFilter !== type) return 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50';
     if (type === 'all') return 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200 font-bold';
     if (type === 'superadmin') return 'bg-rose-50 text-rose-700 shadow-sm ring-1 ring-rose-200 font-bold';
-    if (type === 'organizer') return 'bg-amber-50 text-amber-700 shadow-sm ring-1 ring-amber-200 font-bold';
+    if (type === 'creator') return 'bg-amber-50 text-amber-700 shadow-sm ring-1 ring-amber-200 font-bold';
+
     if (type === 'user') return 'bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-200 font-bold';
     return '';
   };
 
   const getRoleBadge = (role: string) => {
       if (role === 'superadmin') return (<span className="inline-flex items-center gap-1 md:gap-1.5 rounded-md bg-rose-50 px-2 py-1 text-[9px] md:text-[10px] font-bold text-rose-700 ring-1 ring-inset ring-rose-600/20 uppercase tracking-wider shrink-0 max-w-full"><ShieldCheck size={10} className="shrink-0" /> <span className="truncate">Super Admin</span></span>);
-      if (role === 'organizer') return (<span className="inline-flex items-center gap-1 md:gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-[9px] md:text-[10px] font-bold text-amber-700 ring-1 ring-inset ring-amber-600/20 uppercase tracking-wider shrink-0 max-w-full"><UserCog size={10} className="shrink-0" /> <span className="truncate">Organizer</span></span>);
+      if (role === 'creator') return (<span className="inline-flex items-center gap-1 md:gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-[9px] md:text-[10px] font-bold text-amber-700 ring-1 ring-inset ring-amber-600/20 uppercase tracking-wider shrink-0 max-w-full"><UserCog size={10} className="shrink-0" /> <span className="truncate">Creator</span></span>);
+
       return (<span className="inline-flex items-center gap-1 md:gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[9px] md:text-[10px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 uppercase tracking-wider shrink-0 max-w-full"><User size={10} className="shrink-0" /> <span className="truncate">Member</span></span>);
   }
 
@@ -321,9 +323,9 @@ export default function AdminUsersPage() {
       {/* TOOLBAR */}
       <div className="bg-white border border-slate-200 rounded-xl md:rounded-2xl p-3 md:p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 mb-6 md:mb-8 w-full min-w-0">
         <div className="flex p-0.5 w-full md:w-auto bg-slate-100/80 border border-slate-200 rounded-lg overflow-x-auto custom-scrollbar min-w-0">
-          {(['all', 'superadmin', 'organizer', 'user'] as const).map((type) => (
+          {(['all', 'superadmin', 'creator', 'user'] as const).map((type) => (
             <button key={type} onClick={() => setRoleFilter(type)} className={`flex-1 md:flex-none px-4 md:px-5 py-1.5 md:py-2 text-[10px] md:text-[11px] uppercase tracking-wider rounded-md transition-all whitespace-nowrap shrink-0 ${getFilterStyle(type)}`}>
-              {type === 'all' ? 'Semua' : type === 'superadmin' ? 'Superadmin' : type === 'organizer' ? 'Organizer' : 'Member'}
+              {type === 'all' ? 'Semua' : type === 'superadmin' ? 'Superadmin' : type === 'creator' ? 'Creator' : 'Member'}
             </button>
           ))}
         </div>
@@ -534,7 +536,7 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 w-full min-w-0">
-                   {['superadmin', 'organizer', 'user'].map(role => (
+                   {['superadmin', 'creator', 'user'].map(role => (
                      <button key={role} type="button" onClick={() => setNewUser({...newUser, role})} className={`py-2 rounded-xl border text-[10px] sm:text-xs font-bold transition-all capitalize min-w-0 w-full px-1 truncate ${newUser.role === role ? 'bg-indigo-50 border-indigo-500 text-indigo-700 ring-1 ring-indigo-500' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>{role}</button>
                    ))}
                 </div>
@@ -590,7 +592,7 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 w-full min-w-0">
-                   {['superadmin', 'organizer', 'user'].map(role => (
+                   {['superadmin', 'creator', 'user'].map(role => (
                      <button key={role} type="button" onClick={() => setEditUser({...editUser, role})} className={`py-2 rounded-xl border text-[10px] sm:text-xs font-bold transition-all capitalize min-w-0 w-full px-1 truncate ${editUser.role === role ? 'bg-amber-50 border-amber-500 text-amber-700 ring-1 ring-amber-500' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>{role}</button>
                    ))}
                 </div>

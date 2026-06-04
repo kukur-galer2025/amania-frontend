@@ -230,8 +230,8 @@ export default function TicketDashboardClient() {
  {registrations.map((reg, idx) => {
  const isApproved = reg.status === 'verified' || reg.tier === 'free';
  
- const isSuperadmin = !reg.event?.organizer || reg.event?.organizer?.role === 'superadmin';
- const organizerName = isSuperadmin ? 'Amania Official' : reg.event?.organizer?.name;
+ const isSuperadmin = true;
+ const organizerName = reg.event?.organizer?.name || 'Amania Official';
 
  return (
  <motion.div 
