@@ -191,10 +191,18 @@ export default function AdminDashboardPage() {
                   <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
                 </Link>
               )}
-              <Link href="/admin/article-categories" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
-                <span className="text-[11px] md:text-xs font-bold">Tulis Artikel / Berita</span>
-                <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
-              </Link>
+              {!stats.is_creator && (
+                <Link href="/admin/articles/create" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
+                  <span className="text-[11px] md:text-xs font-bold">Tulis Artikel / Berita</span>
+                  <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
+                </Link>
+              )}
+              {stats.is_creator && (
+                <Link href="/admin/e-products/create" className="w-full flex items-center justify-between p-2.5 md:p-3 rounded-lg md:rounded-xl border border-slate-200 hover:border-indigo-600 hover:shadow-sm hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition-all group">
+                  <span className="text-[11px] md:text-xs font-bold">Buat E-Produk Baru</span>
+                  <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-600 md:w-4 md:h-4" />
+                </Link>
+              )}
             </div>
           </div>
 
@@ -210,7 +218,7 @@ export default function AdminDashboardPage() {
               <p className="text-[10px] md:text-xs font-medium text-emerald-400">Terhubung & Tersinkronisasi</p>
             </div>
             <div className="pt-3 md:pt-4 border-t border-white/10 relative z-10">
-              <p className="text-[9px] md:text-[10px] text-slate-400 font-medium">Laravel 11.x • Next.js App Router</p>
+              <p className="text-[9px] md:text-[10px] text-slate-400 font-medium">Laravel 12.x • Next.js 16.x App Router</p>
             </div>
           </div>
         </div>

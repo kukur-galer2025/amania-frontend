@@ -570,6 +570,14 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  </div>
  
   <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+  {/* TOMBOL PANEL CREATOR / ADMIN */}
+  {userData && (userData.role === 'creator' || userData.role === 'superadmin') && (
+      <Link href="/admin/dashboard" className="hidden sm:flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] md:text-xs font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30 transition-transform hover:scale-105 shrink-0">
+          <LayoutDashboard size={14} /> 
+          <span className="hidden lg:block">{userData.role === 'superadmin' ? 'Panel Admin' : 'Panel Creator'}</span>
+          <span className="lg:hidden">Panel</span>
+      </Link>
+  )}
   {/* INFO DARK MODE (Desktop Only) */}
   <button 
   onClick={() => setShowDarkModeModal(true)}

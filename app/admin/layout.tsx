@@ -74,6 +74,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     try {
       const user = JSON.parse(userStr);
       if (user.role !== 'superadmin' && user.role !== 'creator') { router.replace('/beranda'); return; }
+      
+      // Block creators from superadmin only routes
+      if (user.role === 'creator') {
+          const forbidden = [
+              '/admin/events', '/admin/registrations', '/admin/tickets', '/admin/transactions',
+              '/admin/reports', '/admin/article', '/admin/e-product-categories', 
+              '/admin/e-product-transactions', '/admin/course-categories', 
+              '/admin/course-transactions', '/admin/users'
+          ];
+          if (forbidden.some(prefix => pathname.startsWith(prefix))) {
+              router.replace('/admin/dashboard');
+              return;
+          }
+      }
+
       setAdminName(user.name);
       setAdminRole(user.role);
       setIsAuthorized(true);
@@ -81,7 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const interval = setInterval(fetchAdminNotifications, 30000);
       return () => clearInterval(interval);
     } catch { localStorage.clear(); router.replace('/login'); }
-  }, [router]);
+  }, [router, pathname]);
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
