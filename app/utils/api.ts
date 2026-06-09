@@ -1,3 +1,4 @@
+import { safeStorage } from '@/app/utils/safeStorage';
 // app/utils/api.ts
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -5,7 +6,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // 🔥 Tambahkan parameter ke-3 (isFormData) sebagai opsional (default: false)
 export const apiFetch = async (endpoint: string, options: RequestInit = {}, isFormData: boolean = false) => {
   // 1. Ambil token dari localStorage
-  let token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  let token = null;
+  if (typeof window !== 'undefined') {
+    try {
+      token = safeStorage.getItem('token');
+    } catch (e) {
+      console.warn('localStorage is blocked');
+    }
+  }
 
   // 🔥 MAGIC FIX 1: Hapus tanda kutip ekstra jika token disimpan via JSON.stringify 🔥
   if (token && (token.startsWith('"') && token.endsWith('"'))) {

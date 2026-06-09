@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -86,15 +87,15 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  msg: reason === 'expired' ? 'Sesi Anda telah habis. Membawa Anda ke halaman login...' : 'Sesi Anda telah berakhir. Sampai jumpa kembali!',
  type: reason === 'expired' ? 'error' : 'success'
  });
- localStorage.removeItem('token');
- localStorage.removeItem('user');
+ safeStorage.removeItem('token');
+ safeStorage.removeItem('user');
  setUserData(null);
  setTimeout(() => { router.push('/login'); }, 2000);
  };
 
  const fetchCartData = async () => {
  try {
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  if (!token) return;
  const res = await apiFetch('/cart');
  if (res.ok) {
@@ -115,7 +116,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  try {
  const res = await apiFetch(`/cart/${cartId}`, {
  method: 'DELETE',
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
  const json = await res.json();
  
@@ -169,7 +170,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
  // 🌙 DARK MODE: Load preference from localStorage
  useEffect(() => {
- const savedTheme = localStorage.getItem('theme');
+ const savedTheme = safeStorage.getItem('theme');
  if (savedTheme === 'dark') {
  setIsDarkMode(true);
  } else if (savedTheme === null) {
@@ -183,15 +184,15 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const toggleDarkMode = () => {
     setIsDarkMode(prev => {
       const newVal = !prev;
-      localStorage.setItem('theme', newVal ? 'dark' : 'light');
+      safeStorage.setItem('theme', newVal ? 'dark' : 'light');
       return newVal;
     });
   };
 
  useEffect(() => {
  setIsMounted(true);
- const userStr = localStorage.getItem('user');
- const token = localStorage.getItem('token');
+ const userStr = safeStorage.getItem('user');
+ const token = safeStorage.getItem('token');
  const isTokenValid = token && token !== 'null' && token !== 'undefined' && token.length > 10;
 
  if (isTokenValid) {
@@ -207,7 +208,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  if (json.success && json.data) {
  const freshUser = json.data;
  setUserData(freshUser);
- localStorage.setItem('user', JSON.stringify(freshUser));
+ safeStorage.setItem('user', JSON.stringify(freshUser));
  const isProfileIncomplete = !freshUser.email || !freshUser.phone;
  if (isProfileIncomplete && pathname !== '/profil') {
  setShowIncompleteProfileAlert(true);
@@ -226,8 +227,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  fetchCartData(); 
 
  } else {
- localStorage.removeItem('user');
- localStorage.removeItem('token');
+ safeStorage.removeItem('user');
+ safeStorage.removeItem('token');
  setUserData(null);
  }
 

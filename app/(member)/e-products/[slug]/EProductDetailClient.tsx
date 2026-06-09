@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -52,14 +53,14 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
     const [isLoadingChannels, setIsLoadingChannels] = useState(false);
     const [channelError, setChannelError] = useState<string | null>(null);
 
-    const userData = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+    const userData = typeof window !== 'undefined' ? JSON.parse(safeStorage.getItem('user') || 'null') : null;
     const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
     useEffect(() => {
         if (!slug) return;
         (async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = safeStorage.getItem('token');
                 const headers: Record<string, string> = {};
                 if (token && token !== 'null' && token !== 'undefined') {
                     headers['Authorization'] = `Bearer ${token}`;
@@ -104,7 +105,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         try {
             const res = await apiFetch('/cart', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
                 body: JSON.stringify({ e_product_id: product.id })
             });
             const text = await res.text();
@@ -148,7 +149,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
         try {
             const res = await apiFetch('/checkout/payment-channels', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
             });
             const json = await res.json();
 
@@ -178,7 +179,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         try {
             const res = await apiFetch('/checkout/e-product', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
                 body: JSON.stringify({ e_product_id: product.id, method: finalMethod })
             });
             const json = await res.json();
@@ -238,7 +239,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             if (res.ok && json.success) {
                 toast.success('Ulasan eksklusif Anda tersimpan!');
                 setSubmitted(true);
-                const token = localStorage.getItem('token');
+                const token = safeStorage.getItem('token');
                 const headers: Record<string, string> = {};
                 if (token && token !== 'null' && token !== 'undefined') {
                     headers['Authorization'] = `Bearer ${token}`;

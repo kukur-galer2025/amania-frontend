@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,13 +67,13 @@ export default function CourseDetailClient() {
  const [recommendedCourses, setRecommendedCourses] = useState<any[]>([]);
 
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
- const userData = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+ const userData = typeof window !== 'undefined' ? JSON.parse(safeStorage.getItem('user') || 'null') : null;
 
  useEffect(() => {
  const fetchCourse = async () => {
  setLoading(true);
  try {
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  const headers: Record<string, string> = {};
  if (token && token !== 'null' && token !== 'undefined') {
  headers['Authorization'] = `Bearer ${token}`;
@@ -198,7 +199,7 @@ export default function CourseDetailClient() {
 
  try {
  const res = await apiFetch('/checkout/payment-channels', {
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
  const json = await res.json();
 
@@ -229,7 +230,7 @@ export default function CourseDetailClient() {
  try {
  const res = await apiFetch('/checkout/course', {
  method: 'POST',
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
  body: JSON.stringify({ course_id: course.id, method: finalMethod })
  });
  const json = await res.json();

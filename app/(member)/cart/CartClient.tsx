@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -65,7 +66,7 @@ export default function CartClient() {
  const fetchCart = async () => {
  try {
  const res = await apiFetch('/cart', {
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
  const json = await res.json();
  if (res.ok && json.success) {
@@ -107,7 +108,7 @@ export default function CartClient() {
  try {
  const res = await apiFetch(`/cart/${id}`, {
  method: 'DELETE',
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
  if (res.ok) {
  toast.success('Produk dihapus', { id: tid });
@@ -132,7 +133,7 @@ export default function CartClient() {
  setChannelError(null);
  try {
  const res = await apiFetch('/checkout/payment-channels', { 
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } 
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` } 
  });
  const json = await res.json();
  if (res.ok && json.success) setPaymentChannels(json.data);
@@ -152,7 +153,7 @@ export default function CartClient() {
  method: 'POST',
  headers: {
  'Content-Type': 'application/json',
- 'Authorization': `Bearer ${localStorage.getItem('token')}`
+ 'Authorization': `Bearer ${safeStorage.getItem('token')}`
  },
  body: JSON.stringify({ 
  method: selectedChannel,

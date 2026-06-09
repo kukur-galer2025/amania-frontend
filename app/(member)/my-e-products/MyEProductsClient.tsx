@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +23,7 @@ export default function MyEProductsClient() {
  const fetchMyProducts = async () => {
  try {
  const res = await apiFetch('/my-e-products', {
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
  const json = await res.json();
  

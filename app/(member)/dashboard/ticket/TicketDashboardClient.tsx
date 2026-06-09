@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -26,7 +27,7 @@ export default function TicketDashboardClient() {
 
  const fetchMyRegistrations = async () => {
  try {
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  if (!token) {
  toast.error("Sesi tidak valid, silakan login ulang");
  return setLoading(false);

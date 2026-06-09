@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -24,7 +25,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
  const fetchProductDetail = async () => {
  try {
  const res = await apiFetch(`/my-e-products/${slug}`, {
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
  const json = await res.json();
 
@@ -56,7 +57,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
  const tid = toast.loading("Menyiapkan file unduhan...");
  try {
  const res = await apiFetch(`/my-e-products/materials/${activeMaterial.id}/download`, {
- headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+ headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
  });
 
  if (!res.ok) {

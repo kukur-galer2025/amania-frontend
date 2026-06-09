@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; 
@@ -29,7 +30,7 @@ export default function ETicketClient({ slug }: { slug: string }) {
 
  const fetchTicketDetail = async () => {
  try {
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  if (!token) {
  toast.error("Sesi berakhir, silakan login.");
  return router.push('/login');

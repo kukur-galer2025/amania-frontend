@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -141,7 +142,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
  const userData =
  typeof window !== 'undefined'
- ? JSON.parse(localStorage.getItem('user') || 'null')
+ ? JSON.parse(safeStorage.getItem('user') || 'null')
  : null;
  const STORAGE_URL =
  process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';

@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -68,8 +69,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const token   = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    const token   = safeStorage.getItem('token');
+    const userStr = safeStorage.getItem('user');
     if (!token || !userStr) { router.replace('/login'); return; }
     try {
       const user = JSON.parse(userStr);
@@ -95,7 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       fetchAdminNotifications();
       const interval = setInterval(fetchAdminNotifications, 30000);
       return () => clearInterval(interval);
-    } catch { localStorage.clear(); router.replace('/login'); }
+    } catch { safeStorage.clear(); router.replace('/login'); }
   }, [router, pathname]);
 
   useEffect(() => {
@@ -170,7 +171,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); router.push('/login'); };
+  const handleLogout = () => { safeStorage.removeItem('token'); safeStorage.removeItem('user'); router.push('/login'); };
 
   const handleMenuClick = () => {
     setIsMobileMenuOpen(false);

@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,7 +82,7 @@ export default function EProductsClient() {
     (async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = safeStorage.getItem('token');
         const h: Record<string, string> = {};
         if (token && token !== 'null' && token !== 'undefined') h['Authorization'] = `Bearer ${token}`;
 
@@ -132,14 +133,14 @@ export default function EProductsClient() {
 
   const handleAddToCart = async (e: React.MouseEvent, productId: number) => {
     e.preventDefault(); e.stopPropagation();
-    const userStr = localStorage.getItem('user');
+    const userStr = safeStorage.getItem('user');
     if (!userStr || userStr === 'null') { toast.error('Silakan masuk terlebih dahulu.'); router.push('/login'); return; }
     setAddingCartId(productId);
     const tid = toast.loading('Memproses...');
     try {
       const res = await apiFetch('/cart', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
         body: JSON.stringify({ e_product_id: productId })
       });
       const text = await res.text();
@@ -160,7 +161,7 @@ export default function EProductsClient() {
 
   const handleOpenPaymentModal = async (e: React.MouseEvent, product: any) => {
     e.preventDefault(); e.stopPropagation();
-    const token = localStorage.getItem('token');
+    const token = safeStorage.getItem('token');
     if (!token) { toast.error('Silakan login terlebih dahulu'); router.push('/login'); return; }
     setProductToBuy(product);
     setIsPaymentModalOpen(true);
@@ -180,7 +181,7 @@ export default function EProductsClient() {
     try {
       const res = await apiFetch('/checkout/e-product', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
         body: JSON.stringify({ e_product_id: productToBuy.id, method: selectedChannel })
       });
       const json = await res.json();

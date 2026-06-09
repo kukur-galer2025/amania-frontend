@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Plus, Search, Edit2, Trash2, Calendar, 
   MapPin, Loader2, Image as ImageIcon,
-  ChevronLeft, ChevronRight, Inbox
+  ChevronLeft, ChevronRight, Inbox, Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
@@ -21,6 +21,33 @@ export default function AdminEventsPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; 
+
+  const handleExport = async (eventId: number) => {
+    const loadToast = toast.loading("Menyiapkan file Excel...");
+    try {
+      const res = await apiFetch(`/admin/registrations/export/${eventId}`);
+      
+      if (!res.ok) {
+        toast.error("Gagal mengunduh file", { id: loadToast });
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      // Gunakan penamaan standar jika header Content-Disposition tidak disetel dengan baik
+      a.download = `Registrants_${eventId}_${new Date().getTime()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("File berhasil diunduh", { id: loadToast });
+    } catch (error) {
+      toast.error("Terjadi kesalahan sistem", { id: loadToast });
+    }
+  };
 
   // 🔗 AMBIL STORAGE URL DARI .ENV
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -248,6 +275,13 @@ export default function AdminEventsPage() {
                       {/* COLUMN 5: ACTIONS */}
                       <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-1.5 md:gap-2">
+                          <button 
+                            onClick={() => handleExport(event.id)}
+                            className="inline-flex items-center justify-center p-1.5 md:p-2 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 rounded-lg transition-colors shadow-sm"
+                            title="Export Data Pendaftar (Excel)"
+                          >
+                            <Download size={14} className="md:w-4 md:h-4" />
+                          </button>
                           <Link 
                             href={`/admin/events/edit?id=${event.id}`}
                             className="inline-flex items-center justify-center p-1.5 md:p-2 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors shadow-sm"

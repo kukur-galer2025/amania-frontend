@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -24,7 +25,7 @@ export default function CertificatesClient() {
  useEffect(() => {
  const fetchMyCertificates = async () => {
  try {
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  if (!token) {
  toast.error("Silakan login kembali");
  setLoading(false);
