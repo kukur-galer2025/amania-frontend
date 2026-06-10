@@ -36,8 +36,7 @@ export default function AdminEventsPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      // Gunakan penamaan standar jika header Content-Disposition tidak disetel dengan baik
-      a.download = `Registrants_${eventId}_${new Date().getTime()}.xlsx`;
+      a.download = `Registrants_${eventId}_${new Date().getTime()}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
