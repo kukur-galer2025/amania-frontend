@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -73,7 +74,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
         const response = await fetch(`${baseUrl}/admin/upload-image`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
           body: formData,
         });
 

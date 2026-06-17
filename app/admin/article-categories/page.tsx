@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, Loader2, Tag, AlertTriangle, X, ShieldAlert } from 'lucide-react';
@@ -21,7 +22,7 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => {
     // Ambil data user dari localStorage saat komponen dimuat
-    const storedUser = localStorage.getItem('user');
+    const storedUser = safeStorage.getItem('user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUserRole(parsedUser.role || 'superadmin');

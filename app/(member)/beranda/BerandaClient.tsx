@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -23,7 +24,7 @@ export default function BerandaClient() {
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
  useEffect(() => {
- const storedName = localStorage.getItem('user_name');
+ const storedName = safeStorage.getItem('user_name');
  if (storedName) {
  setUserName(storedName.split(' ')[0]);
  }

@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'; 
@@ -49,7 +50,7 @@ export default function CheckoutClient() {
  useEffect(() => {
  if (!slug) return; // Tunggu URL terbaca
 
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  if (!token) {
  toast.error("Silakan masuk atau daftar terlebih dahulu untuk melakukan checkout.");
  router.push('/login');
@@ -92,7 +93,7 @@ export default function CheckoutClient() {
 
  const handleCheckout = async (e: React.FormEvent) => {
  e.preventDefault();
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  
  if (!token) { 
  toast.error("Sesi Anda telah habis. Silakan login kembali."); 

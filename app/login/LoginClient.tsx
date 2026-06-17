@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,8 +45,8 @@ export default function LoginClient() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        safeStorage.setItem('token', data.data.token);
+        safeStorage.setItem('user', JSON.stringify(data.data.user));
 
         setShowSuccessOverlay(true);
         toast.dismiss();
@@ -85,8 +86,8 @@ export default function LoginClient() {
 
         if (res.ok && json.success) {
           toast.dismiss(loadToast);
-          localStorage.setItem('token', json.data.token);
-          localStorage.setItem('user', JSON.stringify(json.data.user));
+          safeStorage.setItem('token', json.data.token);
+          safeStorage.setItem('user', JSON.stringify(json.data.user));
 
           setShowSuccessOverlay(true);
 

@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useRef } from 'react';
 import { User, Mail, Lock, Camera, Save, Loader2, CheckCircle2, AlertCircle, FileText, X, ShieldCheck, Phone } from 'lucide-react';
@@ -21,7 +22,7 @@ export default function ProfilClient() {
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
  useEffect(() => {
- const userData = localStorage.getItem('user');
+ const userData = safeStorage.getItem('user');
  if (userData) {
  const parsedUser = JSON.parse(userData);
  setUser(parsedUser);
@@ -98,7 +99,7 @@ export default function ProfilClient() {
  const data = await res.json();
 
  if (data.success) {
- localStorage.setItem('user', JSON.stringify(data.data));
+ safeStorage.setItem('user', JSON.stringify(data.data));
  showToast('success', 'Profil Anda berhasil diperbarui!');
  
  setTimeout(() => {

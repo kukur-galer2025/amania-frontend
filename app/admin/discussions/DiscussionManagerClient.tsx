@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/app/utils/api';
@@ -22,7 +23,7 @@ export default function DiscussionManagerClient() {
   const [me, setMe] = useState<any>(null);
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
+    const userStr = safeStorage.getItem('user');
     if (userStr) setMe(JSON.parse(userStr));
     fetchDiscussions();
   }, [filterStatus]);

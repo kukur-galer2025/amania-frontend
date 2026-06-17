@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -104,7 +105,7 @@ export default function TransactionsClient() {
  useEffect(() => {
  const fetchTransactions = async () => {
  try {
- const token = localStorage.getItem('token');
+ const token = safeStorage.getItem('token');
  if (!token) {
  toast.error("Silakan login kembali");
  setLoading(false);

@@ -1,4 +1,5 @@
 "use client";
+import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -604,7 +605,7 @@ export default function LearnClient() {
             <p className={`text-sm ${t.textMuted} mb-1 font-medium`}>{activeLesson.file_name || 'File tersedia'}</p>
             <p className={`text-xs ${t.textFaint} mb-8`}>Download file materi untuk mempelajari konten lesson ini.</p>
             <a
-              href={`${API_URL}/courses/lessons/${activeLesson.id}/download?token=${typeof window !== 'undefined' ? localStorage.getItem('token') || '' : ''}`}
+              href={`${API_URL}/courses/lessons/${activeLesson.id}/download?token=${typeof window !== 'undefined' ? safeStorage.getItem('token') || '' : ''}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all active:scale-95"
@@ -648,7 +649,7 @@ export default function LearnClient() {
           {/* Certificate button */}
           {courseData.certificate && (
             <a 
-              href={`${API_URL}/my-courses/${slug}/certificate?token=${typeof window !== 'undefined' ? localStorage.getItem('token') || '' : ''}`} 
+              href={`${API_URL}/my-courses/${slug}/certificate?token=${typeof window !== 'undefined' ? safeStorage.getItem('token') || '' : ''}`} 
               target="_blank" 
               className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 text-[10px] font-black hover:scale-105 transition-all"
             >
