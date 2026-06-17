@@ -8,11 +8,16 @@ import {
   GraduationCap, Clock, BookOpen, Video, ChevronDown, ChevronUp, Award,
   PlayCircle, CheckCircle2, Loader2, ArrowLeft, ArrowRight,
   ChevronLeft, Menu, X, Check, Lock, FileText, Download, Type,
-  Sun, Moon, MessageSquare, Send, Trash2
+  Sun, Moon, MessageSquare, Send, Trash2, Bot, Sparkles, ArrowDown, Mic, Target
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 import toast from 'react-hot-toast';
 import ExamClient from './ExamClient';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useRef } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -42,8 +47,75 @@ export default function LearnClient() {
   // Q&A State
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [activeTab, setActiveTab] = useState<'materi' | 'diskusi'>('materi');
+  const [activeTab, setActiveTab] = useState<'materi' | 'diskusi' | 'mentor'>('materi');
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
+
+  // AI Mentor State
+  const [aiChatHistory, setAiChatHistory] = useState<{role: 'user' | 'ai', content: string}[]>([]);
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [showConfirmClearAi, setShowConfirmClearAi] = useState(false);
+  const [showConfirmDeleteComment, setShowConfirmDeleteComment] = useState<number | null>(null);
+
+  const toggleListening = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Browser Anda tidak mendukung fitur Voice-to-Text.');
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'id-ID';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      if (finalTranscript) {
+         setAiQuestion(prev => prev + (prev ? ' ' : '') + finalTranscript);
+      }
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const clearAiChats = () => {
+    setShowConfirmClearAi(true);
+  };
+
+  const executeClearAiChats = async () => {
+    try {
+      const res = await apiFetch(`/courses/lessons/${activeLessonId}/mentor-chats`, { method: 'DELETE' });
+      if (res.ok) {
+        setAiChatHistory([]);
+        toast.success('Memori AI berhasil di-reset.');
+      }
+    } catch {
+      toast.error('Gagal mereset memori AI.');
+    } finally {
+      setShowConfirmClearAi(false);
+    }
+  };
 
   // Theme classes helper
   const t = {
@@ -101,9 +173,28 @@ export default function LearnClient() {
   useEffect(() => {
     if (activeLessonId) {
       fetchComments();
+      fetchAiMentorChats();
       setActiveTab('materi');
+      setAiChatHistory([]);
+      setAiQuestion('');
     }
   }, [activeLessonId]);
+
+  const fetchAiMentorChats = async () => {
+    try {
+      const res = await apiFetch(`/courses/lessons/${activeLessonId}/mentor-chats`);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        const mappedHistory = json.data.map((chat: any) => ({
+          role: chat.role === 'model' ? 'ai' : 'user',
+          content: chat.content
+        }));
+        setAiChatHistory(mappedHistory);
+      }
+    } catch {
+      console.error('Failed to fetch AI mentor chats');
+    }
+  };
 
   const fetchComments = async () => {
     try {
@@ -137,8 +228,11 @@ export default function LearnClient() {
     }
   };
 
-  const deleteComment = async (id: number) => {
-    if(!confirm('Hapus komentar ini?')) return;
+  const deleteComment = (id: number) => {
+    setShowConfirmDeleteComment(id);
+  };
+
+  const executeDeleteComment = async (id: number) => {
     try {
       const res = await apiFetch(`/courses/lessons/comments/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -147,8 +241,111 @@ export default function LearnClient() {
       }
     } catch {
       toast.error('Gagal menghapus.');
+    } finally {
+      setShowConfirmDeleteComment(null);
     }
   };
+
+  const sendAiMessage = async (text: string) => {
+    if (!text.trim() || isAiLoading) return;
+    
+    const userQ = text;
+    setAiChatHistory(prev => [...prev, { role: 'user', content: userQ }]);
+    setAiQuestion('');
+    setIsAiLoading(true);
+
+    try {
+      const res = await apiFetch(`/courses/lessons/${activeLessonId}/mentor`, {
+        method: 'POST',
+        body: JSON.stringify({ question: userQ })
+      });
+      
+      if (!res.ok) {
+         throw new Error('Network error');
+      }
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      
+      setAiChatHistory(prev => [...prev, { role: 'ai', content: '' }]);
+      setIsAiLoading(false); // Disable spinner since typing starts
+
+      if (reader) {
+        let isDone = false;
+        while (!isDone) {
+          const { done, value } = await reader.read();
+          isDone = done;
+          if (value) {
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const dataStr = line.substring(6).trim();
+                if (dataStr === '[DONE]') {
+                  isDone = true;
+                  break;
+                }
+                if (dataStr) {
+                  try {
+                    const data = JSON.parse(dataStr);
+                    if (data.chunk) {
+                      setAiChatHistory(prev => {
+                        const newHistory = [...prev];
+                        const lastIdx = newHistory.length - 1;
+                        if (newHistory[lastIdx].role === 'ai') {
+                          newHistory[lastIdx] = {
+                            ...newHistory[lastIdx],
+                            content: newHistory[lastIdx].content + data.chunk
+                          };
+                        }
+                        return newHistory;
+                      });
+                    }
+                  } catch (e) {
+                    // Ignore partial JSON chunks
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      toast.error('Gagal menghubungi AI Mentor.');
+      setAiChatHistory(prev => {
+        const last = prev[prev.length - 1];
+        if (last && last.role === 'ai' && last.content === '') {
+          const newH = [...prev];
+          newH[newH.length - 1].content = 'Maaf, gagal terhubung ke server AI.';
+          return newH;
+        }
+        return [...prev, { role: 'ai', content: 'Maaf, gagal terhubung ke server AI.' }];
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const submitAiQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendAiMessage(aiQuestion);
+  };
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleScroll = () => {
+    if (chatContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+      setShowScrollDown(!isAtBottom);
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(scrollToBottom, 100);
+  }, [aiChatHistory]);
 
   const allLessons = useMemo(() => {
     if (!courseData) return [];
@@ -520,6 +717,30 @@ export default function LearnClient() {
                     {activeLesson.duration_minutes > 0 && (
                       <p className={`text-xs font-bold ${t.textFaint} mt-2 flex items-center gap-1`}><Clock size={12} /> {activeLesson.duration_minutes} menit</p>
                     )}
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                      {lessonType === 'video' && (
+                        <button 
+                          onClick={() => {
+                            setActiveTab('mentor');
+                            sendAiMessage('✨ Tolong buatkan rangkuman materi dari video pelajaran ini secara detail beserta poin-poin pentingnya.');
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-bold text-xs rounded-lg transition-colors border border-indigo-200"
+                        >
+                          <Sparkles size={14} className="text-amber-500" />
+                          AI: Rangkum Video Ini
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => {
+                          setActiveTab('mentor');
+                          sendAiMessage('🎯 Tolong berikan saya 1 pertanyaan pilihan ganda yang menantang untuk menguji pemahaman saya tentang materi ini. Jangan beritahu jawabannya dulu. Tunggu saya menjawab, lalu koreksi dan berikan penjelasannya.');
+                        }}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold text-xs rounded-lg transition-colors border border-rose-200"
+                      >
+                        <Target size={14} className="text-rose-500" />
+                        AI: Uji Pemahaman Saya
+                      </button>
+                    </div>
                   </div>
 
                   {/* Mark Complete */}
@@ -550,12 +771,15 @@ export default function LearnClient() {
                 </div>
 
                 {/* Tabs */}
-                <div className={`flex items-center gap-4 border-b ${t.barBorder} mt-8`}>
-                  <button onClick={() => setActiveTab('materi')} className={`pb-3 text-sm font-bold transition-all border-b-2 ${activeTab === 'materi' ? 'border-emerald-500 text-emerald-500' : 'border-transparent ' + t.textMuted}`}>
+                <div className={`flex items-center gap-4 border-b ${t.barBorder} mt-8 overflow-x-auto custom-scrollbar`}>
+                  <button onClick={() => setActiveTab('materi')} className={`pb-3 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'materi' ? 'border-emerald-500 text-emerald-500' : 'border-transparent ' + t.textMuted}`}>
                     Ringkasan Materi
                   </button>
-                  <button onClick={() => setActiveTab('diskusi')} className={`pb-3 text-sm font-bold transition-all border-b-2 flex items-center gap-2 ${activeTab === 'diskusi' ? 'border-emerald-500 text-emerald-500' : 'border-transparent ' + t.textMuted}`}>
+                  <button onClick={() => setActiveTab('diskusi')} className={`pb-3 text-sm font-bold transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'diskusi' ? 'border-emerald-500 text-emerald-500' : 'border-transparent ' + t.textMuted}`}>
                     Ruang Diskusi <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'diskusi' ? 'bg-emerald-500 text-white' : t.pill}`}>{comments.length}</span>
+                  </button>
+                  <button onClick={() => setActiveTab('mentor')} className={`pb-3 text-sm font-bold transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'mentor' ? 'border-indigo-500 text-indigo-500' : 'border-transparent ' + t.textMuted}`}>
+                    <Bot size={16} /> Tanya AI Mentor <Sparkles size={12} className="text-amber-400" />
                   </button>
                 </div>
 
@@ -647,6 +871,176 @@ export default function LearnClient() {
                     </div>
                   </div>
                 )}
+
+                {activeTab === 'mentor' && (
+                  <div className={`py-6 space-y-6 max-w-3xl border ${isDark ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-indigo-100 bg-indigo-50'} rounded-2xl p-6 mt-4 relative overflow-hidden`}>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
+                    
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                          <Bot size={24} />
+                        </div>
+                        <div>
+                          <h3 className={`text-lg font-black ${t.text}`}>AI Mentor</h3>
+                          <p className={`text-xs font-medium ${t.textFaint}`}>Asisten cerdas 24/7</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div 
+                      ref={chatContainerRef}
+                      onScroll={handleScroll}
+                      className="space-y-4 mb-6 max-h-[400px] overflow-y-auto custom-scrollbar pr-2 relative"
+                    >
+                      {aiChatHistory.length === 0 ? (
+                        <div className="text-center py-10 opacity-70">
+                           <Sparkles size={32} className="mx-auto mb-3 text-indigo-400" />
+                           <p className={`text-sm font-bold ${t.text}`}>Halo! Ada yang membingungkan dari lesson ini?</p>
+                           <p className={`text-xs ${t.textMuted} mt-1`}>Silakan ketik pertanyaan Anda di bawah, saya siap membantu.</p>
+                        </div>
+                      ) : (
+                        aiChatHistory.map((msg, idx) => (
+                          <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-xs ${msg.role === 'user' ? 'bg-slate-700' : 'bg-indigo-500'}`}>
+                              {msg.role === 'user' ? 'U' : <Bot size={14} />}
+                            </div>
+                            <div className={`px-4 py-3 rounded-2xl min-w-0 max-w-[85%] overflow-x-auto custom-scrollbar text-sm ${msg.role === 'user' ? 'bg-slate-700 text-white rounded-tr-sm' : `${isDark ? 'bg-slate-800 text-slate-300' : 'bg-white text-slate-700 shadow-sm'} rounded-tl-sm`}`}>
+                              {msg.role === 'user' ? (
+                                <div className="whitespace-pre-wrap">{msg.content}</div>
+                              ) : (
+                                (() => {
+                                  let mainText = msg.content;
+                                  let suggestions: string[] = [];
+                                  if (msg.content.includes('|||')) {
+                                    const parts = msg.content.split('|||');
+                                    mainText = parts[0];
+                                    const suggestionsStr = parts[1] || '';
+                                    suggestions = suggestionsStr.split('|').map(s => s.trim()).filter(s => s);
+                                  }
+
+                                  return (
+                                    <div className="flex flex-col gap-3 w-full min-w-0">
+                                      <div className={`prose prose-sm max-w-none break-words ${isDark ? 'prose-invert prose-p:text-slate-300 prose-headings:text-white prose-a:text-indigo-400' : 'prose-slate prose-p:text-slate-700 prose-headings:text-slate-900 prose-a:text-indigo-600'} prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0`}>
+                                        <ReactMarkdown
+                                          remarkPlugins={[remarkGfm]}
+                                          components={{
+                                            code({node, inline, className, children, ...props}: any) {
+                                              const match = /language-(\w+)/.exec(className || '')
+                                              return !inline && match ? (
+                                                <div className="w-full overflow-x-auto custom-scrollbar my-3 rounded-lg">
+                                                  <SyntaxHighlighter
+                                                    {...props}
+                                                    children={String(children).replace(/\n$/, '')}
+                                                    style={vscDarkPlus}
+                                                    language={match[1]}
+                                                    PreTag="div"
+                                                    customStyle={{ margin: 0, padding: '1rem', fontSize: '12px', background: '#0d1117' }}
+                                                  />
+                                                </div>
+                                              ) : (
+                                                <code {...props} className={`${className} ${isDark ? 'bg-slate-700 text-indigo-300' : 'bg-slate-100 text-indigo-600'} px-1.5 py-0.5 rounded text-[11px] font-mono whitespace-pre-wrap break-all`}>
+                                                  {children}
+                                                </code>
+                                              )
+                                            }
+                                          }}
+                                        >
+                                          {mainText}
+                                        </ReactMarkdown>
+                                      </div>
+                                      
+                                      {suggestions.length > 0 && !isAiLoading && idx === aiChatHistory.length - 1 && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                          {suggestions.map((sug, i) => (
+                                            <button
+                                              key={i}
+                                              onClick={() => sendAiMessage(sug)}
+                                              className={`text-xs px-3 py-1.5 rounded-full border ${isDark ? 'border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/30 text-indigo-300' : 'border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700'} transition-all hover:scale-105 text-left`}
+                                            >
+                                              {sug}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      
+                      {isAiLoading && (
+                        <div className="flex gap-3">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-xs bg-indigo-500">
+                            <Bot size={14} />
+                          </div>
+                          <div className={`px-5 py-4 rounded-2xl max-w-[85%] text-sm rounded-tl-sm flex items-center gap-2 ${isDark ? 'bg-slate-800' : 'bg-white shadow-sm'}`}>
+                            <Loader2 size={16} className="animate-spin text-indigo-500" />
+                            <span className={t.textMuted}>AI sedang memikirkan jawaban...</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Anchor for scrolling to bottom */}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    {/* Scroll to bottom button */}
+                    {showScrollDown && (
+                      <button 
+                        onClick={scrollToBottom}
+                        className="absolute bottom-28 left-1/2 transform -translate-x-1/2 bg-indigo-500/90 backdrop-blur-sm hover:bg-indigo-600 text-white rounded-full p-2 shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all hover:scale-110 z-10 animate-bounce"
+                      >
+                        <ArrowDown size={20} />
+                      </button>
+                    )}
+
+                    <div className="flex justify-end mb-2">
+                      <button 
+                        onClick={clearAiChats}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-rose-500 hover:bg-rose-50/50 font-bold text-[11px] rounded-lg transition-colors border border-transparent hover:border-rose-100"
+                      >
+                        <Trash2 size={13} />
+                        Mulai Topik Baru
+                      </button>
+                    </div>
+
+                    <form onSubmit={submitAiQuestion} className="relative flex items-center">
+                      <textarea
+                        value={aiQuestion}
+                        onChange={(e) => setAiQuestion(e.target.value)}
+                        placeholder="Ketik pertanyaan Anda tentang materi ini..."
+                        className={`w-full p-4 pr-24 text-sm ${isDark ? 'bg-slate-900 text-white border-slate-700 focus:ring-indigo-500' : 'bg-white text-slate-900 border-slate-200 focus:ring-indigo-500'} border rounded-xl focus:outline-none focus:ring-2 resize-none shadow-sm`}
+                        rows={2}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            submitAiQuestion(e as unknown as React.FormEvent);
+                          }
+                        }}
+                      />
+                      <div className="absolute right-3 bottom-3 flex items-center gap-2">
+                        <button 
+                          type="button" 
+                          onClick={toggleListening}
+                          className={`p-2 rounded-lg transition-colors shadow-md ${isListening ? 'bg-rose-500 text-white animate-pulse' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                        >
+                          <Mic size={16} />
+                        </button>
+                        <button 
+                          type="submit" 
+                          disabled={!aiQuestion.trim() || isAiLoading} 
+                          className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 disabled:opacity-50 transition-colors shadow-md shadow-indigo-500/20"
+                        >
+                          <Send size={16} />
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -677,9 +1071,40 @@ export default function LearnClient() {
             </>
           )}
         </AnimatePresence>
+
+        {/* ── CUSTOM MODALS ── */}
+        <AnimatePresence>
+          {showConfirmClearAi && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={`${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} border p-6 rounded-2xl shadow-2xl max-w-sm w-full`}>
+                <h3 className={`text-lg font-bold mb-2 ${t.text}`}>Mulai Topik Baru?</h3>
+                <p className={`text-sm mb-6 ${t.textMuted}`}>Seluruh riwayat obrolan di materi ini akan dihapus permanen. Anda yakin?</p>
+                <div className="flex justify-end gap-3">
+                  <button onClick={() => setShowConfirmClearAi(false)} className={`px-4 py-2 text-sm font-bold rounded-xl transition-colors ${isDark ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-600'}`}>Batal</button>
+                  <button onClick={executeClearAiChats} className="px-4 py-2 text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors shadow-lg shadow-rose-500/30">Hapus Riwayat</button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+          {showConfirmDeleteComment && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={`${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} border p-6 rounded-2xl shadow-2xl max-w-sm w-full`}>
+                <h3 className={`text-lg font-bold mb-2 ${t.text}`}>Hapus Komentar?</h3>
+                <p className={`text-sm mb-6 ${t.textMuted}`}>Komentar ini akan dihapus secara permanen. Anda yakin?</p>
+                <div className="flex justify-end gap-3">
+                  <button onClick={() => setShowConfirmDeleteComment(null)} className={`px-4 py-2 text-sm font-bold rounded-xl transition-colors ${isDark ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-600'}`}>Batal</button>
+                  <button onClick={() => executeDeleteComment(showConfirmDeleteComment)} className="px-4 py-2 text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors shadow-lg shadow-rose-500/30">Hapus Komentar</button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
       </div>
 
       <style jsx global>{`
+        button:not(:disabled), a, [role="button"] { cursor: pointer !important; }
+        button:disabled { cursor: not-allowed !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: ${isDark ? '#334155' : '#cbd5e1'}; border-radius: 10px; }

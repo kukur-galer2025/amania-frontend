@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Award, CheckCircle2, XCircle, ArrowRight, RefreshCcw, Loader2 } from 'lucide-react';
+import { Award, CheckCircle2, XCircle, ArrowRight, RefreshCcw, Loader2, Bot, Sparkles } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
@@ -103,6 +103,31 @@ export default function ExamClient({ slug, isDark = true, onPassed }: { slug: st
            <p className={`text-6xl font-black ${result.is_passed ? (isDark ? 'text-white' : 'text-slate-800') : 'text-slate-400'}`}>{result.score}</p>
         </div>
 
+        {result.ai_feedback && (
+          <div className={`max-w-2xl text-left p-6 sm:p-8 rounded-3xl border mb-8 shadow-lg relative overflow-hidden ${isDark ? 'bg-indigo-950/30 border-indigo-500/30' : 'bg-indigo-50 border-indigo-200'}`}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full"></div>
+            
+            <div className="flex items-center gap-3 mb-4 relative z-10">
+              <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-md">
+                <Bot size={20} />
+              </div>
+              <div>
+                <h3 className={`font-bold text-lg flex items-center gap-2 ${isDark ? 'text-indigo-300' : 'text-indigo-700'}`}>
+                  Evaluasi AI Mentor <Sparkles size={16} className="text-amber-400" />
+                </h3>
+                <p className="text-xs opacity-70">Berdasarkan hasil jawaban Anda</p>
+              </div>
+            </div>
+            
+            <div className={`prose prose-sm max-w-none relative z-10 ${isDark ? 'prose-invert prose-p:text-slate-300' : 'prose-slate prose-p:text-slate-700'}`}>
+              {result.ai_feedback.split('\n').map((paragraph: string, i: number) => (
+                paragraph.trim() ? <p key={i}>{paragraph}</p> : <br key={i} />
+              ))}
+            </div>
+          </div>
+        )}
+
         {!result.is_passed && (
           <button onClick={() => { setResult(null); setAnswers({}); }} className={`px-8 py-3 font-bold rounded-xl transition-colors flex items-center gap-2 ${isDark ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
             <RefreshCcw size={18} /> Coba Lagi
@@ -130,12 +155,19 @@ export default function ExamClient({ slug, isDark = true, onPassed }: { slug: st
         </div>
 
         {lastAttempt && (
-          <div className={`mb-8 p-4 rounded-xl border flex items-center justify-between ${lastAttempt.is_passed ? (isDark ? 'bg-emerald-900/20 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600') : (isDark ? 'bg-rose-900/20 border-rose-500/30 text-rose-400' : 'bg-rose-50 border-rose-200 text-rose-600')}`}>
-             <div>
-               <p className="text-xs font-bold uppercase mb-1">Percobaan Terakhir</p>
-               <p className="text-sm">Skor: <span className="font-black text-lg">{lastAttempt.score}</span> - {lastAttempt.is_passed ? 'Lulus' : 'Belum Lulus'}</p>
+          <div className={`mb-8 p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 ${lastAttempt.is_passed ? (isDark ? 'bg-emerald-900/20 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600') : (isDark ? 'bg-rose-900/20 border-rose-500/30 text-rose-400' : 'bg-rose-50 border-rose-200 text-rose-600')}`}>
+             <div className="flex items-center gap-4">
+               {lastAttempt.is_passed ? <CheckCircle2 size={32} className="opacity-50" /> : <XCircle size={32} className="opacity-50" />}
+               <div>
+                 <p className="text-xs font-bold uppercase mb-1">Percobaan Terakhir</p>
+                 <p className="text-sm">Skor: <span className="font-black text-lg">{lastAttempt.score}</span> - {lastAttempt.is_passed ? 'Lulus' : 'Belum Lulus'}</p>
+               </div>
              </div>
-             {lastAttempt.is_passed && <CheckCircle2 size={32} className="opacity-50" />}
+             {lastAttempt.ai_feedback && (
+               <button onClick={() => setResult(lastAttempt)} className={`text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors ${isDark ? 'bg-black/30 hover:bg-black/50' : 'bg-white/50 hover:bg-white border'}`}>
+                 <Bot size={14} /> Lihat Evaluasi AI
+               </button>
+             )}
           </div>
         )}
 

@@ -1004,7 +1004,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  initial={{ opacity: 0, scale: 0.5, y: 20 }}
  animate={{ opacity: 1, scale: 1, y: 0 }}
  transition={{ type:"spring", stiffness: 260, damping: 20, delay: 1 }}
- className="fixed bottom-24 md:bottom-8 right-5 md:right-8 z-[99]"
+ className="fixed bottom-24 md:bottom-[6.5rem] right-5 md:right-8 z-[99]"
  >
  <Link 
  href="https://wa.me/628985477864"

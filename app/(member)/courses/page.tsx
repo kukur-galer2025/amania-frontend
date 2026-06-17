@@ -11,6 +11,13 @@ export const metadata: Metadata = {
  }
 };
 
+import AiCourseAdvisor from '../../components/AiCourseAdvisor';
+
 export default function CoursesPage() {
- return <CoursesClient />;
+ return (
+  <>
+   <CoursesClient />
+   <AiCourseAdvisor />
+  </>
+ );
 }

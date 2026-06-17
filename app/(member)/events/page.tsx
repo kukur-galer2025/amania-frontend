@@ -43,6 +43,8 @@ export const metadata: Metadata = {
  }
 };
 
+import AiCourseAdvisor from '../../components/AiCourseAdvisor';
+
 export default function EventsPage() {
  const jsonLd = {
 "@context":"https://schema.org",
@@ -59,6 +61,7 @@ export default function EventsPage() {
  dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} 
  />
  <EventsClient />
+ <AiCourseAdvisor />
  </>
  );
 }
