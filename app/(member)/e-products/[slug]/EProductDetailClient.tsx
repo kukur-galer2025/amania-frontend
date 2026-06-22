@@ -9,7 +9,7 @@ import {
     ShoppingCart, UserCircle, ShieldCheck,
     Infinity as InfinityIcon, RefreshCw, Star,
     MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, X, AlertCircle, Sparkles,
-    AlertTriangle, Crown, Layers, Share2, Link as LinkIcon, Banknote, Zap, Award, BadgeCheck, Eye
+    AlertTriangle, Crown, Layers, Share2, Link as LinkIcon, Banknote, Zap, Award, BadgeCheck, Eye, Download
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -48,10 +48,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
     const [isLockedModalOpen, setIsLockedModalOpen] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-    const [paymentChannels, setPaymentChannels] = useState<any[]>([]);
-    const [selectedChannel, setSelectedChannel] = useState<string>('');
-    const [isLoadingChannels, setIsLoadingChannels] = useState(false);
-    const [channelError, setChannelError] = useState<string | null>(null);
+    const [paymentProof, setPaymentProof] = useState<File | null>(null);
 
     const userData = typeof window !== 'undefined' ? JSON.parse(safeStorage.getItem('user') || 'null') : null;
     const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -144,43 +141,29 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         }
 
         setIsPaymentModalOpen(true);
-        setIsLoadingChannels(true);
-        setChannelError(null);
-
-        try {
-            const res = await apiFetch('/checkout/payment-channels', {
-                headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
-            });
-            const json = await res.json();
-
-            if (res.ok && json.success) {
-                setPaymentChannels(json.data);
-            } else {
-                setChannelError(json.message || "Gagal mengambil data metode pembayaran.");
-            }
-        } catch (error) {
-            setChannelError("Terjadi kesalahan jaringan.");
-        } finally {
-            setIsLoadingChannels(false);
-        }
     };
 
     const handleProcessCheckout = async (methodOverride?: string) => {
-        const finalMethod = methodOverride || selectedChannel;
-
-        if (!finalMethod && product.price > 0) {
-            toast.error("Pilih metode pembayaran terlebih dahulu!");
+        if (!paymentProof && product.price > 0 && methodOverride !== 'FREE') {
+            toast.error("Unggah bukti transfer terlebih dahulu!");
             return;
         }
 
         setBtnLoading(true);
-        const tid = toast.loading('Menyiapkan akses eksklusif...');
+        const tid = toast.loading('Memproses transaksi...');
 
         try {
+            const formData = new FormData();
+            formData.append('e_product_id', product.id);
+            formData.append('method', 'MANUAL_QRIS');
+            if (paymentProof) {
+                formData.append('payment_proof', paymentProof);
+            }
+
             const res = await apiFetch('/checkout/e-product', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
-                body: JSON.stringify({ e_product_id: product.id, method: finalMethod })
+                body: formData
             });
             const json = await res.json();
 
@@ -205,10 +188,14 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             }
 
             if (json.checkout_url) {
-                toast.success('Membuka gerbang pembayaran...', { id: tid });
+                toast.success('Pemesanan berhasil, mengarahkan...', { id: tid });
                 window.location.href = json.checkout_url;
             } else {
-                toast.error('Gateway tidak tersedia.', { id: tid }); setBtnLoading(false);
+                toast.success('Pemesanan berhasil! Menunggu konfirmasi admin.', { id: tid });
+                setIsPaymentModalOpen(false);
+                setIsLockedModalOpen(false);
+                setBtnLoading(false);
+                router.push('/my-e-products');
             }
         } catch { toast.error('Kesalahan koneksi.', { id: tid }); setBtnLoading(false); }
     };
@@ -275,13 +262,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         return `${STORAGE_URL}/${user.avatar}`;
     };
 
-    const groupedChannels = paymentChannels.reduce((acc, channel) => {
-        if (channel.active) {
-            if (!acc[channel.group]) acc[channel.group] = [];
-            acc[channel.group].push(channel);
-        }
-        return acc;
-    }, {} as Record<string, any[]>);
+
 
     if (loading) return (
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-6 bg-[#F8FAFC] dark:bg-[#0B1120]">
@@ -862,54 +843,38 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
                             {/* Content */}
                             <div className="p-4 sm:p-5 md:p-6 overflow-y-auto flex-1 custom-scrollbar">
-                                {isLoadingChannels ? (
-                                    <div className="flex flex-col items-center justify-center py-12 gap-4">
-                                        <Loader2 size={40} className="text-indigo-500 animate-spin" />
-                                        <p className="text-xs md:text-sm font-bold text-slate-400 dark:text-slate-500 animate-pulse uppercase tracking-widest">Menghubungkan Gateway...</p>
+                                <div className="space-y-5 md:space-y-6">
+                                    <div className="text-center">
+                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
+                                        <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
+                                            <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
+                                        </div>
+                                        <div>
+                                            <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">
+                                                <Download size={14} /> Unduh QRIS
+                                            </a>
+                                        </div>
                                     </div>
-                                ) : channelError ? (
-                                    <div className="text-center py-10">
-                                        <AlertCircle size={40} className="text-rose-400 mx-auto mb-4" />
-                                        <p className="text-slate-900 dark:text-white font-black text-base md:text-lg mb-2">Terjadi Kesalahan</p>
-                                        <p className="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm px-4">{channelError}</p>
+                                    <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3">Upload Bukti Transfer</h4>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files.length > 0) {
+                                                    setPaymentProof(e.target.files[0]);
+                                                }
+                                            }}
+                                            className="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"
+                                        />
+                                        {paymentProof && (
+                                            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1">
+                                                <CheckCircle2 size={12} /> File terpilih: {paymentProof.name}
+                                            </p>
+                                        )}
                                     </div>
-                                ) : Object.keys(groupedChannels).length === 0 ? (
-                                    <div className="text-center py-10">
-                                        <AlertCircle size={40} className="text-slate-300 dark:text-slate-600 dark:text-slate-400 mx-auto mb-4" />
-                                        <p className="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm">Metode pembayaran tidak tersedia saat ini.</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-5 md:space-y-6">
-                                        {(Object.entries(groupedChannels) as [string, any[]][]).map(([groupName, channels]) => (
-                                            <div key={groupName}>
-                                                <h4 className="text-[9px] md:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5 md:mb-3 ml-1">{groupName}</h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-2.5">
-                                                    {channels.map((channel: any) => {
-                                                        const isSelected = selectedChannel === channel.code;
-                                                        return (
-                                                            <button key={channel.code} onClick={() => setSelectedChannel(channel.code)}
-                                                                className={`flex items-center gap-3 p-3 md:p-3.5 rounded-xl border-2 text-left transition-all active:scale-[0.98]
- ${isSelected
-                                                                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 shadow-md shadow-indigo-100 dark:shadow-indigo-900/20'
-                                                                        : 'border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/300 hover:border-indigo-300 dark:hover:border-indigo-600/50 shadow-sm'
-                                                                    }`}>
-                                                                <div className="w-11 h-8 md:w-14 md:h-10 shrink-0 bg-white rounded-lg flex items-center justify-center px-1.5 md:px-2 py-1 border border-slate-100 dark:border-slate-700/30">
-                                                                    <img src={channel.icon_url} alt={channel.name} className="max-w-full max-h-full object-contain" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className={`text-xs md:text-sm font-bold truncate ${isSelected ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                                                                        {channel.name}
-                                                                    </p>
-                                                                </div>
-                                                                {isSelected && <CheckCircle2 size={16} className="text-indigo-500 shrink-0" />}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                </div>
                             </div>
 
                             {/* Footer */}
@@ -918,7 +883,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                     <p className="text-[8px] md:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 flex items-center justify-center sm:justify-start gap-1"><ShieldCheck size={11} /> Tagihan Terenkripsi</p>
                                     <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-none">{formatRupiah(product.price)}</p>
                                 </div>
-                                <button onClick={() => handleProcessCheckout()} disabled={!selectedChannel || btnLoading || !!channelError}
+                                <button onClick={() => handleProcessCheckout()} disabled={!paymentProof || btnLoading}
                                     className="w-full sm:w-auto px-6 sm:px-8 py-3 md:py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 dark:disabled:from-slate-700 dark:disabled:to-slate-700 dark:disabled:text-slate-500 disabled:shadow-none text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-600/25 dark:shadow-emerald-600/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shrink-0">
                                     {btnLoading ? <><Loader2 size={16} className="animate-spin shrink-0" /> <span className="truncate">Memproses...</span></> : <><Banknote size={16} className="shrink-0 text-emerald-100" /><span className="truncate">Selesaikan Pembayaran</span></>}
                                 </button>

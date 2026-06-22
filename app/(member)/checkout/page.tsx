@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
  title: 'Daftar Program | Amania Checkout',
- description: 'Amankan kursi Anda sekarang. Pilih opsi tiket Anda dan bergabunglah dengan program unggulan Amania Nusantara.',
+ description: 'Amankan kursi Anda sekarang. Pilih opsi tiket Anda dan bergabunglah dengan program unggulan Amania Institute.',
  robots: { index: false, follow: false }, 
 };
 

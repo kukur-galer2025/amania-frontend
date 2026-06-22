@@ -19,6 +19,7 @@ export default function DiscussionManagerClient() {
   const [replyBody, setReplyBody] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{isOpen: boolean; id: number | null}>({isOpen: false, id: null});
   
   const [me, setMe] = useState<any>(null);
 
@@ -77,14 +78,14 @@ export default function DiscussionManagerClient() {
     }
   };
 
-  const deleteDiscussion = async (id: number) => {
-    if (!confirm('Hapus diskusi ini beserta semua balasannya?')) return;
-    setDeletingId(id);
+  const deleteDiscussion = async () => {
+    if (!deleteConfirmModal.id) return;
+    setDeletingId(deleteConfirmModal.id);
     try {
-      const res = await apiFetch(`/admin/discussions/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/admin/discussions/${deleteConfirmModal.id}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success('Diskusi dihapus');
-        if (activeThread?.id === id) setActiveThread(null);
+        if (activeThread?.id === deleteConfirmModal.id) setActiveThread(null);
         fetchDiscussions();
       } else {
         toast.error('Gagal menghapus diskusi');
@@ -93,6 +94,7 @@ export default function DiscussionManagerClient() {
       toast.error('Terjadi kesalahan');
     } finally {
       setDeletingId(null);
+      setDeleteConfirmModal({isOpen: false, id: null});
     }
   };
 
@@ -191,7 +193,7 @@ export default function DiscussionManagerClient() {
                   <h3 className="text-base font-black text-slate-800 truncate">{activeThread.lesson?.title}</h3>
                   <p className="text-xs font-bold text-slate-500 truncate">{activeThread.lesson?.section?.course?.title}</p>
                </div>
-               <button onClick={() => deleteDiscussion(activeThread.id)} disabled={deletingId === activeThread.id} className="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-lg shrink-0">
+               <button onClick={() => setDeleteConfirmModal({isOpen: true, id: activeThread.id})} disabled={deletingId === activeThread.id} className="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-lg shrink-0">
                   Hapus Thread
                </button>
             </div>
@@ -262,6 +264,46 @@ export default function DiscussionManagerClient() {
           </>
         )}
       </div>
+
+      {/* CUSTOM DELETE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {deleteConfirmModal.isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-white rounded-2xl shadow-2xl relative max-w-sm w-full overflow-hidden flex flex-col border border-slate-200"
+            >
+              <div className="p-6">
+                 <h3 className="text-lg font-black text-slate-900 mb-2">Hapus Diskusi?</h3>
+                 <p className="text-sm text-slate-500 leading-relaxed">
+                   Apakah Anda yakin ingin menghapus seluruh diskusi ini beserta semua balasannya? Tindakan ini tidak dapat dibatalkan.
+                 </p>
+              </div>
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                 <button 
+                   onClick={() => setDeleteConfirmModal({isOpen: false, id: null})}
+                   className="px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors"
+                 >
+                   Batal
+                 </button>
+                 <button 
+                   onClick={deleteDiscussion}
+                   disabled={deletingId !== null}
+                   className="px-4 py-2 rounded-lg text-sm font-bold bg-rose-500 text-white hover:bg-rose-600 transition-colors flex items-center gap-2"
+                 >
+                   {deletingId !== null ? <Loader2 size={16} className="animate-spin" /> : null}
+                   Ya, Hapus
+                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

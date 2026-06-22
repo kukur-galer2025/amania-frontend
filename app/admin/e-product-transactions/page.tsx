@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import { 
   Search, CheckCircle2, XCircle, Clock, 
   Loader2, Inbox, Receipt, TrendingUp, Calendar, 
-  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard, Hash
+  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard, Hash, Eye, User, X
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
 
@@ -20,8 +21,8 @@ interface TrxEProduct {
   checkout_url: string | null;
   payment_method: string | null;
   buyer: { name: string; email: string; phone: string | null };
-  // Karena sekarang pakai EProductOrderItem, product menjadi product_names (string gabungan)
-  product_names: string; 
+  product_names: string;
+  payment_proof: string | null;
 }
 
 export default function AdminEProductTransactionsPage() {
@@ -32,6 +33,8 @@ export default function AdminEProductTransactionsPage() {
   
   // State Loading Eksport
   const [isExporting, setIsExporting] = useState(false);
+  const [proofImage, setProofImage] = useState<string | null>(null);
+  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
   
   // Search & Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +43,10 @@ export default function AdminEProductTransactionsPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; 
+
+  // Detail Modal
+  const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
+  const selectedDetail = useMemo(() => transactions.find(t => t.id === selectedDetailId) || null, [transactions, selectedDetailId]);
 
   const fetchTransactions = async () => {
     try {
@@ -71,8 +78,6 @@ export default function AdminEProductTransactionsPage() {
   }, []);
 
   const handleMarkAsPaid = async (id: number, ref: string) => {
-    if (!confirm(`Tandai LUNAS secara manual untuk invoice ${ref}? Pastikan Anda sudah menerima dana transferan.`)) return;
-    
     setActionLoadingId(id);
     const tid = toast.loading("Memperbarui status transaksi...");
     try {
@@ -82,6 +87,7 @@ export default function AdminEProductTransactionsPage() {
       if (res.ok && json.success) {
         toast.success(json.message, { id: tid });
         fetchTransactions(); // Refresh data
+        setSelectedDetailId(null);
       } else {
         toast.error(json.message || "Gagal mengupdate transaksi.", { id: tid });
       }
@@ -325,7 +331,7 @@ export default function AdminEProductTransactionsPage() {
 
                     {/* Kolom 4: Produk & Harga */}
                     <td className="px-4 md:px-6 py-3 md:py-4 min-w-0">
-                      <div className="text-xs md:text-sm font-bold text-slate-900 w-full truncate flex items-center gap-1.5" title={tx.product_names}>
+                      <div className="text-xs md:text-sm font-bold text-slate-900 w-full truncate max-w-[150px] md:max-w-[250px] flex items-center gap-1.5" title={tx.product_names}>
                         <ShoppingCart size={14} className="text-slate-400 shrink-0" /> <span className="truncate">{tx.product_names}</span>
                       </div>
                       <div className="text-[11px] md:text-sm font-black text-emerald-600 mt-1 truncate w-full">
@@ -363,28 +369,12 @@ export default function AdminEProductTransactionsPage() {
                     {/* Kolom 6: Aksi */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-right min-w-0">
                        <div className="flex items-center justify-end gap-2">
-                         
-                         {tx.checkout_url && Number(tx.amount) > 0 && (
-                           <a 
-                             href={tx.checkout_url}
-                             target="_blank"
-                             rel="noopener noreferrer"
-                             className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-slate-200"
-                           >
-                             <ArrowUpRight size={12} /> Cek
-                           </a>
-                         )}
-
-                         {tx.status === 'UNPAID' && (
-                           <button 
-                             onClick={() => handleMarkAsPaid(tx.id, tx.reference)}
-                             disabled={actionLoadingId === tx.id}
-                             className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg text-[9px] md:text-[10px] font-bold transition-all border border-indigo-200 hover:border-transparent disabled:opacity-50"
-                           >
-                             {actionLoadingId === tx.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} 
-                             Lunas
-                           </button>
-                         )}
+                         <button 
+                           onClick={() => setSelectedDetailId(tx.id)}
+                           className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[10px] md:text-xs font-bold transition-colors shadow-sm"
+                         >
+                           <Eye size={12} className="text-slate-400 md:w-3.5 md:h-3.5" /> Detail
+                         </button>
                        </div>
                     </td>
 
@@ -427,6 +417,146 @@ export default function AdminEProductTransactionsPage() {
           </div>
         )}
       </div>
+
+      {proofImage && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setProofImage(null)}>
+            <div className="relative max-w-3xl max-h-[90vh] w-full rounded-2xl overflow-hidden bg-white flex flex-col items-center">
+                <button
+                    className="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2 hover:bg-black transition-colors"
+                    onClick={() => setProofImage(null)}
+                >
+                    <XCircle size={24} />
+                </button>
+                <img src={proofImage} alt="Bukti Pembayaran" className="w-full h-auto max-h-[90vh] object-contain" />
+            </div>
+        </div>
+      )}
+
+      {/* 🔥 MODAL DETAIL TRANSAKSI 🔥 */}
+      <AnimatePresence>
+        {selectedDetail && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setSelectedDetailId(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-white rounded-2xl md:rounded-3xl shadow-2xl relative max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200"
+              onClick={(e) => e.stopPropagation()} 
+            >
+              <div className="px-5 md:px-6 py-3.5 md:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <h2 className="text-base md:text-lg font-bold text-slate-900">Detail Transaksi E-Produk</h2>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider ${
+                    (selectedDetail.status === 'PAID' || selectedDetail.status === 'SETTLED' || selectedDetail.status === 'success') ? 'bg-emerald-100 text-emerald-700' :
+                    (selectedDetail.status === 'EXPIRED' || selectedDetail.status === 'FAILED') ? 'bg-rose-100 text-rose-700' :
+                    'bg-amber-100 text-amber-700'
+                  }`}>
+                    {(selectedDetail.status === 'SETTLED' || selectedDetail.status === 'success') ? 'PAID' : selectedDetail.status}
+                  </span>
+                </div>
+                <button onClick={() => setSelectedDetailId(null)} className="text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors p-1.5 rounded-lg">
+                  <X size={18} className="md:w-5 md:h-5" />
+                </button>
+              </div>
+
+              <div className="p-5 md:p-6 overflow-y-auto flex-1 space-y-5 md:space-y-6 custom-scrollbar">
+                
+                <div className="space-y-3">
+                  <h3 className="text-[10px] md:text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <ShoppingCart size={14} className="text-indigo-500 md:w-4 md:h-4" /> Informasi E-Produk
+                  </h3>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid gap-4">
+                    <div>
+                      <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Produk Dibeli</p>
+                      <p className="text-xs md:text-sm font-bold text-slate-900 leading-relaxed">{selectedDetail.product_names || '-'}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div>
+                         <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Hash size={10} className="text-slate-400"/> Ref Pembayaran</p>
+                         <p className="text-xs md:text-sm font-mono font-bold text-slate-900">{selectedDetail.reference}</p>
+                       </div>
+                       <div>
+                         <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><CreditCard size={10} className="text-slate-400"/> Metode</p>
+                         <p className="text-xs md:text-sm font-bold text-slate-900 uppercase">{selectedDetail.payment_method || '-'}</p>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                   <h3 className="text-[10px] md:text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
+                     <User size={14} className="text-blue-500 md:w-4 md:h-4" /> Data Pembeli
+                   </h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 bg-white px-2">
+                     <div>
+                       <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nama Lengkap</p>
+                       <p className="text-xs md:text-sm font-bold text-slate-900 truncate">{selectedDetail.buyer?.name}</p>
+                     </div>
+                     <div>
+                       <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Alamat Email</p>
+                       <p className="text-xs md:text-sm font-bold text-slate-900 truncate">{selectedDetail.buyer?.email}</p>
+                     </div>
+                     <div className="sm:col-span-2">
+                       <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Waktu Transaksi</p>
+                       <p className="text-xs md:text-sm font-bold text-slate-900">
+                          {new Date(selectedDetail.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit' })} WIB
+                       </p>
+                     </div>
+                   </div>
+                </div>
+
+                {Number(selectedDetail.amount) > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-[10px] md:text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
+                      <CreditCard size={14} className="text-emerald-500 md:w-4 md:h-4" /> Detail Pembayaran
+                    </h3>
+                    <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between mb-2">
+                       <span className="text-[10px] md:text-xs font-bold text-slate-600 uppercase tracking-wider">Total Tagihan</span>
+                       <span className="text-base md:text-lg font-black text-emerald-700">{formatRupiah(selectedDetail.amount)}</span>
+                    </div>
+
+                    <div>
+                      <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Bukti Transfer (Manual QRIS):</p>
+                      {selectedDetail.payment_proof ? (
+                        <div 
+                           onClick={() => setProofImage(`${selectedDetail.payment_proof}`)}
+                           className="relative w-full h-32 md:h-48 bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 group"
+                        >
+                           <img src={`${selectedDetail.payment_proof}`} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                           <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                             <span className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold text-slate-900 flex items-center gap-1.5 md:gap-2 shadow-sm"><Eye size={14} className="md:w-4 md:h-4"/> Lihat Penuh</span>
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="w-full py-8 md:py-10 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-[10px] md:text-xs font-bold">
+                           {selectedDetail.checkout_url ? "Transaksi via Tripay otomatis. (Tidak perlu upload bukti transfer)." : "Belum ada bukti transfer diunggah."}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {selectedDetail.status === 'UNPAID' && (
+                <div className="px-5 md:px-6 py-4 md:py-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3">
+                  <button 
+                    onClick={() => handleMarkAsPaid(selectedDetail.id, selectedDetail.reference)}
+                    disabled={actionLoadingId === selectedDetail.id}
+                    className="w-full sm:w-auto py-2.5 md:py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                  >
+                    {actionLoadingId === selectedDetail.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />} 
+                    Verifikasi Lunas
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

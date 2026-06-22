@@ -80,9 +80,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (user.role === 'creator') {
           const forbidden = [
               '/admin/events', '/admin/registrations', '/admin/tickets', '/admin/transactions',
-              '/admin/reports', '/admin/article', '/admin/e-product-categories', 
-              '/admin/e-product-transactions', '/admin/course-categories', 
-              '/admin/course-transactions', '/admin/users'
+              '/admin/reports', '/admin/e-product-categories', 
+              '/admin/course-categories', '/admin/users'
           ];
           if (forbidden.some(prefix => pathname.startsWith(prefix))) {
               router.replace('/admin/dashboard');
@@ -147,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       let pages = ADMIN_PAGES;
       
       if (adminRole !== 'superadmin') {
-         pages = pages.filter(p => !['/admin/users', '/admin/e-products', '/admin/e-product-categories', '/admin/e-product-transactions'].includes(p.link));
+         pages = pages.filter(p => !['/admin/users', '/admin/e-product-categories', '/admin/course-categories', '/admin/events', '/admin/registrations', '/admin/tickets', '/admin/transactions', '/admin/reports'].includes(p.link));
       }
       setPageResults(pages.filter(p => p.title.toLowerCase().includes(q)).slice(0, 3));
       
@@ -257,25 +256,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <NavItem icon={FileSpreadsheet} label="Eksport Laporan" href="/admin/reports" />
                   </div>
                 </div>
-
-                <div>
-                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
-                  <div className="space-y-0.5">
-                    <NavItem icon={Tag}      label="Kategori Artikel" href="/admin/article-categories" />
-                    <NavItem icon={FileText} label="Semua Artikel"    href="/admin/articles" />
-                  </div>
-                </div>
               </>
             )}
 
             {(adminRole === 'superadmin' || adminRole === 'creator') && (
               <>
                 <div>
+                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
+                  <div className="space-y-0.5">
+                    {adminRole === 'superadmin' && <NavItem icon={Tag} label="Kategori Artikel" href="/admin/article-categories" />}
+                    <NavItem icon={FileText} label="Semua Artikel" href="/admin/articles" />
+                  </div>
+                </div>
+                <div>
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-400">Katalog Digital</p>
                   <div className="space-y-0.5">
                     {adminRole === 'superadmin' && <NavItem icon={Layers} label="Kategori E-Produk" href="/admin/e-product-categories" />}
                     <NavItem icon={ShoppingCart} label="Kelola E-Produk" href="/admin/e-products" />
-                    {adminRole === 'superadmin' && <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />}
+                    <NavItem icon={Receipt} label="Transaksi E-Produk" href="/admin/e-product-transactions" />
                   </div>
                 </div>
                 <div>
@@ -283,7 +281,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <div className="space-y-0.5">
                     {adminRole === 'superadmin' && <NavItem icon={Tag} label="Kategori Kursus" href="/admin/course-categories" />}
                     <NavItem icon={GraduationCap} label="Kelola Kursus" href="/admin/courses" />
-                    {adminRole === 'superadmin' && <NavItem icon={Receipt} label="Transaksi Kursus" href="/admin/course-transactions" />}
+                    <NavItem icon={Receipt} label="Transaksi Kursus" href="/admin/course-transactions" />
+                    <NavItem icon={MessageSquare} label="Ruang Diskusi" href="/admin/discussions" />
                   </div>
                 </div>
                 {adminRole === 'superadmin' && (

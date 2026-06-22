@@ -4,7 +4,7 @@ import ResetSandiClient from './ResetSandiClient';
 import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Buat Kata Sandi Baru | Amania Nusantara',
+  title: 'Buat Kata Sandi Baru | Amania Institute',
   description: 'Masukkan kata sandi baru untuk akun Amania Anda.',
   robots: {
     index: false,

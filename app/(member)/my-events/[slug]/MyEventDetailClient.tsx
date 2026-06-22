@@ -212,7 +212,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  let cleanDesc = stripHtmlToText(event?.description || '');
  if (cleanDesc.length > 180) cleanDesc = cleanDesc.substring(0, 180).replace(/\s+\S*$/,"") + '...';
 
- const captionText = `🎓 *Yuk ikutan program"${shareTitle}"di Amania Nusantara!*\n\n📝"${cleanDesc}"\n\n📍 *Cek detail & daftar di sini:*\n${shareUrl}`;
+ const captionText = `🎓 *Yuk ikutan program "${shareTitle}" di Amania Institute!*\n\n📝 "${cleanDesc}"\n\n📍 *Cek detail & daftar di sini:*\n${shareUrl}`;
 
  try {
  try { await navigator.clipboard.writeText(captionText); } catch (err) {}

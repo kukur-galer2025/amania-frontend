@@ -571,6 +571,11 @@ export default function TransactionsClient() {
  </div>
 
  <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-1 md:mt-0">
+ {trx.payment_proof && (
+   <button onClick={() => setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`)} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
+     <Eye size={16} className="text-indigo-500"/> Lihat Bukti
+   </button>
+ )}
  {isSuccess ? (
  <React.Fragment>
  {trx.checkout_url && (
@@ -586,6 +591,10 @@ export default function TransactionsClient() {
  <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shadow-lg dark:shadow-black/20 shadow-amber-500/20 shrink-0 min-w-0">
  Lanjutkan Pembayaran <ArrowUpRight size={16} className="shrink-0"/>
  </a>
+ ) : isActuallyUnpaid && !trx.checkout_url ? (
+ <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shrink-0 min-w-0">
+ <Clock size={16} className="shrink-0 animate-pulse"/> Menunggu Konfirmasi
+ </div>
  ) : (
  <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed shrink-0 min-w-0">
  Waktu Habis / Kedaluwarsa
@@ -705,6 +714,11 @@ export default function TransactionsClient() {
  </div>
 
  <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-1 md:mt-0">
+ {trx.payment_proof && (
+   <button onClick={() => setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`)} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
+     <Eye size={16} className="text-indigo-500"/> Lihat Bukti
+   </button>
+ )}
  {isSuccess ? (
  <Link href={courseSlug ? `/courses/${courseSlug}/learn` : `/my-courses`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-emerald-600 hover:bg-emerald-50 dark:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-transform shadow-md dark:shadow-black/15 shadow-emerald-600/20 shrink-0 min-w-0">
  <PlayCircle size={16} className="shrink-0"/> <span className="truncate">Mulai Belajar</span>
@@ -713,6 +727,10 @@ export default function TransactionsClient() {
  <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shadow-lg dark:shadow-black/20 shadow-amber-500/20 shrink-0 min-w-0">
  Lanjutkan Pembayaran <ArrowUpRight size={16} className="shrink-0"/>
  </a>
+ ) : isActuallyUnpaid && !trx.checkout_url ? (
+ <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shrink-0 min-w-0">
+ <Clock size={16} className="shrink-0 animate-pulse"/> Menunggu Konfirmasi
+ </div>
  ) : (
  <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed shrink-0 min-w-0">
  Waktu Habis / Kedaluwarsa

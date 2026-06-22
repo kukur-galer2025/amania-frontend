@@ -7,7 +7,7 @@ import {
   FileText, Search, X, SlidersHorizontal, Tag, Gift, Check,
   Star, PackageSearch, CheckCircle2, Crown, Library, 
   FilterX, BookMarked, ShieldCheck, DownloadCloud, LayoutGrid, BookOpen, Award,
-  ShoppingCart, Loader2, Layers, UserCircle, Eye, Banknote
+  ShoppingCart, Loader2, Layers, UserCircle, Eye, Banknote, Download
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -70,11 +70,8 @@ export default function EProductsClient() {
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [productToBuy,       setProductToBuy]       = useState<any>(null);
-  const [paymentChannels,    setPaymentChannels]    = useState<any[]>([]);
-  const [selectedChannel,    setSelectedChannel]    = useState<string>('');
-  const [isLoadingChannels,  setIsLoadingChannels]  = useState(false);
+  const [paymentProof,       setPaymentProof]       = useState<File | null>(null);
   const [btnLoading,         setBtnLoading]         = useState(false);
-  const [channelError,       setChannelError]       = useState<string | null>(null);
 
   const storageUrl  = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -164,36 +161,66 @@ export default function EProductsClient() {
     const token = safeStorage.getItem('token');
     if (!token) { toast.error('Silakan login terlebih dahulu'); router.push('/login'); return; }
     setProductToBuy(product);
+    setPaymentProof(null);
     setIsPaymentModalOpen(true);
-    setIsLoadingChannels(true);
-    setChannelError(null);
-    try {
-      const res = await apiFetch('/checkout/payment-channels', { headers: { 'Authorization': `Bearer ${token}` } });
-      const json = await res.json();
-      if (res.ok && json.success) setPaymentChannels(json.data);
-      else setChannelError(json.message || "Gagal memuat metode pembayaran.");
-    } catch { setChannelError("Kesalahan jaringan."); } finally { setIsLoadingChannels(false); }
   };
 
   const handleProcessCheckout = async () => {
-    if (!selectedChannel) { toast.error("Pilih metode pembayaran!"); return; }
+    if (!productToBuy) return;
+    
+    // For free products we don't need proof
+    if (productToBuy.price > 0 && !paymentProof) {
+        toast.error("Silakan upload bukti transfer!"); 
+        return; 
+    }
+    
     setBtnLoading(true);
+    const tid = toast.loading('Memproses transaksi...');
+
     try {
+      const formData = new FormData();
+      formData.append('e_product_id', productToBuy.id);
+      formData.append('method', 'MANUAL_QRIS');
+      if (paymentProof) {
+          formData.append('payment_proof', paymentProof);
+      }
+
       const res = await apiFetch('/checkout/e-product', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` },
-        body: JSON.stringify({ e_product_id: productToBuy.id, method: selectedChannel })
+        body: formData
       });
       const json = await res.json();
-      if (json.success && json.checkout_url) window.location.href = json.checkout_url;
-      else toast.error(json.message || "Gagal memproses pesanan.");
-    } catch { toast.error("Kesalahan jaringan."); } finally { setBtnLoading(false); }
-  };
+      
+      if (!res.ok || !json.success) {
+          if (json.message?.toLowerCase().includes('sudah memiliki')) {
+              toast.success('Akses sudah di tangan Anda!', { id: tid, icon: '💎' });
+              setIsPaymentModalOpen(false);
+              setProducts(prev => prev.map(p => p.id === productToBuy.id ? { ...p, is_purchased: true } : p));
+          } else {
+              toast.error(json.message || 'Gagal memproses pesanan.', { id: tid });
+          }
+          setBtnLoading(false); return;
+      }
 
-  const groupedChannels = paymentChannels.reduce((acc, c) => {
-    if (c.active) { if (!acc[c.group]) acc[c.group] = []; acc[c.group].push(c); }
-    return acc;
-  }, {} as Record<string, any[]>);
+      if (json.is_free) {
+          toast.success('Produk gratis berhasil diklaim!', { id: tid });
+          setIsPaymentModalOpen(false);
+          setProducts(prev => prev.map(p => p.id === productToBuy.id ? { ...p, is_purchased: true } : p));
+          setBtnLoading(false); return;
+      }
+
+      if (json.checkout_url) {
+          toast.success('Pemesanan berhasil, mengarahkan...', { id: tid });
+          window.location.href = json.checkout_url;
+      } else {
+          toast.success('Pemesanan berhasil! Menunggu konfirmasi admin.', { id: tid });
+          setIsPaymentModalOpen(false);
+          setBtnLoading(false);
+          router.push('/my-e-products');
+      }
+    } catch { toast.error('Kesalahan koneksi.', { id: tid }); setBtnLoading(false); }
+  };
 
   return (
     <div className="font-sans bg-[#F8FAFC] dark:bg-[#0B1120] min-h-screen text-slate-900 dark:text-slate-100 w-full flex flex-col relative overflow-x-hidden">
@@ -529,31 +556,43 @@ export default function EProductsClient() {
                 <button onClick={()=>setIsPaymentModalOpen(false)} className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-slate-400 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 dark:hover:bg-slate-700 transition-colors"><X size={18}/></button>
               </div>
               <div className="p-5 md:p-6 overflow-y-auto custom-scrollbar flex-1">
-                {isLoadingChannels ? (
-                  <div className="py-20 text-center"><Loader2 size={36} className="animate-spin text-amber-600 dark:text-amber-400 mx-auto mb-4"/><p className="text-xs font-bold text-slate-400 dark:text-slate-500">Menyiapkan metode...</p></div>
-                ) : (
-                  <div className="space-y-6">
-                    {(Object.entries(groupedChannels) as [string, any[]][]).map(([group, channels]) => (
-                      <div key={group}>
-                        <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-400 dark:bg-amber-500"></div> {group}</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 md:gap-3">
-                          {channels.map((c: any) => (
-                            <button key={c.code} onClick={()=>setSelectedChannel(c.code)} className={`flex items-center gap-3 p-3 rounded-[1rem] border-2 transition-all ${selectedChannel===c.code ? 'border-amber-600 bg-amber-50 dark:border-amber-500 dark:bg-amber-950/20 shadow-md' : 'border-slate-200 dark:border-slate-800 hover:border-amber-200 dark:hover:border-amber-500/50 bg-white dark:bg-slate-900/60'}`}>
-                              <div className="w-10 h-6 shrink-0 bg-white dark:bg-white rounded flex items-center justify-center p-0.5"><img src={c.icon_url} className="max-w-full max-h-full object-contain" alt={c.name}/></div>
-                              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{c.name}</span>
-                            </button>
-                          ))}
-                        </div>
+                <div className="space-y-6">
+                  <div className="text-center">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
+                      <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
+                          <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
                       </div>
-                    ))}
+                      <div>
+                          <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">
+                              <Download size={14} /> Unduh QRIS
+                          </a>
+                      </div>
                   </div>
-                )}
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3">Upload Bukti Transfer</h4>
+                      <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                  setPaymentProof(e.target.files[0]);
+                              }
+                          }}
+                          className="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"
+                      />
+                      {paymentProof && (
+                          <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1">
+                              <CheckCircle2 size={12} /> File terpilih: {paymentProof.name}
+                          </p>
+                      )}
+                  </div>
+                </div>
               </div>
               <div className="p-5 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="w-full sm:w-auto text-center sm:text-left"><p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1">Total Tagihan</p><p className="text-xl md:text-2xl font-black text-slate-900 dark:text-slate-100">{formatRupiah(productToBuy.price)}</p></div>
                 
-                {/* 🔥 BAYAR SEKARANG: KUNCI DI WARNA HIJAU (EMERALD) 🔥 */}
-                <button onClick={handleProcessCheckout} disabled={!selectedChannel || btnLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg shadow-emerald-600/20 dark:shadow-emerald-950/30 active:scale-95 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 dark:text-slate-400 transition-all flex items-center justify-center gap-2">
+                <button onClick={handleProcessCheckout} disabled={(!paymentProof && productToBuy.price > 0) || btnLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg shadow-emerald-600/20 dark:shadow-emerald-950/30 active:scale-95 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 dark:text-slate-400 transition-all flex items-center justify-center gap-2">
                   {btnLoading ? <Loader2 className="animate-spin" size={18}/> : <Banknote size={18}/>} {btnLoading ? 'Memproses...' : 'Bayar Sekarang'}
                 </button>
               </div>

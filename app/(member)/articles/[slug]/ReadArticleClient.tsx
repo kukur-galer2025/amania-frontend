@@ -162,6 +162,9 @@ export default function ReadArticleClient({ slug }: { slug: string }) {
  {article.author?.role === 'organizer' && (
  <span className="bg-emerald-100 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-[4px] text-[8px] md:text-[9px] uppercase tracking-wider shrink-0">Organizer</span>
  )}
+ {article.author?.role === 'creator' && (
+ <span className="bg-purple-100 text-purple-700 dark:text-purple-400 px-1.5 py-0.5 rounded-[4px] text-[8px] md:text-[9px] uppercase tracking-wider shrink-0">Kreator</span>
+ )}
  </p>
  <p className="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center flex-wrap gap-1.5 mt-0.5 w-full">
  {formatDate(article.created_at)} <span className="hidden sm:inline mx-1">•</span> <span className="sm:hidden">|</span> {article.read_time || 5} menit baca

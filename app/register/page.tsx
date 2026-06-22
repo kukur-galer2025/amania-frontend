@@ -3,8 +3,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import RegisterClient from './RegisterClient';
 
 export const metadata: Metadata = {
-  title: 'Daftar Akun Baru | Amania Nusantara',
-  description: 'Buat akun Amania secara gratis dan mulai perjalanan karir teknologi Anda. Akses ratusan bootcamp, webinar, dan masterclass berkualitas langsung dari praktisi industri.',
+  title: 'Daftar Akun Baru | Amania Institute',
+  description: 'Bergabunglah bersama ribuan praktisi dan pembelajar se-Indonesia. Temukan mentor ahli, bangun portofolio, dan eskalasikan karir IT Anda hari ini!',
   keywords: [
     'daftar amania', 
     'buat akun amania', 
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     'bootcamp programming'
   ],
   authors: [{ name: 'Amania Team' }],
-  creator: 'Amania Nusantara',
-  publisher: 'Amania Nusantara',
+  creator: 'Amania Institute',
+  publisher: 'Amania Institute',
   alternates: {
     canonical: 'https://amania.id/register', 
   },
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: 'Mulai Karir Teknologimu | Daftar Akun Amania',
     description: 'Bergabung dengan ribuan siswa lainnya. Tingkatkan skill IT kamu dengan akses ke berbagai bootcamp dan sertifikasi resmi Amania.',
     url: 'https://amania.id/register',
-    siteName: 'Amania Nusantara',
+    siteName: 'Amania Institute',
     locale: 'id_ID',
     type: 'website',
     images: [

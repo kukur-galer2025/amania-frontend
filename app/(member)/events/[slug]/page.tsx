@@ -44,21 +44,23 @@ export async function generateMetadata(
  const finalImages = imageUrl ? [imageUrl] : previousImages;
  
  return {
- title: `${titleSlug} | Program Amania Nusantara`,
- description: description,
- openGraph: {
- title: `${titleSlug} | Program Amania Nusantara`,
- description: description,
- type: 'website',
- images: finalImages,
- },
- twitter: {
- card: 'summary_large_image',
- title: `${titleSlug} | Program Amania Nusantara`,
- description: description,
- images: finalImages,
- }
- };
+      title: `${titleSlug} | Program Amania Institute`,
+      description: `Daftar dan ikuti ${titleSlug} di Amania Institute. Dapatkan ilmu langsung dari praktisi industri, sertifikat, dan bangun relasi profesional.`,
+      openGraph: {
+        title: `${titleSlug} | Program Amania Institute`,
+        description: `Daftar dan ikuti ${titleSlug} di Amania Institute. Dapatkan ilmu langsung dari praktisi industri, sertifikat, dan bangun relasi profesional.`,
+        url: `https://amania.id/events/${slug}`,
+        images: [
+          { url: 'https://amania.id/og-event.jpg' }
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${titleSlug} | Program Amania Institute`,
+        description: description,
+        images: finalImages,
+      }
+    };
 }
 
 // 2. EXPORT DEFAULT WAJIB ADA DI SINI
