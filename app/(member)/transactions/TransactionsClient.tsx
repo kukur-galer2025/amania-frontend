@@ -8,7 +8,7 @@ import {
  XCircle, Eye, Image as ImageIcon, X, 
  ReceiptText, ArrowUpRight, Search,
  Ticket, FileText, DownloadCloud, CalendarDays, Hash, CreditCard, ShieldAlert, Timer,
- GraduationCap, PlayCircle
+ GraduationCap, PlayCircle, UploadCloud
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -100,46 +100,96 @@ export default function TransactionsClient() {
  const [searchQuery, setSearchQuery] = useState('');
  const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'pending' | 'failed'>('all');
 
+ const [reuploadTarget, setReuploadTarget] = useState<{ id: number, type: 'event' | 'eproduct' | 'course' } | null>(null);
+ const [reuploadFile, setReuploadFile] = useState<File | null>(null);
+ const [reuploadPreview, setReuploadPreview] = useState<string | null>(null);
+ const [isUploading, setIsUploading] = useState(false);
+
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
- useEffect(() => {
  const fetchTransactions = async () => {
- try {
- const token = safeStorage.getItem('token');
- if (!token) {
- toast.error("Silakan login kembali");
- setLoading(false);
- return;
- }
+    try {
+      const token = safeStorage.getItem('token');
+      if (!token) {
+        toast.error("Silakan login kembali");
+        setLoading(false);
+        return;
+      }
 
- const [resEvents, resEProducts, resCourses] = await Promise.all([
- apiFetch('/my-registrations'),
- apiFetch('/my-eproduct-transactions'),
- apiFetch('/my-course-transactions')
- ]);
+      const [resEvents, resEProducts, resCourses] = await Promise.all([
+        apiFetch('/my-registrations'),
+        apiFetch('/my-eproduct-transactions'),
+        apiFetch('/my-course-transactions')
+      ]);
 
- const jsonEvents = await resEvents.json();
- const jsonEProducts = await resEProducts.json();
- const jsonCourses = await resCourses.json();
- 
- if (resEvents.ok && jsonEvents.success) {
- setEventTransactions(jsonEvents.data);
- }
- if (resEProducts.ok && jsonEProducts.success) {
- setEProductTransactions(jsonEProducts.data);
- }
- if (resCourses.ok && jsonCourses.success) {
- setCourseTransactions(jsonCourses.data);
- }
- } catch (error) {
- toast.error("Gagal memuat riwayat transaksi");
- } finally {
- setLoading(false);
- }
- };
+      const jsonEvents = await resEvents.json();
+      const jsonEProducts = await resEProducts.json();
+      const jsonCourses = await resCourses.json();
+      
+      if (resEvents.ok && jsonEvents.success) {
+        setEventTransactions(jsonEvents.data);
+      }
+      if (resEProducts.ok && jsonEProducts.success) {
+        setEProductTransactions(jsonEProducts.data);
+      }
+      if (resCourses.ok && jsonCourses.success) {
+        setCourseTransactions(jsonCourses.data);
+      }
+    } catch (error) {
+      toast.error("Gagal memuat riwayat transaksi");
+    } finally {
+      setLoading(false);
+    }
+  };
 
- fetchTransactions();
- }, []);
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const handleReupload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reuploadTarget || !reuploadFile) return;
+
+    if (reuploadFile.size > 5 * 1024 * 1024) {
+      toast.error('Ukuran file maksimal adalah 5MB.');
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('payment_proof', reuploadFile);
+
+    try {
+      let endpoint = '';
+      if (reuploadTarget.type === 'event') {
+        endpoint = `/registrations/${reuploadTarget.id}/reupload`;
+      } else if (reuploadTarget.type === 'eproduct') {
+        endpoint = `/e-product-transactions/${reuploadTarget.id}/reupload`;
+      } else if (reuploadTarget.type === 'course') {
+        endpoint = `/course-transactions/${reuploadTarget.id}/reupload`;
+      }
+
+      const res = await apiFetch(endpoint, {
+        method: 'POST',
+        body: formData
+      });
+      const json = await res.json();
+
+      if (res.ok && json.success) {
+        toast.success(json.message);
+        setReuploadTarget(null);
+        setReuploadFile(null);
+        setReuploadPreview(null);
+        fetchTransactions();
+      } else {
+        toast.error(json.message || "Gagal mengunggah ulang bukti.");
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan sistem.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
  const formatRupiah = (price: string | number) => {
  const num = typeof price === 'string' ? parseFloat(price) : price;
@@ -217,7 +267,6 @@ export default function TransactionsClient() {
  return eProductTransactions.filter(trx => {
  const query = searchQuery.toLowerCase();
 
- // 🔥 MENGAMBIL NAMA PRODUK DARI RELASI ITEMS 🔥
  const productNames = trx.items && trx.items.length > 0 
  ? trx.items.map((i: any) => i.product?.title).filter(Boolean).join(', ') 
  : '';
@@ -432,9 +481,18 @@ export default function TransactionsClient() {
 
  <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-2 md:mt-0">
  {parseFloat(trx.total_amount) > 0 ? (
+ <div className="flex items-center gap-2 w-full md:w-auto">
+ {trx.status?.toLowerCase() === 'rejected' && (
+   <button 
+     onClick={() => setReuploadTarget({ id: trx.id, type: 'event' })}
+     className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 md:py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-transform shadow-md shadow-rose-200 dark:shadow-none"
+   >
+     Upload Ulang Bukti
+   </button>
+ )}
  <button 
  onClick={() => trx.payment_proof ? setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`) : toast.error("Bukti belum diunggah")}
- className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10"
+ className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10"
  >
  {trx.payment_proof ? (
  <span className="flex items-center gap-1.5"><Eye size={16} className="text-indigo-500"/> Lihat Bukti Transfer</span>
@@ -442,14 +500,24 @@ export default function TransactionsClient() {
  <span className="flex items-center gap-1.5"><ShieldAlert size={16} className="text-rose-400"/> Belum Upload Bukti</span>
  )}
  </button>
+ </div>
  ) : (
  <div className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 rounded-xl text-xs font-bold">
  Tiket Gratis (Free Pass)
  </div>
  )}
  </div>
-
  </div>
+
+ {trx.status?.toLowerCase() === 'rejected' && trx.rejection_reason && (
+   <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+     <XCircle size={16} className="text-rose-500 mt-0.5 shrink-0" />
+     <div>
+       <p className="text-xs font-bold text-rose-700 mb-0.5">Transaksi Ditolak</p>
+       <p className="text-[11px] text-rose-600">{trx.rejection_reason}</p>
+     </div>
+   </div>
+ )}
  </div>
  ))}
  </div>
@@ -491,7 +559,6 @@ export default function TransactionsClient() {
  const s = trx.status?.toLowerCase();
  const isSuccess = s === 'paid' || s === 'success' || s === 'settled';
  
- // 🔥 LOGIKA KEDALUWARSA WAKTU 🔥
  let isTimeExpired = false;
  if (trx.expired_time) {
  isTimeExpired = new Date().getTime() > (Number(trx.expired_time) * 1000);
@@ -502,7 +569,6 @@ export default function TransactionsClient() {
  
  const isActuallyUnpaid = (s === 'unpaid' || s === 'pending') && !isTimeExpired;
 
- // 🔥 EKSTRAK DATA PRODUK DARI RELASI ITEMS 🔥
  const firstProduct = trx.items?.[0]?.product;
  const coverImage = firstProduct?.cover_image;
  const productNames = trx.items && trx.items.length > 0 
@@ -513,9 +579,7 @@ export default function TransactionsClient() {
  return (
  <div key={`ep-${trx.id}`} className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] p-4 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(79,70,229,0.1)] hover:border-indigo-200 dark:hover:border-indigo-700 transition-transform duration-300 group flex flex-col gap-4 w-full min-w-0">
  
- {/* BAGIAN ATAS: INFO & COVER (Selalu Berdampingan) */}
  <div className="flex flex-row items-start gap-4 md:gap-6 w-full">
- {/* Thumbnail E-Product */}
  <div className="w-20 sm:w-28 md:w-36 shrink-0 rounded-lg md:rounded-xl bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-700/50 relative shadow-sm dark:shadow-black/10 flex items-center justify-center p-1.5 md:p-2" style={{ aspectRatio: '2/3' }}>
  {coverImage ? (
  <React.Fragment>
@@ -529,9 +593,7 @@ export default function TransactionsClient() {
  )}
  </div>
 
- {/* Detail Info */}
  <div className="flex-1 flex flex-col min-w-0 py-1">
- 
  <div className="flex flex-wrap items-center gap-2 mb-2 md:mb-3 w-full min-w-0">
  {getStatusBadge(trx.status, trx.created_at, trx.expired_time)}
  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 rounded-md text-[9px] md:text-[10px] font-black uppercase tracking-widest truncate shrink-0">
@@ -554,15 +616,12 @@ export default function TransactionsClient() {
  </div>
  </div>
 
- {/* BAGIAN BAWAH: TOTAL & AKSI */}
  <div className="pt-4 border-t border-slate-100 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full min-w-0">
- 
  <div className="flex items-center justify-between md:justify-start gap-4 md:gap-8 w-full md:w-auto min-w-0 pb-1 md:pb-0">
  <div className="flex flex-col min-w-0 shrink-0">
  <span className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-0.5 flex items-center gap-1"><CreditCard size={12}/> Tagihan Otomatis</span>
  <span className="text-lg md:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight w-full truncate">{formatRupiah(trx.amount)}</span>
  </div>
-
  {isActuallyUnpaid && trx.checkout_url && (
  <div className="border-l border-slate-200 dark:border-slate-700/50 pl-4 md:pl-6 shrink-0 text-right md:text-left">
  <InvoiceCountdown createdAt={trx.created_at} expiredAt={trx.expired_time} />
@@ -570,39 +629,56 @@ export default function TransactionsClient() {
  )}
  </div>
 
- <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-1 md:mt-0">
- {trx.payment_proof && (
-   <button onClick={() => setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`)} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
-     <Eye size={16} className="text-indigo-500"/> Lihat Bukti
-   </button>
- )}
- {isSuccess ? (
- <React.Fragment>
- {trx.checkout_url && (
- <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
- <ReceiptText size={16} className="text-slate-400 dark:text-slate-400 shrink-0"/> <span className="truncate">E-Receipt</span>
- </a>
- )}
- <Link href={productSlug ? `/my-e-products/${productSlug}` : `/my-e-products`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-indigo-600 hover:bg-indigo-50 dark:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-transform shadow-md dark:shadow-black/15 shadow-indigo-600/20 shrink-0 min-w-0">
- <DownloadCloud size={16} className="shrink-0"/> <span className="truncate">Akses Produk</span>
- </Link>
- </React.Fragment>
- ) : isActuallyUnpaid && trx.checkout_url ? (
- <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shadow-lg dark:shadow-black/20 shadow-amber-500/20 shrink-0 min-w-0">
- Lanjutkan Pembayaran <ArrowUpRight size={16} className="shrink-0"/>
- </a>
- ) : isActuallyUnpaid && !trx.checkout_url ? (
- <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shrink-0 min-w-0">
- <Clock size={16} className="shrink-0 animate-pulse"/> Menunggu Konfirmasi
+ <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-1 md:mt-0 items-center">
+    {(s === 'rejected' || s === 'failed') && (
+      <button 
+        onClick={() => setReuploadTarget({ id: trx.id, type: 'eproduct' })}
+        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 md:py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-transform shadow-md shadow-rose-200 dark:shadow-none"
+      >
+        Upload Ulang Bukti
+      </button>
+    )}
+    {trx.payment_proof && (
+      <button onClick={() => setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`)} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
+        <Eye size={16} className="text-indigo-500"/> Lihat Bukti
+      </button>
+    )}
+    {isSuccess ? (
+      <React.Fragment>
+        {trx.checkout_url && (
+          <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
+            <ReceiptText size={16} className="text-slate-400 dark:text-slate-400 shrink-0"/> <span className="truncate">E-Receipt</span>
+          </a>
+        )}
+        <Link href={productSlug ? `/my-e-products/${productSlug}` : `/my-e-products`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-indigo-600 hover:bg-indigo-50 dark:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-transform shadow-md dark:shadow-black/15 shadow-indigo-600/20 shrink-0 min-w-0">
+          <DownloadCloud size={16} className="shrink-0"/> <span className="truncate">Akses Produk</span>
+        </Link>
+      </React.Fragment>
+    ) : isActuallyUnpaid && trx.checkout_url ? (
+      <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shadow-lg dark:shadow-black/20 shadow-amber-500/20 shrink-0 min-w-0">
+        Lanjutkan Pembayaran <ArrowUpRight size={16} className="shrink-0"/>
+      </a>
+    ) : isActuallyUnpaid && !trx.checkout_url ? (
+      <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shrink-0 min-w-0">
+        <Clock size={16} className="shrink-0 animate-pulse"/> Menunggu Konfirmasi
+      </div>
+    ) : (s === 'rejected' || s === 'failed') ? null : (
+      <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed shrink-0 min-w-0">
+        Waktu Habis / Kedaluwarsa
+      </div>
+    )}
  </div>
- ) : (
- <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed shrink-0 min-w-0">
- Waktu Habis / Kedaluwarsa
- </div>
- )}
  </div>
 
- </div>
+ {(s === 'rejected' || s === 'failed') && trx.rejection_reason && (
+   <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+     <XCircle size={16} className="text-rose-500 mt-0.5 shrink-0" />
+     <div>
+       <p className="text-xs font-bold text-rose-700 mb-0.5">Transaksi Ditolak</p>
+       <p className="text-[11px] text-rose-600">{trx.rejection_reason}</p>
+     </div>
+   </div>
+ )}
  </div>
  );
  })}
@@ -662,7 +738,6 @@ export default function TransactionsClient() {
  <div key={`crs-${trx.id}`} className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] p-4 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(16,185,129,0.1)] hover:border-emerald-200 transition-transform duration-300 group flex flex-col gap-4 w-full min-w-0">
  
  <div className="flex flex-row items-start gap-4 md:gap-6 w-full">
- {/* Thumbnail */}
  <div className="w-24 sm:w-32 md:w-44 shrink-0 rounded-lg md:rounded-xl bg-slate-100 dark:bg-slate-700/50 overflow-hidden border border-slate-200 dark:border-slate-700/50 relative shadow-sm dark:shadow-black/10" style={{ aspectRatio: '16/9' }}>
  {courseData?.thumbnail ? (
  <img src={`${STORAGE}/${courseData.thumbnail}`} alt={courseData?.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
@@ -673,7 +748,6 @@ export default function TransactionsClient() {
  )}
  </div>
 
- {/* Detail */}
  <div className="flex-1 flex flex-col min-w-0 py-1">
  <div className="flex flex-wrap items-center gap-2 mb-2 md:mb-3 w-full min-w-0">
  {getStatusBadge(trx.status, trx.created_at, trx.expired_time)}
@@ -697,7 +771,6 @@ export default function TransactionsClient() {
  </div>
  </div>
 
- {/* Bottom: Total & Actions */}
  <div className="pt-4 border-t border-slate-100 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full min-w-0">
  
  <div className="flex items-center justify-between md:justify-start gap-4 md:gap-8 w-full md:w-auto min-w-0 pb-1 md:pb-0">
@@ -705,7 +778,6 @@ export default function TransactionsClient() {
  <span className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-0.5 flex items-center gap-1"><CreditCard size={12}/> Tagihan Otomatis</span>
  <span className="text-lg md:text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight w-full truncate">{formatRupiah(trx.amount)}</span>
  </div>
-
  {isActuallyUnpaid && trx.checkout_url && (
  <div className="border-l border-slate-200 dark:border-slate-700/50 pl-4 md:pl-6 shrink-0 text-right md:text-left">
  <InvoiceCountdown createdAt={trx.created_at} expiredAt={trx.expired_time} />
@@ -713,31 +785,49 @@ export default function TransactionsClient() {
  )}
  </div>
 
- <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-1 md:mt-0">
- {trx.payment_proof && (
-   <button onClick={() => setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`)} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
-     <Eye size={16} className="text-indigo-500"/> Lihat Bukti
-   </button>
+ <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 mt-1 md:mt-0 items-center">
+    {(s === 'rejected' || s === 'failed') && (trx.payment_proof || trx.payment_method === 'MANUAL_QRIS') && (
+      <button 
+        onClick={() => setReuploadTarget({ id: trx.id, type: 'course' })}
+        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 md:py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-transform shadow-md shadow-rose-200 dark:shadow-none"
+      >
+        Upload Ulang Bukti
+      </button>
+    )}
+    {trx.payment_proof && (
+      <button onClick={() => setSelectedProof(`${STORAGE_URL}/${trx.payment_proof}`)} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 md:px-5 py-3 md:py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-transform shadow-sm dark:shadow-black/10 shrink-0 min-w-0">
+        <Eye size={16} className="text-indigo-500"/> Lihat Bukti
+      </button>
+    )}
+    {isSuccess ? (
+      <Link href={courseSlug ? `/courses/${courseSlug}/learn` : `/my-courses`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-emerald-600 hover:bg-emerald-50 dark:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-transform shadow-md dark:shadow-black/15 shadow-emerald-600/20 shrink-0 min-w-0">
+        <PlayCircle size={16} className="shrink-0"/> <span className="truncate">Mulai Belajar</span>
+      </Link>
+    ) : isActuallyUnpaid && trx.checkout_url ? (
+      <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shadow-lg dark:shadow-black/20 shadow-amber-500/20 shrink-0 min-w-0">
+        Lanjutkan Pembayaran <ArrowUpRight size={16} className="shrink-0"/>
+      </a>
+    ) : isActuallyUnpaid && !trx.checkout_url ? (
+      <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shrink-0 min-w-0">
+        <Clock size={16} className="shrink-0 animate-pulse"/> Menunggu Konfirmasi
+      </div>
+    ) : (s === 'rejected' || s === 'failed') ? null : (
+      <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed shrink-0 min-w-0">
+        Waktu Habis / Kedaluwarsa
+      </div>
+    )}
+ </div>
+ </div>
+
+ {(s === 'rejected' || s === 'failed') && trx.rejection_reason && (
+   <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+     <XCircle size={16} className="text-rose-500 mt-0.5 shrink-0" />
+     <div>
+       <p className="text-xs font-bold text-rose-700 mb-0.5">Transaksi Ditolak</p>
+       <p className="text-[11px] text-rose-600">{trx.rejection_reason}</p>
+     </div>
+   </div>
  )}
- {isSuccess ? (
- <Link href={courseSlug ? `/courses/${courseSlug}/learn` : `/my-courses`} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3 md:py-2.5 bg-emerald-600 hover:bg-emerald-50 dark:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-transform shadow-md dark:shadow-black/15 shadow-emerald-600/20 shrink-0 min-w-0">
- <PlayCircle size={16} className="shrink-0"/> <span className="truncate">Mulai Belajar</span>
- </Link>
- ) : isActuallyUnpaid && trx.checkout_url ? (
- <a href={trx.checkout_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shadow-lg dark:shadow-black/20 shadow-amber-500/20 shrink-0 min-w-0">
- Lanjutkan Pembayaran <ArrowUpRight size={16} className="shrink-0"/>
- </a>
- ) : isActuallyUnpaid && !trx.checkout_url ? (
- <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 md:py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs md:text-sm font-black uppercase tracking-widest transition-transform shrink-0 min-w-0">
- <Clock size={16} className="shrink-0 animate-pulse"/> Menunggu Konfirmasi
- </div>
- ) : (
- <div className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed shrink-0 min-w-0">
- Waktu Habis / Kedaluwarsa
- </div>
- )}
- </div>
- </div>
  </div>
  );
  })}
@@ -789,6 +879,93 @@ export default function TransactionsClient() {
  </motion.div>
  </motion.div>
  )}
+ </AnimatePresence>
+
+ {/* 🔥 MODAL UPLOAD ULANG BUKTI 🔥 */}
+ <AnimatePresence>
+   {reuploadTarget && (
+     <motion.div 
+       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+       className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md w-full min-w-0"
+       onClick={() => { setReuploadTarget(null); setReuploadFile(null); setReuploadPreview(null); }}
+     >
+       <motion.div 
+         initial={{ scale: 0.95, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 20, opacity: 0 }}
+         className="relative max-w-md w-full flex flex-col bg-white dark:bg-[#111827] rounded-[1.5rem] shadow-2xl dark:shadow-black/25 border border-slate-200 dark:border-slate-700/50 min-w-0"
+         onClick={(e) => e.stopPropagation()} 
+       >
+         <div className="w-full flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+           <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+             <UploadCloud size={18} className="text-indigo-500"/> Upload Ulang Bukti
+           </h3>
+           <button 
+             onClick={() => { setReuploadTarget(null); setReuploadFile(null); setReuploadPreview(null); }}
+             className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 rounded-lg"
+           >
+             <X size={18} />
+           </button>
+         </div>
+
+         <form onSubmit={handleReupload} className="p-6">
+           <div className="mb-4">
+             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pilih File Gambar Baru</label>
+             <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 flex flex-col items-center justify-center group hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-indigo-500 transition-colors cursor-pointer text-center">
+               <input 
+                 type="file" 
+                 accept="image/png, image/jpeg, image/webp"
+                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                 onChange={(e) => {
+                   const file = e.target.files?.[0];
+                   if (file) {
+                     if (file.size > 5 * 1024 * 1024) {
+                       toast.error("Maksimal ukuran file 5MB");
+                       e.target.value = '';
+                       return;
+                     }
+                     setReuploadFile(file);
+                     setReuploadPreview(URL.createObjectURL(file));
+                     toast.success("File dipilih!");
+                   }
+                 }}
+                 required
+               />
+               {reuploadPreview ? (
+                 <div className="relative w-full h-32 rounded-lg overflow-hidden border border-slate-200">
+                   <img src={reuploadPreview} alt="Preview" className="w-full h-full object-cover"/>
+                 </div>
+               ) : (
+                 <div className="flex flex-col items-center">
+                   <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                     <ImageIcon size={20} />
+                   </div>
+                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Klik atau drop gambar</span>
+                   <span className="text-[10px] text-slate-400 mt-1">Maks. 5MB (JPG, PNG, WEBP)</span>
+                 </div>
+               )}
+             </div>
+           </div>
+
+           <div className="flex justify-end gap-3 mt-6">
+             <button 
+               type="button" 
+               onClick={() => { setReuploadTarget(null); setReuploadFile(null); setReuploadPreview(null); }}
+               className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg"
+             >
+               Batal
+             </button>
+             <button 
+               type="submit" 
+               disabled={isUploading || !reuploadFile}
+               className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg shadow-sm disabled:opacity-50 flex items-center gap-2"
+             >
+               {isUploading ? <Loader2 size={16} className="animate-spin"/> : null}
+               Upload Sekarang
+             </button>
+           </div>
+         </form>
+       </motion.div>
+     </motion.div>
+   )}
  </AnimatePresence>
 
  <style jsx global>{`

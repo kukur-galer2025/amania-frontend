@@ -38,11 +38,12 @@ export default function AdminEProductTransactionsPage() {
   
   // Search & Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'UNPAID' | 'PAID' | 'EXPIRED'>('all');
-
-  // Pagination
+  const [statusFilter, setStatusFilter] = useState<'all' | 'UNPAID' | 'PAID' | 'EXPIRED' | 'FAILED'>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; 
+  const itemsPerPage = 10;
+
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState(''); 
 
   // Detail Modal
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
@@ -86,6 +87,7 @@ export default function AdminEProductTransactionsPage() {
       
       if (res.ok && json.success) {
         toast.success(json.message, { id: tid });
+        setTransactions(transactions.map(tx => tx.id === id ? { ...tx, status: 'PAID' } : tx));
         fetchTransactions(); // Refresh data
         setSelectedDetailId(null);
       } else {
@@ -93,6 +95,32 @@ export default function AdminEProductTransactionsPage() {
       }
     } catch (error) {
       toast.error("Terjadi kesalahan sistem.", { id: tid });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleReject = async (id: number) => {
+    if (!rejectReason.trim()) {
+      toast.error('Alasan penolakan wajib diisi.');
+      return;
+    }
+    setActionLoadingId(id);
+    try {
+      const res = await apiFetch(`/admin/e-product-transactions/${id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: rejectReason })
+      });
+      if (!res.ok) throw new Error();
+      setTransactions(transactions.map(tx => tx.id === id ? { ...tx, status: 'FAILED' } : tx));
+      toast.success('Transaksi berhasil ditolak.');
+      fetchTransactions();
+      setSelectedDetailId(null);
+      setRejectingId(null);
+      setRejectReason('');
+    } catch (error) {
+      toast.error('Gagal menolak transaksi.');
     } finally {
       setActionLoadingId(null);
     }
@@ -541,8 +569,14 @@ export default function AdminEProductTransactionsPage() {
                 )}
               </div>
 
-              {selectedDetail.status === 'UNPAID' && (
+              {(selectedDetail.status === 'UNPAID' || selectedDetail.status === 'PENDING') && (
                 <div className="px-5 md:px-6 py-4 md:py-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3">
+                  <button 
+                    onClick={() => setRejectingId(selectedDetail.id)}
+                    className="w-full sm:w-auto py-2.5 md:py-3 px-6 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 hover:border-rose-300 rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    Tolak Transaksi
+                  </button>
                   <button 
                     onClick={() => handleMarkAsPaid(selectedDetail.id, selectedDetail.reference)}
                     disabled={actionLoadingId === selectedDetail.id}
@@ -553,6 +587,55 @@ export default function AdminEProductTransactionsPage() {
                   </button>
                 </div>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🔥 MODAL TOLAK TRANSAKSI 🔥 */}
+      <AnimatePresence>
+        {rejectingId && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setRejectingId(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-white rounded-2xl md:rounded-3xl shadow-2xl relative max-w-md w-full overflow-hidden flex flex-col border border-slate-200"
+              onClick={(e) => e.stopPropagation()} 
+            >
+              <div className="px-5 md:px-6 py-3.5 md:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h2 className="text-base md:text-lg font-bold text-slate-900">Tolak Transaksi</h2>
+                <button onClick={() => setRejectingId(null)} className="text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors p-1.5 rounded-lg">
+                  <X size={18} className="md:w-5 md:h-5" />
+                </button>
+              </div>
+              <div className="p-5 md:p-6 flex-1 space-y-4">
+                <p className="text-xs md:text-sm text-slate-600">Berikan alasan mengapa transaksi ini ditolak. User akan dapat melihat alasan ini dan mengunggah ulang bukti bayar.</p>
+                <div>
+                  <textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Contoh: Bukti transfer buram, mohon foto ulang dengan jelas."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    rows={4}
+                  />
+                </div>
+              </div>
+              <div className="px-5 md:px-6 py-4 md:py-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                <button onClick={() => setRejectingId(null)} className="py-2.5 px-6 text-slate-600 text-xs md:text-sm font-bold hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+                <button 
+                  onClick={() => handleReject(rejectingId)}
+                  disabled={actionLoadingId === rejectingId || !rejectReason.trim()}
+                  className="py-2.5 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs md:text-sm font-bold transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {actionLoadingId === rejectingId ? <Loader2 size={16} className="animate-spin" /> : null}
+                  Tolak Sekarang
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

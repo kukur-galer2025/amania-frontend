@@ -17,6 +17,9 @@ export default function AdminCourseTransactionsPage() {
   const [proofImage, setProofImage] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   const selectedDetail = transactions.find(t => t.id === selectedDetailId) || null;
 
@@ -41,7 +44,7 @@ export default function AdminCourseTransactionsPage() {
     setActionLoadingId(id);
     const tid = toast.loading("Memperbarui status transaksi...");
     try {
-      const res = await apiFetch(`/admin/course-transactions/${id}/mark-paid`, { method: 'PUT' });
+      const res = await apiFetch(`/admin/course-transactions/${id}/mark-paid`, { method: 'POST' });
       const json = await res.json();
       
       if (res.ok && json.success) {
@@ -53,6 +56,31 @@ export default function AdminCourseTransactionsPage() {
       }
     } catch (error) {
       toast.error("Terjadi kesalahan sistem.", { id: tid });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleReject = async (id: number) => {
+    if (!rejectReason.trim()) {
+      toast.error('Alasan penolakan wajib diisi.');
+      return;
+    }
+    setActionLoadingId(id);
+    try {
+      const res = await apiFetch(`/admin/course-transactions/${id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: rejectReason })
+      });
+      if (!res.ok) throw new Error();
+      toast.success('Transaksi berhasil ditolak.');
+      fetchData();
+      setSelectedDetailId(null);
+      setRejectingId(null);
+      setRejectReason('');
+    } catch (error) {
+      toast.error('Gagal menolak transaksi.');
     } finally {
       setActionLoadingId(null);
     }
@@ -286,10 +314,10 @@ export default function AdminCourseTransactionsPage() {
                       <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Bukti Transfer (Manual QRIS):</p>
                       {selectedDetail.payment_proof ? (
                         <div 
-                           onClick={() => setProofImage(`${STORAGE_URL}/${selectedDetail.payment_proof}`)}
+                           onClick={() => setProofImage(selectedDetail.payment_proof)}
                            className="relative w-full h-32 md:h-48 bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 group"
                         >
-                           <img src={`${STORAGE_URL}/${selectedDetail.payment_proof}`} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                           <img src={selectedDetail.payment_proof} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <span className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold text-slate-900 flex items-center gap-1.5 md:gap-2 shadow-sm"><Eye size={14} className="md:w-4 md:h-4"/> Lihat Penuh</span>
                            </div>
@@ -304,8 +332,14 @@ export default function AdminCourseTransactionsPage() {
                 )}
               </div>
 
-              {selectedDetail.status === 'pending' && (
+              {(selectedDetail.status?.toUpperCase() === 'PENDING' || selectedDetail.status?.toUpperCase() === 'UNPAID') && (
                 <div className="px-5 md:px-6 py-4 md:py-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3">
+                  <button 
+                    onClick={() => setRejectingId(selectedDetail.id)}
+                    className="w-full sm:w-auto py-2.5 md:py-3 px-6 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 hover:border-rose-300 rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    Tolak Transaksi
+                  </button>
                   <button 
                     onClick={() => handleMarkAsPaid(selectedDetail.id)}
                     disabled={actionLoadingId === selectedDetail.id}
@@ -316,6 +350,55 @@ export default function AdminCourseTransactionsPage() {
                   </button>
                 </div>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🔥 MODAL TOLAK TRANSAKSI 🔥 */}
+      <AnimatePresence>
+        {rejectingId && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setRejectingId(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-white rounded-2xl md:rounded-3xl shadow-2xl relative max-w-md w-full overflow-hidden flex flex-col border border-slate-200"
+              onClick={(e) => e.stopPropagation()} 
+            >
+              <div className="px-5 md:px-6 py-3.5 md:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h2 className="text-base md:text-lg font-bold text-slate-900">Tolak Transaksi</h2>
+                <button onClick={() => setRejectingId(null)} className="text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors p-1.5 rounded-lg">
+                  <X size={18} className="md:w-5 md:h-5" />
+                </button>
+              </div>
+              <div className="p-5 md:p-6 flex-1 space-y-4">
+                <p className="text-xs md:text-sm text-slate-600">Berikan alasan mengapa transaksi ini ditolak. User akan dapat melihat alasan ini dan mengunggah ulang bukti bayar.</p>
+                <div>
+                  <textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Contoh: Bukti transfer buram, mohon foto ulang dengan jelas."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    rows={4}
+                  />
+                </div>
+              </div>
+              <div className="px-5 md:px-6 py-4 md:py-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                <button onClick={() => setRejectingId(null)} className="py-2.5 px-6 text-slate-600 text-xs md:text-sm font-bold hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+                <button 
+                  onClick={() => handleReject(rejectingId)}
+                  disabled={actionLoadingId === rejectingId || !rejectReason.trim()}
+                  className="py-2.5 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs md:text-sm font-bold transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {actionLoadingId === rejectingId ? <Loader2 size={16} className="animate-spin" /> : null}
+                  Tolak Sekarang
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

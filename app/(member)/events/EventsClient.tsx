@@ -10,6 +10,7 @@ import {
  MonitorPlay, BookOpen, LayoutGrid, Archive, Clock
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
+import AdBanner from '@/app/components/AdBanner';
 
 const EventSkeleton = () => (
  <div className="bg-white dark:bg-[#111827] rounded-[2rem] overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-black/10 flex flex-col w-full h-full">
@@ -67,6 +68,7 @@ export default function EventsClient() {
  // Tambahkan query parameter jika ada
  const url = searchQuery ? `/events?search=${encodeURIComponent(searchQuery)}` : '/events';
  const res = await apiFetch(url);
+
  if (!res.ok) throw new Error("Gagal terhubung ke server API");
  const data = await res.json();
  if (data.success) {
@@ -212,8 +214,11 @@ export default function EventsClient() {
  </div>
  </section>
 
+  {/* PROMO BANNERS */}
+  <AdBanner placement="webinar" className="pb-6 -mt-2" />
+
  {/* ════════ FILTER TABS DENGAN IKON ════════ */}
- <div className="relative z-20 flex justify-center mb-8 w-full -mt-16">
+ <div className="relative z-20 flex justify-center mb-8 w-full">
  <div className="flex gap-2 overflow-x-auto custom-scrollbar bg-white dark:bg-slate-800/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-xl dark:shadow-black/20 shadow-slate-200 dark:shadow-none w-max max-w-full">
  {[
  { id: 'upcoming', label: 'Program Tersedia', icon: Sparkles },

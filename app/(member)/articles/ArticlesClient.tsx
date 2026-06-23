@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import AdBanner from '@/app/components/AdBanner';
 
 // Helper untuk cuplikan teks
 const getSnippet = (html: string) => {
@@ -345,14 +346,8 @@ export default function ArticlesClient() {
                         </div>
 
                         {/* Kotak Iklan / Banner Edukasi */}
-                        <div className="bg-slate-900 p-5 md:p-6 text-white text-center rounded-xl md:rounded-2xl shadow-lg dark:shadow-black/20 w-full shrink-0">
-                            <img src="/logo-amania.png" alt="Amania" className="mx-auto mb-3 md:mb-4 h-10 md:h-12 w-auto object-contain brightness-0 invert" />
-                            <h5 className="text-base md:text-lg font-bold mb-1.5 md:mb-2 break-words">Tingkatkan Karir IT Anda</h5>
-                            <p className="text-xs md:text-sm text-slate-400 dark:text-slate-400 mb-5 md:mb-6 leading-relaxed px-2 md:px-0 break-words">Akses ratusan kelas premium dan bootcamp eksklusif bersama Amania.</p>
-                            <Link href="/events" className="block w-full py-2.5 md:py-3 bg-blue-600 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg md:rounded-xl shadow-sm dark:shadow-black/10">
-                                Lihat Katalog Kelas
-                            </Link>
-                        </div>
+                        <AdBanner placement="article" variant="sidebar" />
+                        
 
                     </div>
                 </aside>

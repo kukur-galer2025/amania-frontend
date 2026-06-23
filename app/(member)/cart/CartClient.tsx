@@ -225,7 +225,7 @@ export default function CartClient() {
  {/* 🔥 PANEL PILIH SEMUA 🔥 */}
  <div className="flex items-center justify-between p-4 bg-white dark:bg-[#111827] rounded-[1.5rem] border border-slate-100 dark:border-slate-700/50 shadow-sm dark:shadow-black/10">
  <button onClick={handleToggleSelectAll} className="flex items-center gap-3 group px-2">
- <div className={`w-5 h-5 md:w-6 md:h-6 rounded-[8px] border-2 flex items-center justify-center transition-transform ${selectedItems.length === cartItems.length && cartItems.length > 0 ? 'bg-amber-50 dark:bg-amber-500 border-amber-500 shadow-md dark:shadow-black/15 shadow-amber-500/20' : 'border-slate-300 dark:border-slate-600 group-hover:border-amber-400 bg-slate-50 dark:bg-[#111827]'}`}>
+ <div className={`w-5 h-5 md:w-6 md:h-6 rounded-[8px] border-2 flex items-center justify-center transition-transform ${selectedItems.length === cartItems.length && cartItems.length > 0 ? 'bg-amber-500 dark:bg-amber-500 border-amber-500 shadow-md dark:shadow-black/15 shadow-amber-500/20' : 'border-slate-300 dark:border-slate-600 group-hover:border-amber-400 bg-slate-50 dark:bg-[#111827]'}`}>
  {selectedItems.length === cartItems.length && cartItems.length > 0 && <Check size={16} className="text-white" strokeWidth={3} />}
  </div>
  <span className="text-sm md:text-base font-black text-slate-700 dark:text-slate-300 select-none">Pilih Semua ({cartItems.length})</span>
@@ -244,7 +244,7 @@ export default function CartClient() {
  
  {/* CHECKBOX INDIVIDUAL */}
  <button onClick={() => handleToggleSelect(item.id)} className="shrink-0 pl-1 md:pl-2 relative z-10 flex items-center justify-center">
- <div className={`w-5 h-5 md:w-6 md:h-6 rounded-[8px] border-2 flex items-center justify-center transition-transform ${isSelected ? 'bg-amber-50 dark:bg-amber-500 border-amber-500 shadow-md dark:shadow-black/15 shadow-amber-500/20' : 'border-slate-300 dark:border-slate-600 group-hover:border-amber-400 bg-slate-50 dark:bg-[#111827]'}`}>
+ <div className={`w-5 h-5 md:w-6 md:h-6 rounded-[8px] border-2 flex items-center justify-center transition-transform ${isSelected ? 'bg-amber-500 dark:bg-amber-500 border-amber-500 shadow-md dark:shadow-black/15 shadow-amber-500/20' : 'border-slate-300 dark:border-slate-600 group-hover:border-amber-400 bg-slate-50 dark:bg-[#111827]'}`}>
  {isSelected && <Check size={16} className="text-white" strokeWidth={3} />}
  </div>
  </button>
@@ -379,7 +379,7 @@ export default function CartClient() {
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPaymentModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"/>
  <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative bg-white dark:bg-[#111827] rounded-[2rem] shadow-2xl dark:shadow-black/25 w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]">
- <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-amber-50 dark:bg-amber-500/10/30">
+ <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-amber-50 dark:bg-amber-500/10">
  <div><h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white">Pilih Pembayaran</h3><p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Transaksi Aman & Terenkripsi</p></div>
  <button onClick={() => setIsPaymentModalOpen(false)} className="p-2 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-full text-slate-400 dark:text-slate-400 hover:text-rose-500"><X size={18}/></button>
  </div>
@@ -398,13 +398,27 @@ export default function CartClient() {
  </div>
  </div>
  <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
- <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3">Upload Bukti Transfer</h4>
+ <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">Upload Bukti Transfer</h4>
+ <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">Format: JPG, PNG, WEBP (Maksimal 5MB)</p>
  <input
  type="file"
  accept="image/*"
  onChange={(e) => {
  if (e.target.files && e.target.files.length > 0) {
- setPaymentProof(e.target.files[0]);
+ const file = e.target.files[0];
+ const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+ if (!validTypes.includes(file.type)) {
+ toast.error('Format file tidak didukung! Gunakan JPG, PNG, atau WEBP.');
+ e.target.value = '';
+ return;
+ }
+ if (file.size > 5 * 1024 * 1024) {
+ toast.error('Ukuran file terlalu besar! Maksimal 5MB.');
+ e.target.value = '';
+ return;
+ }
+ setPaymentProof(file);
+ toast.success('Bukti pembayaran berhasil dipilih!');
  }
  }}
  className="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-amber-900/30 dark:file:text-amber-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"

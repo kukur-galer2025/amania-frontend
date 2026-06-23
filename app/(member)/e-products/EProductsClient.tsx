@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
+import AdBanner from '@/app/components/AdBanner';
 
 const SORT_OPTIONS = [
   { value: 'newest',    label: 'Terbaru Dirilis' },
@@ -59,6 +60,7 @@ export default function EProductsClient() {
   const [categories,        setCategories]        = useState<string[]>([]);
   const [loading,           setLoading]           = useState(true);
   const [search,            setSearch]            = useState('');
+
   
   // 🔥 UPDATE: Tambah 'owned' ke state priceFilter 🔥
   const [priceFilter,       setPriceFilter]       = useState<'all' | 'free' | 'owned'>('all');
@@ -280,6 +282,9 @@ export default function EProductsClient() {
           </motion.div>
         </div>
       </section>
+
+      {/* PROMO BANNERS */}
+      <AdBanner placement="eproduct" className="-mt-8 md:-mt-12 pb-2" />
 
       {/* Trust Badges */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
@@ -551,7 +556,7 @@ export default function EProductsClient() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPaymentModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
             <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]">
-              <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-amber-50 dark:bg-amber-500/10/30 dark:bg-amber-950/10">
+              <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-amber-50 dark:bg-amber-500/10">
                 <div><h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-slate-100">Pilih Pembayaran</h3><p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Transaksi Aman & Terenkripsi</p></div>
                 <button onClick={()=>setIsPaymentModalOpen(false)} className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-slate-400 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 dark:hover:bg-slate-700 transition-colors"><X size={18}/></button>
               </div>
@@ -570,13 +575,27 @@ export default function EProductsClient() {
                       </div>
                   </div>
                   <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
-                      <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3">Upload Bukti Transfer</h4>
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">Upload Bukti Transfer</h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">Format: JPG, PNG, WEBP (Maksimal 5MB)</p>
                       <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => {
                               if (e.target.files && e.target.files.length > 0) {
-                                  setPaymentProof(e.target.files[0]);
+                                  const file = e.target.files[0];
+                                  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+                                  if (!validTypes.includes(file.type)) {
+                                      toast.error('Format file tidak didukung! Gunakan JPG, PNG, atau WEBP.');
+                                      e.target.value = '';
+                                      return;
+                                  }
+                                  if (file.size > 5 * 1024 * 1024) {
+                                      toast.error('Ukuran file terlalu besar! Maksimal 5MB.');
+                                      e.target.value = '';
+                                      return;
+                                  }
+                                  setPaymentProof(file);
+                                  toast.success('Bukti pembayaran berhasil dipilih!');
                               }
                           }}
                           className="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"

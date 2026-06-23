@@ -9,7 +9,7 @@ import {
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
   CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt,
-  GraduationCap, BookOpen, Video, MessageSquare
+  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -176,10 +176,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setIsMobileMenuOpen(false);
   };
 
-  const NavItem = ({ icon: Icon, label, href }: { icon: any; label: string; href: string }) => {
-    const isActive = pathname === href || (pathname.startsWith(href) && href !== '/admin');
+  const NavItem = ({ icon: Icon, label, href, target }: { icon: any; label: string; href: string; target?: string }) => {
+    const isActive = pathname === href || (pathname.startsWith(href) && href !== '/admin' && href !== '/');
     return (
-      <Link href={href} onClick={handleMenuClick} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'}`}>
+      <Link href={href} target={target} onClick={handleMenuClick} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'}`}>
         <div className="flex items-center gap-3">
           <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600'} />
           <span className={`text-sm font-bold leading-none ${isActive ? 'opacity-100' : 'opacity-80'}`}>{label}</span>
@@ -241,7 +241,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <nav className="px-3 py-4 space-y-5">
             <div>
               <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Dashboard</p>
-              <div className="space-y-0.5"><NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" /></div>
+              <div className="space-y-0.5">
+                <NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" />
+                <NavItem icon={Globe} label="Lihat Website" href="/beranda" target="_blank" />
+              </div>
             </div>
 
             {adminRole === 'superadmin' && (
@@ -264,6 +267,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div>
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
                   <div className="space-y-0.5">
+                    {adminRole === 'superadmin' && <NavItem icon={MonitorPlay} label="Kelola Iklan/Promo" href="/admin/advertisements" />}
                     {adminRole === 'superadmin' && <NavItem icon={Tag} label="Kategori Artikel" href="/admin/article-categories" />}
                     <NavItem icon={FileText} label="Semua Artikel" href="/admin/articles" />
                   </div>

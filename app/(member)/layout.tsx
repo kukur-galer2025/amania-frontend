@@ -14,6 +14,7 @@ import {
  MonitorPlay, ShieldAlert, ShoppingBag, Trash2, GraduationCap,
  Sun, Moon
 } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 import { apiFetch } from '../utils/api'; 
 
 const STATIC_PAGES = [
@@ -339,7 +340,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
  return (
  <div className={`min-h-screen bg-[#F4F7FB] dark:bg-[#0B1120] text-slate-800 dark:text-slate-200 flex font-sans relative w-full overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
- 
+ <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
  <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-100/40 dark:bg-indigo-900/10 blur-[100px] pointer-events-none z-0"></div>
  <div className="fixed bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-100/30 dark:bg-blue-900/8 blur-[120px] pointer-events-none z-0"></div>
  <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-50 dark:bg-purple-950/50/40 dark:bg-purple-900/8 blur-[80px] pointer-events-none z-0"></div>
@@ -831,7 +832,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  >
  <ShoppingCart size={20} strokeWidth={2} />
  {cartCount > 0 && (
- <span className="absolute top-0 right-0 w-4.5 h-4.5 bg-indigo-50 dark:bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-[2px] border-white dark:border-slate-700 dark:border-slate-900 translate-x-1/4 -translate-y-1/4 shadow-sm dark:shadow-black/10 animate-in zoom-in duration-300">
+ <span className="absolute top-0 right-0 w-4.5 h-4.5 bg-indigo-500 dark:bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-[2px] border-white dark:border-slate-700 dark:border-slate-900 translate-x-1/4 -translate-y-1/4 shadow-sm dark:shadow-black/10 animate-in zoom-in duration-300">
  {cartCount > 9 ? '9+' : cartCount}
  </span>
  )}
@@ -908,7 +909,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  >
  <Bell size={20} strokeWidth={showNotifications ? 2.5 : 2} />
  {unreadCount > 0 && (
- <span className="absolute top-0 right-0 w-4.5 h-4.5 bg-rose-50 dark:bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-[2px] border-white dark:border-slate-700 dark:border-slate-900 translate-x-1/4 -translate-y-1/4 shadow-sm dark:shadow-black/10">
+ <span className="absolute top-0 right-0 w-4.5 h-4.5 bg-rose-500 dark:bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-[2px] border-white dark:border-slate-700 dark:border-slate-900 translate-x-1/4 -translate-y-1/4 shadow-sm dark:shadow-black/10">
  {unreadCount > 9 ? '9+' : unreadCount}
  </span>
  )}
@@ -1020,6 +1021,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  transition={{ duration: 3, repeat: Infinity, ease:"easeInOut"}}
  className="relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white rounded-full shadow-[0_10px_25px_-5px_rgba(37,211,102,0.5)] border border-slate-200/30 dark:border-slate-700/20 overflow-hidden active:scale-95 transition-transform"
  >
+ 
  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>
  
  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16" className="drop-shadow-md dark:shadow-black/15 w-7 h-7 md:w-[30px] md:h-[30px]">

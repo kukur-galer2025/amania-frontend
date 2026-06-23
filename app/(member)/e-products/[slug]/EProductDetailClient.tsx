@@ -857,13 +857,27 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         </div>
                                     </div>
                                     <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
-                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3">Upload Bukti Transfer</h4>
+                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">Upload Bukti Transfer</h4>
+                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">Format: JPG, PNG, WEBP (Maksimal 5MB)</p>
                                         <input
                                             type="file"
                                             accept="image/*"
                                             onChange={(e) => {
                                                 if (e.target.files && e.target.files.length > 0) {
-                                                    setPaymentProof(e.target.files[0]);
+                                                    const file = e.target.files[0];
+                                                    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+                                                    if (!validTypes.includes(file.type)) {
+                                                        toast.error('Format file tidak didukung! Gunakan JPG, PNG, atau WEBP.');
+                                                        e.target.value = '';
+                                                        return;
+                                                    }
+                                                    if (file.size > 5 * 1024 * 1024) {
+                                                        toast.error('Ukuran file terlalu besar! Maksimal 5MB.');
+                                                        e.target.value = '';
+                                                        return;
+                                                    }
+                                                    setPaymentProof(file);
+                                                    toast.success('Bukti pembayaran berhasil dipilih!');
                                                 }
                                             }}
                                             className="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"

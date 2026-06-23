@@ -9,6 +9,7 @@ import {
  BarChart3, ArrowRight, Crown, Users, Zap, TrendingUp
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
+import AdBanner from '@/app/components/AdBanner';
 
 export default function CoursesClient() {
  const [courses, setCourses] = useState<any[]>([]);
@@ -171,6 +172,9 @@ export default function CoursesClient() {
  </div>
  </div>
  </div>
+
+ {/* PROMO BANNERS */}
+ <AdBanner placement="course" className="pb-6 -mt-2" />
 
  {/* ═══ FILTERS ═══ */}
  <div className="flex flex-col gap-4 mb-8">
