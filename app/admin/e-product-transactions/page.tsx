@@ -29,7 +29,6 @@ interface TrxEProduct {
 
 export default function AdminEProductTransactionsPage() {
   const [transactions, setTransactions] = useState<TrxEProduct[]>([]);
-  const [stats, setStats] = useState({ totalRevenue: 0, paidCount: 0, unpaidCount: 0, expiredCount: 0 });
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   
@@ -76,14 +75,6 @@ export default function AdminEProductTransactionsPage() {
         setTransactions(json.data || []);
         if (json.creators) {
           setCreatorsList(json.creators);
-        }
-        if (json.stats) {
-          setStats({
-            totalRevenue: Number(json.stats.total_revenue) || 0,
-            paidCount: Number(json.stats.paid_count) || 0,
-            unpaidCount: Number(json.stats.unpaid_count) || 0,
-            expiredCount: Number(json.stats.expired_count) || 0,
-          });
         }
       } else {
         toast.error(json.message || "Gagal memuat data transaksi.");
@@ -200,6 +191,28 @@ export default function AdminEProductTransactionsPage() {
       return matchesSearch && matchesStatus && matchesCreator;
     });
   }, [transactions, searchTerm, statusFilter, selectedCreator]);
+
+  // --- DYNAMIC STATS ---
+  const stats = useMemo(() => {
+    let totalRevenue = 0;
+    let paidCount = 0;
+    let unpaidCount = 0;
+    let expiredCount = 0;
+
+    filteredTransactions.forEach(tx => {
+      const s = tx.status === 'SETTLED' ? 'PAID' : tx.status;
+      if (s === 'PAID') {
+        totalRevenue += Number(tx.amount) || 0;
+        paidCount++;
+      } else if (s === 'UNPAID') {
+        unpaidCount++;
+      } else if (s === 'EXPIRED' || s === 'FAILED') {
+        expiredCount++;
+      }
+    });
+
+    return { totalRevenue, paidCount, unpaidCount, expiredCount };
+  }, [filteredTransactions]);
 
   useEffect(() => {
     setCurrentPage(1);
