@@ -234,6 +234,11 @@ input::-webkit-credentials-auto-fill-button {
     filter: none !important;
     opacity: 0.2 !important;
   }
+
+  /* 5. Disable mix-blend-mode (Very expensive in Firefox on large areas) */
+  [class*="mix-blend-"] {
+    mix-blend-mode: normal !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
