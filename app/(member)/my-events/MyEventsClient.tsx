@@ -92,8 +92,7 @@ export default function MyEventsClient() {
  {/* ════════ IMMERSIVE LUXURY HERO SECTION ════════ */}
  <section className="relative w-full pt-20 pb-28 md:pt-28 md:pb-36 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl dark:shadow-black/25 shadow-indigo-900/10 bg-slate-950 flex flex-col items-center justify-center text-center border border-slate-200/50 dark:border-slate-700/30 mt-4 md:mt-0">
  <div className="absolute inset-0 z-0">
- <img 
- src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+ <img loading="lazy" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
  alt="Learning Concept"
  className="w-full h-full object-cover opacity-20 mix-blend-luminosity scale-105"
  />
@@ -200,7 +199,7 @@ export default function MyEventsClient() {
  
  {reg.event?.image && (
  <div className="absolute inset-0 z-0">
- <img src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover blur-[20px] opacity-40 scale-125" alt="blur-bg"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover blur-[20px] opacity-40 scale-125" alt="blur-bg"/>
  </div>
  )}
  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-slate-900/50 z-0"/>
@@ -239,7 +238,7 @@ export default function MyEventsClient() {
 
  <div className={`relative z-10 w-full h-full transition-transform duration-700 ease-out group-hover:scale-105 flex items-center justify-center ${isPast ? 'grayscale opacity-90' : ''}`}>
  {reg.event?.image ? (
- <img src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-contain drop-shadow-2xl dark:shadow-black/25 rounded-xl"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-contain drop-shadow-2xl dark:shadow-black/25 rounded-xl"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400"><ImageIcon size={40} strokeWidth={1.5} /></div>
  )}

@@ -273,7 +273,7 @@ export default function CoursesClient() {
  {/* ── Thumbnail ── */}
  <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-700/50">
  {course.thumbnail ? (
- <img src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
  <GraduationCap size={48} className="text-emerald-300/70"/>
@@ -334,14 +334,14 @@ export default function CoursesClient() {
  {(!course.instructor || course.instructor.role === 'superadmin' || course.instructor.name === 'Admin Amania') ? (
  <>
  <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
- <img src="/logo-mini.png" alt="Amania Official" className="w-4 h-4 object-contain dark:brightness-0 dark:invert" />
+ <img loading="lazy" src="/logo-mini.png" alt="Amania Official" className="w-4 h-4 object-contain dark:brightness-0 dark:invert" />
  </div>
  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Amania Official</span>
  </>
  ) : (
  <>
  {course.instructor?.avatar ? (
- <img src={`${STORAGE_URL}/${course.instructor.avatar}`} alt={course.instructor.name} className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700/50 shrink-0" />
+ <img loading="lazy" src={`${STORAGE_URL}/${course.instructor.avatar}`} alt={course.instructor.name} className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700/50 shrink-0" />
  ) : (
  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center shrink-0">
  <User size={13} className="text-slate-400 dark:text-slate-400"/>

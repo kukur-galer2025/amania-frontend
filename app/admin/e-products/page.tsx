@@ -240,7 +240,7 @@ export default function AdminEProductsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-16 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
-                          {product.cover_image ? <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="w-full h-full object-cover" /> : <ImageIcon size={24} className="text-slate-300" />}
+                          {product.cover_image ? <img loading="lazy" src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="w-full h-full object-cover" /> : <ImageIcon size={24} className="text-slate-300" />}
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-slate-900 truncate max-w-[250px] md:max-w-[300px] text-base">{product.title}</p>

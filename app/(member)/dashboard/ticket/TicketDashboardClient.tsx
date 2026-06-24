@@ -113,8 +113,7 @@ export default function TicketDashboardClient() {
  {/* 🔥 HERO SECTION 🔥 */}
  <div className="relative w-full overflow-hidden bg-slate-900 rounded-[1.5rem] md:rounded-[2rem] border border-slate-800 shadow-sm dark:shadow-black/10 mt-4 min-w-0">
  <div className="absolute inset-0 opacity-30">
- <img 
- src="https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=2070&auto=format&fit=crop"
+ <img loading="lazy" src="https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=2070&auto=format&fit=crop"
  alt="Ticket Dashboard Banner"
  className="w-full h-full object-cover"
  />
@@ -246,9 +245,9 @@ export default function TicketDashboardClient() {
  {reg.event?.image ? (
  <>
  <div className="absolute inset-0 z-0">
- <img src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover blur-md opacity-40 scale-110" alt="blur-bg"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover blur-md opacity-40 scale-110" alt="blur-bg"/>
  </div>
- <img src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 drop-shadow-lg dark:shadow-black/20"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 drop-shadow-lg dark:shadow-black/20"/>
  </>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-400"><BookOpen size={24} className="md:w-7 md:h-7"/></div>
@@ -409,7 +408,7 @@ export default function TicketDashboardClient() {
  >
  {proofPreview ? (
  <>
- <img src={proofPreview} className="w-full h-full object-cover" alt="Preview"/>
+ <img loading="lazy" src={proofPreview} className="w-full h-full object-cover" alt="Preview"/>
  <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity backdrop-blur-sm w-full h-full">
  <span className="bg-white dark:bg-[#111827] px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-semibold text-slate-900 dark:text-white shadow-sm dark:shadow-black/10 flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[90%]"><UploadCloud size={14} className="shrink-0"/> <span className="truncate">Ganti Gambar</span></span>
  </div>

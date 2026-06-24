@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search, Loader2, Receipt, GraduationCap,
@@ -9,6 +9,7 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
+import { safeStorage } from '@/app/utils/safeStorage';
 
 export default function AdminCourseTransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -23,6 +24,23 @@ export default function AdminCourseTransactionsPage() {
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   const selectedDetail = transactions.find(t => t.id === selectedDetailId) || null;
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState('all');
+
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const userStr = safeStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setIsAdmin(user.role === 'superadmin');
+      }
+    } catch {}
+  }, []);
+
+  const [creatorsList, setCreatorsList] = useState<{id: number; name: string}[]>([]);
+
   const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
   const fetchData = async () => {
@@ -30,7 +48,12 @@ export default function AdminCourseTransactionsPage() {
     try {
       const res = await apiFetch('/admin/course-transactions');
       const json = await res.json();
-      if (res.ok && json.success) setTransactions(json.data);
+      if (res.ok && json.success) {
+        setTransactions(json.data);
+        if (json.creators) {
+          setCreatorsList(json.creators);
+        }
+      }
     } catch {
       toast.error('Gagal mengambil data transaksi kursus');
     } finally {
@@ -108,11 +131,18 @@ export default function AdminCourseTransactionsPage() {
     }
   };
 
-  const filteredTransactions = transactions.filter(t =>
-    (t.user?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (t.course?.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (t.invoice_code || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTransactions = transactions.filter(t => {
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      (t.user?.name || '').toLowerCase().includes(searchLower) ||
+      (t.course?.title || '').toLowerCase().includes(searchLower) ||
+      (t.invoice_code || '').toLowerCase().includes(searchLower);
+    
+    const creatorName = t.course?.user?.name || '';
+    const matchesCreator = selectedCreator === 'all' || creatorName === selectedCreator;
+
+    return matchesSearch && matchesCreator;
+  });
 
   return (
     <div className="space-y-6 md:space-y-8 bg-slate-50 min-h-[80vh] pb-10 rounded-2xl">
@@ -126,12 +156,31 @@ export default function AdminCourseTransactionsPage() {
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Transaksi Kursus</h1>
           <p className="text-sm text-slate-500 mt-1">Riwayat pembelian kursus online oleh pengguna.</p>
         </div>
-        <div className="relative w-full md:w-72 shrink-0">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-          <input
-            type="text" placeholder="Cari user, kursus, invoice..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none w-full transition-all"
-          />
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto shrink-0">
+          {isMounted && isAdmin && creatorsList.length > 0 && (
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={selectedCreator}
+                onChange={(e) => setSelectedCreator(e.target.value)}
+                className="appearance-none w-full sm:w-auto bg-white border border-slate-200 rounded-xl py-2.5 pl-4 pr-10 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:border-emerald-500 transition-all shadow-sm cursor-pointer"
+              >
+                <option value="all">Semua Kreator</option>
+                {creatorsList.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
+          )}
+          <div className="relative w-full sm:w-72 shrink-0">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text" placeholder="Cari user, kursus, invoice..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none w-full transition-all"
+            />
+          </div>
         </div>
       </div>
 
@@ -144,6 +193,7 @@ export default function AdminCourseTransactionsPage() {
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Invoice</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Pengguna</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Kursus</th>
+                {isMounted && isAdmin && <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Kreator</th>}
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Total</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Status</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Tanggal</th>
@@ -152,9 +202,9 @@ export default function AdminCourseTransactionsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-400"><Loader2 size={32} className="animate-spin mx-auto mb-3 text-emerald-500" /><span className="font-bold">Memuat transaksi...</span></td></tr>
+                <tr><td colSpan={isMounted && isAdmin ? 8 : 7} className="px-6 py-16 text-center text-slate-400"><Loader2 size={32} className="animate-spin mx-auto mb-3 text-emerald-500" /><span className="font-bold">Memuat transaksi...</span></td></tr>
               ) : filteredTransactions.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-16 text-center text-slate-500"><Receipt size={48} className="mx-auto mb-4 text-slate-300" /><p className="font-bold text-slate-700 text-base">Belum Ada Transaksi</p><p className="text-xs">Transaksi pembelian kursus akan muncul di sini.</p></td></tr>
+                <tr><td colSpan={isMounted && isAdmin ? 8 : 7} className="px-6 py-16 text-center text-slate-500"><Receipt size={48} className="mx-auto mb-4 text-slate-300" /><p className="font-bold text-slate-700 text-base">Belum Ada Transaksi</p><p className="text-xs">Transaksi pembelian kursus akan muncul di sini.</p></td></tr>
               ) : (
                 filteredTransactions.map((trx) => {
                   const statusBadge = getStatusBadge(trx.status);
@@ -183,6 +233,16 @@ export default function AdminCourseTransactionsPage() {
                           <span className="font-semibold text-slate-700 truncate max-w-[200px]">{trx.course?.title || 'Kursus dihapus'}</span>
                         </div>
                       </td>
+                      {isMounted && isAdmin && (
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <User size={13} className="text-indigo-400 shrink-0" />
+                            <span className="font-bold text-slate-700 truncate max-w-[120px]">
+                              {trx.course?.user?.name || '-'}
+                            </span>
+                          </div>
+                        </td>
+                      )}
                       <td className="px-6 py-4">
                         <span className={`font-black ${trx.amount === 0 ? 'text-emerald-600' : 'text-slate-800'}`}>
                           {formatRupiah(trx.amount)}
@@ -222,7 +282,7 @@ export default function AdminCourseTransactionsPage() {
                 >
                     <XCircle size={24} />
                 </button>
-                <img src={proofImage} alt="Bukti Pembayaran" className="w-full h-auto max-h-[90vh] object-contain" />
+                <img loading="lazy" src={proofImage} alt="Bukti Pembayaran" className="w-full h-auto max-h-[90vh] object-contain" />
             </div>
         </div>
       )}
@@ -317,7 +377,7 @@ export default function AdminCourseTransactionsPage() {
                            onClick={() => setProofImage(selectedDetail.payment_proof)}
                            className="relative w-full h-32 md:h-48 bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 group"
                         >
-                           <img src={selectedDetail.payment_proof} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                           <img loading="lazy" src={selectedDetail.payment_proof} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <span className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold text-slate-900 flex items-center gap-1.5 md:gap-2 shadow-sm"><Eye size={14} className="md:w-4 md:h-4"/> Lihat Penuh</span>
                            </div>

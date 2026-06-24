@@ -144,8 +144,7 @@ export default function EventsClient() {
  {/* ════════ HERO SECTION KOTAK (LUXURY REDESIGN) ════════ */}
  <section className="relative pt-20 pb-24 md:pt-32 md:pb-32 w-full flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0c] rounded-[2rem] md:rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] mb-12 border border-slate-200/50 dark:border-slate-700/30">
  <div className="absolute inset-0 z-0">
- <img 
- src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=2070"
+ <img loading="lazy" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=2070"
  alt="Webinar Hero Background"
  className="w-full h-full object-cover opacity-[0.15] mix-blend-screen scale-105"
  />
@@ -350,9 +349,9 @@ export default function EventsClient() {
  {event.image ? (
  <>
  <div className="absolute inset-0 overflow-hidden opacity-50 mix-blend-luminosity">
- <img src={`${STORAGE_URL}/${event.image}`} alt="blur" className="w-full h-full object-cover blur-2xl scale-125"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt="blur" className="w-full h-full object-cover blur-2xl scale-125"/>
  </div>
- <img src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="relative z-10 w-full h-full object-contain p-2 drop-shadow-xl dark:shadow-black/20"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="relative z-10 w-full h-full object-contain p-2 drop-shadow-xl dark:shadow-black/20"/>
  </>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 relative z-10"><ImageIcon size={40} strokeWidth={1.5} /></div>
@@ -367,14 +366,13 @@ export default function EventsClient() {
  <div className="absolute -top-7 right-5 z-30">
  <div className="w-12 h-12 rounded-full border-4 border-slate-200/50 dark:border-slate-700/300 bg-slate-50 dark:bg-[#111827] shadow-md dark:shadow-black/15 flex items-center justify-center overflow-hidden">
  {isSuperadmin ? (
- <img 
- src="/logo.png"
+ <img loading="lazy" src="/logo.png"
  className="w-full h-full object-contain p-1"
  alt="Amania Official"
  onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Amania&background=0D8ABC&color=fff&rounded=true&bold=true'; }} 
  />
  ) : organizerAvatar ? (
- <img src={organizerAvatar} className="w-full h-full object-cover" alt="org"/>
+ <img loading="lazy" src={organizerAvatar} className="w-full h-full object-cover" alt="org"/>
  ) : (
  <User size={18} className="text-slate-400 dark:text-slate-400"/>
  )}

@@ -341,9 +341,10 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  return (
  <div className={`min-h-screen bg-[#F4F7FB] dark:bg-[#0B1120] text-slate-800 dark:text-slate-200 flex font-sans relative w-full overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
  <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
- <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-100/40 dark:bg-indigo-900/10 blur-[100px] pointer-events-none z-0"></div>
- <div className="fixed bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-100/30 dark:bg-blue-900/8 blur-[120px] pointer-events-none z-0"></div>
- <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-50 dark:bg-purple-950/50/40 dark:bg-purple-900/8 blur-[80px] pointer-events-none z-0"></div>
+ {/* Decorative background - using radial gradients instead of blur for performance */}
+ <div className="fixed inset-0 pointer-events-none z-0" style={{
+   background: 'radial-gradient(ellipse 40% 40% at 0% 0%, rgba(199,210,254,0.25) 0%, transparent 70%), radial-gradient(ellipse 50% 50% at 100% 100%, rgba(191,219,254,0.2) 0%, transparent 70%), radial-gradient(ellipse 30% 30% at 80% 20%, rgba(233,213,255,0.15) 0%, transparent 70%)'
+ }}></div>
 
  {/* 🔥 MODAL STATUS KERANJANG (GLOBAL POPUP DI TENGAH) 🔥 */}
  <AnimatePresence>
@@ -441,7 +442,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <aside className={`fixed top-0 left-0 h-screen w-[270px] bg-white dark:bg-slate-800/70 dark:bg-slate-900/90 backdrop-blur-2xl border-r border-white dark:border-slate-700/50 flex flex-col z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.3)]' : '-translate-x-full'}`}>
  <div className="h-[72px] px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-700/40 dark:border-slate-800 shrink-0 bg-transparent">
  <Link href="/beranda" className="flex items-center gap-3 group">
- <img src="/logo-amania.png" alt="Logo Amania" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300 dark:brightness-0 dark:invert"/>
+ <img loading="lazy" src="/logo-amania.png" alt="Logo Amania" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300 dark:brightness-0 dark:invert"/>
  </Link>
  <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 lg:hidden text-slate-400 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg">
  <X size={20} />
@@ -454,7 +455,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <Link href="/profil" className="block p-5 bg-white dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none flex flex-col items-center text-center group hover:border-indigo-100 dark:hover:border-indigo-800 hover:shadow-[0_8px_30px_rgba(79,70,229,0.08)] transition-transform duration-300">
  <div className="relative mb-4">
  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-slate-50 dark:bg-slate-800/60 border-[3px] border-white dark:border-slate-800 shadow-md dark:shadow-black/15 ring-2 ring-slate-100 dark:ring-indigo-500/20 group-hover:ring-indigo-300 dark:group-hover:ring-indigo-500 transition-transform duration-300">
- <img src={getAvatarSource()} alt="Profile" className="w-full h-full object-cover"/>
+ <img loading="lazy" src={getAvatarSource()} alt="Profile" className="w-full h-full object-cover"/>
  </div>
  <div className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-50 dark:bg-emerald-500 rounded-full border-2 border-white dark:border-slate-700 dark:border-slate-800 shadow-sm dark:shadow-black/10"></div>
  </div>
@@ -567,7 +568,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  </div>
  {/* Logo Mobile Only */}
  <Link href="/beranda" className="sm:hidden shrink-0 block">
- <img src="/logo-amania.png" alt="Amania" className="h-7 w-auto object-contain dark:brightness-0 dark:invert"/>
+ <img loading="lazy" src="/logo-amania.png" alt="Amania" className="h-7 w-auto object-contain dark:brightness-0 dark:invert"/>
  </Link>
  </div>
  
@@ -725,7 +726,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-slate-800/60 dark:hover:bg-slate-700/50 group/item"
  >
  <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 shrink-0 border border-slate-200 dark:border-slate-700 dark:border-slate-600 shadow-sm dark:shadow-black/10 dark:shadow-none">
- <img src={`${STORAGE_URL}/${event.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" alt={event.title} />
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" alt={event.title} />
  </div>
  <div className="flex-1 min-w-0">
  <h4 className="text-[13px] font-bold text-slate-900 dark:text-white leading-tight truncate group-hover/item:text-indigo-600 dark:group-hover/item:text-indigo-400">{event.title}</h4>
@@ -754,7 +755,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  >
  <div className="w-10 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 shrink-0 border border-slate-200 dark:border-slate-700 dark:border-slate-600 shadow-sm dark:shadow-black/10 dark:shadow-none" style={{ aspectRatio: '2 / 3' }}>
  {ep.image ? (
- <img src={`${STORAGE_URL}/${ep.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" alt={ep.title} />
+ <img loading="lazy" src={`${STORAGE_URL}/${ep.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" alt={ep.title} />
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-400"><FileText size={20} /></div>
  )}
@@ -785,7 +786,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-slate-800/60 dark:hover:bg-slate-700/50 group/item"
  >
  <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 shrink-0 border border-slate-200 dark:border-slate-700 dark:border-slate-600 shadow-sm dark:shadow-black/10 dark:shadow-none">
- <img src={`${STORAGE_URL}/${article.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" alt={article.title} />
+ <img loading="lazy" src={`${STORAGE_URL}/${article.image}`} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" alt={article.title} />
  </div>
  <div className="flex-1 min-w-0">
  <h4 className="text-[13px] font-bold text-slate-900 dark:text-white leading-tight truncate group-hover/item:text-slate-600 dark:text-slate-400 dark:group-hover/item:text-indigo-400">{article.title}</h4>
@@ -858,7 +859,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <Link href={`/e-products/${item.product.slug}`} className="flex items-center gap-3 flex-1 min-w-0 pr-10" onClick={() => setShowCartDropdown(false)}>
  <div className="w-12 h-[68px] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 dark:border-slate-600 shrink-0 bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 relative">
  {item.product.cover_image ? (
- <img src={`${STORAGE_URL}/${item.product.cover_image}`} alt={item.product.title} className="w-full h-full object-cover group-hover/citem:scale-110 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${item.product.cover_image}`} alt={item.product.title} className="w-full h-full object-cover group-hover/citem:scale-110 transition-transform duration-500"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center"><FileText size={16} className="text-slate-300 dark:text-slate-400"/></div>
  )}
@@ -983,7 +984,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <div className="max-w-[1400px] mx-auto px-5 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
  <div className="flex flex-col items-center md:items-start gap-3.5">
  <div className="flex items-center gap-3">
- <img src="/logo-mini.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert"/>
+ <img loading="lazy" src="/logo-mini.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert"/>
  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Amania.id</span>
  </div>
  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center md:text-left max-w-sm leading-relaxed">

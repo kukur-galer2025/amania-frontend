@@ -478,7 +478,7 @@ export default function EditEventClient() {
                     <div onClick={() => fileInputRef.current?.click()} className={`relative w-full aspect-video md:aspect-[21/9] rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden group transition-colors ${validationErrors.image ? 'border-rose-400 bg-rose-50 hover:border-rose-500' : 'border-slate-300 hover:border-indigo-500 bg-slate-50'}`}>
                       {imagePreview ? (
                         <>
-                          <img src={imagePreview} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Banner" />
+                          <img loading="lazy" src={imagePreview} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Banner" />
                           <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <div className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-sm flex items-center gap-1.5 md:gap-2 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                                 <ImageIcon size={14} className="text-slate-700 md:w-4 md:h-4" /> <span className="text-[10px] md:text-xs font-semibold text-slate-700">Ganti Gambar</span>
@@ -662,7 +662,7 @@ export default function EditEventClient() {
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 border border-orange-200 text-orange-600 overflow-hidden">
                      {useQris ? (
-                       <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-cover" />
+                       <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-cover" />
                      ) : (
                        <QrCode size={20} className="md:w-6 md:h-6" />
                      )}
@@ -881,7 +881,7 @@ export default function EditEventClient() {
                       className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-slate-300 cursor-pointer group overflow-hidden bg-slate-50 hover:border-indigo-400 transition-colors"
                     >
                       {spkPhotoPreview ? (
-                        <img src={spkPhotoPreview} className="w-full h-full object-cover" alt="Preview" />
+                        <img loading="lazy" src={spkPhotoPreview} className="w-full h-full object-cover" alt="Preview" />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
                           <Camera size={16} className="mb-1 md:w-5 md:h-5" />
@@ -932,7 +932,7 @@ export default function EditEventClient() {
                        <div key={s.id} className="bg-white p-3 md:p-4 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm hover:border-slate-300 transition-colors">
                          <div className="flex items-center gap-3 overflow-hidden">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                               <img src={`${STORAGE_URL}/${s.photo}`} className="w-full h-full object-cover" alt={s.name} />
+                               <img loading="lazy" src={`${STORAGE_URL}/${s.photo}`} className="w-full h-full object-cover" alt={s.name} />
                             </div>
                             <div className="truncate">
                               <h4 className="font-semibold text-xs md:text-sm text-slate-900 truncate">{s.name}</h4>

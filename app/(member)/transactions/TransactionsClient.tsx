@@ -437,9 +437,9 @@ export default function TransactionsClient() {
  {trx.event?.image ? (
  <React.Fragment>
  <div className="absolute inset-0 z-0">
- <img src={`${STORAGE_URL}/${trx.event.image}`} className="w-full h-full object-cover blur-xl opacity-40 scale-125" alt="blur"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${trx.event.image}`} className="w-full h-full object-cover blur-xl opacity-40 scale-125" alt="blur"/>
  </div>
- <img src={`${STORAGE_URL}/${trx.event.image}`} alt={trx.event?.title} className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg dark:shadow-black/20"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${trx.event.image}`} alt={trx.event?.title} className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg dark:shadow-black/20"/>
  </React.Fragment>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400"><Ticket size={32} strokeWidth={1.5} /></div>
@@ -584,9 +584,9 @@ export default function TransactionsClient() {
  {coverImage ? (
  <React.Fragment>
  <div className="absolute inset-0 z-0">
- <img src={`${STORAGE_URL}/${coverImage}`} className="w-full h-full object-cover blur-lg opacity-40 scale-125" alt="blur-bg"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${coverImage}`} className="w-full h-full object-cover blur-lg opacity-40 scale-125" alt="blur-bg"/>
  </div>
- <img src={`${STORAGE_URL}/${coverImage}`} alt={productNames || 'Cover Produk'} className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-md dark:shadow-black/15"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${coverImage}`} alt={productNames || 'Cover Produk'} className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-md dark:shadow-black/15"/>
  </React.Fragment>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400"><FileText size={32} strokeWidth={1}/></div>
@@ -740,7 +740,7 @@ export default function TransactionsClient() {
  <div className="flex flex-row items-start gap-4 md:gap-6 w-full">
  <div className="w-24 sm:w-32 md:w-44 shrink-0 rounded-lg md:rounded-xl bg-slate-100 dark:bg-slate-700/50 overflow-hidden border border-slate-200 dark:border-slate-700/50 relative shadow-sm dark:shadow-black/10" style={{ aspectRatio: '16/9' }}>
  {courseData?.thumbnail ? (
- <img src={`${STORAGE}/${courseData.thumbnail}`} alt={courseData?.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE}/${courseData.thumbnail}`} alt={courseData?.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50">
  <GraduationCap size={32} className="text-emerald-300"/>
@@ -863,7 +863,7 @@ export default function TransactionsClient() {
  </button>
  </div>
  <div className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-2xl overflow-hidden flex items-center justify-center">
- <img src={selectedProof || ''} alt="Bukti Transfer" className="w-full max-h-[60vh] object-contain"/>
+ <img loading="lazy" src={selectedProof || ''} alt="Bukti Transfer" className="w-full max-h-[60vh] object-contain"/>
  </div>
  <div className="w-full pt-4 pb-2 px-2 flex justify-end">
  <a 
@@ -931,7 +931,7 @@ export default function TransactionsClient() {
                />
                {reuploadPreview ? (
                  <div className="relative w-full h-32 rounded-lg overflow-hidden border border-slate-200">
-                   <img src={reuploadPreview} alt="Preview" className="w-full h-full object-cover"/>
+                   <img loading="lazy" src={reuploadPreview} alt="Preview" className="w-full h-full object-cover"/>
                  </div>
                ) : (
                  <div className="flex flex-col items-center">

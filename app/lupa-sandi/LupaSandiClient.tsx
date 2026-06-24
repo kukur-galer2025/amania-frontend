@@ -17,8 +17,7 @@ export default function LupaSandiClient() {
         
         <div className="p-6 md:p-8 sm:px-12 lg:px-16 xl:px-24 flex-none flex items-center justify-between border-b md:border-none border-slate-100 bg-white md:bg-transparent sticky top-0 md:relative z-20">
           <Link href="/" className="flex items-center gap-2.5 md:gap-3 group">
-            <img src="/logo-amania.png" alt="Amania" className="h-6 md:h-8 w-auto object-contain group-hover:scale-105 transition-transform" />
-            <span className="text-lg md:text-xl font-extrabold text-slate-950 tracking-tight mt-0.5">Amania</span>
+            <img loading="lazy" src="/logo-amania.png" alt="Amania" className="h-6 md:h-8 w-auto object-contain group-hover:scale-105 transition-transform" />
           </Link>
           <Link href="/login" className="text-xs md:text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">
             Masuk

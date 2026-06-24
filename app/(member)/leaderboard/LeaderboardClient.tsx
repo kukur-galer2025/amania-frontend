@@ -235,8 +235,7 @@ export default function LeaderboardClient() {
  {/* User Info */}
  <div className="flex items-center gap-3 md:gap-5 overflow-hidden">
  <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 shrink-0 bg-slate-50 dark:bg-[#111827] shadow-sm dark:shadow-black/10 transition-transform duration-300 group-hover:scale-105 ${isTop3 ? 'border-amber-400' : 'border-slate-200 dark:border-slate-700/50'}`}>
- <img 
- src={getAvatarUrl(user)} 
+ <img loading="lazy" src={getAvatarUrl(user)} 
  alt={user.name} 
  className="w-full h-full object-cover"
  />

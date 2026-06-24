@@ -229,7 +229,7 @@ export default function CreateEventPage() {
               >
                 {imagePreview ? (
                   <>
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <img loading="lazy" src={imagePreview} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                        <div className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-sm flex items-center gap-1.5 md:gap-2 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                           <ImageIcon size={14} className="text-slate-700 md:w-4 md:h-4" /> 

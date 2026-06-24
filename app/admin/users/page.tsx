@@ -359,7 +359,7 @@ export default function AdminUsersPage() {
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap min-w-0 max-w-[200px] md:max-w-[300px]">
                       <div className="flex items-center min-w-0">
                         <div className="h-9 w-9 md:h-11 md:w-11 shrink-0 rounded-full border border-slate-200 overflow-hidden bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shadow-sm">
-                          <img src={getAvatarUrl(user)} alt={user.name} className="w-full h-full object-cover" />
+                          <img loading="lazy" src={getAvatarUrl(user)} alt={user.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="ml-3 md:ml-4 min-w-0 flex-1">
                           <div className="text-xs md:text-sm font-bold text-slate-900 truncate w-full" title={user.name}>{user.name}</div>
@@ -441,7 +441,7 @@ export default function AdminUsersPage() {
               </div>
               <div className="p-6 flex flex-col items-center w-full min-w-0">
                  <div className="w-24 h-24 rounded-full border-4 border-slate-100 overflow-hidden shadow-sm mb-4">
-                    <img src={getAvatarUrl(selectedInfoUser)} alt="avatar" className="w-full h-full object-cover" />
+                    <img loading="lazy" src={getAvatarUrl(selectedInfoUser)} alt="avatar" className="w-full h-full object-cover" />
                  </div>
                  <h4 className="text-lg font-black text-slate-900 w-full text-center truncate">{selectedInfoUser.name}</h4>
                  <div className="mt-1 mb-5">{getRoleBadge(selectedInfoUser.role)}</div>
@@ -524,7 +524,7 @@ export default function AdminUsersPage() {
                 <div className="flex flex-col items-center justify-center mb-2 w-full min-w-0">
                   <label htmlFor="avatar-upload" className="relative group cursor-pointer">
                     <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-indigo-200 bg-slate-50 flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-400 group-hover:bg-indigo-50 shadow-sm shrink-0">
-                      {avatarPreview ? (<img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />) : (
+                      {avatarPreview ? (<img loading="lazy" src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />) : (
                         <div className="flex flex-col items-center text-indigo-400 group-hover:text-indigo-500"><Camera size={24} className="mb-1 shrink-0" /><span className="text-[9px] font-bold uppercase tracking-wider mt-0.5 truncate">Logo/Foto</span></div>
                       )}
                     </div>
@@ -581,7 +581,7 @@ export default function AdminUsersPage() {
                 <div className="flex flex-col items-center justify-center mb-2 w-full min-w-0">
                   <label htmlFor="edit-avatar-upload" className="relative group cursor-pointer">
                     <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-amber-200 bg-slate-50 flex items-center justify-center overflow-hidden transition-all group-hover:border-amber-400 group-hover:bg-amber-50 shadow-sm shrink-0">
-                      {editAvatarPreview ? (<img src={editAvatarPreview} alt="Preview" className="w-full h-full object-cover" />) : (
+                      {editAvatarPreview ? (<img loading="lazy" src={editAvatarPreview} alt="Preview" className="w-full h-full object-cover" />) : (
                         <div className="flex flex-col items-center text-amber-400 group-hover:text-amber-500"><Camera size={24} className="mb-1 shrink-0" /><span className="text-[9px] font-bold uppercase tracking-wider mt-0.5 truncate">Logo/Foto</span></div>
                       )}
                     </div>

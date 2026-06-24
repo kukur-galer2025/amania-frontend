@@ -10,6 +10,7 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
+import { safeStorage } from '@/app/utils/safeStorage';
 
 interface TrxEProduct {
   id: number;
@@ -23,6 +24,7 @@ interface TrxEProduct {
   buyer: { name: string; email: string; phone: string | null };
   product_names: string;
   payment_proof: string | null;
+  creator_name?: string | null;
 }
 
 export default function AdminEProductTransactionsPage() {
@@ -45,9 +47,25 @@ export default function AdminEProductTransactionsPage() {
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState(''); 
 
-  // Detail Modal
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   const selectedDetail = useMemo(() => transactions.find(t => t.id === selectedDetailId) || null, [transactions, selectedDetailId]);
+
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState('all');
+
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const userStr = safeStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setIsAdmin(user.role === 'superadmin');
+      }
+    } catch {}
+  }, []);
+
+  const [creatorsList, setCreatorsList] = useState<{id: number; name: string}[]>([]);
 
   const fetchTransactions = async () => {
     try {
@@ -56,6 +74,9 @@ export default function AdminEProductTransactionsPage() {
       
       if (res.ok && json.success) {
         setTransactions(json.data || []);
+        if (json.creators) {
+          setCreatorsList(json.creators);
+        }
         if (json.stats) {
           setStats({
             totalRevenue: Number(json.stats.total_revenue) || 0,
@@ -166,20 +187,23 @@ export default function AdminEProductTransactionsPage() {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = 
         (tx.reference?.toLowerCase() || '').includes(searchLower) || 
-        (tx.tripay_reference?.toLowerCase() || '').includes(searchLower) || // Bisa cari via tripay ref juga
+        (tx.tripay_reference?.toLowerCase() || '').includes(searchLower) || 
         (tx.buyer?.name?.toLowerCase() || '').includes(searchLower) ||
         (tx.product_names?.toLowerCase() || '').includes(searchLower);
       
       const normalizedStatus = tx.status === 'SETTLED' ? 'PAID' : tx.status;
       const matchesStatus = statusFilter === 'all' || normalizedStatus === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      const creatorName = tx.creator_name || '';
+      const matchesCreator = selectedCreator === 'all' || creatorName === selectedCreator;
+
+      return matchesSearch && matchesStatus && matchesCreator;
     });
-  }, [transactions, searchTerm, statusFilter]);
+  }, [transactions, searchTerm, statusFilter, selectedCreator]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, selectedCreator]);
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const currentTransactions = filteredTransactions.slice(
@@ -274,6 +298,24 @@ export default function AdminEProductTransactionsPage() {
               </button>
             ))}
           </div>
+          
+          {isMounted && isAdmin && creatorsList.length > 0 && (
+            <div className="relative shrink-0">
+              <select
+                value={selectedCreator}
+                onChange={(e) => setSelectedCreator(e.target.value)}
+                className="appearance-none w-full sm:w-auto bg-white border border-slate-200 rounded-lg py-1.5 md:py-2 pl-3 pr-8 text-[10px] md:text-xs font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:border-indigo-500 transition-all shadow-sm cursor-pointer"
+              >
+                <option value="all">Semua Kreator</option>
+                {creatorsList.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                <svg className="fill-current h-3 w-3 md:h-4 md:w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Search Input */}
@@ -300,6 +342,7 @@ export default function AdminEProductTransactionsPage() {
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[22%]">Invoice & Tripay Ref</th>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">Info Pembeli</th>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[20%]">E-Produk & Harga</th>
+                {isMounted && isAdmin && <th className="px-4 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[15%]">Kreator</th>}
                 <th className="px-4 md:px-6 py-3 md:py-4 text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[13%]">Status</th>
                 <th className="px-4 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-wider md:tracking-[0.2em] w-[10%]">Aksi</th>
               </tr>
@@ -308,14 +351,14 @@ export default function AdminEProductTransactionsPage() {
               
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 md:px-6 py-16 md:py-20 text-center">
+                  <td colSpan={isMounted && isAdmin ? 7 : 6} className="px-4 md:px-6 py-16 md:py-20 text-center">
                     <Loader2 className="w-5 h-5 md:w-6 md:h-6 text-indigo-500 animate-spin mx-auto mb-2 md:mb-3" />
                     <p className="text-[10px] md:text-sm font-bold text-slate-400 tracking-wider">Memuat data transaksi e-produk...</p>
                   </td>
                 </tr>
               ) : currentTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 md:px-6 py-16 md:py-24 text-center">
+                  <td colSpan={isMounted && isAdmin ? 7 : 6} className="px-4 md:px-6 py-16 md:py-24 text-center">
                     <Inbox className="w-8 h-8 md:w-10 md:h-10 text-slate-300 mx-auto mb-3 md:mb-4" strokeWidth={1.5} />
                     <h3 className="text-sm md:text-base font-bold text-slate-900">Tidak ada transaksi ditemukan</h3>
                     <p className="text-xs md:text-sm text-slate-500 mt-1">Sesuaikan filter atau kata kunci pencarian Anda.</p>
@@ -366,6 +409,22 @@ export default function AdminEProductTransactionsPage() {
                         {formatRupiah(tx.amount)}
                       </div>
                     </td>
+
+                    {/* Kolom 4.5: Kreator */}
+                    {isMounted && isAdmin && (
+                      <td className="px-4 md:px-6 py-3 md:py-4 min-w-0">
+                        {tx.creator_name ? (
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <User size={13} className="text-indigo-400 shrink-0" />
+                            <span className="font-bold text-slate-700 truncate max-w-[120px]">
+                              {tx.creator_name}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">-</span>
+                        )}
+                      </td>
+                    )}
 
                     {/* Kolom 5: Status & Metode */}
                     <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
@@ -455,7 +514,7 @@ export default function AdminEProductTransactionsPage() {
                 >
                     <XCircle size={24} />
                 </button>
-                <img src={proofImage} alt="Bukti Pembayaran" className="w-full h-auto max-h-[90vh] object-contain" />
+                <img loading="lazy" src={proofImage} alt="Bukti Pembayaran" className="w-full h-auto max-h-[90vh] object-contain" />
             </div>
         </div>
       )}
@@ -554,7 +613,7 @@ export default function AdminEProductTransactionsPage() {
                            onClick={() => setProofImage(`${selectedDetail.payment_proof}`)}
                            className="relative w-full h-32 md:h-48 bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 group"
                         >
-                           <img src={`${selectedDetail.payment_proof}`} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                           <img loading="lazy" src={`${selectedDetail.payment_proof}`} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <span className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold text-slate-900 flex items-center gap-1.5 md:gap-2 shadow-sm"><Eye size={14} className="md:w-4 md:h-4"/> Lihat Penuh</span>
                            </div>

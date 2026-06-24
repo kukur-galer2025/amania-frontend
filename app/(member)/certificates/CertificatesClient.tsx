@@ -205,8 +205,7 @@ export default function CertificatesClient() {
 
  <div className="relative w-full aspect-[16/10] bg-slate-100 dark:bg-slate-700/50 overflow-hidden shrink-0">
  {reg.event?.image ? (
- <img 
- src={`${STORAGE_URL}/${reg.event.image}`} // 🔥 Menggunakan URL Storage dari env
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} // 🔥 Menggunakan URL Storage dari env
  alt={reg.event.title} 
  className={`w-full h-full object-cover transition-transform duration-700 ${isLocked ? 'grayscale' : 'group-hover:scale-110'}`} 
  />

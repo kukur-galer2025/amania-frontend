@@ -169,7 +169,7 @@ export default function ArticlesClient() {
                                     <Link href={`/articles/${currentArticles[0].slug}`} className="group block w-full">
                                         <div className="w-full aspect-video md:aspect-[16/9] bg-slate-100 dark:bg-slate-700/50 mb-4 md:mb-5 relative overflow-hidden rounded-xl md:rounded-none shrink-0">
                                             {currentArticles[0].image ? (
-                                                <img src={`${STORAGE_URL}/${currentArticles[0].image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Headline" />
+                                                <img loading="lazy" src={`${STORAGE_URL}/${currentArticles[0].image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Headline" />
                                             ) : (
                                                 <div className="w-full h-full flex justify-center items-center text-slate-300 dark:text-slate-500"><BookOpen size={48} className="md:w-16 md:h-16" strokeWidth={1} /></div>
                                             )}
@@ -219,7 +219,7 @@ export default function ArticlesClient() {
                                                 {/* Thumbnail */}
                                                 <div className="w-full sm:w-[200px] md:w-[240px] aspect-video sm:aspect-[4/3] bg-slate-100 dark:bg-slate-700/50 shrink-0 overflow-hidden relative rounded-xl md:rounded-lg">
                                                     {article.image ? (
-                                                        <img src={`${STORAGE_URL}/${article.image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Thumbnail" />
+                                                        <img loading="lazy" src={`${STORAGE_URL}/${article.image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Thumbnail" />
                                                     ) : (
                                                         <div className="w-full h-full flex justify-center items-center text-slate-300 dark:text-slate-500"><BookOpen size={24} className="md:w-8 md:h-8" /></div>
                                                     )}

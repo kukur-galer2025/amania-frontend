@@ -191,7 +191,7 @@ export default function MyCoursesClient() {
  {/* Thumbnail */}
  <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-700/50">
  {course.thumbnail ? (
- <img src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50">
  <GraduationCap size={48} className="text-emerald-300"/>

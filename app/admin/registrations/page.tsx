@@ -516,7 +516,7 @@ export default function AdminRegistrationsPage() {
                            onClick={() => setSelectedProof(`${STORAGE_URL}/${selectedDetail.payment_proof}`)}
                            className="relative w-full h-32 md:h-48 bg-slate-100 rounded-xl overflow-hidden cursor-pointer border border-slate-200 group"
                         >
-                           <img src={`${STORAGE_URL}/${selectedDetail.payment_proof}`} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                           <img loading="lazy" src={`${STORAGE_URL}/${selectedDetail.payment_proof}`} alt="Bukti Bayar" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <span className="bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold text-slate-900 flex items-center gap-1.5 md:gap-2 shadow-sm"><Eye size={14} className="md:w-4 md:h-4"/> Lihat Penuh</span>
                            </div>
@@ -624,7 +624,7 @@ export default function AdminRegistrationsPage() {
               <button onClick={() => setSelectedProof(null)} className="absolute -top-12 md:-top-16 right-0 p-2 md:p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors">
                 <X size={20} className="md:w-6 md:h-6" />
               </button>
-              <img src={selectedProof} alt="Bukti Transfer Penuh" className="w-full max-h-[85vh] object-contain rounded-xl md:rounded-2xl shadow-2xl" />
+              <img loading="lazy" src={selectedProof} alt="Bukti Transfer Penuh" className="w-full max-h-[85vh] object-contain rounded-xl md:rounded-2xl shadow-2xl" />
             </motion.div>
           </motion.div>
         )}

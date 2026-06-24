@@ -254,7 +254,7 @@ export default function CreateArticlePage() {
                 className={`w-full aspect-video rounded-xl md:rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden group ${validationErrors.image ? 'border-rose-400 bg-rose-50 hover:border-rose-500' : 'border-slate-200 hover:border-indigo-400 bg-slate-50'}`}
               >
                 {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                  <img loading="lazy" src={imagePreview} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                 ) : (
                   <>
                     <ImageIcon size={20} className={`md:w-6 md:h-6 mb-1.5 md:mb-2 transition-colors ${validationErrors.image ? 'text-rose-400' : 'text-slate-300 group-hover:text-indigo-500'}`} />

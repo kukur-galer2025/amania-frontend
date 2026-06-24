@@ -235,7 +235,7 @@ export default function AdminCoursesPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
-                            {course.thumbnail ? <img src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover" /> : <Video size={24} className="text-slate-300" />}
+                            {course.thumbnail ? <img loading="lazy" src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover" /> : <Video size={24} className="text-slate-300" />}
                           </div>
                           <div className="min-w-0">
                             <p className="font-bold text-slate-900 truncate max-w-[250px] md:max-w-[300px] text-base">{course.title}</p>

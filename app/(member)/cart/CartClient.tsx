@@ -251,7 +251,7 @@ export default function CartClient() {
 
  <div className="w-[70px] sm:w-[110px] md:w-[130px] shrink-0 rounded-2xl overflow-hidden shadow-md dark:shadow-black/15 border border-slate-100 dark:border-slate-700/50 aspect-[3/4] relative z-10 bg-slate-900 cursor-pointer" onClick={() => router.push(`/e-products/${item.product.slug}`)}>
  {item.product.cover_image ? (
- <img src={`${STORAGE_URL}/${item.product.cover_image}`} alt={item.product.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${item.product.cover_image}`} alt={item.product.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
  ) : (
  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-700/50 text-slate-300 dark:text-slate-500"><FileText size={24} /></div>
  )}
@@ -389,7 +389,7 @@ export default function CartClient() {
  <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
  <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
- <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
+ <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
  </div>
  <div>
     <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-xs rounded-lg hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors border border-amber-200 dark:border-amber-500/20">

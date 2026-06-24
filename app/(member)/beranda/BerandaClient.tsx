@@ -84,8 +84,7 @@ export default function BerandaClient() {
  <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-10 max-w-7xl mx-auto w-full relative z-10">
  <div className="relative w-full rounded-[3rem] overflow-hidden shadow-2xl dark:shadow-black/25 shadow-indigo-900/15 bg-slate-950 border border-slate-900">
  <div className="absolute inset-0">
- <img
- src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+ <img loading="lazy" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
  alt="Learning Collaboration"
  className="w-full h-full object-cover opacity-35 mix-blend-luminosity scale-105"
  />
@@ -224,7 +223,7 @@ export default function BerandaClient() {
  <span className={`text-sm font-black shrink-0 w-6 text-center ${idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-slate-400' : 'text-orange-500'}`}>
  {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
  </span>
- <img src={getAvatarUrl(leader.name)} alt="Avatar" className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700 dark:border-slate-600 shrink-0"/>
+ <img loading="lazy" src={getAvatarUrl(leader.name)} alt="Avatar" className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700 dark:border-slate-600 shrink-0"/>
  <div className="flex flex-col min-w-0 flex-1">
  <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate leading-snug">{leader.name}</p>
  <p className="text-[10px] text-slate-400 dark:text-slate-400 font-semibold">{leader.points || (150 - idx * 15)} Poin</p>
@@ -327,7 +326,7 @@ export default function BerandaClient() {
 
  <div className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-[1.8rem] overflow-hidden shrink-0 block" style={{ aspectRatio: '16 / 10' }}>
  {event.image ? (
- <img src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
  ) : (
  <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/60"><BookOpen size={40} className="text-slate-300"/></div>
  )}
@@ -447,7 +446,7 @@ export default function BerandaClient() {
  style={{ aspectRatio: '2 / 3' }}
  >
  {product.cover_image ? (
- <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
  ) : (
  <div className="absolute inset-0 w-full h-full flex items-center justify-center text-slate-300 bg-slate-50 dark:bg-slate-800/60">
  <FileText size={48} strokeWidth={1} />
@@ -565,7 +564,7 @@ export default function BerandaClient() {
  style={{ aspectRatio: '4 / 3' }}
  >
  {article.image ? (
- <img src={`${STORAGE_URL}/${article.image}`} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${article.image}`} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
  ) : (
  <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-[#111827]"><Newspaper size={40} className="text-slate-300 dark:text-slate-400"/></div>
  )}

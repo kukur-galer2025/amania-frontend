@@ -429,7 +429,7 @@ export default function AdminCourseEditPage() {
               <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Thumbnail</label>
               {existingThumbnail && !thumbnail && (
                 <div className="mb-3 rounded-xl overflow-hidden border border-slate-200">
-                  <img src={`${STORAGE_URL}/${existingThumbnail}`} alt="Thumbnail" className="w-full h-32 object-cover" />
+                  <img loading="lazy" src={`${STORAGE_URL}/${existingThumbnail}`} alt="Thumbnail" className="w-full h-32 object-cover" />
                 </div>
               )}
               <div className="relative border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50 rounded-xl p-3 text-center transition-colors group cursor-pointer">
@@ -526,7 +526,7 @@ export default function AdminCourseEditPage() {
                                     </div>
                                     {ytId && (
                                       <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 relative">
-                                        <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="" className="w-full h-full object-cover" />
+                                        <img loading="lazy" src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="" className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                                           <PlayCircle size={14} className="text-white" />
                                         </div>

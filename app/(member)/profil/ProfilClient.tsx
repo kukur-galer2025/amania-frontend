@@ -189,7 +189,7 @@ export default function ProfilClient() {
  <div className="relative group cursor-pointer shrink-0" onClick={() => fileInputRef.current?.click()}>
  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700/50 shadow-md dark:shadow-black/15 bg-slate-50 dark:bg-[#111827] relative group-hover:ring-4 group-hover:ring-indigo-100 transition-transform">
  {avatarPreview ? (
- <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover"/>
+ <img loading="lazy" src={avatarPreview} alt="Preview" className="w-full h-full object-cover"/>
  ) : (
  <User size={40} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500"/>
  )}

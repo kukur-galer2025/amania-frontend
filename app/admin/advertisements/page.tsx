@@ -261,7 +261,7 @@ export default function AdminAdvertisementsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="w-32 h-16 rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shrink-0 relative">
-                          <img src={`${STORAGE_URL}/${ad.image_path}`} alt={ad.title} className="w-full h-full object-cover" />
+                          <img loading="lazy" src={`${STORAGE_URL}/${ad.image_path}`} alt={ad.title} className="w-full h-full object-cover" />
                         </div>
                         <div>
                           <p className="text-sm font-black text-slate-900">{ad.title}</p>
@@ -332,7 +332,7 @@ export default function AdminAdvertisementsPage() {
                     className="w-full aspect-[21/9] rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-500 hover:bg-indigo-50/50 bg-slate-50 cursor-pointer overflow-hidden flex flex-col items-center justify-center transition-colors relative"
                   >
                     {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <img loading="lazy" src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
                       <div className="text-center p-4">
                         <ImageIcon className="w-8 h-8 text-slate-400 mx-auto mb-2" />

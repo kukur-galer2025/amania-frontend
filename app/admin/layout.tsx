@@ -222,7 +222,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="px-6 pt-6 pb-5 flex items-center justify-between flex-shrink-0 border-b border-slate-100">
           <Link href="/admin/dashboard" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden bg-slate-50 border border-slate-100 group-hover:scale-105 transition-transform">
-              <img src="/logo-amania.png" alt="Amania" className="w-full h-full object-contain p-1" />
+              <img loading="lazy" src="/logo-amania.png" alt="Amania" className="w-full h-full object-contain p-1" />
             </div>
             <div>
               <p className="text-lg font-black tracking-tight text-slate-900 leading-none">Amania</p>

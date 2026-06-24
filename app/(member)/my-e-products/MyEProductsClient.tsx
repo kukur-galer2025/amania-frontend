@@ -157,7 +157,7 @@ export default function MyEProductsClient() {
  {/* --- LEFT: Cover Image with Adaptive Height --- */}
  <div className="relative w-[100px] sm:w-[130px] min-h-[150px] shrink-0 rounded-[1rem] sm:rounded-[1.25rem] overflow-hidden bg-slate-900 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.1)] group-hover:shadow-[8px_0_25px_-5px_rgba(245,158,11,0.25)] transition-shadow duration-500">
  {product.cover_image ? (
- <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"/>
  ) : (
  <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#111827] text-slate-300 dark:text-slate-500">
  <FileText size={32} />

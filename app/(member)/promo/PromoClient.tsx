@@ -71,7 +71,7 @@ export default function PromoClient() {
             >
               {ad.url ? (
                 <a href={ad.url} target="_blank" rel="noreferrer" className="block relative h-full w-full">
-                  <img src={`${STORAGE_URL}/${ad.image_path}`} alt={ad.title} className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img loading="lazy" src={`${STORAGE_URL}/${ad.image_path}`} alt={ad.title} className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <span className="bg-white text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm shadow-xl flex items-center gap-2">
                       Lihat Penawaran <ExternalLink size={16} />
@@ -80,7 +80,7 @@ export default function PromoClient() {
                 </a>
               ) : (
                 <div className="block relative h-full w-full">
-                  <img src={`${STORAGE_URL}/${ad.image_path}`} alt={ad.title} className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500" />
+                  <img loading="lazy" src={`${STORAGE_URL}/${ad.image_path}`} alt={ad.title} className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500" />
                 </div>
               )}
             </motion.div>

@@ -326,7 +326,7 @@ export default function EditEProductClient() {
                 <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2"><ImageIcon size={16} className="text-indigo-500"/> Cover Produk</h3>
                 <div className="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50 rounded-2xl p-4 text-center transition-colors group aspect-[3/4] flex flex-col items-center justify-center overflow-hidden cursor-pointer" onClick={() => coverRef.current?.click()}>
                   {coverPreview ? (
-                    <img src={coverPreview} className="w-full h-full object-cover rounded-xl" alt="Cover" />
+                    <img loading="lazy" src={coverPreview} className="w-full h-full object-cover rounded-xl" alt="Cover" />
                   ) : (
                     <div className="text-slate-400 group-hover:text-indigo-500 transition-colors">
                       <ImageIcon className="mx-auto h-8 w-8 mb-2" />

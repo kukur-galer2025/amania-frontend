@@ -481,7 +481,7 @@ export default function CheckoutClient() {
 
  {/* Gambar QRIS yang Lebih Besar */}
  <div className="w-full max-w-[260px] md:max-w-[320px] aspect-square border border-slate-200 dark:border-slate-700/50 rounded-2xl overflow-hidden p-2 bg-white dark:bg-[#111827] shadow-inner mx-auto my-2">
- <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-contain"/>
+ <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-contain"/>
  </div>
 
  {/* Tombol Unduh Permanen (Selalu Tampil) */}
@@ -518,8 +518,7 @@ export default function CheckoutClient() {
  <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-xl hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 group min-w-0 w-full">
  <div className="flex items-center gap-3 md:gap-4 min-w-0 w-full">
  <div className="w-12 md:w-14 h-8 md:h-10 bg-white dark:bg-[#111827] rounded border border-slate-200 dark:border-slate-700/50 p-1 flex items-center justify-center shrink-0 shadow-sm dark:shadow-black/10 overflow-hidden relative">
- <img 
- src={localLogoPath} 
+ <img loading="lazy" src={localLogoPath} 
  alt={bank.bank_code} 
  className="max-h-full max-w-full object-contain relative z-10"
  onError={(e) => { 
@@ -574,7 +573,7 @@ export default function CheckoutClient() {
  >
  {proofPreview ? (
  <>
- <img src={proofPreview} className="w-full h-full object-cover" alt="Preview"/>
+ <img loading="lazy" src={proofPreview} className="w-full h-full object-cover" alt="Preview"/>
  <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm w-full h-full">
  <span className="bg-white dark:bg-[#111827] px-3 md:px-4 py-1.5 rounded-md text-[11px] md:text-xs font-semibold flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[90%]"><ImageIcon size={14} className="shrink-0"/> <span className="truncate">Ganti File</span></span>
  </div>
@@ -608,7 +607,7 @@ export default function CheckoutClient() {
  <div className="flex gap-3 md:gap-4 mb-5 md:mb-6 w-full min-w-0">
  <div className="w-16 md:w-20 h-12 md:h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/50 bg-slate-100 dark:bg-slate-700/50 shrink-0">
  {event?.image ? (
- <img src={`${STORAGE_URL}/${event.image}`} className="w-full h-full object-cover" alt="Thumbnail"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} className="w-full h-full object-cover" alt="Thumbnail"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-500"><ImageIcon size={16} className="md:w-5 md:h-5"/></div>
  )}
@@ -632,9 +631,9 @@ export default function CheckoutClient() {
  <div className="flex items-center gap-2.5 w-full min-w-0">
  <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 flex items-center justify-center shrink-0 overflow-hidden">
  {organizerAvatar ? (
- <img src={organizerAvatar} alt={organizerName} className="w-full h-full object-cover rounded-full"/>
+ <img loading="lazy" src={organizerAvatar} alt={organizerName} className="w-full h-full object-cover rounded-full"/>
  ) : isSuperadmin ? (
- <img src="/logo-amania.png" alt="Amania" className="w-4 h-4 object-contain"/>
+ <img loading="lazy" src="/logo-amania.png" alt="Amania" className="w-4 h-4 object-contain"/>
  ) : (
  <User size={14} className="text-slate-400 dark:text-slate-400"/>
  )}

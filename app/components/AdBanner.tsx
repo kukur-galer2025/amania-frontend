@@ -83,10 +83,10 @@ export default function AdBanner({ placement, variant = 'banner', className = ''
             >
               {currentAd.url ? (
                 <a href={currentAd.url} target="_blank" rel="noreferrer" className="block w-full h-full">
-                  <img src={`${STORAGE_URL}/${currentAd.image_path}`} alt={currentAd.title} className="w-full h-full object-cover" />
+                  <img loading="lazy" src={`${STORAGE_URL}/${currentAd.image_path}`} alt={currentAd.title} className="w-full h-full object-cover" />
                 </a>
               ) : (
-                <img src={`${STORAGE_URL}/${currentAd.image_path}`} alt={currentAd.title} className="w-full h-full object-cover" />
+                <img loading="lazy" src={`${STORAGE_URL}/${currentAd.image_path}`} alt={currentAd.title} className="w-full h-full object-cover" />
               )}
             </motion.div>
           </AnimatePresence>
@@ -136,15 +136,13 @@ export default function AdBanner({ placement, variant = 'banner', className = ''
             >
               {currentAd.url ? (
                 <a href={currentAd.url} target="_blank" rel="noreferrer" className="block w-full h-full">
-                  <img
-                    src={`${STORAGE_URL}/${currentAd.image_path}`}
+                  <img loading="lazy" src={`${STORAGE_URL}/${currentAd.image_path}`}
                     alt={currentAd.title}
                     className="w-full h-full object-cover"
                   />
                 </a>
               ) : (
-                <img
-                  src={`${STORAGE_URL}/${currentAd.image_path}`}
+                <img loading="lazy" src={`${STORAGE_URL}/${currentAd.image_path}`}
                   alt={currentAd.title}
                   className="w-full h-full object-cover"
                 />

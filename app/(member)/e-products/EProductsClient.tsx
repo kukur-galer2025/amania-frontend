@@ -230,7 +230,7 @@ export default function EProductsClient() {
       {/* --- HERO --- */}
       <section className="relative w-full bg-[#0a0f1c] overflow-hidden rounded-b-[2.5rem] md:rounded-b-[4rem] shadow-2xl border-b border-indigo-900/50 pb-12 pt-8 md:pt-16 md:pb-24">
         <div className="absolute inset-0 z-0">
-          <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2000" className="w-full h-full object-cover opacity-15 mix-blend-luminosity" alt="Background" />
+          <img loading="lazy" src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2000" className="w-full h-full object-cover opacity-15 mix-blend-luminosity" alt="Background" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c]/90 via-[#0a0f1c]/80 to-[#0a0f1c]"></div>
           <div className="absolute -top-24 -left-24 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-600/20 blur-[100px] md:blur-[120px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-transparent dark:bg-amber-500/10 blur-[80px] md:blur-[100px] rounded-full pointer-events-none" />
@@ -424,7 +424,7 @@ export default function EProductsClient() {
                       {/* COVER IMAGE */}
                       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
                         {p.cover_image ? (
-                          <img src={`${storageUrl}/${p.cover_image}`} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                          <img loading="lazy" src={`${storageUrl}/${p.cover_image}`} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
                             <FileText size={48} className="text-slate-200 dark:text-slate-700" />
@@ -491,10 +491,10 @@ export default function EProductsClient() {
                         {/* Author */}
                         <div className="flex items-center gap-2 mb-3 pt-2">
                           {authorName === 'Amania Official'
-                            ? <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0"><img src="/logo-mini.png" className="w-3.5 h-3.5 object-contain dark:brightness-0 dark:invert" /></div>
+                            ? <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0"><img loading="lazy" src="/logo-mini.png" className="w-3.5 h-3.5 object-contain dark:brightness-0 dark:invert" /></div>
                             : (
                                 p.author?.avatar 
-                                ? <img src={`${storageUrl}/${p.author.avatar}`} className="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
+                                ? <img loading="lazy" src={`${storageUrl}/${p.author.avatar}`} className="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
                                 : <UserCircle size={16} className="text-slate-300 shrink-0" />
                             )
                           }
@@ -566,7 +566,7 @@ export default function EProductsClient() {
                       <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
                       <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
-                          <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
+                          <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
                       </div>
                       <div>
                           <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">

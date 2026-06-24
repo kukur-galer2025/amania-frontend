@@ -197,3 +197,79 @@ input::-webkit-credentials-auto-fill-button {
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
+
+/* ═══════════════════════════════════════════════════════
+   🔥 FIREFOX PERFORMANCE OPTIMIZATION 🔥
+   Firefox does NOT hardware-accelerate backdrop-filter,
+   causing severe lag with 100+ blur effects.
+   ═══════════════════════════════════════════════════════ */
+
+/* Detect Firefox: @-moz-document targets Firefox only */
+@-moz-document url-prefix() {
+  /* 1. Disable backdrop-blur entirely in Firefox (biggest performance killer) */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. Make translucent backgrounds more opaque to compensate for no blur */
+  [class*="backdrop-blur"] {
+    background-color: rgba(255, 255, 255, 0.97) !important;
+  }
+  .dark [class*="backdrop-blur"] {
+    background-color: rgba(15, 23, 42, 0.97) !important;
+  }
+
+  /* 3. Reduce heavy decorative blur orbs (blur-[100px]+ gradient circles) */
+  [class*="blur-\[100px\]"],
+  [class*="blur-\[120px\]"],
+  [class*="blur-\[130px\]"],
+  [class*="blur-\[150px\]"] {
+    filter: blur(40px) !important;
+    opacity: 0.5 !important;
+  }
+
+  /* 4. Disable blur on image backgrounds (e.g. blur-xl, blur-2xl) */
+  img[class*="blur-"] {
+    filter: none !important;
+    opacity: 0.2 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   GPU ACCELERATION HINTS (All browsers)
+   Forces compositor layers on frequently animated elements
+   ═══════════════════════════════════════════════════════ */
+header,
+aside,
+nav,
+footer,
+[class*="sticky"],
+[class*="fixed"] {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REDUCED MOTION: Respect user system preferences
+   Disables animations for users who prefer reduced motion
+   ═══════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [class*="blur-\["] {
+    filter: none !important;
+  }
+
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}

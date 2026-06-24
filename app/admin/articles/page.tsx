@@ -173,7 +173,7 @@ export default function AdminArticlesPage() {
                       <div className="flex items-center gap-3 md:gap-4">
                         <div className="w-10 h-10 md:w-14 md:h-14 bg-slate-100 rounded-lg md:rounded-2xl overflow-hidden shrink-0 border border-slate-100 shadow-sm relative">
                           {article.image ? (
-                            <img src={`${STORAGE_URL}/${article.image}`} alt="cover" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <img loading="lazy" src={`${STORAGE_URL}/${article.image}`} alt="cover" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={16} className="md:w-5 md:h-5" /></div>
                           )}

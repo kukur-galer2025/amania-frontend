@@ -457,7 +457,7 @@ export default function AdminTransactionsPage() {
                  </button>
               </div>
               <div className="w-full bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center">
-                 <img src={proofImage} alt="Bukti Transfer" className="w-full max-h-[70vh] md:max-h-[75vh] object-contain" />
+                 <img loading="lazy" src={proofImage} alt="Bukti Transfer" className="w-full max-h-[70vh] md:max-h-[75vh] object-contain" />
               </div>
             </motion.div>
           </motion.div>
