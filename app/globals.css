@@ -206,21 +206,14 @@ input::-webkit-credentials-auto-fill-button {
 
 /* Detect Firefox: @-moz-document targets Firefox only */
 @-moz-document url-prefix() {
-  /* 1. Disable backdrop-blur entirely in Firefox (biggest performance killer) */
-  * {
+  /* 1. Disable backdrop-blur entirely in Firefox (biggest performance killer)
+     Using attribute selector instead of * to prevent style recalculation overhead */
+  [class*="backdrop-blur"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
 
-  /* 2. Make translucent backgrounds more opaque to compensate for no blur */
-  [class*="backdrop-blur"] {
-    background-color: rgba(255, 255, 255, 0.97) !important;
-  }
-  .dark [class*="backdrop-blur"] {
-    background-color: rgba(15, 23, 42, 0.97) !important;
-  }
-
-  /* 3. Reduce heavy decorative blur orbs (blur-[100px]+ gradient circles) */
+  /* 2. Reduce heavy decorative blur orbs */
   [class*="blur-\[100px\]"],
   [class*="blur-\[120px\]"],
   [class*="blur-\[130px\]"],
@@ -229,30 +222,16 @@ input::-webkit-credentials-auto-fill-button {
     opacity: 0.5 !important;
   }
 
-  /* 4. Disable blur on image backgrounds (e.g. blur-xl, blur-2xl) */
+  /* 3. Disable blur on image backgrounds */
   img[class*="blur-"] {
     filter: none !important;
     opacity: 0.2 !important;
   }
 
-  /* 5. Disable mix-blend-mode (Very expensive in Firefox on large areas) */
+  /* 4. Disable mix-blend-mode (Very expensive in Firefox on large areas) */
   [class*="mix-blend-"] {
     mix-blend-mode: normal !important;
   }
-}
-
-/* ═══════════════════════════════════════════════════════
-   GPU ACCELERATION HINTS (All browsers)
-   Forces compositor layers on frequently animated elements
-   ═══════════════════════════════════════════════════════ */
-header,
-aside,
-nav,
-footer,
-[class*="sticky"],
-[class*="fixed"] {
-  will-change: transform;
-  transform: translateZ(0);
 }
 
 /* ═══════════════════════════════════════════════════════
