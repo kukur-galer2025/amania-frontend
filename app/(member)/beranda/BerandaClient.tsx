@@ -218,7 +218,7 @@ export default function BerandaClient() {
 
  <div className="space-y-3.5 w-full">
  {leaders.length > 0 ? leaders.map((leader, idx) => (
- <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-[#111827] hover:bg-indigo-50 dark:hover:bg-indigo-50 dark:bg-indigo-500/10/40 dark:hover:bg-indigo-950/30 rounded-2xl hover:border-indigo-100 dark:border-indigo-800 dark:hover:border-indigo-800 border border-transparent transition-transform w-full">
+ <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-[#111827] hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-2xl border border-transparent hover:border-indigo-100 dark:hover:border-indigo-800 transition-all w-full">
  <div className="flex items-center gap-3 w-full min-w-0">
  <span className={`text-sm font-black shrink-0 w-6 text-center ${idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-slate-400' : 'text-orange-500'}`}>
  {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}

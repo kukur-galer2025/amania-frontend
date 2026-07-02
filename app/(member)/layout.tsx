@@ -408,7 +408,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mb-6 border border-rose-100 dark:border-rose-500/20 shadow-inner"><ShieldAlert size={40} strokeWidth={2} /></div>
  <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mb-2">Profil Belum Lengkap!</h2>
  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-8">Demi keamanan dan kenyamanan, mohon lengkapi <span className="font-bold text-slate-700 dark:text-slate-300">Nomor Handphone</span> dan <span className="font-bold text-slate-700 dark:text-slate-300">Email</span> Anda sebelum melanjutkan.</p>
- <button onClick={() => { setShowIncompleteProfileAlert(false); router.push('/profil'); }} className="w-full py-4 bg-slate-900 dark:bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-600 dark:hover:bg-indigo-50 dark:bg-indigo-500 shadow-lg dark:shadow-black/20 flex items-center justify-center gap-2">Lengkapi Profil Sekarang <ArrowRight size={18} /></button>
+ <button onClick={() => { setShowIncompleteProfileAlert(false); router.push('/profil'); }} className="w-full py-4 bg-slate-900 dark:bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-600 dark:hover:bg-indigo-700 shadow-lg dark:shadow-black/20 flex items-center justify-center gap-2 transition-all active:scale-95">Lengkapi Profil Sekarang <ArrowRight size={18} /></button>
  </motion.div>
  </div>
  )}
@@ -463,7 +463,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <h4 className="text-[15px] font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{userData.name}</h4>
  <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-widest truncate mt-1">{userData.role}</p>
  </div>
- <div className="mt-5 w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-[11px] font-bold text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:hover:bg-indigo-50 dark:bg-indigo-500/10 dark:group-hover:bg-indigo-950 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-transform border border-slate-100 dark:border-slate-700/50 dark:border-slate-700 group-hover:border-indigo-100 dark:border-indigo-800 dark:group-hover:border-indigo-800 shadow-sm dark:shadow-black/10 dark:shadow-none">
+ <div className="mt-5 w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-[11px] font-bold text-slate-500 dark:text-slate-300 group-hover:bg-indigo-600 group-hover:text-white dark:group-hover:bg-indigo-600 dark:group-hover:text-white transition-all border border-slate-100 dark:border-slate-700 shadow-sm">
  <Settings2 size={14} /> Kelola Profil
  </div>
  </Link>
@@ -473,7 +473,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  <Sparkles size={26} className="text-indigo-300 mx-auto mb-3 drop-shadow-sm dark:shadow-black/10"/>
  <h4 className="text-sm font-bold text-white mb-1.5 tracking-wide">Mode Tamu</h4>
  <p className="text-[11px] text-slate-300 mb-6 leading-relaxed px-1 font-medium">Masuk untuk menikmati akses penuh Amania.</p> 
- <Link href="/login" className="flex items-center justify-center gap-2 w-full py-2.5 bg-white dark:bg-slate-800 dark:bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-slate-100 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-50 dark:bg-indigo-500/10 hover:shadow-lg dark:shadow-black/20 transition-transform duration-300">
+ <Link href="/login" className="flex items-center justify-center gap-2 w-full py-2.5 bg-white hover:bg-indigo-600 text-slate-900 hover:text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95">
  <LogIn size={15} /> Masuk / Daftar
  </Link>
  </div>
@@ -890,7 +890,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
  </div>
 
  <div className="p-3 border-t border-slate-100 dark:border-slate-700/50 dark:border-slate-700 bg-white dark:bg-[#111827] shrink-0">
- <Link href="/cart" onClick={() => setShowCartDropdown(false)} className="flex w-full py-2.5 bg-slate-900 dark:bg-indigo-600 hover:bg-indigo-600 dark:hover:bg-indigo-50 dark:bg-indigo-500 text-white justify-center items-center gap-2 rounded-xl text-[11px] font-bold transition-transform shadow-md dark:shadow-black/15 active:scale-95">
+ <Link href="/cart" onClick={() => setShowCartDropdown(false)} className="flex w-full py-2.5 bg-slate-900 dark:bg-indigo-600 hover:bg-indigo-600 dark:hover:bg-indigo-700 text-white justify-center items-center gap-2 rounded-xl text-[11px] font-bold transition-all shadow-md active:scale-95">
  <ShoppingCart size={14}/> Lihat Semua Keranjang
  </Link>
  </div>

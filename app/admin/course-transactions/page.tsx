@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Search, Loader2, Receipt, GraduationCap,
+  Search, Loader2, Receipt, GraduationCap, TrendingUp,
   User, Calendar, CreditCard, CheckCircle2, Clock, XCircle, AlertCircle, Eye, Hash, X
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
@@ -115,19 +115,26 @@ export default function AdminCourseTransactionsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
+    const s = (status || '').toLowerCase();
+    switch (s) {
       case 'paid':
+      case 'settled':
       case 'completed':
       case 'verified':
+      case 'lunas':
+      case 'berhasil':
         return { label: 'Lunas', icon: CheckCircle2, bg: 'bg-emerald-50 text-emerald-600 border-emerald-100' };
       case 'pending':
+      case 'unpaid':
+      case 'menunggu':
         return { label: 'Menunggu', icon: Clock, bg: 'bg-amber-50 text-amber-600 border-amber-100' };
       case 'failed':
       case 'cancelled':
       case 'expired':
-        return { label: status === 'expired' ? 'Kedaluwarsa' : 'Gagal', icon: XCircle, bg: 'bg-rose-50 text-rose-600 border-rose-100' };
+      case 'gagal':
+        return { label: s === 'expired' ? 'Kedaluwarsa' : 'Gagal', icon: XCircle, bg: 'bg-rose-50 text-rose-600 border-rose-100' };
       default:
-        return { label: status, icon: AlertCircle, bg: 'bg-slate-50 text-slate-600 border-slate-100' };
+        return { label: status || 'Pending', icon: AlertCircle, bg: 'bg-slate-50 text-slate-600 border-slate-100' };
     }
   };
 
@@ -136,7 +143,7 @@ export default function AdminCourseTransactionsPage() {
     const matchesSearch = 
       (t.user?.name || '').toLowerCase().includes(searchLower) ||
       (t.course?.title || '').toLowerCase().includes(searchLower) ||
-      (t.invoice_code || '').toLowerCase().includes(searchLower);
+      (t.reference || t.invoice_code || '').toLowerCase().includes(searchLower);
     
     const creatorName = t.course?.user?.name || '';
     const matchesCreator = selectedCreator === 'all' || creatorName === selectedCreator;
@@ -144,13 +151,30 @@ export default function AdminCourseTransactionsPage() {
     return matchesSearch && matchesCreator;
   });
 
+  // 🔥 Stats dihitung realtime dari data yang sudah difilter
+  const PAID_STATUSES = ['paid', 'settled', 'verified', 'berhasil', 'lunas'];
+  const UNPAID_STATUSES = ['unpaid', 'pending', 'menunggu'];
+  const EXPIRED_STATUSES = ['expired', 'failed', 'cancelled', 'gagal'];
+
+  const liveStats = useMemo(() => {
+    const paid = filteredTransactions.filter(t => PAID_STATUSES.includes((t.status || '').toLowerCase()));
+    const unpaid = filteredTransactions.filter(t => UNPAID_STATUSES.includes((t.status || '').toLowerCase()));
+    const expired = filteredTransactions.filter(t => EXPIRED_STATUSES.includes((t.status || '').toLowerCase()));
+    return {
+      total_revenue: paid.reduce((sum, t) => sum + Number(t.amount || 0), 0),
+      paid_count: paid.length,
+      unpaid_count: unpaid.length,
+      expired_count: expired.length,
+    };
+  }, [filteredTransactions]);
+
   return (
     <div className="space-y-6 md:space-y-8 bg-slate-50 min-h-[80vh] pb-10 rounded-2xl">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[10px] font-black uppercase tracking-widest mb-3">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-black uppercase tracking-widest mb-3">
             <Receipt size={12} /> Kursus Online
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Transaksi Kursus</h1>
@@ -162,7 +186,7 @@ export default function AdminCourseTransactionsPage() {
               <select
                 value={selectedCreator}
                 onChange={(e) => setSelectedCreator(e.target.value)}
-                className="appearance-none w-full sm:w-auto bg-white border border-slate-200 rounded-xl py-2.5 pl-4 pr-10 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:border-emerald-500 transition-all shadow-sm cursor-pointer"
+                className="appearance-none w-full sm:w-auto bg-white border border-slate-200 rounded-xl py-2.5 pl-4 pr-10 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:border-indigo-500 transition-all shadow-sm cursor-pointer"
               >
                 <option value="all">Semua Kreator</option>
                 {creatorsList.map((c) => (
@@ -178,10 +202,33 @@ export default function AdminCourseTransactionsPage() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text" placeholder="Cari user, kursus, invoice..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none w-full transition-all"
+              className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-full transition-all"
             />
           </div>
         </div>
+      </div>
+
+      {/* STAT CARDS - Realtime */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Omset', value: `Rp ${Number(liveStats.total_revenue).toLocaleString('id-ID')}`, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+          { label: 'Terjual', value: `${liveStats.paid_count} trx`, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+          { label: 'Unpaid', value: `${liveStats.unpaid_count} trx`, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+          { label: 'Expired', value: `${liveStats.expired_count} trx`, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100' },
+        ].map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} className={`bg-white p-4 md:p-5 rounded-xl border ${s.border} shadow-sm flex items-center gap-3`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.bg} ${s.color}`}>
+                <Icon size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{s.label}</p>
+                <p className={`text-lg font-black ${s.color}`}>{s.value}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* TABLE */}
@@ -213,7 +260,7 @@ export default function AdminCourseTransactionsPage() {
                     <tr key={trx.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4">
                         <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
-                          {trx.invoice_code || `#${trx.id}`}
+                          {trx.reference || trx.invoice_code || `#${trx.id}`}
                         </span>
                       </td>
                       <td className="px-6 py-4">

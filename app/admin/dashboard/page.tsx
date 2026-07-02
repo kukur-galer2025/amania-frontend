@@ -8,21 +8,34 @@ import {
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api'; // 🔥 API SAKTI
+import { safeStorage } from '@/app/utils/safeStorage';
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [localName, setLocalName] = useState('Admin');
   const [stats, setStats] = useState({
     total_pendapatan: 0,
+    pendapatan_kursus: 0,
+    pendapatan_eproduk: 0,
     total_peserta: 0,
     tiket_terjual: 0,
     menunggu_verifikasi: 0,
     is_creator: false,
     total_courses: 0,
     total_eproducts: 0,
+    user_name: '',
   });
   const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
 
   useEffect(() => {
+    const userStr = safeStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        if (u && u.name) setLocalName(u.name);
+      } catch {}
+    }
+
     const fetchDashboardData = async () => {
       try {
         // 🔥 PENGGUNAAN APIFETCH 🔥
@@ -31,15 +44,18 @@ export default function AdminDashboardPage() {
 
         if (json.success) {
           setStats({
-            total_pendapatan: json.data.total_pendapatan,
-            total_peserta: json.data.total_peserta,
-            tiket_terjual: json.data.tiket_terjual,
-            menunggu_verifikasi: json.data.menunggu_verifikasi,
+            total_pendapatan: json.data.total_pendapatan || 0,
+            pendapatan_kursus: json.data.pendapatan_kursus || 0,
+            pendapatan_eproduk: json.data.pendapatan_eproduk || 0,
+            total_peserta: json.data.total_peserta || 0,
+            tiket_terjual: json.data.tiket_terjual || 0,
+            menunggu_verifikasi: json.data.menunggu_verifikasi || 0,
             is_creator: json.data.is_creator || false,
             total_courses: json.data.total_courses || 0,
             total_eproducts: json.data.total_eproducts || 0,
+            user_name: json.data.user_name || '',
           });
-          setRecentRegistrations(json.data.recent_registrations);
+          setRecentRegistrations(json.data.recent_registrations || []);
         } else {
           toast.error(json.message || "Gagal memuat data dashboard Amania.");
         }
@@ -63,8 +79,10 @@ export default function AdminDashboardPage() {
   }
 
   const STAT_CARDS = stats.is_creator ? [
-    { title: 'Total Kursus Saya', value: Number(stats.total_courses).toLocaleString('id-ID'), icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-    { title: 'Total E-Produk Saya', value: Number(stats.total_eproducts).toLocaleString('id-ID'), icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { title: 'Pendapatan Kursus', value: `Rp ${Number(stats.pendapatan_kursus).toLocaleString('id-ID')}`, icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+    { title: 'Pendapatan E-Produk', value: `Rp ${Number(stats.pendapatan_eproduk).toLocaleString('id-ID')}`, icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { title: 'Total Kursus Saya', value: Number(stats.total_courses).toLocaleString('id-ID'), icon: GraduationCap, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { title: 'Total E-Produk Saya', value: Number(stats.total_eproducts).toLocaleString('id-ID'), icon: ShoppingCart, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
   ] : [
     { title: 'Total Pendapatan', value: `Rp ${Number(stats.total_pendapatan).toLocaleString('id-ID')}`, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
     { title: 'Total Peserta', value: Number(stats.total_peserta).toLocaleString('id-ID'), icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
@@ -76,7 +94,7 @@ export default function AdminDashboardPage() {
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 px-2 sm:px-0 pb-20">
       
       <div className="mt-2 md:mt-0">
-        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Selamat Datang, Admin! 👋</h1>
+        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Selamat Datang, {stats.user_name || localName || (stats.is_creator ? 'Kreator' : 'Admin')}! 👋</h1>
         <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">Berikut adalah ringkasan performa Amania saat ini.</p>
       </div>
 
@@ -104,74 +122,80 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div>
-              <h3 className="text-sm md:text-base font-bold text-slate-900">{stats.is_creator ? 'Aktivitas Kursus' : 'Pendaftaran Terbaru'}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-slate-500 mt-0.5">{stats.is_creator ? 'Pantau perkembangan kursus Anda.' : 'Segera verifikasi tiket yang berstatus pending.'}</p>
+              <h3 className="text-sm md:text-base font-bold text-slate-900">{stats.is_creator ? 'Aktivitas Pembelian Terbaru' : 'Pendaftaran Terbaru'}</h3>
+              <p className="text-[10px] md:text-[11px] font-medium text-slate-500 mt-0.5">{stats.is_creator ? 'Pantau transaksi pembelian kursus dan e-produk terbaru Anda.' : 'Segera verifikasi tiket yang berstatus pending.'}</p>
             </div>
-            {!stats.is_creator && (
+            {stats.is_creator ? (
+              <div className="flex items-center gap-2">
+                <Link href="/admin/course-transactions" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg shrink-0">
+                  Kursus <ArrowUpRight size={14} />
+                </Link>
+                <Link href="/admin/e-product-transactions" className="text-[10px] md:text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1 transition-colors bg-emerald-50 px-2.5 py-1.5 rounded-lg shrink-0">
+                  E-Produk <ArrowUpRight size={14} />
+                </Link>
+              </div>
+            ) : (
               <Link href="/admin/registrations" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg md:bg-transparent md:px-0 md:py-0 shrink-0">
                 Kelola <span className="hidden sm:inline">Semua</span> <ArrowUpRight size={14} />
               </Link>
             )}
           </div>
           
-          {!stats.is_creator && (
-            <div className="flex-1 overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse min-w-[500px]">
-                <thead>
-                  <tr className="border-b border-slate-100 text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white">
-                    <th className="px-4 md:px-6 py-3 md:py-4">Peserta</th>
-                    <th className="px-4 md:px-6 py-3 md:py-4">Program</th>
-                    <th className="px-4 md:px-6 py-3 md:py-4">Status</th>
+          <div className="flex-1 overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse min-w-[500px]">
+              <thead>
+                <tr className="border-b border-slate-100 text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white">
+                  <th className="px-4 md:px-6 py-3 md:py-4">Peserta / Pembeli</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4">Program / Karya</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {recentRegistrations.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-4 md:px-6 py-8 md:py-10 text-center text-xs md:text-sm font-medium text-slate-400">
+                      {stats.is_creator ? (
+                        <div className="py-4 flex flex-col items-center justify-center text-center">
+                          <GraduationCap size={36} className="text-indigo-200 mb-3" />
+                          <h4 className="text-base font-bold text-slate-700">Belum Ada Aktivitas Pembelian</h4>
+                          <p className="text-xs text-slate-400 max-w-sm mt-1">Kursus online dan e-produk Anda belum memiliki pembelian. Bagikan tautan karya Anda untuk mulai menghasilkan!</p>
+                        </div>
+                      ) : 'Belum ada data pendaftaran terbaru.'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {recentRegistrations.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="px-4 md:px-6 py-8 md:py-10 text-center text-xs md:text-sm font-medium text-slate-400">
-                        Belum ada data pendaftaran terbaru.
+                ) : (
+                  recentRegistrations.map((reg) => (
+                    <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        <p className="text-xs md:text-sm font-bold text-slate-900">{reg.name}</p>
+                        <p className="text-[9px] md:text-[10px] font-medium text-slate-400 flex items-center gap-1 mt-0.5">
+                          <Clock size={10} className="md:w-3 md:h-3" /> {reg.date}
+                        </p>
+                      </td>
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        <p className="text-[11px] md:text-xs font-semibold text-slate-600 line-clamp-1">{reg.event}</p>
+                      </td>
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        {reg.status === 'pending' ? (
+                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-amber-200/60">
+                            <AlertCircle size={10} className="md:w-3 md:h-3" /> Pending
+                          </span>
+                        ) : reg.status === 'verified' ? (
+                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-emerald-200/60">
+                            <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-rose-200/60">
+                            <AlertCircle size={10} className="md:w-3 md:h-3" /> {reg.status}
+                          </span>
+                        )}
                       </td>
                     </tr>
-                  ) : (
-                    recentRegistrations.map((reg) => (
-                      <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-4 md:px-6 py-3 md:py-4">
-                          <p className="text-xs md:text-sm font-bold text-slate-900">{reg.name}</p>
-                          <p className="text-[9px] md:text-[10px] font-medium text-slate-400 flex items-center gap-1 mt-0.5">
-                            <Clock size={10} className="md:w-3 md:h-3" /> {reg.date}
-                          </p>
-                        </td>
-                        <td className="px-4 md:px-6 py-3 md:py-4">
-                          <p className="text-[11px] md:text-xs font-semibold text-slate-600 line-clamp-1">{reg.event}</p>
-                        </td>
-                        <td className="px-4 md:px-6 py-3 md:py-4">
-                          {reg.status === 'pending' ? (
-                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-amber-200/60">
-                              <AlertCircle size={10} className="md:w-3 md:h-3" /> Pending
-                            </span>
-                          ) : reg.status === 'verified' ? (
-                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-emerald-200/60">
-                              <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Verified
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-rose-200/60">
-                              <AlertCircle size={10} className="md:w-3 md:h-3" /> Ditolak
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-          {stats.is_creator && (
-            <div className="flex-1 p-8 flex flex-col items-center justify-center text-center bg-slate-50/50">
-              <GraduationCap size={40} className="text-indigo-200 mb-4" />
-              <h4 className="text-lg font-bold text-slate-800">Mulai Berkarya!</h4>
-              <p className="text-sm text-slate-500 max-w-md mt-2">Buat kursus online Anda yang pertama dan bagikan e-produk unggulan Anda kepada para peserta Amania.</p>
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="space-y-6">
