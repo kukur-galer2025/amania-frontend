@@ -9,7 +9,7 @@ import {
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
   CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt,
-  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe
+  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe, ListTodo
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -244,6 +244,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-0.5">
                 <NavItem icon={LayoutDashboard} label="Overview" href="/admin/dashboard" />
                 <NavItem icon={Globe} label="Lihat Website" href="/beranda" target="_blank" />
+                <NavItem icon={ListTodo} label="Manajemen Task" href="/admin/tasks" />
               </div>
             </div>
 
@@ -287,6 +288,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <NavItem icon={GraduationCap} label="Kelola Kursus" href="/admin/courses" />
                     <NavItem icon={Receipt} label="Transaksi Kursus" href="/admin/course-transactions" />
                     <NavItem icon={MessageSquare} label="Ruang Diskusi" href="/admin/discussions" />
+                  </div>
+                </div>
+                <div>
+                  <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-amber-500">Keuangan</p>
+                  <div className="space-y-0.5">
+                    <NavItem icon={CreditCard} label="Penarikan Dana" href="/admin/withdrawals" />
                   </div>
                 </div>
                 {adminRole === 'superadmin' && (

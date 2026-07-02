@@ -26,13 +26,17 @@ export default function AdminDashboardPage() {
     user_name: '',
   });
   const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [wdStats, setWdStats] = useState<any>(null);
 
   useEffect(() => {
     const userStr = safeStorage.getItem('user');
+    let uRole = '';
     if (userStr) {
       try {
         const u = JSON.parse(userStr);
         if (u && u.name) setLocalName(u.name);
+        if (u && u.role) uRole = u.role;
       } catch {}
     }
 
@@ -59,6 +63,19 @@ export default function AdminDashboardPage() {
         } else {
           toast.error(json.message || "Gagal memuat data dashboard Amania.");
         }
+
+        // Fetch Tasks (To-Do List)
+        const taskRes = await apiFetch('/admin/tasks');
+        const taskJson = await taskRes.json();
+        if (taskJson.success) setTasks(taskJson.data.slice(0, 4));
+
+        // Fetch Withdrawals Stats if Creator or Admin
+        if (uRole === 'creator' || uRole === 'superadmin') {
+          const wdRes = await apiFetch('/withdrawals/stats');
+          const wdJson = await wdRes.json();
+          if (wdJson.success) setWdStats(wdJson.data);
+        }
+
       } catch (error) {
         toast.error("Terjadi kesalahan jaringan.");
       } finally {
@@ -118,86 +135,119 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         
-        {/* RECENT REGISTRATIONS */}
-        <div className="lg:col-span-2 bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <div>
-              <h3 className="text-sm md:text-base font-bold text-slate-900">{stats.is_creator ? 'Aktivitas Pembelian Terbaru' : 'Pendaftaran Terbaru'}</h3>
-              <p className="text-[10px] md:text-[11px] font-medium text-slate-500 mt-0.5">{stats.is_creator ? 'Pantau transaksi pembelian kursus dan e-produk terbaru Anda.' : 'Segera verifikasi tiket yang berstatus pending.'}</p>
-            </div>
-            {stats.is_creator ? (
-              <div className="flex items-center gap-2">
-                <Link href="/admin/course-transactions" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg shrink-0">
-                  Kursus <ArrowUpRight size={14} />
-                </Link>
-                <Link href="/admin/e-product-transactions" className="text-[10px] md:text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1 transition-colors bg-emerald-50 px-2.5 py-1.5 rounded-lg shrink-0">
-                  E-Produk <ArrowUpRight size={14} />
-                </Link>
+        {/* KIRI (Tabel & Tasks) */}
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
+          {/* RECENT REGISTRATIONS */}
+          <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div>
+                <h3 className="text-sm md:text-base font-bold text-slate-900">{stats.is_creator ? 'Aktivitas Pembelian Terbaru' : 'Pendaftaran Terbaru'}</h3>
+                <p className="text-[10px] md:text-[11px] font-medium text-slate-500 mt-0.5">{stats.is_creator ? 'Pantau transaksi pembelian kursus dan e-produk terbaru Anda.' : 'Segera verifikasi tiket yang berstatus pending.'}</p>
               </div>
-            ) : (
-              <Link href="/admin/registrations" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg md:bg-transparent md:px-0 md:py-0 shrink-0">
-                Kelola <span className="hidden sm:inline">Semua</span> <ArrowUpRight size={14} />
-              </Link>
-            )}
-          </div>
-          
-          <div className="flex-1 overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[500px]">
-              <thead>
-                <tr className="border-b border-slate-100 text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white">
-                  <th className="px-4 md:px-6 py-3 md:py-4">Peserta / Pembeli</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4">Program / Karya</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {recentRegistrations.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-4 md:px-6 py-8 md:py-10 text-center text-xs md:text-sm font-medium text-slate-400">
-                      {stats.is_creator ? (
-                        <div className="py-4 flex flex-col items-center justify-center text-center">
-                          <GraduationCap size={36} className="text-indigo-200 mb-3" />
-                          <h4 className="text-base font-bold text-slate-700">Belum Ada Aktivitas Pembelian</h4>
-                          <p className="text-xs text-slate-400 max-w-sm mt-1">Kursus online dan e-produk Anda belum memiliki pembelian. Bagikan tautan karya Anda untuk mulai menghasilkan!</p>
-                        </div>
-                      ) : 'Belum ada data pendaftaran terbaru.'}
-                    </td>
+              {stats.is_creator ? (
+                <div className="flex items-center gap-2">
+                  <Link href="/admin/course-transactions" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg shrink-0">
+                    Kursus <ArrowUpRight size={14} />
+                  </Link>
+                  <Link href="/admin/e-product-transactions" className="text-[10px] md:text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1 transition-colors bg-emerald-50 px-2.5 py-1.5 rounded-lg shrink-0">
+                    E-Produk <ArrowUpRight size={14} />
+                  </Link>
+                </div>
+              ) : (
+                <Link href="/admin/registrations" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg md:bg-transparent md:px-0 md:py-0 shrink-0">
+                  Kelola <span className="hidden sm:inline">Semua</span> <ArrowUpRight size={14} />
+                </Link>
+              )}
+            </div>
+            
+            <div className="flex-1 overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-white">
+                    <th className="px-4 md:px-6 py-3 md:py-4">Peserta / Pembeli</th>
+                    <th className="px-4 md:px-6 py-3 md:py-4">Program / Karya</th>
+                    <th className="px-4 md:px-6 py-3 md:py-4">Status</th>
                   </tr>
-                ) : (
-                  recentRegistrations.map((reg) => (
-                    <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <p className="text-xs md:text-sm font-bold text-slate-900">{reg.name}</p>
-                        <p className="text-[9px] md:text-[10px] font-medium text-slate-400 flex items-center gap-1 mt-0.5">
-                          <Clock size={10} className="md:w-3 md:h-3" /> {reg.date}
-                        </p>
-                      </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <p className="text-[11px] md:text-xs font-semibold text-slate-600 line-clamp-1">{reg.event}</p>
-                      </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        {reg.status === 'pending' ? (
-                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-amber-200/60">
-                            <AlertCircle size={10} className="md:w-3 md:h-3" /> Pending
-                          </span>
-                        ) : reg.status === 'verified' ? (
-                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-emerald-200/60">
-                            <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Verified
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-rose-200/60">
-                            <AlertCircle size={10} className="md:w-3 md:h-3" /> {reg.status}
-                          </span>
-                        )}
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {recentRegistrations.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 md:px-6 py-8 md:py-10 text-center text-xs md:text-sm font-medium text-slate-400">
+                        {stats.is_creator ? (
+                          <div className="py-4 flex flex-col items-center justify-center text-center">
+                            <GraduationCap size={36} className="text-indigo-200 mb-3" />
+                            <h4 className="text-base font-bold text-slate-700">Belum Ada Aktivitas Pembelian</h4>
+                            <p className="text-xs text-slate-400 max-w-sm mt-1">Kursus online dan e-produk Anda belum memiliki pembelian. Bagikan tautan karya Anda untuk mulai menghasilkan!</p>
+                          </div>
+                        ) : 'Belum ada data pendaftaran terbaru.'}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    recentRegistrations.map((reg) => (
+                      <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="px-4 md:px-6 py-3 md:py-4">
+                          <p className="text-xs md:text-sm font-bold text-slate-900">{reg.name}</p>
+                          <p className="text-[9px] md:text-[10px] font-medium text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Clock size={10} className="md:w-3 md:h-3" /> {reg.date}
+                          </p>
+                        </td>
+                        <td className="px-4 md:px-6 py-3 md:py-4">
+                          <p className="text-[11px] md:text-xs font-semibold text-slate-600 line-clamp-1">{reg.event}</p>
+                        </td>
+                        <td className="px-4 md:px-6 py-3 md:py-4">
+                          {reg.status === 'pending' ? (
+                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-amber-200/60">
+                              <AlertCircle size={10} className="md:w-3 md:h-3" /> Pending
+                            </span>
+                          ) : reg.status === 'verified' ? (
+                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-emerald-200/60">
+                              <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Verified
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-rose-200/60">
+                              <AlertCircle size={10} className="md:w-3 md:h-3" /> {reg.status}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* TASKS (TO-DO LIST) */}
+          <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm md:text-base font-bold text-slate-900">Manajemen Task Terbaru</h3>
+              <Link href="/admin/tasks" className="text-[10px] md:text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1">
+                Kelola Task <ArrowUpRight size={14} />
+              </Link>
+            </div>
+            {tasks.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                {tasks.map(t => (
+                  <div key={t.id} className="flex gap-3 items-start p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <div className={`mt-0.5 w-4 h-4 md:w-5 md:h-5 rounded-md border flex items-center justify-center flex-shrink-0 ${t.status === 'done' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 bg-white'}`}>
+                      {t.status === 'done' && <CheckCircle2 size={12} />}
+                    </div>
+                    <div>
+                      <p className={`text-xs md:text-sm font-bold ${t.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{t.title}</p>
+                      {t.description && <p className="text-[10px] md:text-[11px] text-slate-500 mt-1 line-clamp-1">{t.description}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-xs text-slate-400 font-medium">Belum ada task saat ini.</p>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* KANAN (Aksi & Status) */}
         <div className="space-y-6">
           {/* QUICK ACTIONS */}
           <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6">
@@ -229,6 +279,32 @@ export default function AdminDashboardPage() {
               )}
             </div>
           </div>
+
+          {/* WITHDRAWAL SHORTCUT */}
+          {wdStats && (
+            <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-xl md:rounded-2xl shadow-lg p-5 md:p-6 relative overflow-hidden text-white">
+              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="relative z-10 flex justify-between items-center mb-1">
+                <h3 className="text-sm md:text-base font-bold text-indigo-50">Keuangan</h3>
+                <Link href="/admin/withdrawals" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
+                  <ArrowUpRight size={16} />
+                </Link>
+              </div>
+              <div className="relative z-10 mt-3">
+                {stats.is_creator ? (
+                  <>
+                    <p className="text-[10px] md:text-xs font-medium text-indigo-200">Saldo Bisa Ditarik</p>
+                    <p className="text-2xl font-black mt-1">Rp {wdStats.available_balance?.toLocaleString('id-ID') || 0}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[10px] md:text-xs font-medium text-indigo-200">Permohonan Penarikan</p>
+                    <p className="text-2xl font-black mt-1">{wdStats.total_pending_requests || 0} Antrean</p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* STATUS SYSTEM */}
           <div className="bg-slate-900 rounded-xl md:rounded-2xl border border-slate-800 shadow-lg p-5 md:p-6 relative overflow-hidden">
