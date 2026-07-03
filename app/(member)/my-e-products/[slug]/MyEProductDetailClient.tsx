@@ -3,7 +3,7 @@ import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { 
  ArrowLeft, FileText, Link as LinkIcon, DownloadCloud, 
  Layers, CheckCircle2, PlayCircle, Loader2, BookOpen,
@@ -101,25 +101,19 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
  <div className="max-w-[1600px] mx-auto w-full relative z-10 animate-in fade-in duration-700 pb-20">
  
  {/* ════ BACKGROUND GLOW ════ */}
- <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-50 dark:bg-amber-500/10 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-normal"></div>
+ <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-50 dark:bg-amber-500/10 rounded-full  -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-normal"></div>
  
  <div className="flex flex-col lg:flex-row gap-8 items-start">
  
  {/* ════ 1. MAIN CONTENT AREA (LEFT) ════ */}
  <div className="flex-1 w-full min-w-0">
- <AnimatePresence mode="wait">
+ 
  {activeMaterial ? (
- <motion.div 
- key={activeMaterial.id}
- initial={{ opacity: 0, y: 15 }} 
- animate={{ opacity: 1, y: 0 }} 
- exit={{ opacity: 0, y: -15 }}
- className="bg-white dark:bg-[#111827] rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col"
- >
+ <div key={activeMaterial.id} className="bg-white dark:bg-[#111827] rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
  {/* 🔥 2A. HEADER & VIEWER TERINTEGRASI (FULL BLACK) 🔥 */}
  <div className="relative w-full bg-slate-950 overflow-hidden pt-8 pb-12 px-6 md:px-10 border-b border-slate-800">
  {/* Background Gradient */}
- <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/15 rounded-full blur-[80px]"></div>
+ <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/15 rounded-full "></div>
 
  {/* --- BARIS 1: NAV & STATUS --- */}
  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10 border-b border-slate-800 pb-5">
@@ -203,7 +197,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
 
  </div>
  </div>
- </motion.div>
+ </div>
  ) : (
  <div className="bg-white dark:bg-[#111827] rounded-[2rem] md:rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-700/50 p-16 flex flex-col items-center justify-center text-center shadow-sm dark:shadow-black/10">
  <BookOpen size={48} className="text-slate-300 dark:text-slate-500 mb-5"/>
@@ -211,7 +205,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
  <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-sm max-w-sm">Mohon maaf, Admin belum mengunggah materi untuk produk ini. Silakan hubungi dukungan jika ini adalah kesalahan.</p>
  </div>
  )}
- </AnimatePresence>
+ 
 
  </div>
 

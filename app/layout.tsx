@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning di <html> untuk aman dari intervensi ekstensi browser
-    <html lang="id" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       
       <body 
         className={`${inter.className} bg-slate-50 text-slate-900 antialiased min-h-screen`}

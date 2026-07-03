@@ -3,7 +3,7 @@ import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+
 import AdBanner from '@/app/components/AdBanner';
 import {
  ArrowRight, BookOpen, Trophy,
@@ -74,63 +74,40 @@ export default function BerandaClient() {
  : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
 
  return (
- <div className="min-h-screen font-sans pb-16 selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100 w-full overflow-x-hidden min-w-0">
+ <div className="min-h-screen font-sans pb-16 selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100 w-full overflow-clip min-w-0">
 
- {/* DECORATIVE BACKGROUND BLOBS */}
- <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-indigo-200/30 dark:from-indigo-900/20 to-purple-200/20 dark:to-purple-900/10 blur-[150px] rounded-full pointer-events-none z-0"/>
- <div className="absolute top-[800px] right-1/10 w-[500px] h-[500px] bg-gradient-to-br from-blue-200/20 dark:from-blue-900/15 to-teal-200/25 dark:to-teal-900/10 blur-[120px] rounded-full pointer-events-none z-0"/>
+ {/* DECORATIVE BACKGROUND BLOBS (Removed to optimize scroll performance on Firefox) */}
 
  {/* 1. HERO SECTION */}
  <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-10 max-w-7xl mx-auto w-full relative z-10">
- <div className="relative w-full rounded-[3rem] overflow-hidden shadow-2xl dark:shadow-black/25 shadow-indigo-900/15 bg-slate-950 border border-slate-900">
+ <div className="relative w-full bg-slate-950 border border-slate-900 rounded-[2.5rem] overflow-clip transform-gpu translate-z-0">
  <div className="absolute inset-0">
- <img loading="lazy" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+ <img loading="lazy" src="/images/beranda_hero_bg.png"
  alt="Learning Collaboration"
- className="w-full h-full object-cover opacity-35 mix-blend-luminosity scale-105"
+ className="w-full h-full object-cover"
  />
  </div>
- {/* Neon overlays */}
- <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/95 to-indigo-950/40"/>
- <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-indigo-500/20 dark:bg-indigo-500/20 blur-[150px] rounded-full pointer-events-none"/>
- <div className="absolute -bottom-45 -left-45 w-[500px] h-[500px] bg-amber-500/10 dark:bg-amber-500/10 blur-[120px] rounded-full pointer-events-none"/>
+ {/* Hardware-accelerated overlays */}
+ <div className="absolute inset-0 bg-slate-950/40 pointer-events-none"/>
+ <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 to-transparent pointer-events-none"/>
 
  <div className="relative z-10 px-6 py-16 md:py-24 md:px-16 lg:px-20 max-w-4xl w-full">
- <motion.div
- initial={{ opacity: 0, y: 15 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.5 }}
- className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full text-amber-300 text-xs font-black tracking-wider uppercase mb-6 shadow-xl shrink-0"
- >
- <Sparkles size={14} className="text-amber-400 animate-pulse"/>
+ <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/80 border border-white/10 rounded-full text-amber-300 text-xs font-black tracking-wider uppercase mb-6 shrink-0">
+ <Sparkles size={14} className="text-amber-400"/>
  <span>Pusat Pembelajaran Interaktif Amania</span>
- </motion.div>
+ </div>
 
- <motion.h1
- initial={{ opacity: 0, y: 15 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.1, duration: 0.5 }}
- className="text-4xl md:text-5xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] mb-6"
- >
- Halo, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 drop-shadow-sm dark:shadow-black/10">{userName}! 👋</span><br />
+ <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] mb-6">
+ Halo, <span className="text-amber-400">{userName}! 👋</span><br />
  Siap Kuasai Hal Baru?
- </motion.h1>
+ </h1>
 
- <motion.p
- initial={{ opacity: 0, y: 15 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.2, duration: 0.5 }}
- className="text-base md:text-xl text-slate-300 font-medium leading-relaxed mb-10 max-w-2xl"
- >
+ <p className="text-base md:text-xl text-slate-300 font-medium leading-relaxed mb-10 max-w-2xl">
  Akselerasikan karir digital Anda melalui kurikulum berbasis kebutuhan industri. Ikuti kelas terupdate, dapatkan sertifikat resmi, dan terhubung langsung dengan para mentor ahli.
- </motion.p>
+ </p>
 
  {/* Quick Stats in Hero */}
- <motion.div
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ delay: 0.3 }}
- className="grid grid-cols-3 gap-4 max-w-lg mb-10 border-t border-slate-200/30 dark:border-slate-700/20 pt-8"
- >
+ <div className="grid grid-cols-3 gap-4 max-w-lg mb-10 border-t border-slate-200/30 dark:border-slate-700/20 pt-8">
  <div>
  <p className="text-2xl md:text-3xl font-black text-white">5K+</p>
  <p className="text-xs md:text-sm text-slate-400 font-bold">Member Aktif</p>
@@ -141,25 +118,20 @@ export default function BerandaClient() {
  </div>
  <div>
  <p className="text-2xl md:text-3xl font-black text-indigo-400">100%</p>
- <p className="text-xs md:text-sm text-slate-400 font-bold">Portofolio terverivikasi</p>
+ <p className="text-xs md:text-sm text-slate-400 font-bold">Portofolio Terverifikasi</p>
  </div>
- </motion.div>
+ </div>
 
- <motion.div
- initial={{ opacity: 0, y: 15 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.4, duration: 0.5 }}
- className="flex flex-col sm:flex-row items-center gap-4 w-full"
- >
- <Link href="/my-events" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 dark:text-white rounded-2xl font-black transition-transform shadow-xl dark:shadow-black/20 shadow-amber-400/20 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shrink-0">
+ <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+ <Link href="/my-events" className="w-full sm:w-auto px-8 py-4 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl font-black flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shrink-0 transition-transform">
  <PlayCircle size={20} className="shrink-0"/>
  <span>Lanjutkan Belajar</span>
  </Link>
- <Link href="/events" className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white rounded-2xl font-bold transition-transform shadow-sm flex items-center justify-center gap-2 hover:scale-105 shrink-0">
+ <Link href="/events" className="w-full sm:w-auto px-8 py-4 bg-slate-800/80 border border-white/20 hover:bg-slate-700/80 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-105 shrink-0 transition-transform">
  <span>Eksplorasi Katalog</span>
  <ArrowRight size={18} />
  </Link>
- </motion.div>
+ </div>
  </div>
  </div>
  </section>
@@ -173,10 +145,10 @@ export default function BerandaClient() {
  <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 w-full relative z-10">
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
 
- <Link href="/dashboard/ticket" className="group bg-gradient-to-br from-indigo-700 to-violet-900 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl dark:shadow-black/25 shadow-indigo-900/10 hover:shadow-indigo-500/20 hover:-translate-y-1.5 transition-transform duration-300 w-full border border-indigo-600/30">
- <div className="absolute top-0 right-0 w-36 h-36 bg-white/20 dark:bg-white/10 rounded-full blur-[40px] transition-transform duration-500 group-hover:scale-150"></div>
+ <Link href="/dashboard/ticket" className="group bg-gradient-to-br from-indigo-700 to-violet-900 rounded-[2.5rem] p-8 relative overflow-clip shadow-lg dark:shadow-black/25 shadow-indigo-900/10 hover:shadow-indigo-500/20 hover:-translate-y-1.5 transition-transform duration-300 w-full border border-indigo-600/30">
+ <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 dark:bg-white/5 rounded-full transition-transform duration-500 group-hover:scale-150"></div>
  <div className="relative z-10 flex items-center justify-between text-white mb-8 w-full">
- <div className="w-14 h-14 bg-white dark:bg-slate-800/15 backdrop-blur-md rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
+ <div className="w-14 h-14 bg-white dark:bg-slate-800/80 rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
  <Ticket size={28} className="text-amber-300"/>
  </div>
  <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center border border-white/30 dark:border-white/10">
@@ -189,10 +161,10 @@ export default function BerandaClient() {
  </div>
  </Link>
 
- <Link href="/transactions" className="group bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl dark:shadow-black/25 shadow-emerald-900/10 hover:shadow-emerald-500/20 hover:-translate-y-1.5 transition-transform duration-300 w-full border border-emerald-500/30">
- <div className="absolute bottom-0 right-0 w-36 h-36 bg-white/20 dark:bg-white/10 rounded-full blur-[40px] transition-transform duration-500 group-hover:scale-150"></div>
+ <Link href="/transactions" className="group bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[2.5rem] p-8 relative overflow-clip shadow-lg dark:shadow-black/25 shadow-emerald-900/10 hover:shadow-emerald-500/20 hover:-translate-y-1.5 transition-transform duration-300 w-full border border-emerald-500/30">
+ <div className="absolute bottom-0 right-0 w-36 h-36 bg-white/10 dark:bg-white/5 rounded-full transition-transform duration-500 group-hover:scale-150"></div>
  <div className="relative z-10 flex items-center justify-between text-white mb-8 w-full">
- <div className="w-14 h-14 bg-white dark:bg-slate-800/15 backdrop-blur-md rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
+ <div className="w-14 h-14 bg-white dark:bg-slate-800/80 rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
  <Receipt size={28} className="text-emerald-300"/>
  </div>
  <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center border border-white/30 dark:border-white/10">
@@ -205,7 +177,7 @@ export default function BerandaClient() {
  </div>
  </Link>
 
- <div className="bg-white dark:bg-[#111827] rounded-[2.5rem] p-6 border border-slate-200 dark:border-slate-700/50 shadow-xl dark:shadow-black/20 shadow-slate-100/50 dark:shadow-none flex flex-col justify-between w-full">
+ <div className="bg-white dark:bg-[#111827] rounded-[2.5rem] p-6 border border-slate-200 dark:border-slate-700/50 shadow-lg dark:shadow-black/20 shadow-slate-100/50 dark:shadow-none flex flex-col justify-between w-full">
  <div className="flex items-center justify-between mb-5 w-full">
  <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
  <Trophy size={20} className="text-amber-500 shrink-0"/>
@@ -281,7 +253,7 @@ export default function BerandaClient() {
  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 w-full">
  <div className="min-w-0 w-full">
  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-rose-50 dark:bg-rose-500/10 rounded-full text-rose-600 dark:text-rose-400 text-xs font-extrabold uppercase tracking-wider mb-4 border border-rose-100 dark:border-rose-500/20">
- <Flame size={12} className="text-rose-500 dark:text-rose-400 animate-pulse"/>
+ <Flame size={12} className="text-rose-500 dark:text-rose-400"/>
  <span>Program Sedang Berjalan</span>
  </div>
  <h2 className="text-3xl md:text-4xl font-black text-slate-950 dark:text-white dark:text-white mb-2.5 tracking-tight flex items-center gap-3">
@@ -299,7 +271,7 @@ export default function BerandaClient() {
  {loading ? (
  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
  {[1, 2, 3].map(i => (
- <div key={i} className="h-96 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-3 animate-pulse w-full">
+ <div key={i} className="h-96 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-3 w-full">
  <div className="w-full h-48 bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-3xl mb-4"></div>
  <div className="h-4 bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded mx-4 mb-2"></div>
  <div className="h-4 bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded mx-4 w-1/2"></div>
@@ -319,21 +291,21 @@ export default function BerandaClient() {
 
  return (
  <Link
- href={`/events/${event.slug}`} // 🔥 FIX: Gunakan path routing dinamis /events/[slug]
+ href={`/events/${event.slug}`}
  key={event.id}
- className="group bg-white dark:bg-[#111827] rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 overflow-hidden hover:shadow-2xl dark:shadow-black/25 hover:shadow-indigo-500/10 dark:hover:shadow-none hover:-translate-y-2 transition-transform duration-300 flex flex-col p-3 min-w-0 w-full shadow-md dark:shadow-black/15 shadow-slate-100/50 dark:shadow-none"
+ className="group bg-white dark:bg-[#111827] rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 hover:shadow-2xl dark:shadow-black/25 hover:shadow-indigo-500/10 dark:hover:shadow-none hover:-translate-y-2 transition-transform duration-300 flex flex-col p-3 min-w-0 w-full shadow-md dark:shadow-black/15 shadow-slate-100/50 dark:shadow-none"
  >
 
- <div className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-[1.8rem] overflow-hidden shrink-0 block" style={{ aspectRatio: '16 / 10' }}>
+ <div className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-[1.8rem] shrink-0 block" style={{ aspectRatio: '16 / 10' }}>
  {event.image ? (
- <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[1.8rem]"/>
  ) : (
- <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/60"><BookOpen size={40} className="text-slate-300"/></div>
+ <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/60 rounded-[1.8rem]"><BookOpen size={40} className="text-slate-300"/></div>
  )}
 
  {/* Status Badge */}
  <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
- <span className="bg-slate-950/80 backdrop-blur-md text-white px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm dark:shadow-black/10 max-w-[120px] text-center border border-slate-200/30 dark:border-slate-700/20">
+ <span className="bg-slate-950/90 text-white px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm dark:shadow-black/10 max-w-[120px] text-center border border-slate-200/30 dark:border-slate-700/20">
  {event.tier || 'Masterclass'}
  </span>
  </div>
@@ -341,7 +313,7 @@ export default function BerandaClient() {
  <div className="absolute bottom-4 left-4 z-10">
  {isStarted ? (
  <span className="bg-emerald-50 dark:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg dark:shadow-black/20 shadow-emerald-500/20 flex items-center gap-1.5 border border-emerald-400/20">
- <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-slate-800 animate-ping"/>
+ <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"/>
  <span>Sedang Berjalan</span>
  </span>
  ) : (
@@ -428,7 +400,7 @@ export default function BerandaClient() {
  {loading ? (
  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 w-full min-w-0 pt-2 pb-6">
  {[1, 2, 3, 4, 5].map(i => (
- <div key={i} className="relative w-full bg-slate-200 rounded-2xl animate-pulse block" style={{ aspectRatio: '2 / 3' }}></div>
+ <div key={i} className="relative w-full bg-slate-200 rounded-2xl block" style={{ aspectRatio: '2 / 3' }}></div>
  ))}
  </div>
  ) : eProducts.length > 0 ? (
@@ -442,18 +414,18 @@ export default function BerandaClient() {
  <Link key={product.id} href={`/e-products/${product.slug}`} className="group flex flex-col h-full w-full min-w-0">
 
  <div
- className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-2xl md:rounded-[2rem] shadow-md dark:shadow-black/15 dark:shadow-none border border-slate-200 dark:border-slate-700/50 group-hover:shadow-2xl dark:shadow-black/25 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-none group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden mb-3.5 md:mb-4 block"
+ className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-2xl md:rounded-[2rem] shadow-md dark:shadow-black/15 dark:shadow-none border border-slate-200 dark:border-slate-700/50 group-hover:shadow-2xl dark:shadow-black/25 group-hover:shadow-indigo-500/10 dark:group-hover:shadow-none group-hover:-translate-y-2 transition-transform duration-300 mb-3.5 md:mb-4 block"
  style={{ aspectRatio: '2 / 3' }}
  >
  {product.cover_image ? (
- <img loading="lazy" src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-2xl md:rounded-[2rem]"/>
  ) : (
- <div className="absolute inset-0 w-full h-full flex items-center justify-center text-slate-300 bg-slate-50 dark:bg-slate-800/60">
+ <div className="absolute inset-0 w-full h-full flex items-center justify-center text-slate-300 bg-slate-50 dark:bg-slate-800/60 rounded-2xl md:rounded-[2rem]">
  <FileText size={48} strokeWidth={1} />
  </div>
  )}
 
- <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none z-0"></div>
+ <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none z-0 rounded-2xl md:rounded-[2rem]"></div>
 
  <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
  {isFree ? (
@@ -547,7 +519,7 @@ export default function BerandaClient() {
  {loading ? (
  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full min-w-0">
  {[1, 2, 3].map(i => (
- <div key={i} className="flex flex-col gap-4 animate-pulse w-full">
+ <div key={i} className="flex flex-col gap-4 w-full">
  <div className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-[2rem]" style={{ aspectRatio: '4 / 3' }}></div>
  <div className="h-4 bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded w-1/4"></div>
  <div className="h-6 bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded w-full"></div>
@@ -560,13 +532,13 @@ export default function BerandaClient() {
  <Link href={`/articles/${article.slug}`} key={article.id} className="group flex flex-col gap-5 min-w-0 w-full">
 
  <div
- className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-[2.2rem] overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-md dark:shadow-black/15 dark:shadow-none group-hover:shadow-2xl dark:shadow-black/25 group-hover:shadow-indigo-500/5 dark:group-hover:shadow-none group-hover:-translate-y-1.5 transition-transform duration-355 shrink-0 block"
+ className="relative w-full bg-slate-100 dark:bg-slate-700/50 dark:bg-slate-700 rounded-[2.2rem] border border-slate-200 dark:border-slate-700/50 shadow-md dark:shadow-black/15 dark:shadow-none group-hover:shadow-2xl dark:shadow-black/25 group-hover:shadow-indigo-500/5 dark:group-hover:shadow-none group-hover:-translate-y-1.5 transition-transform duration-300 shrink-0 block"
  style={{ aspectRatio: '4 / 3' }}
  >
  {article.image ? (
- <img loading="lazy" src={`${STORAGE_URL}/${article.image}`} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${article.image}`} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[2.2rem]"/>
  ) : (
- <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-[#111827]"><Newspaper size={40} className="text-slate-300 dark:text-slate-400"/></div>
+ <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-[#111827] rounded-[2.2rem]"><Newspaper size={40} className="text-slate-300 dark:text-slate-400"/></div>
  )}
  </div>
 
@@ -594,11 +566,11 @@ export default function BerandaClient() {
  {/* 7. CTA KOMUNITAS */}
  <section className="px-4 sm:px-6 lg:px-8 pb-12 pt-8 max-w-7xl mx-auto w-full min-w-0 relative z-10">
  <div className="bg-slate-950 rounded-[3rem] p-10 md:p-16 relative overflow-hidden shadow-2xl dark:shadow-black/25 flex flex-col lg:flex-row items-center justify-between gap-10 border border-slate-900 w-full min-w-0">
- <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/20 dark:bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none animate-pulse"/>
- <div className="absolute bottom-0 left-0 w-85 h-85 bg-amber-500/10 dark:bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"/>
+ <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full pointer-events-none"/>
+ <div className="absolute bottom-0 left-0 w-85 h-85 bg-amber-500/5 dark:bg-amber-500/5 rounded-full pointer-events-none"/>
 
  <div className="relative z-10 text-center lg:text-left max-w-2xl space-y-4 min-w-0 w-full">
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-amber-300 text-xs font-black tracking-wider uppercase">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 border border-white/10 rounded-xl text-amber-300 text-xs font-black tracking-wider uppercase">
  <Users size={12} className="text-amber-400"/>
  <span>Amania Exclusive Community</span>
  </div>

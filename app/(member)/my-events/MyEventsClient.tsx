@@ -3,7 +3,7 @@ import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+// Framer Motion removed for performance
 import { 
  Search, Calendar, MapPin, Loader2, Image as ImageIcon, 
  CheckCircle2, Clock, Shield, Award, Sparkles, ShieldCheck,
@@ -90,35 +90,34 @@ export default function MyEventsClient() {
  <div className="w-full min-w-0 space-y-4 md:space-y-6 animate-in fade-in duration-500 pb-20 md:pb-24 font-sans selection:bg-indigo-100 dark:selection:bg-indigo-900">
  
  {/* ════════ IMMERSIVE LUXURY HERO SECTION ════════ */}
- <section className="relative w-full pt-20 pb-28 md:pt-28 md:pb-36 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl dark:shadow-black/25 shadow-indigo-900/10 bg-slate-950 flex flex-col items-center justify-center text-center border border-slate-200/50 dark:border-slate-700/30 mt-4 md:mt-0">
+ <section className="relative w-full pt-20 pb-28 md:pt-28 md:pb-36 rounded-[2.5rem] md:rounded-[3rem] bg-slate-950 flex flex-col items-center justify-center text-center border border-slate-200/50 dark:border-slate-700/30 mt-4 md:mt-0">
  <div className="absolute inset-0 z-0">
  <img loading="lazy" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
  alt="Learning Concept"
- className="w-full h-full object-cover opacity-20 mix-blend-luminosity scale-105"
+ className="w-full h-full object-cover opacity-20"
  />
  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/70 to-slate-950/90"/>
- <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/20 dark:bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none"/>
  </div>
 
  <div className="relative z-10 px-6 max-w-3xl mx-auto flex flex-col items-center w-full min-w-0">
- <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-400/30 rounded-full text-indigo-200 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-sm dark:shadow-black/10">
+ <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/20 dark:bg-indigo-500/20 border border-indigo-400/30 rounded-full text-indigo-200 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 shadow-sm dark:shadow-black/10">
  <Sparkles size={14} className="text-amber-400"/> Ruang Belajar Eksklusif
- </motion.div>
+ </div>
  
- <motion.h1 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter leading-[1.1] drop-shadow-lg dark:shadow-black/20 mb-5 w-full">
+ <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter leading-[1.1] drop-shadow-lg dark:shadow-black/20 mb-5 w-full">
  Koleksi Event & <br className="hidden sm:block"/>
  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-indigo-400 font-serif italic font-light pr-2">Webinar Anda.</span>
- </motion.h1>
+ </h1>
  
- <motion.p initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-indigo-100/70 text-sm md:text-base font-medium leading-relaxed max-w-lg mx-auto w-full px-2">
+ <p className="text-indigo-100/70 text-sm md:text-base font-medium leading-relaxed max-w-lg mx-auto w-full px-2">
  Akses seluruh jadwal kelas, modul eksklusif, dan rekaman dari program Amania yang telah Anda ikuti.
- </motion.p>
+ </p>
  </div>
  </section>
 
  {/* ════════ FLOATING TOOLBAR (PENCARIAN & FILTER) ════════ */}
  <div className="relative z-20 max-w-[1000px] mx-auto px-4 md:px-8 -mt-20 md:-mt-24 w-full">
- <div className="bg-white dark:bg-slate-800/90 backdrop-blur-2xl border border-white dark:border-slate-700/50 rounded-2xl md:rounded-[2rem] p-3 md:p-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col md:flex-row items-center justify-between gap-3 md:gap-5 w-full">
+ <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[2rem] p-3 md:p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 md:gap-5 w-full">
  
  <div className="relative w-full md:flex-1 min-w-0 group">
  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-400 group-focus-within:text-indigo-600 dark:text-indigo-400" size={18} />
@@ -147,7 +146,7 @@ export default function MyEventsClient() {
  }`}
  >
  {statusFilter === type.id && (
- <motion.div layoutId="myEventsFilter" className="absolute inset-0 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 rounded-lg md:rounded-xl -z-10 shadow-sm dark:shadow-black/10" transition={{ type:"spring", stiffness: 400, damping: 30 }} />
+ <div className="absolute inset-0 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 rounded-lg md:rounded-xl -z-10 shadow-sm dark:shadow-black/10" />
  )}
  <type.icon size={14} className={statusFilter === type.id ? 'text-indigo-500' : 'text-slate-400 dark:text-slate-400'} />
  {type.label}
@@ -160,7 +159,7 @@ export default function MyEventsClient() {
  {/* ════════ MAIN GRID CLASS CARDS ════════ */}
  <div className="max-w-7xl mx-auto px-4 md:px-8 w-full min-w-0 mt-8 md:mt-12">
  {filteredEvents.length === 0 ? (
- <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-[#111827] border border-indigo-100 dark:border-indigo-500/20 rounded-[2rem] md:rounded-[3rem] p-10 md:p-20 flex flex-col items-center justify-center text-center shadow-sm dark:shadow-black/10 w-full min-w-0">
+ <div className="bg-white dark:bg-[#111827] border border-indigo-100 dark:border-indigo-500/20 rounded-[2rem] md:rounded-[3rem] p-10 md:p-20 flex flex-col items-center justify-center text-center shadow-sm dark:shadow-black/10 w-full min-w-0">
  <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-full flex items-center justify-center mb-6 shadow-sm dark:shadow-black/10 shrink-0">
  <Compass size={32} className="text-indigo-400" strokeWidth={1.5} />
  </div>
@@ -173,10 +172,9 @@ export default function MyEventsClient() {
  <Link href="/events" className="px-8 py-3.5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-xl md:rounded-2xl text-xs md:text-sm font-bold hover:shadow-lg dark:shadow-black/20 hover:shadow-slate-900/20 transition-transform shadow-sm dark:shadow-black/10 inline-flex items-center gap-2 shrink-0 group">
  Eksplorasi Program <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
  </Link>
- </motion.div>
+ </div>
  ) : (
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full min-w-0">
- <AnimatePresence mode="popLayout">
  {filteredEvents.map((reg, idx) => {
  const isPast = new Date(reg.event?.end_time || reg.event?.start_time) < new Date();
  const isSuperadmin = true;
@@ -187,11 +185,9 @@ export default function MyEventsClient() {
  const timeLeft = getTimeLeft(reg.event?.start_time);
 
  return (
- <motion.div 
- layout
- initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(idx * 0.05, 0.3) }}
+ <div 
  key={reg.id} 
- className="group bg-white dark:bg-[#111827] rounded-[2rem] border border-slate-200 dark:border-slate-700/50 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_50px_-15px_rgba(79,70,229,0.15)] hover:border-indigo-300 transition-transform duration-500 flex flex-col overflow-hidden w-full min-w-0 transform hover:-translate-y-1.5"
+ className="group bg-white dark:bg-[#111827] rounded-[2rem] border border-slate-200 dark:border-slate-700/50 hover:border-indigo-300 flex flex-col overflow-hidden w-full min-w-0"
  >
  
  {/* 🔥 IMAGE CONTAINER (UNCROPPED & LUXURY BLUR) 🔥 */}
@@ -199,15 +195,15 @@ export default function MyEventsClient() {
  
  {reg.event?.image && (
  <div className="absolute inset-0 z-0">
- <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover blur-[20px] opacity-40 scale-125" alt="blur-bg"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} className="w-full h-full object-cover opacity-10 scale-125" alt="bg"/>
  </div>
  )}
- <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-slate-900/50 z-0"/>
+ <div className="absolute inset-0 bg-slate-950/80 z-0"/>
 
  {/* Lencana VIP / Basic */}
  <div className="absolute top-4 left-4 z-20">
- <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-xl dark:shadow-black/20 backdrop-blur-md border ${
- reg.tier === 'premium' ? 'bg-amber-500 dark:bg-amber-500/90 text-white border-amber-400' : 'bg-white dark:bg-slate-800/95 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700/50'
+ <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest border ${
+ reg.tier === 'premium' ? 'bg-amber-500 text-white border-amber-400' : 'bg-white dark:bg-slate-800/95 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700/50'
  }`}>
  {reg.tier === 'premium' ? <Award size={12} className="shrink-0"/> : <Shield size={12} className="shrink-0 text-indigo-600 dark:text-indigo-400"/>}
  <span className="truncate">{reg.tier === 'premium' ? 'VIP Access' : 'Basic Pass'}</span>
@@ -218,27 +214,27 @@ export default function MyEventsClient() {
  <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
  {/* Lencana Selesai / Aktif */}
  {isPast ? (
- <span className="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 shadow-xl dark:shadow-black/20">
+ <span className="bg-slate-900/80 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1">
  <CheckCircle2 size={12} /> Selesai
  </span>
  ) : (
- <span className="bg-indigo-500 dark:bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-indigo-400 flex items-center gap-1 shadow-xl dark:shadow-black/20 shadow-indigo-500/30">
+ <span className="bg-indigo-500 dark:bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-indigo-400 flex items-center gap-1">
  <CheckCircle2 size={12} className="text-white"/> Kelas Aktif
  </span>
  )}
 
  {/* 🔥 BADGE HITUNG MUNDUR LUXURY 🔥 */}
  {timeLeft && !isPast && (
- <span className="bg-amber-500 dark:bg-amber-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-amber-400 flex items-center gap-1.5 shadow-xl dark:shadow-black/20">
+ <span className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-amber-400 flex items-center gap-1.5">
  <Clock size={12} className="text-white shrink-0"/>
  {timeLeft}
  </span>
  )}
  </div>
 
- <div className={`relative z-10 w-full h-full transition-transform duration-700 ease-out group-hover:scale-105 flex items-center justify-center ${isPast ? 'grayscale opacity-90' : ''}`}>
+ <div className={`relative z-10 w-full h-full flex items-center justify-center ${isPast ? 'grayscale opacity-90' : ''}`}>
  {reg.event?.image ? (
- <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-contain drop-shadow-2xl dark:shadow-black/25 rounded-xl"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${reg.event.image}`} alt={reg.event.title} className="w-full h-full object-contain rounded-xl"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400"><ImageIcon size={40} strokeWidth={1.5} /></div>
  )}
@@ -304,10 +300,9 @@ export default function MyEventsClient() {
  </div>
  </div>
 
- </motion.div>
+ </div>
  );
  })}
- </AnimatePresence>
  </div>
  )}
  </div>

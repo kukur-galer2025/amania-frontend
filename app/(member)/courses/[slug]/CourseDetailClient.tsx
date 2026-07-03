@@ -2,7 +2,7 @@
 import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -267,9 +267,9 @@ export default function CourseDetailClient() {
  if (loading) {
  return (
  <div className="min-h-[60vh] flex flex-col items-center justify-center gap-5">
- <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}>
- <Loader2 size={48} className="text-emerald-500"/>
- </motion.div>
+ <div>
+ <Loader2 size={48} className="text-emerald-500 animate-spin"/>
+ </div>
  <p className="text-sm font-black text-emerald-500/80 uppercase tracking-[0.3em] animate-pulse">Memuat Kursus Premium...</p>
  </div>
  );
@@ -309,16 +309,12 @@ export default function CourseDetailClient() {
  }
  .glass-card {
  background: rgba(255,255,255,0.7);
- backdrop-filter: blur(20px);
- -webkit-backdrop-filter: blur(20px);
  }
  .dark .glass-card {
  background: rgba(30,41,59,0.7);
  }
  .glass-card-strong {
  background: rgba(255,255,255,0.85);
- backdrop-filter: blur(24px);
- -webkit-backdrop-filter: blur(24px);
  }
  .dark .glass-card-strong {
  background: rgba(15,23,42,0.85);
@@ -331,9 +327,9 @@ export default function CourseDetailClient() {
 
  {/* AMBIENT GLOW - ENHANCED */}
  <div className="absolute top-0 left-0 right-0 h-[800px] z-0 pointer-events-none overflow-hidden">
- <div className="absolute top-[-30%] left-[5%] w-[70%] h-[90%] bg-emerald-50 dark:bg-emerald-500/[0.06] blur-[150px] rounded-full"/>
- <div className="absolute top-[5%] right-[5%] w-[50%] h-[70%] bg-teal-400/[0.05] blur-[130px] rounded-full"/>
- <div className="absolute top-[40%] left-[40%] w-[35%] h-[40%] bg-cyan-400/[0.04] blur-[120px] rounded-full"/>
+ <div className="absolute top-[-30%] left-[5%] w-[70%] h-[90%] bg-emerald-50 dark:bg-emerald-500/[0.06]  rounded-full"/>
+ <div className="absolute top-[5%] right-[5%] w-[50%] h-[70%] bg-teal-400/[0.05]  rounded-full"/>
+ <div className="absolute top-[40%] left-[40%] w-[35%] h-[40%] bg-cyan-400/[0.04]  rounded-full"/>
  {/* Subtle dot grid */}
  <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: 'radial-gradient(circle, #10b981 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
  </div>
@@ -373,14 +369,14 @@ export default function CourseDetailClient() {
  {/* Badges on thumbnail */}
  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col gap-2">
  {isEnrolled && (
- <motion.span initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="bg-gradient-to-r from-emerald-500 to-teal-500 backdrop-blur-md text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg dark:shadow-black/20 flex items-center gap-1.5 w-fit border border-slate-200/30 dark:border-slate-700/20">
+ <span className="bg-gradient-to-r from-emerald-500 to-teal-500 backdrop- text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg dark:shadow-black/20 flex items-center gap-1.5 w-fit border border-slate-200/30 dark:border-slate-700/20">
  <CheckCircle2 size={12} /> Terdaftar
- </motion.span>
+ </span>
  )}
  {isFree && !isEnrolled && (
- <motion.span initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="bg-gradient-to-r from-emerald-500 to-teal-500 backdrop-blur-md text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg dark:shadow-black/20 w-fit border border-slate-200/30 dark:border-slate-700/20">
+ <span className="bg-gradient-to-r from-emerald-500 to-teal-500 backdrop- text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg dark:shadow-black/20 w-fit border border-slate-200/30 dark:border-slate-700/20">
  <Zap size={12} className="inline mr-1"/> Gratis
- </motion.span>
+ </span>
  )}
  </div>
 
@@ -388,10 +384,10 @@ export default function CourseDetailClient() {
  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-6">
  <div className="flex items-end justify-between gap-3">
  <div className="flex items-center gap-2 flex-wrap">
- <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border backdrop-blur-md ${getLevelColor(course.level)} bg-white dark:bg-slate-800/80`}>
+ <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border backdrop- ${getLevelColor(course.level)} bg-white dark:bg-slate-800/80`}>
  <BarChart3 size={11} /> {getLevelLabel(course.level)}
  </span>
- <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-slate-800/80 backdrop-blur-md text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] sm:text-[11px] font-bold border border-emerald-100 dark:border-emerald-500/20">
+ <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-slate-800/80 backdrop- text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] sm:text-[11px] font-bold border border-emerald-100 dark:border-emerald-500/20">
  <Tag size={11} /> {course.category?.name || 'Umum'}
  </span>
  </div>
@@ -402,13 +398,11 @@ export default function CourseDetailClient() {
 
  {/* Title & Meta - ENHANCED */}
  <div>
- <motion.h1 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
- className="text-[22px] sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+ <h1 className="text-[22px] sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
  {course.title}
- </motion.h1>
+ </h1>
 
- <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-  className="flex items-center gap-3 mb-5">
+ <div className="flex items-center gap-3 mb-5">
   {(!course.instructor || course.instructor.role === 'superadmin' || course.instructor.name === 'Admin Amania') ? (
   <>
   <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm dark:shadow-black/10">
@@ -434,11 +428,10 @@ export default function CourseDetailClient() {
   </div>
   </>
   )}
-  </motion.div>
+  </div>
 
  {/* Stats bar - ENHANCED */}
- <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
- className="flex items-center gap-2 sm:gap-3 flex-wrap p-3.5 sm:p-4 glass-card-strong rounded-xl border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 shadow-sm dark:shadow-black/10">
+ <div className="flex items-center gap-2 sm:gap-3 flex-wrap p-3.5 sm:p-4 glass-card-strong rounded-xl border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 shadow-sm dark:shadow-black/10">
  {course.avg_rating > 0 ? (
  <>
  <div className="flex items-center gap-1.5">
@@ -492,12 +485,11 @@ export default function CourseDetailClient() {
  </div>
  </>
  )}
- </motion.div>
+ </div>
  </div>
 
  {/* Description - ENHANCED */}
- <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
- className="glass-card-strong p-5 sm:p-7 md:p-8 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 shadow-[0_8px_40px_rgb(0,0,0,0.04)] relative overflow-hidden">
+ <div className="bg-white dark:bg-slate-900 p-5 sm:p-7 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative">
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-emerald-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
@@ -511,11 +503,10 @@ export default function CourseDetailClient() {
  </div>
  </div>
  <div className="prose prose-sm prose-slate max-w-none break-normal whitespace-normal overflow-hidden text-slate-600 dark:text-slate-400 leading-relaxed [&_img]:rounded-xl [&_img]:shadow-md dark:shadow-black/15 [&_strong]:text-slate-800 dark:text-slate-200 [&_strong]:font-extrabold" dangerouslySetInnerHTML={{ __html: (course.description || '<p>Belum ada deskripsi.</p>').replace(/&nbsp;/g, ' ') }} />
- </motion.div>
+ </div>
 
  {/* Curriculum - ENHANCED */}
- <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
- className="glass-card-strong p-5 sm:p-7 md:p-8 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 shadow-[0_8px_40px_rgb(0,0,0,0.04)] relative overflow-hidden">
+ <div className="bg-white dark:bg-slate-900 p-5 sm:p-7 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative">
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-indigo-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
@@ -551,13 +542,12 @@ export default function CourseDetailClient() {
  </div>
  </button>
 
- <AnimatePresence>
+ 
  {expandedSections.has(section.id) && (
- <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: 'easeInOut' }} className="overflow-hidden">
+ <div className="overflow-hidden">
  <div className="divide-y divide-slate-100 dark:divide-slate-700/50 bg-white dark:bg-slate-800">
  {(section.lessons || []).map((lesson: any, lIdx: number) => (
- <motion.div key={lesson.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: lIdx * 0.04 }}
- className="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-emerald-50 dark:hover:bg-slate-700/50 group/lesson">
+ <div key={lesson.id} className="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-emerald-50 dark:hover:bg-slate-700/50 group/lesson">
  <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
  {lesson.is_preview ? (
  <PlayCircle size={17} className="text-emerald-500 group-hover/lesson:scale-110 transition-transform"/>
@@ -578,22 +568,20 @@ export default function CourseDetailClient() {
  </span>
  )}
  </div>
- </motion.div>
- ))}
- </div>
- </motion.div>
- )}
- </AnimatePresence>
  </div>
  ))}
  </div>
+ </div>
  )}
- </motion.div>
+ 
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
 
  {/* ═══ RATING & REVIEWS SECTION - ENHANCED ═══ */}
- <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
- className="glass-card-strong rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 shadow-[0_8px_40px_rgb(0,0,0,0.04)] p-5 sm:p-7 md:p-8 relative overflow-hidden"
- >
+ <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm p-5 sm:p-7 md:p-8 relative">
  {/* Decorative accent */}
  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-amber-500/[0.04] to-transparent rounded-bl-[3rem] pointer-events-none"/>
  
@@ -628,8 +616,7 @@ export default function CourseDetailClient() {
  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 w-3.5">{star}</span>
  <Star size={10} className="text-amber-400 fill-amber-400 shrink-0"/>
  <div className="flex-1 h-[7px] bg-white dark:bg-[#111827] rounded-full overflow-hidden border border-amber-100 dark:border-amber-500/20">
- <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.5, duration: 0.6 }}
- className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"/>
+ <div className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full" />
  </div>
  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 w-5 text-right">{count}</span>
  </div>
@@ -669,8 +656,7 @@ export default function CourseDetailClient() {
  {(course.reviews || []).length > 0 ? (
  <div className="space-y-3">
  {(course.reviews || []).slice(0, 10).map((review: any, idx: number) => (
- <motion.div key={review.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + idx * 0.05 }}
- className="flex gap-3 p-4 glass-card rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-emerald-100 dark:border-emerald-800/80 hover:shadow-[0_4px_20px_rgba(16,185,129,0.06)] transition-transform duration-300 group/review">
+ <div key={review.id} className="flex gap-3 p-4 glass-card rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-emerald-100 dark:border-emerald-800/80 hover:shadow-[0_4px_20px_rgba(16,185,129,0.06)] -transform duration-300 group/review">
  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm dark:shadow-black/10 group-hover/review:scale-105 transition-transform">
  {(review.user?.name || 'A').charAt(0).toUpperCase()}
  </div>
@@ -686,7 +672,7 @@ export default function CourseDetailClient() {
  {review.comment && <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{review.comment}</p>}
  <p className="text-[9px] text-slate-400 dark:text-slate-400 mt-1.5 font-bold uppercase tracking-widest">{new Date(review.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
  </div>
- </motion.div>
+ </div>
  ))}
  </div>
  ) : (
@@ -698,29 +684,27 @@ export default function CourseDetailClient() {
  <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1">Jadilah yang pertama memberikan rating!</p>
  </div>
  )}
- </motion.div>
+ </div>
 
  </div>
 
  {/* RIGHT: Checkout Sidebar - ENHANCED */}
  <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 lg:sticky lg:top-24 mt-2 md:mt-0 z-30">
- {/* Glow behind */}
- <div className="hidden lg:block absolute -inset-3 bg-gradient-to-b from-emerald-500/[0.05] via-teal-500/[0.04] to-transparent rounded-[3rem] blur-2xl pointer-events-none"/>
  
- <div className="glass-card-strong rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-slate-700/50 dark:border-slate-700 shadow-[0_20px_60px_rgba(0,0,0,0.07)] overflow-hidden relative flex flex-col w-full hover:shadow-[0_25px_70px_rgba(0,0,0,0.09)] transition-shadow duration-500">
+ <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden relative flex flex-col w-full shadow-sm">
 
- {/* Animated accent line */}
- <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 animate-gradient-shift"/>
+ {/* Static accent line instead of animated */}
+ <div className="h-1 w-full bg-gradient-to-r from-emerald-500 to-teal-500"/>
 
- <div className="p-5 sm:p-6 md:p-8 relative z-10 bg-gradient-to-b from-white/90 to-slate-50/90 dark:from-slate-800/90 dark:to-slate-900/90">
+ <div className="p-5 sm:p-6 md:p-8 relative z-10">
  {/* Ownership indicator */}
  {isEnrolled ? (
- <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-black/10">
+ <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200/60 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-none">
  <CheckCircle2 size={15} strokeWidth={2.5} />
  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">Akses Terbuka</p>
  </div>
  ) : (
- <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-black/10">
+ <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-none">
  <GraduationCap size={14} />
  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">Investasi Pendidikan</p>
  </div>
@@ -737,20 +721,18 @@ export default function CourseDetailClient() {
  {isEnrolled ? 'Terdaftar' : formatRupiah(course.price)}
  </p>
 
- {!isFree && !isEnrolled && <p className="text-[11px] md:text-xs font-medium text-slate-500 dark:text-slate-400 mb-6">Pembayaran 1x via Tripay. Aman & Terenkripsi.</p>}
+ {!isFree && !isEnrolled && <p className="text-[11px] md:text-xs font-medium text-slate-500 dark:text-slate-400 mb-6">Pembayaran 1x via QRIS. Aman & Terenkripsi.</p>}
  {isFree && !isEnrolled && <p className="text-[11px] md:text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-6">Akses kursus premium gratis khusus Anda.</p>}
  {isEnrolled && <p className="text-[11px] md:text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-6">Anda sudah bisa mengakses seluruh materi.</p>}
 
  {/* CTA Buttons (Desktop) */}
  <div className="hidden lg:flex flex-col gap-2.5 w-full">
  {isEnrolled ? (
- <Link href={`/learn/${slug}`} className="relative w-full py-4 rounded-xl font-black text-white text-sm bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_35px_rgba(16,185,129,0.4)] transition-transform flex items-center justify-center gap-2 overflow-hidden group active:scale-[0.98]">
- <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:animate-shimmer"></span>
+ <Link href={`/learn/${slug}`} className="w-full py-4 rounded-xl font-black text-white text-sm bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-colors flex items-center justify-center gap-2 overflow-hidden group">
  <PlayCircle size={18} className="shrink-0 relative z-10"/> <span className="relative z-10">Lanjut Belajar</span>
  </Link>
  ) : (
- <button onClick={handleOpenPaymentModal} disabled={enrolling} className="relative w-full py-4 rounded-xl font-black text-white text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-[0_10px_30px_rgba(5,150,105,0.3)] hover:shadow-[0_12px_35px_rgba(5,150,105,0.4)] transition-transform flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn active:scale-[0.98]">
- <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover/btn:animate-shimmer"></span>
+ <button onClick={handleOpenPaymentModal} disabled={enrolling} className="w-full py-4 rounded-xl font-black text-white text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn">
  {enrolling ? <Loader2 size={18} className="animate-spin shrink-0 relative z-10"/> : <Banknote size={18} className="shrink-0 text-emerald-100 relative z-10"/>}
  <span className="relative z-10">{isFree ? 'Klaim Gratis Sekarang' : 'Beli Kursus Ini'}</span>
  </button>
@@ -768,8 +750,7 @@ export default function CourseDetailClient() {
  {/* Benefits - ENHANCED */}
  <div className="border-t border-slate-100 dark:border-slate-700/50 p-5 sm:p-6 md:p-7 flex flex-col gap-3.5 w-full relative z-10 bg-gradient-to-b from-slate-50/50 to-white/50 dark:from-slate-800/50 dark:to-slate-900/50">
  {BENEFITS.map((b, idx) => (
- <motion.div key={b.label} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + idx * 0.08 }}
- className="flex gap-3 w-full min-w-0 items-start group/benefit hover:bg-white/5 dark:hover:bg-slate-700/500 dark:hover:bg-slate-800/50 p-2 -m-2 rounded-xl">
+ <div key={b.label} className="flex gap-3 w-full min-w-0 items-start group/benefit hover:bg-white/5 dark:hover:bg-slate-700/500 dark:hover:bg-slate-800/50 p-2 -m-2 rounded-xl">
  <div className={`w-9 h-9 md:w-10 md:h-10 rounded-xl ${b.bg} ${b.border} border flex items-center justify-center shrink-0 shadow-sm dark:shadow-black/10 group-hover/benefit:scale-110 transition-transform`}>
  <b.icon size={16} strokeWidth={2.5} />
  </div>
@@ -777,7 +758,7 @@ export default function CourseDetailClient() {
  <p className="font-bold text-slate-900 dark:text-white text-xs md:text-sm mb-0.5">{b.label}</p>
  <p className="text-[10px] md:text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{b.desc}</p>
  </div>
- </motion.div>
+ </div>
  ))}
  </div>
  </div>
@@ -788,7 +769,7 @@ export default function CourseDetailClient() {
 
  {/* Rekomendasi Kursus (Full Width - Boxed) */}
  {recommendedCourses.length > 0 && (
- <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="mt-8 mb-12 w-full">
+ <div className="mt-8 mb-12 w-full">
  <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
  <div>
@@ -819,9 +800,9 @@ export default function CourseDetailClient() {
  
  <div className="absolute top-3 right-3 flex items-start">
  {rec.price === 0 ? (
- <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg shadow-lg backdrop-blur-md">GRATIS</span>
+ <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg shadow-lg backdrop-">GRATIS</span>
  ) : (
- <span className="px-2.5 py-1 bg-white dark:bg-slate-800/90 backdrop-blur-md text-slate-900 dark:text-white text-[10px] font-black rounded-lg shadow-lg border border-slate-100 dark:border-slate-700">{formatRupiah(rec.price)}</span>
+ <span className="px-2.5 py-1 bg-white dark:bg-slate-800/90 backdrop- text-slate-900 dark:text-white text-[10px] font-black rounded-lg shadow-lg border border-slate-100 dark:border-slate-700">{formatRupiah(rec.price)}</span>
  )}
  </div>
  </div>
@@ -840,11 +821,11 @@ export default function CourseDetailClient() {
  ))}
  </div>
  </div>
- </motion.div>
+ </div>
  )}
 
  {/* 🔥 MOBILE STICKY BOTTOM BAR - ENHANCED 🔥 */}
- <div className="fixed bottom-0 left-0 right-0 glass-card-strong border-t border-slate-200 dark:border-slate-700/50 p-3 pb-safe z-[50] lg:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.08)] flex items-center justify-between gap-2.5 w-full">
+ <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700/50 p-3 pb-safe z-[50] lg:hidden shadow-lg flex items-center justify-between gap-2.5 w-full">
  <div className="shrink-0 flex flex-col justify-center min-w-0 pl-1 w-[35%]">
  {!isFree && !isEnrolled && (
  <div className="flex items-center gap-1 mb-0.5">
@@ -873,17 +854,16 @@ export default function CourseDetailClient() {
  </div>
 
  {/* 🔥 MODAL PEMILIHAN PEMBAYARAN TRIPAY 🔥 */}
- <AnimatePresence>
+ 
  {isPaymentModalOpen && (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 w-full h-full">
- <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPaymentModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-md w-full h-full"/>
- <motion.div initial={{ opacity: 0, y: 80, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 80, scale: 0.95 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
- className="relative bg-white dark:bg-[#111827] rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_25px_70px_rgba(0,0,0,0.2)] w-full md:w-[600px] max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden">
+ <div onClick={() => setIsPaymentModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop- w-full h-full"/>
+ <div className="relative bg-white dark:bg-[#111827] rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_25px_70px_rgba(0,0,0,0.2)] w-full md:w-[600px] max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden">
  
  {/* Accent line */}
  <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 animate-gradient-shift shrink-0"/>
  
- <div className="p-4 sm:p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white w-full shrink-0">
+ <div className="p-4 sm:p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white dark:from-[#111827] dark:to-slate-900 w-full shrink-0">
  <div className="min-w-0 pr-4">
  <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white truncate w-full">Metode Pembayaran</h3>
  <p className="text-[9px] md:text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest truncate w-full">Sistem Terenkripsi Aman</p>
@@ -892,12 +872,12 @@ export default function CourseDetailClient() {
  <X size={18} strokeWidth={2.5} />
  </button>
  </div>
- <div className="p-4 sm:p-5 md:p-6 overflow-y-auto flex-1 custom-scrollbar bg-gradient-to-b from-slate-50/30 to-white w-full">
+ <div className="p-4 sm:p-5 md:p-6 overflow-y-auto flex-1 custom-scrollbar bg-gradient-to-b from-slate-50/30 to-white dark:from-[#111827] dark:to-[#111827] w-full">
  <div className="space-y-5 md:space-y-6 w-full">
  <div className="text-center">
  <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
- <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
+ <div className="bg-white dark:bg-slate-800 p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
  <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
  </div>
  <div>
@@ -930,7 +910,7 @@ export default function CourseDetailClient() {
  toast.success('Bukti pembayaran berhasil dipilih!');
  }
  }}
- className="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/30 dark:file:text-emerald-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"
+ className="block w-full text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/30 dark:file:text-emerald-400 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl p-2"
  />
  {paymentProof && (
  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1">
@@ -946,17 +926,17 @@ export default function CourseDetailClient() {
  <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-none truncate w-full">{formatRupiah(course.price)}</p>
  </div>
 
- <button onClick={() => handleProcessCheckout()} disabled={!paymentProof || enrolling} className="w-full sm:w-auto px-6 sm:px-8 py-3 md:py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 dark:text-slate-400 disabled:shadow-none text-white rounded-xl font-black text-sm transition-transform shadow-[0_8px_24px_rgba(5,150,105,0.25)] hover:shadow-[0_12px_30px_rgba(5,150,105,0.35)] flex items-center justify-center gap-2 active:scale-[0.98] shrink-0 min-w-0">
+ <button onClick={() => handleProcessCheckout()} disabled={!paymentProof || enrolling} className="w-full sm:w-auto px-6 sm:px-8 py-3 md:py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-slate-200 disabled:to-slate-200 dark:disabled:from-slate-800 dark:disabled:to-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:shadow-none text-white rounded-xl font-black text-sm transition-transform shadow-[0_8px_24px_rgba(5,150,105,0.25)] hover:shadow-[0_12px_30px_rgba(5,150,105,0.35)] flex items-center justify-center gap-2 active:scale-[0.98] shrink-0 min-w-0">
  {enrolling ? <><Loader2 size={16} className="animate-spin shrink-0"/> <span className="truncate">Memproses...</span></> : <><Banknote size={16} className="shrink-0 text-emerald-100"/><span className="truncate">Selesaikan Pembayaran</span></>}
  </button>
  </div>
- </motion.div>
+ </div>
  </div>
  )}
- </AnimatePresence>
+ 
 
  {/* 🔥 SHARE MODAL WITH BROADCAST 🔥 */}
- <AnimatePresence>
+ 
  {isShareModalOpen && (() => {
  const cleanDesc = course.description 
  ? course.description.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g,"'").replace(/\s+/g, ' ').trim().substring(0, 150) + '...'
@@ -966,10 +946,9 @@ export default function CourseDetailClient() {
  const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(bcText)}`;
  return (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
- <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsShareModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-md"/>
- <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
- className="relative w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_25px_70px_rgba(0,0,0,0.2)] overflow-hidden">
- <button onClick={() => setIsShareModalOpen(false)} className="absolute top-3 right-3 md:top-4 md:right-4 p-2 text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-white bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-700/50 rounded-full z-10 backdrop-blur-sm">
+ <div onClick={() => setIsShareModalOpen(false)} className="absolute inset-0 bg-slate-900/50 backdrop-"/>
+ <div className="relative w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_25px_70px_rgba(0,0,0,0.2)] overflow-hidden">
+ <button onClick={() => setIsShareModalOpen(false)} className="absolute top-3 right-3 md:top-4 md:right-4 p-2 text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-white bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-700/50 rounded-full z-10 backdrop-">
  <X size={16} />
  </button>
 
@@ -1020,11 +999,11 @@ export default function CourseDetailClient() {
  <LinkIcon size={16} /> Salin Link
  </button>
  </div>
- </motion.div>
+ </div>
  </div>
  );
  })()}
- </AnimatePresence>
+ 
 
  </div>
  );

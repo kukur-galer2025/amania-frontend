@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Loader2, Eye, EyeOff, Mail, Lock, 
   User, Sparkles, ArrowRight, AlertTriangle, 
-  Check, Video, BookOpen, Award, Phone
+  Check, Video, BookOpen, Award, Phone, MonitorPlay
 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
@@ -242,22 +242,30 @@ export default function RegisterClient() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
-              <BookOpen className="text-emerald-400 shrink-0 mt-0.5" size={24} />
-              <div>
-                <h4 className="font-bold text-white text-sm">Koleksi E-Produk</h4>
-                <p className="text-xs text-slate-400 mt-1">Dapatkan akses ke materi pembelajaran digital berkualitas tinggi.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
               <Video className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
                 <h4 className="font-bold text-white text-sm">Webinar Interaktif</h4>
                 <p className="text-xs text-slate-400 mt-1">Belajar langsung dari praktisi lewat sesi kelas dan webinar live.</p>
               </div>
             </div>
+            
+            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
+              <MonitorPlay className="text-emerald-400 shrink-0 mt-0.5" size={24} />
+              <div>
+                <h4 className="font-bold text-white text-sm">Online E-Course</h4>
+                <p className="text-xs text-slate-400 mt-1">Akses kelas rekaman berkualitas dan tingkatkan keahlian dengan jadwal belajar fleksibel.</p>
+              </div>
+            </div>
 
-            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl md:col-span-2 transition-transform hover:-translate-y-1 duration-300">
+            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
+              <BookOpen className="text-emerald-400 shrink-0 mt-0.5" size={24} />
+              <div>
+                <h4 className="font-bold text-white text-sm">Koleksi E-Produk</h4>
+                <p className="text-xs text-slate-400 mt-1">Dapatkan akses instan ke materi pembelajaran digital berkualitas tinggi.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
               <Award className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
                 <h4 className="font-bold text-white text-sm">Sertifikat Profesional</h4>

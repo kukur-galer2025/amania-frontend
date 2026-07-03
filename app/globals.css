@@ -6,6 +6,26 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ═══════════════════════════════════════════════════════
+   🔥 CRITICAL PERFORMANCE FIX: Kill Tailwind v4 Preflight Transitions
+   
+   Tailwind v4's @import "tailwindcss" applies transition-property
+   to ALL elements (*, ::before, ::after) by default. This causes
+   446 out of 474 DOM nodes to have active transitions, forcing the
+   browser to check every element on every frame — even when idle.
+   
+   This reset kills all inherited transitions. Explicit Tailwind
+   utility classes (transition-transform, transition-colors, etc.)
+   still work because class selectors (.xxx) have higher specificity
+   than the universal selector (*).
+   ═══════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  transition-property: none;
+  transition-duration: 0s;
+}
+
+/* ═══════════════════════════════════════════════════════
    CSS CUSTOM PROPERTIES
    ═══════════════════════════════════════════════════════ */
 :root {
@@ -181,6 +201,21 @@ input::-webkit-credentials-auto-fill-button {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+ .no-visible-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-visible-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom scrollbar for light mode */

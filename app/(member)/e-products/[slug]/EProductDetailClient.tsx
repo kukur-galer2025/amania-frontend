@@ -3,7 +3,7 @@ import { safeStorage } from '@/app/utils/safeStorage';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
     FileText, ArrowLeft, Loader2,
     ShoppingCart, UserCircle, ShieldCheck,
@@ -266,9 +266,9 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
     if (loading) return (
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-6 bg-[#F8FAFC] dark:bg-[#0B1120]">
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}>
-                <Loader2 size={48} className="text-indigo-600 dark:text-indigo-400" />
-            </motion.div>
+            <div>
+                <Loader2 size={48} className="text-indigo-600 dark:text-indigo-400 animate-spin" />
+            </div>
             <p className="text-sm font-black text-indigo-500/80 uppercase tracking-[0.3em] animate-pulse">Memuat Aset Premium...</p>
         </div>
     );
@@ -321,16 +321,12 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
  .glass-card {
  background: rgba(255,255,255,0.7);
- backdrop-filter: blur(20px);
- -webkit-backdrop-filter: blur(20px);
  }
  .dark .glass-card {
  background: rgba(15, 23, 42, 0.45);
  }
  .glass-card-strong {
  background: rgba(255,255,255,0.85);
- backdrop-filter: blur(24px);
- -webkit-backdrop-filter: blur(24px);
  }
  .dark .glass-card-strong {
  background: rgba(15, 23, 42, 0.7);
@@ -339,9 +335,9 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
             {/* ════ AMBIENT BACKGROUND GLOW - ENHANCED ════ */}
             <div className="absolute top-0 left-0 right-0 h-[800px] z-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-30%] left-[5%] w-[70%] h-[90%] bg-indigo-50 dark:bg-indigo-500/[0.07] blur-[150px] rounded-full" />
-                <div className="absolute top-[5%] right-[5%] w-[50%] h-[70%] bg-violet-400/[0.06] blur-[130px] rounded-full" />
-                <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] bg-blue-400/[0.05] blur-[120px] rounded-full" />
+                <div className="absolute top-[-30%] left-[5%] w-[70%] h-[90%] bg-indigo-50 dark:bg-indigo-500/[0.07]  rounded-full" />
+                <div className="absolute top-[5%] right-[5%] w-[50%] h-[70%] bg-violet-400/[0.06]  rounded-full" />
+                <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] bg-blue-400/[0.05]  rounded-full" />
                 {/* Decorative grid pattern */}
                 <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle, #6366f1 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
             </div>
@@ -349,12 +345,12 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             {/* HEADER NAV */}
             <div className="relative z-40 w-full pt-5 md:pt-8 bg-transparent">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-                    <Link href="/e-products" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold text-xs md:text-sm transition-transform duration-300 glass-card border border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 shadow-sm dark:shadow-black/10 hover:shadow-md dark:shadow-black/15 px-4 sm:px-5 py-2.5 rounded-full group">
-                        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" /> <span className="hidden sm:inline">Kembali ke Katalog</span><span className="sm:hidden">Kembali</span>
+                    <Link href="/e-products" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold text-xs md:text-sm border border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 px-4 sm:px-5 py-2.5 rounded-full group">
+                        <ArrowLeft size={16} /> <span className="hidden sm:inline">Kembali ke Katalog</span><span className="sm:hidden">Kembali</span>
                     </Link>
 
-                    <button onClick={() => setIsShareModalOpen(true)} className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold text-xs md:text-sm transition-transform duration-300 glass-card border border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 shadow-sm dark:shadow-black/10 hover:shadow-md dark:shadow-black/15 px-4 sm:px-5 py-2.5 rounded-full group">
-                        <Share2 size={16} className="group-hover:rotate-12 transition-transform" /> <span className="hidden sm:inline">Bagikan Produk</span><span className="sm:hidden">Bagikan</span>
+                    <button onClick={() => setIsShareModalOpen(true)} className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold text-xs md:text-sm border border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 px-4 sm:px-5 py-2.5 rounded-full group">
+                        <Share2 size={16} /> <span className="hidden sm:inline">Bagikan Produk</span><span className="sm:hidden">Bagikan</span>
                     </button>
                 </div>
             </div>
@@ -371,78 +367,70 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
                             {/* Animated Floating Cover - ENHANCED */}
                             <div className="relative mx-auto md:mx-0 shrink-0">
-                                {/* Glow ring behind cover */}
-                                <div className="absolute -inset-3 bg-gradient-to-br from-indigo-500/20 via-violet-500/15 to-blue-500/20 rounded-[2.2rem] blur-xl opacity-60 animate-pulse-glow" />
+                                {/* REMOVED GLOW */}
 
-                                <motion.div
-                                    animate={{ y: [-6, 6, -6] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                                    className="w-[180px] sm:w-[240px] md:w-[300px] max-w-full aspect-[2/3] shrink-0 rounded-[1.8rem] md:rounded-[2rem] overflow-hidden relative shadow-[0_30px_60px_-15px_rgba(79,70,229,0.35)] dark:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.65)] border-[3px] border-white dark:border-slate-800 group z-10"
-                                >
+                                <div className="w-[180px] sm:w-[240px] md:w-[300px] max-w-full aspect-[2/3] shrink-0 rounded-[1.8rem] md:rounded-[2rem] overflow-hidden relative border-[3px] border-white dark:border-slate-800 group z-10">
                                     {product.cover_image ? (
                                         <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                                     ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-100 via-violet-50 to-slate-100 text-indigo-300 gap-3">
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-indigo-50 text-indigo-300 gap-3">
                                             <FileText className="w-16 h-16 md:w-20 md:h-20" strokeWidth={1} />
                                             <span className="text-[9px] md:text-xs font-black uppercase tracking-widest text-indigo-400">Premium Asset</span>
                                         </div>
                                     )}
 
                                     {/* Overlay gradient */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                     {/* Status Badges on Cover */}
                                     <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
                                         {isOwned && (
-                                            <motion.span initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="bg-gradient-to-r from-indigo-600 to-violet-600 backdrop-blur-md text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg dark:shadow-black/40 flex items-center gap-1.5 w-fit border border-white dark:border-slate-800/40">
+                                            <span className="bg-indigo-600 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl flex items-center gap-1.5 w-fit border border-white dark:border-slate-800/40">
                                                 <CheckCircle2 size={12} /> Dimiliki
-                                            </motion.span>
+                                            </span>
                                         )}
                                         {isFree && !isOwned && (
-                                            <motion.span initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="bg-gradient-to-r from-emerald-500 to-teal-500 backdrop-blur-md text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg dark:shadow-black/40 w-fit border border-white dark:border-slate-800/40">
+                                            <span className="bg-emerald-500 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl w-fit border border-white dark:border-slate-800/40">
                                                 <Zap size={12} className="inline mr-1" /> Gratis
-                                            </motion.span>
+                                            </span>
                                         )}
                                     </div>
-                                </motion.div>
+                                </div>
                             </div>
 
                             {/* Title & Meta Info */}
                             <div className="flex-1 flex flex-col text-center md:text-left w-full min-w-0 mt-2 md:mt-0">
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                                    className="inline-flex items-center justify-center md:justify-start gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/40 dark:to-violet-950/40 border border-indigo-200/40 dark:border-indigo-900/30 rounded-full text-indigo-700 dark:text-indigo-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-4 w-fit mx-auto md:mx-0">
+                                <div className="inline-flex items-center justify-center md:justify-start gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/40 dark:border-indigo-900/30 rounded-full text-indigo-700 dark:text-indigo-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-4 w-fit mx-auto md:mx-0">
                                     <Crown size={13} className="text-indigo-500" /> {product.category?.name || 'Aset Eksklusif'}
-                                </motion.div>
+                                </div>
 
-                                <motion.h1 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                                    className="text-[22px] sm:text-3xl md:text-4xl lg:text-[2.75rem] font-black text-slate-900 dark:text-slate-100 leading-[1.12] tracking-tight mb-5 break-words">
+                                <h1 className="text-[22px] sm:text-3xl md:text-4xl lg:text-[2.75rem] font-black text-slate-900 dark:text-slate-100 leading-[1.12] tracking-tight mb-5 break-words">
                                     {product.title}
-                                </motion.h1>
+                                </h1>
 
                                 {/* Social Proof Badges */}
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                                    className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 mb-6">
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 mb-6">
                                     {avgRating > 0 ? (
-                                        <div className="flex items-center gap-2 glass-card px-3 py-1.5 rounded-full border border-amber-200/50 dark:border-amber-900/30 shadow-sm dark:shadow-black/10 group hover:shadow-md dark:shadow-black/15 transition-transform">
-                                            <Star size={15} className="fill-amber-400 text-amber-400 group-hover:scale-110 transition-transform" />
+                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-200/50 dark:border-amber-900/30">
+                                            <Star size={15} className="fill-amber-400 text-amber-400" />
                                             <span className="text-sm font-black text-slate-800 dark:text-slate-200">{avgRating.toFixed(1)}</span>
                                             <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500">({totalReviews} Ulasan)</span>
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-2 glass-card px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-black/10">
+                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800">
                                             <Star size={15} className="text-slate-300 dark:text-slate-600" />
                                             <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">Belum ada rating</span>
                                         </div>
                                     )}
-                                    <div className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 px-3 py-1.5 rounded-full border border-emerald-200/50 dark:border-emerald-900/30 shadow-sm dark:shadow-black/10">
+                                    <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1.5 rounded-full border border-emerald-200/50 dark:border-emerald-900/30">
                                         <ShieldCheck size={14} className="text-emerald-500" />
                                         <span className="text-[9px] sm:text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Terverifikasi</span>
                                     </div>
-                                </motion.div>
+                                </div>
 
                                 {/* Author Box - ENHANCED */}
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                                    className="glass-card-strong border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full md:w-max shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-black/20 overflow-hidden mx-auto md:mx-0 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] dark:hover:shadow-black/30 transition-shadow duration-300 group">
-                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full md:w-max overflow-hidden mx-auto md:mx-0 group">
+                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 group-hover:scale-105">
                                         {authorName === 'Amania Official' ? (
                                             <img src="/logo-mini.png" alt="Amania Official" className="w-5 h-5 md:w-6 md:h-6 object-contain dark:brightness-0 dark:invert" />
                                         ) : product.author?.avatar ? (
@@ -460,18 +448,17 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                             )}
                                         </p>
                                     </div>
-                                </motion.div>
+                                </div>
                             </div>
                         </div>
 
                         {/* 2. DESKRIPSI HTML CARD - ENHANCED */}
-                        <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
-                            className="glass-card-strong rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-8 md:p-10 shadow-[0_8px_40px_rgb(0,0,0,0.04)] border border-slate-200 dark:border-slate-800 w-full mt-2 overflow-hidden relative group">
+                        <div className="rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-8 md:p-10 border border-slate-200 dark:border-slate-800 w-full mt-2 overflow-hidden relative group">
                             {/* Decorative corner accent */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-500/[0.04] to-transparent rounded-bl-[4rem] pointer-events-none" />
+                            {/* removed bg gradient corner */}
 
                             <div className="flex items-center gap-3 mb-6 md:mb-8 pb-5 md:pb-6 border-b border-slate-100 dark:border-slate-800 relative">
-                                <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-950/60 dark:to-violet-950/60 rounded-xl md:rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-200/40 dark:border-indigo-900/50 shrink-0 shadow-sm dark:shadow-black/10">
+                                <div className="w-10 h-10 md:w-11 md:h-11 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl md:rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-200/40 dark:border-indigo-900/50 shrink-0">
                                     <Sparkles size={20} />
                                 </div>
                                 <div>
@@ -480,16 +467,15 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                 </div>
                             </div>
                             <div className="html-content w-full" dangerouslySetInnerHTML={{ __html: product.description.replace(/&nbsp;/g, ' ') }} />
-                        </motion.div>
+                        </div>
 
                         {/* 3. SEKSI ULASAN - ENHANCED */}
-                        <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
-                            className="glass-card-strong rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-8 md:p-10 shadow-[0_8px_40px_rgb(0,0,0,0.04)] border border-slate-200 dark:border-slate-800 w-full relative overflow-hidden">
+                        <div className="rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-8 md:p-10 border border-slate-200 dark:border-slate-800 w-full relative overflow-hidden">
                             {/* Decorative corner */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-500/[0.04] to-transparent rounded-bl-[4rem] pointer-events-none" />
+                            {/* removed bg gradient corner */}
 
                             <div className="flex items-center gap-3 mb-6 md:mb-8 relative">
-                                <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-950/60 dark:to-orange-950/60 rounded-xl md:rounded-2xl flex items-center justify-center text-amber-500 border border-amber-200/40 dark:border-amber-900/50 shrink-0 shadow-sm dark:shadow-black/10">
+                                <div className="w-10 h-10 md:w-11 md:h-11 bg-amber-50 dark:bg-amber-950/60 rounded-xl md:rounded-2xl flex items-center justify-center text-amber-500 border border-amber-200/40 dark:border-amber-900/50 shrink-0">
                                     <MessageSquare size={20} />
                                 </div>
                                 <div>
@@ -500,7 +486,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
                             {/* Rating Summary Bar */}
                             {reviews.length > 0 && (
-                                <div className="flex flex-col sm:flex-row items-center gap-5 mb-8 p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-950/20 dark:to-orange-950/20 rounded-2xl border border-amber-100 dark:border-amber-900/30 shadow-inner">
+                                <div className="flex flex-col sm:flex-row items-center gap-5 mb-8 p-4 sm:p-5 bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-100 dark:border-amber-900/30">
                                     <div className="text-center shrink-0">
                                         <p className="text-3xl sm:text-4xl font-black text-amber-600 dark:text-amber-500 leading-none">{avgRating.toFixed(1)}</p>
                                         <div className="flex items-center gap-0.5 mt-1.5 justify-center">
@@ -519,7 +505,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 w-3.5">{star}</span>
                                                     <Star size={10} className="text-amber-400 fill-amber-400 shrink-0" />
                                                     <div className="flex-1 h-[7px] bg-white dark:bg-slate-800 rounded-full overflow-hidden border border-amber-100 dark:border-amber-900/50">
-                                                        <div className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full transition-transform duration-500" style={{ width: `${pct}%` }} />
+                                                        <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
                                                     </div>
                                                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 w-5 text-right">{count}</span>
                                                 </div>
@@ -530,8 +516,8 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                             )}
 
                             {reviews.length === 0 ? (
-                                <div className="text-center py-10 md:py-14 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/60 dark:to-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed px-4 w-full">
-                                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                                <div className="text-center py-10 md:py-14 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed px-4 w-full">
+                                    <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700">
                                         <ThumbsUp size={28} className="text-slate-300 dark:text-slate-600" />
                                     </div>
                                     <p className="text-slate-900 dark:text-slate-100 font-black text-base md:text-lg mb-1">Belum ada ulasan</p>
@@ -540,10 +526,9 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                             ) : (
                                 <div className="grid gap-3 sm:gap-4 mb-8 md:mb-10 w-full">
                                     {reviews.map((r: any, idx: number) => (
-                                        <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                                            className="p-4 sm:p-5 rounded-xl sm:rounded-2xl glass-card dark:bg-[#111827] border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full min-w-0 hover:border-indigo-100 dark:hover:border-indigo-800 hover:shadow-[0_4px_24px_rgba(79,70,229,0.06)] transition-transform duration-300 group/review">
+                                        <div key={r.id} className="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-[#111827] border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full min-w-0 hover:border-indigo-100 dark:hover:border-indigo-800 group/review">
                                             <div className="flex items-center sm:items-start gap-3 w-full sm:w-auto shrink-0">
-                                                <img src={getAvatar(r.user)} alt="avatar" className="w-9 h-9 md:w-10 md:h-10 rounded-xl shadow-sm dark:shadow-black/10 border border-slate-100 dark:border-slate-800 group-hover/review:scale-105 transition-transform" />
+                                                <img src={getAvatar(r.user)} alt="avatar" className="w-9 h-9 md:w-10 md:h-10 rounded-xl border border-slate-100 dark:border-slate-800" />
                                                 <div className="min-w-0 sm:hidden flex-1">
                                                     <p className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{r.user?.name || 'Member Eksklusif'}</p>
                                                     <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
@@ -555,17 +540,17 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                                         <p className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{r.user?.name || 'Member Eksklusif'}</p>
                                                         <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                                                     </div>
-                                                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 px-3 py-1 rounded-lg border border-amber-100 dark:border-amber-900/30 w-fit shrink-0">
+                                                    <div className="bg-amber-50 dark:bg-amber-950/20 px-3 py-1 rounded-lg border border-amber-100 dark:border-amber-900/30 w-fit shrink-0">
                                                         <StarRow rating={r.rating} size={13} />
                                                     </div>
                                                 </div>
                                                 {/* Rating for mobile */}
-                                                <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 px-3 py-1 rounded-lg border border-amber-100 dark:border-amber-900/30 w-fit shrink-0 mb-2.5 sm:hidden">
+                                                <div className="bg-amber-50 dark:bg-amber-950/20 px-3 py-1 rounded-lg border border-amber-100 dark:border-amber-900/30 w-fit shrink-0 mb-2.5 sm:hidden">
                                                     <StarRow rating={r.rating} size={13} />
                                                 </div>
                                                 {r.review && <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed break-words w-full">{r.review}</p>}
                                             </div>
-                                        </motion.div>
+                                        </div>
                                     ))}
                                 </div>
                             )}
@@ -577,19 +562,19 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                 </h3>
 
                                 {!userData ? (
-                                    <div className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-900/60 dark:to-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left w-full">
+                                    <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left w-full">
                                         <div>
                                             <p className="font-black text-slate-900 dark:text-slate-100 text-sm md:text-base mb-1">Akses Penilaian Terkunci</p>
                                             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">Anda harus masuk dan memiliki produk ini.</p>
                                         </div>
-                                        <Link href="/login" className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 text-white text-sm font-bold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-transform shadow-lg dark:shadow-black/20 shadow-slate-900/20 shrink-0">
+                                        <Link href="/login" className="w-full sm:w-auto px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-800 shrink-0">
                                             Masuk Sistem
                                         </Link>
                                     </div>
                                 )
                                     : !isOwned ? (
-                                        <div onClick={() => setIsLockedModalOpen(true)} className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/40 dark:to-slate-950/40 border border-slate-200 dark:border-slate-800 border-dashed rounded-2xl p-6 md:p-10 flex flex-col items-center text-center cursor-pointer hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:bg-indigo-500/10/50 dark:hover:bg-indigo-950/30 transition-transform duration-300 group relative overflow-hidden w-full">
-                                            <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center shadow-sm dark:shadow-black/10 mb-4 relative z-10 border border-slate-200 dark:border-slate-700 group-hover:scale-110 group-hover:border-amber-200 dark:group-hover:border-amber-500/50 transition-transform">
+                                        <div onClick={() => setIsLockedModalOpen(true)} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 border-dashed rounded-2xl p-6 md:p-10 flex flex-col items-center text-center cursor-pointer hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 group relative overflow-hidden w-full">
+                                            <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4 relative z-10 border border-slate-200 dark:border-slate-700 group-hover:border-amber-200 dark:group-hover:border-amber-500/50">
                                                 <Lock className="text-slate-400 dark:text-slate-500 group-hover:text-amber-500 w-6 h-6" />
                                             </div>
                                             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base md:text-lg mb-2 relative z-10">Kawasan Khusus Pemilik</h4>
@@ -597,22 +582,22 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         </div>
                                     )
                                         : submitted ? (
-                                            <div className="bg-gradient-to-r from-emerald-50/80 to-teal-50/80 dark:from-emerald-950/20 dark:to-teal-950/20 border border-emerald-200/60 dark:border-emerald-900/30 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 w-full">
+                                            <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/30 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 w-full">
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-black text-emerald-800 dark:text-emerald-400 text-sm md:text-base mb-3 flex items-center gap-2"><CheckCircle2 size={16} /> Tersimpan di Sistem</p>
                                                     <StarRow rating={myRating} size={16} />
-                                                    {myReview && <p className="text-xs md:text-sm text-emerald-900 dark:text-emerald-300 mt-3 bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm dark:shadow-black/10 break-words">{myReview}</p>}
+                                                    {myReview && <p className="text-xs md:text-sm text-emerald-900 dark:text-emerald-300 mt-3 bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30 break-words">{myReview}</p>}
                                                 </div>
                                                 <button onClick={() => setSubmitted(false)} className="w-full sm:w-auto text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-200/40 dark:bg-emerald-900/30 hover:bg-emerald-200/70 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl shrink-0 mt-2 sm:mt-0">Edit Ulasan</button>
                                             </div>
                                         )
                                             : (
-                                                <div className="space-y-5 w-full bg-gradient-to-br from-slate-50/80 to-white dark:from-slate-900/60 dark:to-slate-950/60 p-5 md:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+                                                <div className="space-y-5 w-full bg-slate-50 dark:bg-slate-900/60 p-5 md:p-7 rounded-2xl border border-slate-200 dark:border-slate-800">
                                                     <div>
                                                         <label className="block text-[9px] md:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Tingkat Kepuasan</label>
                                                         <div className="flex gap-1 md:gap-1.5">
                                                             {[1, 2, 3, 4, 5].map((s) => (
-                                                                <button key={s} onClick={() => setMyRating(s)} className="p-1 hover:scale-125 transition-transform duration-200 focus:outline-none">
+                                                                <button key={s} onClick={() => setMyRating(s)} className="p-1 focus:outline-none">
                                                                     <Star className={`w-8 h-8 md:w-10 md:h-10 ${s <= myRating ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]' : 'text-slate-300 dark:text-slate-600 dark:text-slate-400 hover:text-amber-200'}`} />
                                                                 </button>
                                                             ))}
@@ -621,38 +606,38 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                                     <div>
                                                         <label className="block text-[9px] md:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Opini Anda (Opsional)</label>
                                                         <textarea value={myReview} onChange={(e) => setMyReview(e.target.value)} placeholder="Tuliskan pengalaman berharga Anda..."
-                                                            className="w-full p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-4 focus:ring-indigo-500/10 dark:focus:ring-indigo-500/20 focus:border-indigo-400 dark:focus:border-indigo-500 outline-none transition-transform min-h-[110px] resize-none shadow-sm dark:shadow-black/10" maxLength={1000} />
+                                                            className="w-full p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-4 focus:ring-indigo-500/10 dark:focus:ring-indigo-500/20 focus:border-indigo-400 dark:focus:border-indigo-500 outline-none min-h-[110px] resize-none" maxLength={1000} />
                                                     </div>
                                                     <button onClick={handleSubmitReview} disabled={submitting || myRating === 0}
-                                                        className="w-full sm:w-auto px-8 py-3 md:py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black text-sm rounded-xl hover:from-indigo-700 hover:to-violet-700 transition-transform flex items-center justify-center gap-2 disabled:opacity-50 shadow-[0_8px_24px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_30px_rgba(99,102,241,0.4)]">
+                                                        className="w-full sm:w-auto px-8 py-3 md:py-3.5 bg-indigo-600 text-white font-black text-sm rounded-xl hover:bg-indigo-700 flex items-center justify-center gap-2 disabled:opacity-50">
                                                         {submitting ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Send size={16} className="shrink-0" />} Publish Ulasan
                                                     </button>
                                                 </div>
                                             )}
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
 
                     {/* KOLOM KANAN (THE LUXURY CHECKOUT VAULT) - ENHANCED */}
                     <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 lg:sticky lg:top-24 mt-2 md:mt-4 lg:mt-0 z-30">
 
                         {/* Glow behind vault */}
-                        <div className="hidden lg:block absolute -inset-3 bg-gradient-to-b from-indigo-500/[0.06] via-violet-500/[0.04] to-transparent rounded-[3rem] blur-2xl pointer-events-none" />
+                        {/* removed glow */}
 
-                        <div className="glass-card-strong rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-[0_20px_60px_rgba(0,0,0,0.07)] overflow-hidden relative flex flex-col w-full group/vault hover:shadow-[0_25px_70px_rgba(0,0,0,0.09)] transition-shadow duration-500">
+                        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-slate-800 overflow-hidden relative flex flex-col w-full group/vault">
 
                             {/* Animated top accent line */}
-                            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 animate-gradient-shift" />
+                            <div className="h-1 w-full bg-indigo-500" />
 
-                            <div className="p-5 sm:p-6 md:p-8 relative z-10 bg-gradient-to-b from-white/90 to-slate-50/90 dark:from-slate-900/90 dark:to-slate-950/90">
+                            <div className="p-5 sm:p-6 md:p-8 relative z-10 bg-white dark:bg-slate-900">
                                 {/* INDIKATOR KEPEMILIKAN */}
                                 {isOwned ? (
-                                    <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200/60 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-black/10">
+                                    <div className="inline-flex items-center gap-2 mb-5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3.5 py-2 rounded-xl w-fit">
                                         <CheckCircle2 size={15} strokeWidth={2.5} />
                                         <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">Akses Terbuka</p>
                                     </div>
                                 ) : (
-                                    <div className="inline-flex items-center gap-2 mb-5 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30 border border-indigo-100 dark:border-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3.5 py-2 rounded-xl w-fit shadow-sm dark:shadow-black/10">
+                                    <div className="inline-flex items-center gap-2 mb-5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3.5 py-2 rounded-xl w-fit">
                                         <Banknote size={13} className="text-indigo-600 dark:text-indigo-400" />
                                         <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">Investasi Aset</p>
                                     </div>
@@ -664,13 +649,13 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         <span className="text-xs md:text-sm font-bold text-slate-400 dark:text-slate-500 line-through decoration-rose-500/60 decoration-2">
                                             {formatRupiah(originalPrice)}
                                         </span>
-                                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white bg-gradient-to-r from-rose-500 to-pink-500 px-2 py-0.5 rounded-md shadow-sm dark:shadow-black/10">
+                                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white bg-rose-500 px-2 py-0.5 rounded-md">
                                             80% OFF
                                         </span>
                                     </div>
                                 )}
 
-                                <p className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter mb-2 break-words ${isFree || isOwned ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500' : 'text-slate-900 dark:text-slate-100'}`}>
+                                <p className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter mb-2 break-words ${isFree || isOwned ? 'text-emerald-500' : 'text-slate-900 dark:text-slate-100'}`}>
                                     {isOwned ? 'Terverifikasi' : formatRupiah(product.price)}
                                 </p>
 
@@ -681,21 +666,21 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                 {/* TOMBOL AKSI (DESKTOP) */}
                                 <div className="hidden lg:flex flex-col gap-2.5 w-full">
                                     {isOwned ? (
-                                        <button onClick={handleAccessProduct} className="relative w-full py-4 rounded-xl font-black text-white text-sm bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_35px_rgba(16,185,129,0.4)] transition-transform flex items-center justify-center gap-2 overflow-hidden group active:scale-[0.98]">
-                                            <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:animate-shimmer"></span>
+                                        <button onClick={handleAccessProduct} className="relative w-full py-4 rounded-xl font-black text-white text-sm bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center gap-2 overflow-hidden group active:scale-[0.98]">
+                                            {/* shimmer removed */}
                                             <Layers size={18} className="shrink-0 relative z-10" /> <span className="relative z-10">Buka di Koleksi Saya</span>
                                         </button>
                                     ) : (
                                         <>
-                                            <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative w-full py-4 rounded-xl font-black text-white text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-[0_10px_30px_rgba(5,150,105,0.3)] hover:shadow-[0_12px_35px_rgba(5,150,105,0.4)] transition-transform flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn active:scale-[0.98]">
-                                                <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover/btn:animate-shimmer"></span>
+                                            <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="relative w-full py-4 rounded-xl font-black text-white text-sm bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2 disabled:opacity-70 overflow-hidden group/btn active:scale-[0.98]">
+                                                {/* shimmer removed */}
                                                 {btnLoading ? <Loader2 size={18} className="animate-spin shrink-0 relative z-10" /> : <Banknote size={18} className="shrink-0 relative z-10 text-emerald-100" />}
                                                 <span className="relative z-10">{isFree ? 'Klaim Gratis Sekarang' : 'Beli Langsung'}</span>
                                             </button>
 
                                             {!isFree && (
-                                                <button onClick={handleAddToCart} disabled={cartLoading} className="relative w-full py-3.5 rounded-xl font-black text-indigo-600 dark:text-indigo-400 text-sm bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30 border border-indigo-200/60 dark:border-indigo-900/50 hover:from-indigo-100 hover:to-violet-100 dark:hover:from-indigo-900/40 dark:hover:to-violet-900/40 transition-transform flex items-center justify-center gap-2 disabled:opacity-70 group/cart active:scale-[0.98]">
-                                                    {cartLoading ? <Loader2 size={18} className="animate-spin shrink-0" /> : <ShoppingCart size={18} className="shrink-0 group-hover/cart:-translate-y-0.5 transition-transform" />}
+                                                <button onClick={handleAddToCart} disabled={cartLoading} className="relative w-full py-3.5 rounded-xl font-black text-indigo-600 dark:text-indigo-400 text-sm bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 flex items-center justify-center gap-2 disabled:opacity-70 group/cart active:scale-[0.98]">
+                                                    {cartLoading ? <Loader2 size={18} className="animate-spin shrink-0" /> : <ShoppingCart size={18} className="shrink-0" />}
                                                     <span>Tambah ke Keranjang</span>
                                                 </button>
                                             )}
@@ -714,22 +699,22 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                             {/* BENEFITS SECTION */}
                             <div className="border-t border-slate-100 dark:border-slate-700/50 p-5 sm:p-6 md:p-7 flex flex-col gap-3.5 w-full relative z-10">
                                 {BENEFITS.map((b, idx) => (
-                                    <motion.div key={b.label} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + idx * 0.08 }}
-                                        className="flex gap-3 w-full min-w-0 items-start group/benefit hover:bg-white dark:hover:bg-slate-800/50 p-2 -m-2 rounded-xl">
-                                        <div className={`w-9 h-9 md:w-10 md:h-10 rounded-xl ${b.bg} ${b.border} border flex items-center justify-center shrink-0 shadow-sm dark:shadow-black/10 group-hover/benefit:scale-110 transition-transform`}>
-                                            <b.icon size={16} strokeWidth={2.5} className={`bg-gradient-to-br ${b.gradient} bg-clip-text`} />
+                                    <div key={b.label}
+                                        className="flex gap-3 w-full min-w-0 items-start group/benefit hover:bg-slate-50 dark:hover:bg-slate-800/50 p-2 -m-2 rounded-xl">
+                                        <div className={`w-9 h-9 md:w-10 md:h-10 rounded-xl ${b.bg} ${b.border} border flex items-center justify-center shrink-0`}>
+                                            <b.icon size={16} strokeWidth={2.5} className="text-emerald-500" />
                                         </div>
                                         <div className="flex-1 min-w-0 pt-0.5">
                                             <p className="font-bold text-slate-900 dark:text-slate-100 text-xs md:text-sm mb-0.5">{b.label}</p>
                                             <p className="text-[10px] md:text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{b.desc}</p>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 ))}
                             </div>
 
                             {/* ANTI PIRACY WARNING - ENHANCED */}
-                            <div className="bg-gradient-to-r from-rose-50/70 to-pink-50/70 dark:from-rose-950/20 dark:to-pink-950/20 border-t border-rose-100 dark:border-rose-900/30 p-4 sm:p-5 w-full flex items-start gap-3 relative z-10">
-                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center shrink-0 border border-rose-200/60 dark:border-rose-800/40">
+                            <div className="bg-rose-50 dark:bg-rose-950/20 border-t border-rose-100 dark:border-rose-900/30 p-4 sm:p-5 w-full flex items-start gap-3 relative z-10">
+                                <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center shrink-0 border border-rose-200/60 dark:border-rose-800/40">
                                     <AlertTriangle size={14} className="text-rose-500" />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -746,7 +731,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             </div>
 
             {/* MOBILE STICKY BOTTOM BAR */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/90 dark:bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-700/50 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_30px_rgba(0,0,0,0.4)]">
+            <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white dark:bg-[#0f172a] border-t-2 border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-3 p-3 sm:p-4">
                     {/* Price Column */}
                     <div className="shrink-0 flex flex-col justify-center min-w-0 pl-1 w-[35%]">
@@ -763,18 +748,18 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                     {/* Action Buttons */}
                     <div className="flex-1 flex gap-2 justify-end">
                         {isOwned ? (
-                            <button onClick={handleAccessProduct} className="w-full py-2.5 rounded-xl font-black text-white text-xs bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center gap-1.5 active:scale-95 transition-transform shadow-lg shadow-emerald-500/25 dark:shadow-emerald-500/15">
+                            <button onClick={handleAccessProduct} className="w-full py-2.5 rounded-xl font-black text-white text-xs bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center gap-1.5 active:scale-95">
                                 <Layers size={14} className="shrink-0" /> <span className="truncate">Buka Koleksi</span>
                             </button>
                         ) : (
                             <>
                                 {!isFree && (
-                                    <button onClick={handleAddToCart} disabled={cartLoading} className="w-11 h-11 shrink-0 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-70">
+                                    <button onClick={handleAddToCart} disabled={cartLoading} className="w-11 h-11 shrink-0 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 flex items-center justify-center active:scale-95 disabled:opacity-70">
                                         {cartLoading ? <Loader2 size={16} className="animate-spin" /> : <ShoppingCart size={16} />}
                                     </button>
                                 )}
-                                <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="flex-1 py-2.5 rounded-xl font-black text-white text-xs sm:text-sm bg-gradient-to-r from-emerald-600 to-teal-600 shadow-lg shadow-emerald-600/25 dark:shadow-emerald-600/15 flex items-center justify-center gap-1.5 disabled:opacity-70 active:scale-95 transition-transform overflow-hidden relative group">
-                                    <span className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer"></span>
+                                <button onClick={handleOpenPaymentModal} disabled={btnLoading} className="flex-1 py-2.5 rounded-xl font-black text-white text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-1.5 disabled:opacity-70 active:scale-95 overflow-hidden relative group">
+                                    {/* shimmer removed */}
                                     {btnLoading ? <Loader2 size={14} className="animate-spin shrink-0 relative z-10" /> : <Banknote size={16} className="shrink-0 relative z-10" />}
                                     <span className="truncate relative z-10">{isFree ? 'Klaim Gratis' : 'Beli Langsung'}</span>
                                 </button>
@@ -786,13 +771,12 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
             </div>
 
             {/* MODAL: AKSES TERKUNCI */}
-            <AnimatePresence>
+            
                 {isLockedModalOpen && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLockedModalOpen(false)}
-                            className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
-                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="relative w-full max-w-sm bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-2xl dark:shadow-black/40 p-6 md:p-8 text-center">
+                        <div onClick={() => setIsLockedModalOpen(false)}
+                            className="absolute inset-0 bg-black/80" />
+                        <div className="relative w-full max-w-sm bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-lg dark:shadow-black/20 p-6 md:p-8 text-center">
                             <button onClick={() => setIsLockedModalOpen(false)} className="absolute top-3 right-3 p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
                                 <X size={16} />
                             </button>
@@ -805,7 +789,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                             </p>
                             <div className="flex flex-col gap-2.5 w-full">
                                 <button onClick={() => { setIsLockedModalOpen(false); handleOpenPaymentModal(); }}
-                                    className="w-full py-3.5 rounded-xl font-black text-white text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+                                    className="w-full py-3.5 rounded-xl font-black text-white text-sm bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center gap-2 active:scale-[0.98]">
                                     <Banknote size={16} className="shrink-0" /> {isFree ? 'Klaim Akses Gratis' : 'Dapatkan Akses Resmi'}
                                 </button>
                                 <button onClick={() => setIsLockedModalOpen(false)}
@@ -813,22 +797,21 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                     Tutup Peringatan
                                 </button>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 )}
-            </AnimatePresence>
+            
 
             {/* MODAL: PEMBAYARAN TRIPAY */}
-            <AnimatePresence>
+            
                 {isPaymentModalOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPaymentModalOpen(false)}
-                            className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
-                        <motion.div initial={{ opacity: 0, y: 80, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 80, scale: 0.95 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="relative bg-white dark:bg-[#111827] rounded-2xl shadow-2xl dark:shadow-black/40 w-full md:w-[600px] max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700/50">
+                        <div onClick={() => setIsPaymentModalOpen(false)}
+                            className="absolute inset-0 bg-black/80" />
+                        <div className="relative bg-white dark:bg-[#111827] rounded-2xl shadow-lg dark:shadow-black/20 w-full md:w-[600px] max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700/50">
 
                             {/* Accent line */}
-                            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 animate-gradient-shift shrink-0" />
+                            <div className="h-1 w-full bg-indigo-500 shrink-0" />
 
                             {/* Header */}
                             <div className="p-4 sm:p-5 md:p-6 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between shrink-0">
@@ -898,17 +881,17 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                     <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-none">{formatRupiah(product.price)}</p>
                                 </div>
                                 <button onClick={() => handleProcessCheckout()} disabled={!paymentProof || btnLoading}
-                                    className="w-full sm:w-auto px-6 sm:px-8 py-3 md:py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 dark:disabled:from-slate-700 dark:disabled:to-slate-700 dark:disabled:text-slate-500 disabled:shadow-none text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-600/25 dark:shadow-emerald-600/15 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shrink-0">
+                                    className="w-full sm:w-auto px-6 sm:px-8 py-3 md:py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-500 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 active:scale-[0.98] shrink-0">
                                     {btnLoading ? <><Loader2 size={16} className="animate-spin shrink-0" /> <span className="truncate">Memproses...</span></> : <><Banknote size={16} className="shrink-0 text-emerald-100" /><span className="truncate">Selesaikan Pembayaran</span></>}
                                 </button>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 )}
-            </AnimatePresence>
+            
 
             {/* MODAL: SHARE PRODUK */}
-            <AnimatePresence>
+            
                 {isShareModalOpen && (() => {
                     const cleanDesc = product.description
                         ? product.description.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim().substring(0, 150) + '...'
@@ -918,20 +901,19 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                     const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(bcText)}`;
                     return (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsShareModalOpen(false)}
-                                className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                                className="relative w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-2xl dark:shadow-black/40 overflow-hidden">
-                                <button onClick={() => setIsShareModalOpen(false)} className="absolute top-3 right-3 md:top-4 md:right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full z-10 backdrop-blur-sm transition-colors">
+                            <div onClick={() => setIsShareModalOpen(false)}
+                                className="absolute inset-0 bg-black/80" />
+                            <div className="relative w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-lg dark:shadow-black/20 overflow-hidden">
+                                <button onClick={() => setIsShareModalOpen(false)} className="absolute top-3 right-3 md:top-4 md:right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full z-10 transition-colors">
                                     <X size={16} />
                                 </button>
 
                                 {/* Cover Hero Preview */}
-                                <div className="relative aspect-[2.2/1] overflow-hidden bg-gradient-to-br from-indigo-600 to-violet-700">
+                                <div className="relative aspect-[2.2/1] overflow-hidden bg-indigo-600">
                                     {product.cover_image && (
                                         <img src={`${STORAGE_URL}/${product.cover_image}`} alt={product.title} className="w-full h-full object-cover opacity-25" />
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                                    {/* gradient overlay removed */}
                                     <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
                                         <span className="text-[8px] sm:text-[9px] font-black text-indigo-300 uppercase tracking-widest mb-1 block">Bagikan Produk</span>
                                         <h3 className="text-sm sm:text-base font-black text-white leading-snug line-clamp-2">{product.title}</h3>
@@ -959,7 +941,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                 {/* Broadcast Preview */}
                                 <div className="p-4 sm:p-5">
                                     <p className="text-[9px] sm:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Preview Broadcast</p>
-                                    <div className="bg-slate-50 dark:bg-slate-800/300 border border-slate-200 dark:border-slate-700/50 rounded-xl p-3 sm:p-4 text-[11px] sm:text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium whitespace-pre-line max-h-28 overflow-y-auto custom-scrollbar">
+                                    <div className="bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-xl p-3 sm:p-4 text-[11px] sm:text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium whitespace-pre-line max-h-28 overflow-y-auto custom-scrollbar">
                                         {bcText}
                                     </div>
                                 </div>
@@ -978,11 +960,11 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         <LinkIcon size={16} /> Salin Link
                                     </button>
                                 </div>
-                            </motion.div>
+                            </div>
                         </div>
                     );
                 })()}
-            </AnimatePresence>
+            
 
         </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import Link from 'next/link';
 import {
  Search, GraduationCap, Clock, BookOpen, Video,
@@ -96,79 +96,61 @@ export default function CoursesClient() {
  backgroundSize: '30px 30px'
  }} />
  
- {/* Ambient Glow Orbs */}
- <div className="absolute top-[-30%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-500/20 dark:bg-emerald-500/20 blur-[120px]"/>
- <div className="absolute bottom-[-40%] left-[-5%] w-[400px] h-[400px] rounded-full bg-teal-400/15 blur-[100px]"/>
- <div className="absolute top-[50%] left-[30%] w-[300px] h-[300px] rounded-full bg-cyan-500/10 blur-[80px]"/>
+  {/* Ambient Glow Orbs Removed for Performance */}
 
  <div className="relative px-6 md:px-12 py-12 md:py-16 lg:py-20">
  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
  <div className="flex-1 max-w-2xl">
  {/* Badge */}
- <motion.div 
- initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
- className="inline-flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 dark:border-slate-700/20 mb-6"
- >
+ <div className="inline-flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop- px-4 py-2 rounded-full border border-white/10 dark:border-slate-700/20 mb-6">
  <div className="w-5 h-5 rounded-full bg-emerald-400/30 flex items-center justify-center">
  <Sparkles size={11} className="text-emerald-300"/>
  </div>
  <span className="text-[11px] font-bold text-white/90 uppercase tracking-[0.2em]">Kursus Online Premium</span>
- </motion.div>
+ </div>
 
  {/* Title */}
- <motion.h1 
- initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
- className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.1] mb-5"
- >
+ <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.1] mb-5">
  Kuasai Skill Baru<br />
  <span className="bg-gradient-to-r from-emerald-300 to-teal-200 bg-clip-text text-transparent">dengan Kursus Terbaik</span>
- </motion.h1>
+ </h1>
 
- <motion.p 
- initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
- className="text-sm md:text-base text-white/60 font-medium max-w-lg mb-8 leading-relaxed"
- >
+ <p className="text-sm md:text-base text-white/60 font-medium max-w-lg mb-8 leading-relaxed">
  Video berkualitas HD dari instruktur profesional. Belajar kapan saja, di mana saja, dengan kurikulum terstruktur.
- </motion.p>
+ </p>
 
  {/* Stats pills */}
- <motion.div 
- initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
- className="flex items-center gap-3 flex-wrap mb-8 md:mb-0"
- >
- <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/10 dark:border-slate-700/20">
+ <div className="flex items-center gap-3 flex-wrap mb-8 md:mb-0">
+ <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop- px-3.5 py-2 rounded-lg border border-white/10 dark:border-slate-700/20">
  <PlayCircle size={14} className="text-emerald-300"/>
  <span className="text-xs font-bold text-white/80">{courses.length}+ Kursus</span>
  </div>
- <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/10 dark:border-slate-700/20">
+ <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop- px-3.5 py-2 rounded-lg border border-white/10 dark:border-slate-700/20">
  <Users size={14} className="text-teal-300"/>
  <span className="text-xs font-bold text-white/80">Instruktur Pro</span>
  </div>
- <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/10 dark:border-slate-700/20">
+ <div className="flex items-center gap-2 bg-white/10 dark:bg-slate-800/30 backdrop- px-3.5 py-2 rounded-lg border border-white/10 dark:border-slate-700/20">
  <Star size={14} className="text-amber-300 fill-amber-300"/>
  <span className="text-xs font-bold text-white/80">Rating 4.9</span>
  </div>
- </motion.div>
+ </div>
  </div>
 
  {/* Search Bar */}
- <motion.div 
- initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
- className="w-full lg:w-[420px] shrink-0"
- >
+ <div className="w-full lg:w-[420px] shrink-0">
  <div className="relative">
- <div className="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-emerald-50 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
- <Search size={16} className="text-emerald-300"/>
+  <div className="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+  <Search size={16} className="text-emerald-400"/>
+  </div>
+  <input
+  type="text"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  placeholder="Cari kursus atau instruktur..."
+  className="w-full bg-white/10 dark:bg-slate-800/30 backdrop- rounded-xl py-4 pl-16 pr-6 text-sm font-semibold text-white placeholder-white/40 focus:bg-white/20 dark:bg-slate-800/15 focus:ring-2 focus:ring-emerald-500/30 border border-white/10 dark:border-slate-700/20 outline-none transition-colors"
+  />
  </div>
- <input
- type="text"
- value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- placeholder="Cari kursus atau instruktur..."
- className="w-full bg-white/10 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl py-4 pl-16 pr-6 text-sm font-semibold text-white placeholder-white/40 focus:bg-white/20 dark:bg-slate-800/15 focus:ring-2 focus:ring-emerald-500/30 border border-white/10 dark:border-slate-700/20 outline-none shadow-2xl dark:shadow-black/25 shadow-black/20 transition-transform"
- />
  </div>
- </motion.div>
  </div>
  </div>
  </div>
@@ -182,10 +164,10 @@ export default function CoursesClient() {
  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
  <button
  onClick={() => setSelectedCategory('all')}
- className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-transform border whitespace-nowrap shrink-0 ${
+ className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors border whitespace-nowrap shrink-0 ${
  selectedCategory === 'all'
- ? 'bg-slate-900 text-white border-slate-900 shadow-lg dark:shadow-black/20 shadow-slate-900/20'
- : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 hover:shadow-sm dark:shadow-black/10'
+ ? 'bg-slate-900 text-white border-slate-900'
+ : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600'
  }`}
  >
  Semua Kategori
@@ -194,10 +176,10 @@ export default function CoursesClient() {
  <button
  key={cat.id}
  onClick={() => setSelectedCategory(cat.id.toString())}
- className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-transform border whitespace-nowrap shrink-0 ${
+ className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors border whitespace-nowrap shrink-0 ${
  selectedCategory === cat.id.toString()
- ? 'bg-slate-900 text-white border-slate-900 shadow-lg dark:shadow-black/20 shadow-slate-900/20'
- : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:border-slate-600 dark:hover:border-slate-600 hover:shadow-sm dark:shadow-black/10'
+ ? 'bg-slate-900 text-white border-slate-900'
+ : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600'
  }`}
  >
  {cat.name}
@@ -221,10 +203,10 @@ export default function CoursesClient() {
  <button
  key={level.value}
  onClick={() => setSelectedLevel(level.value)}
- className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-transform whitespace-nowrap shrink-0 ${
+ className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap shrink-0 ${
  selectedLevel === level.value
- ? 'bg-emerald-600 text-white shadow-sm dark:shadow-black/10'
- : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-700/50 dark:hover:bg-slate-700/50'
+ ? 'bg-emerald-600 text-white'
+ : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
  }`}
  >
  {level.label}
@@ -237,9 +219,9 @@ export default function CoursesClient() {
  {/* ═══ COURSE GRID ═══ */}
  {loading ? (
  <div className="flex flex-col items-center justify-center py-24 gap-4">
- <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}>
- <Loader2 size={44} className="text-emerald-500"/>
- </motion.div>
+ <div>
+ <Loader2 size={44} className="text-emerald-500 animate-spin"/>
+ </div>
  <p className="text-sm font-black text-emerald-500/70 uppercase tracking-[0.2em] animate-pulse">Memuat Kursus Premium...</p>
  </div>
  ) : filteredCourses.length === 0 ? (
@@ -250,65 +232,58 @@ export default function CoursesClient() {
  <h3 className="text-xl font-black text-slate-800 dark:text-slate-200">Kursus Belum Tersedia</h3>
  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md leading-relaxed">Kursus yang sesuai dengan pencarian Anda belum tersedia. Coba ubah filter atau cek kembali nanti.</p>
  {(searchQuery || selectedCategory !== 'all' || selectedLevel !== 'all') && (
- <button onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedLevel('all'); }} className="px-6 py-3 bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 text-sm font-bold rounded-xl transition-transform">
+ <button onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedLevel('all'); }} className="px-6 py-3 bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 text-sm font-bold rounded-lg transition-colors">
  Reset Semua Filter
  </button>
  )}
  </div>
  ) : (
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
- <AnimatePresence mode="popLayout">
- {filteredCourses.map((course, idx) => (
- <motion.div
- key={course.id}
- initial={{ opacity: 0, y: 30 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95 }}
- transition={{ delay: idx * 0.04, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
- layout
- >
- <Link href={`/courses/${course.slug}`} className="group block h-full">
- <div className="bg-white dark:bg-[#111827] rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(16,185,129,0.12)] hover:border-emerald-200/60 transition-transform duration-500 hover:-translate-y-1.5 h-full flex flex-col">
  
- {/* ── Thumbnail ── */}
- <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-700/50">
- {course.thumbnail ? (
- <img loading="lazy" src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"/>
+ {filteredCourses.map((course, idx) => (
+ <div key={course.id}>
+ <Link href={`/courses/${course.slug}`} className="group block h-full">
+  <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden hover:border-emerald-400 transition-colors h-full flex flex-col">
+  
+  {/* ── Thumbnail ── */}
+  <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-800">
+  {course.thumbnail ? (
+  <img loading="lazy" src={`${STORAGE_URL}/${course.thumbnail}`} alt={course.title} className="w-full h-full object-cover"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
  <GraduationCap size={48} className="text-emerald-300/70"/>
  </div>
  )}
  
- {/* Gradient overlay */}
- <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
- 
- {/* Play button overlay */}
-  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-transform duration-500">
-  <div className="w-14 h-14 rounded-full bg-white/30 dark:bg-slate-800/20 backdrop-blur-md border border-white/50 dark:border-slate-700/30 flex items-center justify-center shadow-2xl dark:shadow-black/25 group-hover:scale-100 scale-75 transition-transform duration-500">
-  <PlayCircle size={28} className="text-white ml-0.5"/>
+  {/* Gradient overlay */}
+  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
+  
+  {/* Play button overlay */}
+   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+   <div className="w-14 h-14 rounded-full bg-white/30 dark:bg-slate-800/20 backdrop- border border-white/50 dark:border-slate-700/30 flex items-center justify-center">
+   <PlayCircle size={28} className="text-white ml-0.5"/>
+   </div>
   </div>
- </div>
 
  {/* Top badges */}
  <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
  {/* Level badge */}
- <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-lg dark:shadow-black/20 ${getLevelColor(course.level)}`}>
+ <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop- shadow-lg dark:shadow-black/20 ${getLevelColor(course.level)}`}>
  {getLevelIcon(course.level)} {getLevelLabel(course.level)}
  </span>
  
  {/* Price badge */}
   {course.price === 0 ? (
-  <span className="px-3 py-1.5 rounded-lg text-xs font-black shadow-lg dark:shadow-black/20 backdrop-blur-md bg-emerald-500 dark:bg-emerald-500/90 text-white">
+  <span className="px-3 py-1.5 rounded-lg text-xs font-black shadow-lg dark:shadow-black/20 backdrop- bg-emerald-500 dark:bg-emerald-500/90 text-white">
   GRATIS
  </span>
  ) : (
  <div className="flex flex-col items-end gap-0.5">
- <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800/90 backdrop-blur-md px-2.5 py-1 rounded-lg shadow-lg dark:shadow-black/20">
+ <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800/90 backdrop- px-2.5 py-1 rounded-lg shadow-lg dark:shadow-black/20">
  <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 line-through">{formatRupiah(course.price * 5)}</span>
  <span className="text-[8px] font-black text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.5 rounded">80%</span>
  </div>
- <span className="px-3 py-1.5 rounded-lg text-xs font-black shadow-lg dark:shadow-black/20 backdrop-blur-md bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white">
+ <span className="px-3 py-1.5 rounded-lg text-xs font-black shadow-lg dark:shadow-black/20 backdrop- bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white">
  {formatRupiah(course.price)}
  </span>
  </div>
@@ -402,9 +377,9 @@ export default function CoursesClient() {
  </div>
  </div>
  </Link>
- </motion.div>
+ </div>
  ))}
- </AnimatePresence>
+ 
  </div>
  )}
  </div>

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Loader2, Eye, EyeOff, Mail, Lock,
   Sparkles, ArrowRight, AlertTriangle,
-  Check, Video, BookOpen, Award
+  Check, Video, BookOpen, Award, MonitorPlay
 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
@@ -305,8 +305,16 @@ export default function LoginClient() {
             <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
               <Video className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
-                <h4 className="font-bold text-white text-sm">Webinar & Course</h4>
-                <p className="text-xs text-slate-400 mt-1">Ikuti sesi webinar live eksklusif dan pelajari kembali materi kelas interaktif dari mana saja.</p>
+                <h4 className="font-bold text-white text-sm">Webinar Interaktif</h4>
+                <p className="text-xs text-slate-400 mt-1">Ikuti sesi webinar live eksklusif dan belajar interaktif dari pakar industri terkemuka.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
+              <MonitorPlay className="text-emerald-400 shrink-0 mt-0.5" size={24} />
+              <div>
+                <h4 className="font-bold text-white text-sm">Online E-Course</h4>
+                <p className="text-xs text-slate-400 mt-1">Akses rekaman kelas berlisensi dan pelajari kembali materi video kapan saja dari mana saja.</p>
               </div>
             </div>
 
@@ -318,11 +326,11 @@ export default function LoginClient() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl md:col-span-2 transition-transform hover:-translate-y-1 duration-300">
+            <div className="flex items-start gap-4 bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl transition-transform hover:-translate-y-1 duration-300">
               <Award className="text-emerald-400 shrink-0 mt-0.5" size={24} />
               <div>
                 <h4 className="font-bold text-white text-sm">Sertifikat Resmi</h4>
-                <p className="text-xs text-slate-400 mt-1">Dapatkan dan unduh e-sertifikat resmi setiap kali Anda menyelesaikan kursus atau menghadiri webinar.</p>
+                <p className="text-xs text-slate-400 mt-1">Dapatkan dan unduh e-sertifikat resmi setiap kali Anda menyelesaikan kelas atau webinar.</p>
               </div>
             </div>
           </div>

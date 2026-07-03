@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import Link from 'next/link';
 import {
  GraduationCap, PlayCircle, Clock, BookOpen, Video,
@@ -114,7 +114,7 @@ export default function MyCoursesClient() {
  <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 mb-8 shadow-xl dark:shadow-black/20">
  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_30%_20%,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"/>
  <div className="relative z-10">
- <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-200 uppercase tracking-[0.2em] bg-white dark:bg-slate-800/30 px-3 py-1.5 rounded-full backdrop-blur-sm mb-4">
+ <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-200 uppercase tracking-[0.2em] bg-white dark:bg-slate-800/30 px-3 py-1.5 rounded-full backdrop- mb-4">
  <GraduationCap size={12} /> Kursus Saya
  </span>
  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1">Lanjutkan Perjalanan</h1>
@@ -180,12 +180,7 @@ export default function MyCoursesClient() {
  const progress = getProgress(course);
  const status = getStatus(course);
  return (
- <motion.div
- key={course.id}
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: idx * 0.05, duration: 0.4 }}
- >
+ <div key={course.id}>
  <Link href={`/learn/${course.slug}`} className="group block">
  <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm dark:shadow-black/10 hover:shadow-xl dark:shadow-black/20 hover:shadow-slate-200 dark:shadow-none hover:border-slate-200 dark:border-slate-700/50 transition-transform duration-500 hover:-translate-y-1">
  {/* Thumbnail */}
@@ -199,7 +194,7 @@ export default function MyCoursesClient() {
  )}
  {/* Status overlay */}
  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
- <span className="text-white text-xs font-bold flex items-center gap-1.5 bg-white dark:bg-slate-800/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+ <span className="text-white text-xs font-bold flex items-center gap-1.5 bg-white dark:bg-slate-800/20 backdrop- px-3 py-1.5 rounded-full">
  <PlayCircle size={14} /> Lanjut Belajar
  </span>
  </div>
@@ -238,12 +233,7 @@ export default function MyCoursesClient() {
  </span>
  </div>
  <div className="w-full h-2 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden">
- <motion.div
- className={`h-full rounded-full ${progress === 100 ? 'bg-emerald-50 dark:bg-emerald-500' : 'bg-indigo-500 dark:bg-indigo-400'}`}
- initial={{ width: 0 }}
- animate={{ width: `${progress}%` }}
- transition={{ delay: idx * 0.1 + 0.3, duration: 0.8, ease: 'easeOut' }}
- />
+ <div className={`h-full rounded-full ${progress === 100 ? 'bg-emerald-50 dark:bg-emerald-500' : 'bg-indigo-500 dark:bg-indigo-400'}`} />
  </div>
  </div>
 
@@ -274,27 +264,20 @@ export default function MyCoursesClient() {
  </div>
  </div>
  </Link>
- </motion.div>
+ </div>
  );
  })}
  </div>
  )}
 
  {/* ═══ RATING MODAL ═══ */}
- <AnimatePresence>
+ 
  {ratingModal && (
  <>
- <motion.div
- initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
- onClick={() => setRatingModal(null)}
- className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+ <div onClick={() => setRatingModal(null)}
+ className="fixed inset-0 bg-black/50 backdrop- z-50"
  />
- <motion.div
- initial={{ opacity: 0, scale: 0.9, y: 20 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.9, y: 20 }}
- className="fixed inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 top-1/2 -translate-y-1/2 w-auto sm:w-full sm:max-w-md bg-white dark:bg-[#111827] rounded-2xl shadow-2xl dark:shadow-black/25 z-50 overflow-hidden"
- >
+ <div className="fixed inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 top-1/2 -translate-y-1/2 w-auto sm:w-full sm:max-w-md bg-white dark:bg-[#111827] rounded-2xl shadow-2xl dark:shadow-black/25 z-50 overflow-hidden">
  {/* Header */}
  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
  <div className="flex items-center gap-2">
@@ -364,10 +347,10 @@ export default function MyCoursesClient() {
  {submittingReview ? 'Menyimpan...' : ratingModal.user_review ? 'Update Review' : 'Kirim Review'}
  </button>
  </div>
- </motion.div>
+ </div>
  </>
  )}
- </AnimatePresence>
+ 
  </div>
  );
 }

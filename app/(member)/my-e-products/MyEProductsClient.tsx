@@ -141,7 +141,7 @@ export default function MyEProductsClient() {
 
  return (
  <motion.div 
- key={purchase.id} 
+ key={`${purchase.id}-${index}`} 
  layout 
  initial={{ opacity: 0, y: 20 }} 
  animate={{ opacity: 1, y: 0, transition: { delay: Math.min(index * 0.05, 0.3) } }} 

@@ -3,15 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
- Calendar, MapPin, Users, Clock, CheckCircle2, 
- BookOpen, FileText, Video, AlertCircle, Share2, Award, 
- Sparkles, Zap, Ticket, Gem, ChevronRight, ShieldCheck,
- Loader2, User, Briefcase, ArrowRight, Lock, Info, Download,
- ArrowLeft, DownloadCloud, Link as LinkIcon, PlayCircle
+import { ArrowLeft, Calendar, MapPin, Clock, ShieldCheck,
+  Users, CheckCircle2, 
+  BookOpen, FileText, Video, AlertCircle, Share2, Award, 
+  Sparkles, Zap, Ticket, Gem, ChevronRight,
+  Loader2, User, Briefcase, ArrowRight, Lock, Info, Download,
+  DownloadCloud, Link as LinkIcon, PlayCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AnimatePresence, motion } from 'framer-motion';
 import { apiFetch } from '@/app/utils/api'; 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -289,7 +289,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <div className="bg-[#F8FAFC] dark:bg-[#0B1120] min-h-screen pb-24 font-sans overflow-x-hidden w-full min-w-0">
  
  {/* NAVBAR STICKY */}
- <nav className="bg-white dark:bg-slate-800/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 dark:border-slate-700/50 h-14 md:h-16 flex items-center w-full min-w-0 shadow-sm dark:shadow-black/10">
+ <nav className="bg-white dark:bg-slate-800/80 sticky top-0 z-40 border-b border-slate-200 dark:border-slate-700/50 h-14 md:h-16 flex items-center w-full min-w-0 shadow-sm dark:shadow-black/10">
  <div className="max-w-7xl mx-auto w-full px-4 md:px-8 flex items-center justify-between min-w-0">
  <div className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm min-w-0 flex-1">
  <Link href="/my-events" className="text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:text-indigo-400 font-bold shrink-0 flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700/50">
@@ -305,40 +305,36 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <div className="bg-slate-900 relative overflow-hidden w-full min-w-0">
  <div className="absolute inset-0 z-0">
  {event.image ? (
- <img src={`${STORAGE_URL}/${event.image}`} alt="Background" className="w-full h-full object-cover object-center opacity-20 blur-sm scale-105"/>
+ <img src={`${STORAGE_URL}/${event.image}`} alt="Background" className="w-full h-full object-cover object-center opacity-20"/>
  ) : (
- <div className="absolute top-0 -left-1/4 w-1/2 h-full bg-gradient-to-r from-indigo-500/30 to-transparent blur-3xl rounded-full mix-blend-screen"/>
+ <div className="absolute top-0 -left-1/4 w-1/2 h-full bg-indigo-500/10 rounded-full"/>
  )}
  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent"></div>
  </div>
 
  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 md:pt-16 pb-8 md:pb-12 relative z-10 w-full min-w-0">
- <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 w-full min-w-0">
- <span className="inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 bg-indigo-500/20 text-indigo-200 dark:text-indigo-300 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border border-indigo-400/30 backdrop-blur-sm shrink-0">
+ <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 w-full min-w-0">
+ <span className="inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 bg-indigo-500/20 text-indigo-200 dark:text-indigo-300 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border border-indigo-400/30 shrink-0">
  <BookOpen size={10} className="shrink-0"/> Ruang Belajar
  </span>
  
- <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border backdrop-blur-sm shrink-0 ${isPast ? 'bg-slate-800/80 text-slate-300 border-slate-700' : 'bg-emerald-500/20 text-emerald-300 dark:text-emerald-400 border-emerald-400/30'}`}>
+ <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 text-[9px] md:text-[11px] font-bold uppercase tracking-wider rounded-md border shrink-0 ${isPast ? 'bg-slate-800/80 text-slate-300 border-slate-700' : 'bg-emerald-500/20 text-emerald-300 dark:text-emerald-400 border-emerald-400/30'}`}>
  {isPast ? <CheckCircle2 size={10} className="shrink-0"/> : <Zap size={10} className="shrink-0"/>} 
  {isPast ? 'Telah Selesai' : 'Sedang Berjalan'}
  </span>
 
  {timeLeft && !isPast && (
- <motion.span 
- initial={{ opacity: 0, scale: 0.9 }}
- animate={{ opacity: 1, scale: 1 }}
- className="px-3 py-1.5 bg-amber-500/90 backdrop-blur-md border border-amber-400 text-white rounded-md text-[9px] md:text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg dark:shadow-black/20 shrink-0"
- >
+ <span className="px-3 py-1.5 bg-amber-500/90 border border-amber-400 text-white rounded-md text-[9px] md:text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg dark:shadow-black/20 shrink-0">
  <Clock size={12} /> {timeLeft}
- </motion.span>
+ </span>
  )}
- </motion.div>
+ </div>
  
- <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.2] tracking-tight max-w-4xl mb-6 break-words w-full">
+ <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.2] tracking-tight max-w-4xl mb-6 break-words w-full">
  {event.title}
- </motion.h1>
+ </h1>
 
- <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 lg:gap-8 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 p-4 sm:p-5 rounded-2xl backdrop-blur-md w-full sm:w-fit min-w-0 shadow-lg dark:shadow-black/20">
+ <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 lg:gap-8 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 p-4 sm:p-5 rounded-2xl w-full sm:w-fit min-w-0 shadow-sm dark:shadow-black/10">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0"><Calendar size={18}/></div>
  <div>
@@ -356,7 +352,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <p className="text-xs sm:text-sm text-slate-900 dark:text-white font-semibold">{timeString}</p>
  </div>
  </div>
- </motion.div>
+ </div>
  </div>
  </div>
 
@@ -506,11 +502,10 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  </>
  )}
  </motion.div>
- ) 
+ ) : (
 
  /* INFORMASI PROGRAM */
- : (
- <motion.div key="desc" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full min-w-0">
+ <div key="desc" className="w-full min-w-0">
  <div className="q-content break-words w-full min-w-0" dangerouslySetInnerHTML={{ __html: processedDescription }} />
 
  {event.speakers && event.speakers.length > 0 && (
@@ -536,7 +531,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  </div>
  </div>
  )}
- </motion.div>
+ </div>
  )}
  </AnimatePresence>
  </div>
@@ -548,12 +543,10 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  
  {/* 🔥 WIDGET HITUNG MUNDUR LUXURY (DI KANAN ATAS POSTER) 🔥 */}
  {timeLeft && !isPast && (
- <motion.div 
- initial={{ opacity: 0, scale: 0.95 }}
- animate={{ opacity: 1, scale: 1 }}
+ <div 
  className="w-full flex items-center justify-between p-4 sm:p-5 rounded-[2rem] border bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md dark:shadow-black/15 relative overflow-hidden group"
  >
- <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/20 rounded-bl-full -z-10 blur-xl group-hover:bg-amber-400/40 transition-transform duration-500"/>
+ <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/20 rounded-bl-full -z-10 group-hover:bg-amber-400/40 transition-colors"/>
  <div className="flex items-center gap-3.5 z-10">
  <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg dark:shadow-black/20 shadow-orange-500/30">
  <Clock size={22} />
@@ -570,13 +563,12 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <div className="shrink-0 z-10 hidden sm:block">
  <Zap size={28} className="text-amber-500 opacity-60 animate-pulse"/>
  </div>
- </motion.div>
+ </div>
  )}
 
  {/* POSTER EVENT */}
  {event.image && (
- <motion.div 
- initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+ <div 
  className="w-full bg-slate-900 rounded-[1.5rem] md:rounded-[2rem] border-4 border-slate-200/50 dark:border-slate-700/300 shadow-xl dark:shadow-black/20 overflow-hidden relative"
  >
  <img
@@ -584,12 +576,11 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  alt="Poster Program"
  className="w-full h-auto max-h-[600px] object-contain rounded-[1.25rem] md:rounded-[1.5rem]"
  />
- </motion.div>
+ </div>
  )}
 
- <motion.div 
- initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
- className="bg-white dark:bg-[#111827] p-5 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl dark:shadow-black/20 shadow-slate-200 dark:shadow-none border border-slate-200 dark:border-slate-700/50 w-full min-w-0"
+ <div 
+ className="bg-white dark:bg-[#111827] p-5 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-slate-700/50 w-full min-w-0"
  >
  
  {/* TICKET TIER BADGE LUXURY */}
@@ -680,7 +671,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  Bagikan ke Teman
  </button>
  
- </motion.div>
+ </div>
  </aside>
 
  </main>
