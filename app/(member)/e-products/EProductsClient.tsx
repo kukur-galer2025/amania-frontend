@@ -442,12 +442,14 @@ export default function EProductsClient() {
                       className={`relative h-full flex bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/5 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden ${viewMode === 'list' ? 'flex-row' : 'flex-col'}`}
                       onClick={() => router.push(`/e-products/${p.slug}`)}
                     >
-                      {/* COVER IMAGE */}
-                      <div className={`relative overflow-clip bg-slate-100 dark:bg-slate-800 shrink-0 ${viewMode === 'list' ? 'w-24 sm:w-2/5 lg:w-[260px] aspect-[3/4] sm:aspect-[4/3] border-r border-b-0 border-slate-200 dark:border-slate-700/50' : 'w-full aspect-[4/3] border-b border-slate-200 dark:border-slate-700/50'}`}>
+                      <div 
+                        className={`relative overflow-clip bg-slate-100 dark:bg-slate-800 shrink-0 ${viewMode === 'list' ? 'w-24 sm:w-2/5 lg:w-[260px] border-r border-b-0 border-slate-200 dark:border-slate-700/50 portrait-list-img' : 'w-full border-b border-slate-200 dark:border-slate-700/50'}`}
+                        style={{ aspectRatio: viewMode === 'grid' ? '4/3' : undefined }}
+                      >
                         {p.cover_image ? (
-                          <img loading="lazy" src={`${storageUrl}/${p.cover_image}`} alt={p.title} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/600x400/1e293b/334155?text=Amania'; }} />
+                          <img loading="lazy" src={`${storageUrl}/${p.cover_image}`} alt={p.title} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/600x400/1e293b/334155?text=Amania'; }} />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+                          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
                             <FileText size={48} className="text-slate-300 dark:text-slate-600 w-8 h-8 sm:w-12 sm:h-12" />
                           </div>
                         )}
