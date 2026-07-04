@@ -450,29 +450,32 @@ export default function BerandaClient() {
  {product.author?.name || 'Amania Official'}
  </p>
 
- <h3 className="text-sm md:text-[15px] font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-2 break-words w-full" title={product.title}>
+ <div className="h-[40px] md:h-[44px] mb-2 w-full">
+ <h3 className="text-sm md:text-[15px] font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 break-words w-full h-full" title={product.title}>
  {product.title}
  </h3>
+ </div>
 
  <div className="mt-auto flex flex-col gap-0.5 w-full min-w-0">
  {!isFree && (
- <span className="text-[11px] text-slate-400 dark:text-slate-400 line-through font-bold">
+ <span className="text-[10px] md:text-[11px] text-slate-400 dark:text-slate-400 line-through font-bold">
  {formatRupiah(product.price * 5)}
  </span>
  )}
- <div className="flex items-center justify-between gap-2 w-full min-w-0">
- <p className={`text-base md:text-lg font-black tracking-tight truncate ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-950 dark:text-white dark:text-white'}`}>
+ <div className="flex items-center justify-between gap-1.5 w-full min-w-0">
+ <p className={`text-sm lg:text-[15px] font-black tracking-tight truncate ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-950 dark:text-white dark:text-white'}`}>
  {formatRupiah(product.price)}
  </p>
 
  {avgRating > 0 ? (
- <div className="flex items-center gap-0.5 shrink-0 bg-white dark:bg-slate-800 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 dark:border-slate-600 px-2 py-0.5 rounded-lg shadow-sm dark:shadow-black/10 dark:shadow-none">
+ <div className="flex items-center gap-0.5 shrink-0 bg-white dark:bg-slate-800 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 dark:border-slate-600 px-1.5 py-0.5 rounded-lg shadow-sm dark:shadow-black/10 dark:shadow-none">
  <Star size={10} className="fill-amber-400 text-amber-400"/>
  <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 dark:text-slate-200">{avgRating.toFixed(1)}</span>
  </div>
  ) : (
  <div className="flex items-center gap-0.5 shrink-0 bg-slate-50 dark:bg-slate-800/60 dark:bg-slate-700 border border-slate-200 dark:border-slate-700/60 dark:border-slate-600 px-1.5 py-0.5 rounded-lg">
- <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400">Belum ada rating</span>
+ <Star size={10} className="fill-slate-300 text-slate-400"/>
+ <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400">0.0</span>
  </div>
  )}
  </div>
