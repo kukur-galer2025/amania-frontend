@@ -330,10 +330,15 @@ export default function CoursesClient() {
  <span className="text-[8px] sm:text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate">{course.category?.name || 'Umum'}</span>
  </div>
 
- {/* Title */}
- <h3 className="text-xs sm:text-[15px] md:text-base font-bold text-slate-900 dark:text-white leading-snug mb-2 sm:mb-3 line-clamp-2 group-hover:text-emerald-700 dark:text-emerald-400 tracking-tight">
- {course.title}
- </h3>
+ {/* Title Container (Fixed Height) */}
+ <div className="h-[33px] sm:h-[42px] md:h-[44px] mb-2 sm:mb-3">
+   <h3 
+     className="text-xs sm:text-[15px] md:text-base font-bold text-slate-900 dark:text-white leading-snug group-hover:text-emerald-700 dark:text-emerald-400 tracking-tight h-full"
+     style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+   >
+     {course.title}
+   </h3>
+ </div>
 
  {/* Instructor */}
  <div className="flex items-center gap-2 sm:gap-2.5 mb-3 sm:mb-4">

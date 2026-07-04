@@ -498,21 +498,23 @@ export default function EProductsClient() {
 
                         {/* Title */}
                         <h3 
-                          className="text-xs sm:text-[15px] font-black text-slate-800 dark:text-slate-100 tracking-tight leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-1.5 sm:mb-2"
+                          className="text-xs sm:text-[15px] h-[33px] sm:h-[42px] font-black text-slate-800 dark:text-slate-100 tracking-tight leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-1.5 sm:mb-2"
                           style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                         >
                           {p.title}
                         </h3>
 
-                        {/* Description */}
-                        {p.description && (
-                          <p 
-                            className="hidden sm:block text-[11px] text-slate-400 dark:text-slate-400 leading-relaxed mb-3"
-                            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-                          >
-                            {stripHtmlAndEntities(p.description)}
-                          </p>
-                        )}
+                        {/* Description Container (Fixed Height) */}
+                        <div className="hidden sm:block h-[36px] mb-3">
+                          {p.description ? (
+                            <p 
+                              className="text-[11px] text-slate-400 dark:text-slate-400 leading-relaxed h-full"
+                              style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                            >
+                              {stripHtmlAndEntities(p.description)}
+                            </p>
+                          ) : null}
+                        </div>
 
                         {/* Spacer */}
                         {viewMode === 'grid' && <div className="flex-1" />}
