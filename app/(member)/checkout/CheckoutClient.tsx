@@ -633,7 +633,7 @@ export default function CheckoutClient() {
  {organizerAvatar ? (
  <img loading="lazy" src={organizerAvatar} alt={organizerName} className="w-full h-full object-cover rounded-full"/>
  ) : isSuperadmin ? (
- <img loading="lazy" src="/logo-amania.png" alt="Amania" className="w-4 h-4 object-contain"/>
+ <img loading="lazy" src="/logo-amania.png" alt="Amania" className="w-4 h-4 object-contain dark:brightness-0 dark:invert"/>
  ) : (
  <User size={14} className="text-slate-400 dark:text-slate-400"/>
  )}

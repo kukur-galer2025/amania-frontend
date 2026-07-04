@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { 
   Search, CheckCircle2, XCircle, Clock, 
   Loader2, Inbox, Receipt, TrendingUp, Calendar, 
-  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard, Hash, Eye, User, X
+  ChevronLeft, ChevronRight, ShoppingCart, FileSpreadsheet, ArrowUpRight, CreditCard, Hash, Eye, User, X, AlertCircle
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -249,6 +249,33 @@ export default function AdminEProductTransactionsPage() {
         </button>
       </div>
 
+      {isMounted && !isAdmin && (
+        <div className="bg-indigo-50/80 border border-indigo-100 p-4 md:p-5 rounded-xl md:rounded-2xl flex items-start gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shrink-0 border border-indigo-100 text-indigo-600">
+            <AlertCircle size={22} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm md:text-base font-bold text-indigo-900 mb-2">Sistem Bagi Hasil Kreator (70% - 30%)</h3>
+            <div className="text-[11px] md:text-xs font-medium text-indigo-700/80 leading-relaxed max-w-4xl space-y-2">
+              <p>
+                Sebagai bentuk kolaborasi, setiap transaksi penjualan e-produk Anda akan diproses dengan skema bagi hasil otomatis: <strong>70% menjadi hak penuh Anda</strong>, dan 30% dialokasikan untuk biaya operasional platform Amania.
+              </p>
+              <div className="bg-white/60 rounded-lg p-3 border border-indigo-200/50 inline-block">
+                <p className="font-bold mb-1">💡 Contoh Perhitungan per Transaksi:</p>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  <li>Harga Jual E-Produk: <strong className="text-slate-900">Rp 100.000</strong></li>
+                  <li>Potongan Platform Amania (30%): <strong className="text-rose-600">- Rp 30.000</strong></li>
+                  <li><strong>Masuk ke Saldo Anda: <span className="text-emerald-600">Rp 70.000</span></strong></li>
+                </ul>
+              </div>
+              <p>
+                *Nilai transaksi yang tertera pada tabel di bawah ini adalah <strong>nilai transaksi kotor (100%)</strong> yang dibayarkan oleh pembeli. Saldo yang akan masuk ke dompet Anda adalah 70% dari nilai tersebut.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. STATS WIDGETS */}
       <div className="flex md:grid md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8 overflow-x-auto custom-scrollbar pb-4 md:pb-0 snap-x">
         <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3 md:gap-4 min-w-[240px] md:min-w-0 snap-start shrink-0 flex-1">
@@ -418,9 +445,22 @@ export default function AdminEProductTransactionsPage() {
                       <div className="text-xs md:text-sm font-bold text-slate-900 w-full truncate max-w-[150px] md:max-w-[250px] flex items-center gap-1.5" title={tx.product_names}>
                         <ShoppingCart size={14} className="text-slate-400 shrink-0" /> <span className="truncate">{tx.product_names}</span>
                       </div>
-                      <div className="text-[11px] md:text-sm font-black text-emerald-600 mt-1 truncate w-full">
-                        {formatRupiah(tx.amount)}
-                      </div>
+                      {!isAdmin ? (
+                        <div className="mt-1.5 flex flex-col gap-0.5 min-w-[140px]">
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-slate-400 font-medium">Harga Asli:</span>
+                            <span className="text-slate-500 font-semibold">{formatRupiah(tx.amount)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs mt-0.5 pt-0.5 border-t border-slate-100">
+                            <span className="text-emerald-600/80 font-bold">Hasil 70%:</span>
+                            <span className="text-emerald-600 font-black">{formatRupiah(Number(tx.amount) * 0.7)}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-[11px] md:text-sm font-black text-emerald-600 mt-1 truncate w-full">
+                          {formatRupiah(tx.amount)}
+                        </div>
+                      )}
                     </td>
 
                     {/* Kolom 4.5: Kreator */}
@@ -615,8 +655,8 @@ export default function AdminEProductTransactionsPage() {
                       <CreditCard size={14} className="text-emerald-500 md:w-4 md:h-4" /> Detail Pembayaran
                     </h3>
                     <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between mb-2">
-                       <span className="text-[10px] md:text-xs font-bold text-slate-600 uppercase tracking-wider">Total Tagihan</span>
-                       <span className="text-base md:text-lg font-black text-emerald-700">{formatRupiah(selectedDetail.amount)}</span>
+                       <span className="text-[10px] md:text-xs font-bold text-slate-600 uppercase tracking-wider">{!isAdmin ? 'Penghasilan Bersih (70%)' : 'Total Tagihan'}</span>
+                       <span className="text-base md:text-lg font-black text-emerald-700">{formatRupiah(!isAdmin ? (Number(selectedDetail.amount) * 0.7) : selectedDetail.amount)}</span>
                     </div>
 
                     <div>

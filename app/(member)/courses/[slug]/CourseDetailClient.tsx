@@ -325,15 +325,6 @@ export default function CourseDetailClient() {
  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
  `}</style>
 
- {/* AMBIENT GLOW - ENHANCED */}
- <div className="absolute top-0 left-0 right-0 h-[800px] z-0 pointer-events-none overflow-hidden">
- <div className="absolute top-[-30%] left-[5%] w-[70%] h-[90%] bg-emerald-50 dark:bg-emerald-500/[0.06]  rounded-full"/>
- <div className="absolute top-[5%] right-[5%] w-[50%] h-[70%] bg-teal-400/[0.05]  rounded-full"/>
- <div className="absolute top-[40%] left-[40%] w-[35%] h-[40%] bg-cyan-400/[0.04]  rounded-full"/>
- {/* Subtle dot grid */}
- <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: 'radial-gradient(circle, #10b981 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
- </div>
-
  {/* HEADER NAV */}
  <div className="relative z-40 w-full pt-5 md:pt-8 bg-transparent">
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -537,7 +528,7 @@ export default function CourseDetailClient() {
  <p className="text-[10px] font-medium text-slate-400 dark:text-slate-400 mt-0.5">{section.lessons?.length || 0} lesson</p>
  </div>
  </div>
- <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${expandedSections.has(section.id) ? 'bg-emerald-100 text-emerald-600 dark:text-emerald-400 rotate-0' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-400'}`}>
+ <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${expandedSections.has(section.id) ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rotate-0' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-400'}`}>
  {expandedSections.has(section.id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
  </div>
  </button>
@@ -552,18 +543,18 @@ export default function CourseDetailClient() {
  {lesson.is_preview ? (
  <PlayCircle size={17} className="text-emerald-500 group-hover/lesson:scale-110 transition-transform"/>
  ) : (
- <Lock size={13} className="text-slate-300 dark:text-slate-500"/>
+ <Lock size={13} className="text-slate-400 dark:text-slate-400"/>
  )}
  </div>
  <div className="flex-1 min-w-0">
- <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-300 truncate">{lesson.title}</p>
+ <p className={`text-[13px] font-semibold truncate ${lesson.is_preview ? 'text-slate-800 dark:text-white' : 'text-slate-600 dark:text-slate-200'}`}>{lesson.title}</p>
  </div>
  <div className="flex items-center gap-2 shrink-0">
  {lesson.is_preview && (
- <span className="text-[8px] sm:text-[9px] font-black text-emerald-600 dark:text-emerald-400 bg-gradient-to-r from-emerald-50 to-teal-50 px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-800/60">PREVIEW</span>
+ <span className="text-[8px] sm:text-[9px] font-black text-emerald-600 dark:text-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/40 dark:to-teal-900/40 px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-500/30">PREVIEW</span>
  )}
  {lesson.duration_minutes > 0 && (
- <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 flex items-center gap-1">
+ <span className="text-[10px] font-bold text-slate-400 dark:text-slate-300 flex items-center gap-1">
  <Clock size={10} /> {lesson.duration_minutes}m
  </span>
  )}

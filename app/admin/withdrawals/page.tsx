@@ -5,7 +5,7 @@ import { apiFetch } from '@/app/utils/api';
 import { safeStorage } from '@/app/utils/safeStorage';
 import {
   CreditCard, Loader2, CheckCircle2, Clock, XCircle, Search, 
-  UploadCloud, FileText, Landmark, DollarSign, Wallet, Eye
+  UploadCloud, FileText, Landmark, DollarSign, Wallet, Eye, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -177,11 +177,38 @@ export default function WithdrawalsPage() {
               <Landmark size={18} /> Ajukan Penarikan
             </button>
           </div>
+
+          <div className="bg-indigo-50/80 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 p-4 md:p-5 rounded-xl md:rounded-2xl flex items-start gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-indigo-500/20 rounded-full flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
+              <AlertCircle size={22} strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm md:text-base font-bold text-indigo-900 dark:text-indigo-300 mb-2">Informasi Saldo & Bagi Hasil (70%)</h3>
+              <div className="text-[11px] md:text-xs font-medium text-indigo-700/80 dark:text-indigo-400/90 leading-relaxed space-y-2">
+                <p>
+                  Sesuai kesepakatan kolaborasi, seluruh nominal saldo dan total pendapatan yang tertera di bawah ini <strong>merupakan penghasilan bersih (70%)</strong> Anda setelah dipotong biaya operasional platform Amania (30%).
+                </p>
+                <div className="bg-white/60 dark:bg-black/20 rounded-lg p-3 border border-indigo-200/50 dark:border-indigo-500/20 inline-block">
+                  <p className="font-bold mb-1">💡 Contoh Perhitungan per Transaksi:</p>
+                  <ul className="list-disc pl-4 space-y-0.5">
+                    <li>Harga Produk Terjual: <strong className="text-slate-900 dark:text-slate-200">Rp 100.000</strong></li>
+                    <li>Biaya Amania (30%): <strong className="text-rose-600 dark:text-rose-400">- Rp 30.000</strong></li>
+                    <li><strong>Masuk ke Saldo Anda: <span className="text-emerald-600 dark:text-emerald-400">Rp 70.000</span></strong></li>
+                  </ul>
+                </div>
+                <p>
+                  Oleh karena itu, saat Anda melakukan pengajuan penarikan dana, nominal yang Anda cairkan akan ditransfer seutuhnya tanpa ada potongan biaya tambahan lagi dari pihak Amania.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Wallet size={64} /></div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Saldo Tersedia</p>
               <p className="text-2xl font-black text-slate-900 mt-2">{formatRp(stats.available_balance)}</p>
+              <p className="text-[10px] font-bold text-slate-400 mt-1">Sisa saldo bersih 70%</p>
             </div>
             <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Clock size={64} /></div>
@@ -197,6 +224,7 @@ export default function WithdrawalsPage() {
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><DollarSign size={64} /></div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Pendapatan</p>
               <p className="text-2xl font-black text-slate-900 mt-2">{formatRp(stats.total_revenue)}</p>
+              <p className="text-[10px] font-bold text-slate-400 mt-1">Penghasilan bersih 70%</p>
             </div>
           </div>
         </>

@@ -96,8 +96,8 @@ export default function AdminDashboardPage() {
   }
 
   const STAT_CARDS = stats.is_creator ? [
-    { title: 'Pendapatan Kursus', value: `Rp ${Number(stats.pendapatan_kursus).toLocaleString('id-ID')}`, icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-    { title: 'Pendapatan E-Produk', value: `Rp ${Number(stats.pendapatan_eproduk).toLocaleString('id-ID')}`, icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { title: 'Pendapatan Kursus', value: `Rp ${Number(stats.pendapatan_kursus).toLocaleString('id-ID')}`, note: 'Penghasilan bersih 70%', icon: GraduationCap, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+    { title: 'Pendapatan E-Produk', value: `Rp ${Number(stats.pendapatan_eproduk).toLocaleString('id-ID')}`, note: 'Penghasilan bersih 70%', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
     { title: 'Total Kursus Saya', value: Number(stats.total_courses).toLocaleString('id-ID'), icon: GraduationCap, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
     { title: 'Total E-Produk Saya', value: Number(stats.total_eproducts).toLocaleString('id-ID'), icon: ShoppingCart, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
   ] : [
@@ -115,6 +115,34 @@ export default function AdminDashboardPage() {
         <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">Berikut adalah ringkasan performa Amania saat ini.</p>
       </div>
 
+      {/* CREATOR REVENUE SPLIT INFO BANNER */}
+      {stats.is_creator && (
+        <div className="bg-indigo-50/80 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 p-4 md:p-5 rounded-xl md:rounded-2xl flex items-start gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-indigo-500/20 rounded-full flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
+            <AlertCircle size={22} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm md:text-base font-bold text-indigo-900 dark:text-indigo-300 mb-2">Sistem Bagi Hasil Kreator (70% - 30%)</h3>
+            <div className="text-[11px] md:text-xs font-medium text-indigo-700/80 dark:text-indigo-400/90 leading-relaxed max-w-4xl space-y-2">
+              <p>
+                Sebagai bentuk kolaborasi, setiap transaksi penjualan kursus maupun e-produk Anda akan diproses dengan skema bagi hasil otomatis: <strong>70% menjadi hak penuh Anda</strong>, dan 30% dialokasikan untuk biaya operasional platform Amania.
+              </p>
+              <div className="bg-white/60 dark:bg-black/20 rounded-lg p-3 border border-indigo-200/50 dark:border-indigo-500/20">
+                <p className="font-bold mb-1">💡 Ilustrasi Perhitungan:</p>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  <li>Harga Jual E-Produk/Kursus: <strong className="text-slate-900 dark:text-slate-200">Rp 100.000</strong></li>
+                  <li>Potongan Platform Amania (30%): <strong className="text-rose-600 dark:text-rose-400">- Rp 30.000</strong></li>
+                  <li><strong>Penghasilan Bersih Anda (70%): <span className="text-emerald-600 dark:text-emerald-400">Rp 70.000</span></strong></li>
+                </ul>
+              </div>
+              <p>
+                Seluruh nominal pendapatan dan saldo yang tertera pada panel ini <strong>sudah merupakan penghasilan bersih</strong> milik Anda yang siap dicairkan, sehingga tidak akan ada pemotongan biaya tambahan saat penarikan dana.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* STAT CARDS - Horizontal Scroll Mobile */}
       <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 overflow-x-auto custom-scrollbar pb-4 md:pb-0 snap-x">
         {STAT_CARDS.map((stat, index) => {
@@ -127,6 +155,9 @@ export default function AdminDashboardPage() {
               <div className="min-w-0">
                 <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5 md:mb-1 truncate">{stat.title}</p>
                 <h3 className="text-lg md:text-2xl font-black text-slate-900 truncate">{stat.value}</h3>
+                {stat.note && (
+                  <p className="text-[9px] md:text-[10px] font-bold text-slate-500 mt-1">{stat.note}</p>
+                )}
               </div>
             </div>
           );

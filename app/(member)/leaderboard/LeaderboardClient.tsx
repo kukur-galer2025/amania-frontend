@@ -145,8 +145,8 @@ export default function LeaderboardClient() {
  </div>
 
  {/* Filter 2: Waktu */}
- <div className="flex justify-center">
- <div className="bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-xl flex border border-slate-300 dark:border-slate-600/30 w-full sm:w-auto">
+ <div className="flex justify-center w-full max-w-full">
+ <div className="bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-xl flex overflow-x-auto custom-scrollbar border border-slate-300 dark:border-slate-600/30 w-full sm:w-auto">
  {[
  { id: 'all', label: 'Sepanjang Masa' },
  { id: 'month', label: 'Bulan Ini' },
@@ -225,7 +225,7 @@ export default function LeaderboardClient() {
  key={user.id} 
  className={`group flex items-center justify-between px-5 md:px-8 py-4 md:py-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-transform duration-300 ${isTop3 ? 'bg-gradient-to-r from-slate-50/50 dark:from-slate-800/30 to-transparent' : ''}`}
  >
- <div className="flex items-center gap-4 md:gap-10 overflow-hidden pr-2">
+ <div className="flex items-center gap-3 md:gap-10 min-w-0 flex-1 pr-2">
  
  {/* Ranking Badge */}
  <div className="w-8 md:w-10 flex justify-center shrink-0">
@@ -233,20 +233,20 @@ export default function LeaderboardClient() {
  </div>
 
  {/* User Info */}
- <div className="flex items-center gap-3 md:gap-5 overflow-hidden">
+ <div className="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
  <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 shrink-0 bg-slate-50 dark:bg-[#111827] shadow-sm dark:shadow-black/10 transition-transform duration-300 group-hover:scale-105 ${isTop3 ? 'border-amber-400' : 'border-slate-200 dark:border-slate-700/50'}`}>
  <img loading="lazy" src={getAvatarUrl(user)} 
  alt={user.name} 
  className="w-full h-full object-cover"
  />
  </div>
- <div className="truncate">
+ <div className="min-w-0 flex-1">
  <h4 className={`text-sm md:text-base font-black leading-tight truncate ${isTop3 ? 'text-slate-900 dark:text-white group-hover:text-amber-600' : 'text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:text-indigo-400'}`}>
  {user.name}
  </h4>
  
  {/* 🔥 MOBILE VIEW BADGE (Menghilang jika 0) 🔥 */}
- <div className="xs:hidden mt-1.5 flex items-center gap-2 flex-wrap">
+ <div className="sm:hidden mt-1.5 flex items-center gap-1.5 flex-wrap">
  {(activeCategory === 'all' || activeCategory === 'event') && eventCount > 0 && (
  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded text-[9px] font-bold text-blue-700 dark:text-blue-400">
  <BookOpen size={10} /> {eventCount} Event
@@ -268,7 +268,7 @@ export default function LeaderboardClient() {
  </div>
 
  {/* 🔥 DESKTOP VIEW BADGE (Menghilang jika 0) 🔥 */}
- <div className="shrink-0 hidden xs:flex items-center justify-end gap-2.5 pl-2">
+ <div className="shrink-0 hidden sm:flex items-center justify-end gap-2.5 pl-2">
  
  {(activeCategory === 'all' || activeCategory === 'event') && eventCount > 0 && (
  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 shadow-sm dark:shadow-black/10 text-blue-700 dark:text-blue-400 transition-transform hover:-translate-y-0.5">

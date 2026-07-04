@@ -8,6 +8,7 @@ import {
  ChevronLeft, ChevronRight, User, Gem, Zap, CheckCircle2, ShieldCheck, ArrowRight,
  MonitorPlay, BookOpen, LayoutGrid, Archive, Clock
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '@/app/utils/api';
 import AdBanner from '@/app/components/AdBanner';
 
@@ -38,8 +39,7 @@ export default function EventsClient() {
  
  const [searchQuery, setSearchQuery] = useState('');
  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
- const [currentPage, setCurrentPage] = useState(1);
- const itemsPerPage = 9; 
+ const [visibleCount, setVisibleCount] = useState(9);
 
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -74,7 +74,7 @@ export default function EventsClient() {
  }, [searchQuery]);
 
  useEffect(() => {
- setCurrentPage(1);
+ setVisibleCount(9);
  }, [searchQuery, filter]);
 
  const filteredEvents = useMemo(() => {
@@ -88,17 +88,7 @@ export default function EventsClient() {
  });
  }, [events, filter]);
 
- const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
-
- const currentEvents = filteredEvents.slice(
- (currentPage - 1) * itemsPerPage, 
- currentPage * itemsPerPage
- );
-
- const handlePageChange = (page: number) => {
- setCurrentPage(page);
- window.scrollTo({ top: 300, behavior: 'smooth' }); 
- };
+ const visibleEvents = filteredEvents.slice(0, visibleCount);
 
  // --- Fungsi Bantuan ---
  const getTimeLeft = (startTime: string) => {
@@ -124,64 +114,68 @@ export default function EventsClient() {
  return (
  <div className="font-sans pb-12 w-full">
  
-   {/* ════════ HERO SECTION (ULTRA-FAST CSS ONLY) ════════ */}
- <section className="relative pt-20 pb-24 md:pt-32 md:pb-32 w-full flex flex-col items-center justify-center bg-slate-950 rounded-[2rem] md:rounded-[3rem] mb-12 border border-slate-800">
- 
- {/* CSS Pure Gradients (No Images, No Masks, 100% GPU Accelerated) */}
- <div className="absolute inset-0 z-0 rounded-[2rem] md:rounded-[3rem]" style={{
- background: 'radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.4) 0%, rgba(2, 6, 23, 1) 70%)'
- }}></div>
- 
- <div className="relative z-10 max-w-4xl mx-auto px-6 text-center w-full">
- <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-slate-900/80 border border-amber-400/20 rounded-full text-amber-300 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-8">
- <Gem size={14} className="text-amber-400"/> Amania Masterclass
- </div>
- 
- <div className="relative mb-6">
- <div className="absolute -top-6 -left-4 md:left-10 text-slate-800 hidden md:block">
- <MonitorPlay size={40} strokeWidth={1} />
- </div>
- 
- <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-200 to-slate-400 tracking-tight leading-[1.1]">
- Elevate Your <br className="hidden sm:block"/>
- <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 font-serif italic font-light pr-2">Expertise.</span>
- </h1>
- 
- <div className="absolute -bottom-2 -right-2 md:right-12 text-slate-800 hidden md:block">
- <BookOpen size={36} strokeWidth={1} />
- </div>
- </div>
- 
- <p className="text-slate-400 text-sm md:text-base lg:text-lg font-medium max-w-2xl mx-auto mb-12 leading-relaxed">
- Bergabunglah dengan Webinar dan Event premium kami. Dipandu eksklusif oleh pakar industri untuk melesatkan karir profesional Anda.
- </p>
- 
- <div className="max-w-2xl mx-auto w-full relative">
- <div className="relative flex flex-col sm:flex-row items-center bg-slate-900 rounded-2xl p-2 border border-slate-700 focus-within:border-amber-400/50 w-full gap-2 sm:gap-0">
- <div className="hidden sm:block pl-5 pr-3 text-slate-500 group-focus-within:text-amber-400">
- <Search size={22} strokeWidth={2} />
- </div>
- <input 
- type="text"
- placeholder="Cari webinar, bootcamp, atau mentor..."
- value={searchQuery} 
- onChange={(e) => setSearchQuery(e.target.value)} 
- className="w-full bg-transparent border-none text-white placeholder:text-slate-500 py-3 sm:py-3.5 px-4 sm:px-0 text-sm md:text-base font-medium outline-none min-w-0 text-center sm:text-left"
- />
- <button className="w-full sm:w-auto bg-orange-500 text-white px-8 py-3.5 sm:py-4 rounded-xl font-black text-sm hover:bg-orange-600 shrink-0 active:scale-95 sm:ml-2 flex justify-center items-center gap-2">
- <Search size={16} className="sm:hidden"/> Eksplorasi
- </button>
- </div>
- </div>
- </div>
- </section>
+  {/* ════════ HERO SECTION (NEXT-GEN) ════════ */}
+  <section className="relative pt-16 md:pt-32 pb-24 md:pb-40 w-full flex flex-col items-center justify-center bg-slate-950 rounded-b-3xl md:rounded-b-[4rem] border-b border-indigo-900/50">
+  
+  {/* High-Performance Pure CSS Gradient Background (No Lag) */}
+  <div className="absolute inset-0 z-0 rounded-b-3xl md:rounded-b-[4rem]" style={{
+  background: 'radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.4) 0%, rgba(2, 6, 23, 1) 70%)'
+  }}></div>
+  
+  <div className="relative z-10 max-w-5xl mx-auto px-6 text-center w-full">
+  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/5 border border-white/10 backdrop-blur-md rounded-full text-amber-300 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-8 shadow-[0_0_15px_rgba(251,191,36,0.1)]">
+  <Gem size={14} className="text-amber-400 drop-shadow-md"/> Amania Masterclass
+  </motion.div>
+  
+  <div className="relative mb-8">
+  <motion.div initial={{ opacity: 0, scale: 0.5, rotate: -20 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="absolute -top-10 -left-6 md:left-12 text-white/10 hidden md:block">
+  <MonitorPlay size={64} strokeWidth={1} />
+  </motion.div>
+  
+  <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 tracking-tight leading-[1.15] md:leading-[1.1] drop-shadow-sm">
+  Elevate Your <br className="hidden sm:block"/>
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 font-serif italic font-light pr-2">Expertise.</span>
+  </motion.h1>
+  
+  <motion.div initial={{ opacity: 0, scale: 0.5, rotate: 20 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.7, delay: 0.3 }} className="absolute -bottom-6 -right-6 md:right-16 text-white/10 hidden md:block">
+  <BookOpen size={56} strokeWidth={1} />
+  </motion.div>
+  </div>
+  
+  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }} className="text-slate-300/90 text-sm md:text-base lg:text-lg font-medium max-w-2xl mx-auto leading-relaxed">
+  Bergabunglah dengan Webinar dan Event premium kami. Dipandu eksklusif oleh pakar industri untuk melesatkan karir profesional Anda.
+  </motion.p>
+  </div>
+  {/* Search Bar (Inside Hero) */}
+  <div className="relative z-30 px-4 mt-8 max-w-3xl mx-auto w-full">
+  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+  <div className="flex flex-col sm:flex-row items-center bg-slate-800/90 dark:bg-slate-900 rounded-2xl md:rounded-[2rem] p-2 border border-slate-700 shadow-lg focus-within:border-amber-400/50 w-full gap-2 sm:gap-0 transition-colors">
+  <div className="hidden sm:block pl-6 pr-3 text-slate-300 group-focus-within:text-amber-400 transition-colors">
+  <Search size={24} strokeWidth={2} />
+  </div>
+  <input 
+  type="text"
+  placeholder="Cari webinar, bootcamp..."
+  value={searchQuery} 
+  onChange={(e) => setSearchQuery(e.target.value)} 
+  className="w-full bg-transparent border-none text-white placeholder:text-slate-400 py-3.5 sm:py-4 px-5 sm:px-0 text-sm md:text-base font-bold outline-none min-w-0 text-center sm:text-left"
+  />
+  <button className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-3.5 sm:py-4 rounded-xl md:rounded-2xl font-black text-sm shrink-0 active:scale-95 sm:ml-2 flex justify-center items-center gap-2 shadow-lg shadow-orange-500/30 transition-all">
+  <Search size={16} className="sm:hidden"/> Eksplorasi
+  </button>
+  </div>
+  </motion.div>
+  </div>
+  </section>
 
   {/* PROMO BANNERS */}
-  <AdBanner placement="webinar" className="pb-6 -mt-2" />
+  <div className="w-full relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 md:-mt-10 mb-8 md:mb-10">
+    <AdBanner placement="webinar" className="shadow-md dark:shadow-none rounded-2xl md:rounded-[2rem] overflow-hidden" />
+  </div>
 
- {/* ════════ FILTER TABS ════════ */}
- <div className="relative z-20 flex justify-center mb-8 w-full">
- <div className="flex gap-2 overflow-x-auto custom-scrollbar bg-white dark:bg-slate-800/95 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/50 w-max max-w-full">
+ {/* ════════ SEGMENTED FILTER TABS (APPLE STYLE) ════════ */}
+ <div className="sticky top-[70px] md:top-[80px] z-[40] flex justify-center mb-10 md:mb-12 w-full px-4 pointer-events-none transition-all">
+ <div className="pointer-events-auto flex overflow-x-auto hide-scrollbar p-1.5 bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 w-full sm:w-max shadow-sm">
  {[
  { id: 'upcoming', label: 'Program Tersedia', icon: Sparkles },
  { id: 'all', label: 'Semua Katalog', icon: LayoutGrid },
@@ -190,10 +184,13 @@ export default function EventsClient() {
  <button 
  key={tab.id} 
  onClick={() => setFilter(tab.id as any)} 
- className={`group relative px-5 py-2.5 md:py-3 rounded-xl text-[11px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap ${filter === tab.id ? 'text-white bg-slate-900' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+ className={`relative px-4 sm:px-6 py-2.5 md:py-3 rounded-xl text-[10px] sm:text-[11px] md:text-xs font-black uppercase tracking-wider whitespace-nowrap transition-colors flex-shrink-0 ${filter === tab.id ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
  >
- <span className="relative z-10 flex items-center gap-2">
- <tab.icon size={14} className={`${filter === tab.id ? 'text-amber-400' : 'text-slate-400 dark:text-slate-400 group-hover:text-indigo-500'}`} />
+ {filter === tab.id && (
+ <motion.div layoutId="activeWebinarFilter" className="absolute inset-0 bg-white dark:bg-slate-700 rounded-xl shadow-sm border border-slate-200/50 dark:border-slate-600/50 z-0" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+ )}
+ <span className="relative z-10 flex items-center justify-center gap-1.5 md:gap-2">
+ <tab.icon size={14} className={`${filter === tab.id ? 'text-indigo-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}`} />
  {tab.label}
  </span>
  </button>
@@ -234,7 +231,7 @@ export default function EventsClient() {
  ) : (
  <>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
- {currentEvents.map((event) => {
+ {visibleEvents.map((event) => {
  const isPast = new Date(event.end_time) < new Date();
  const isFree = event.basic_price === 0;
  const isSuperadmin = true;
@@ -246,12 +243,15 @@ export default function EventsClient() {
  <div key={event.id} className="w-full h-full">
  <Link 
  href={`/events/${event.slug}`} 
- className="group flex flex-col h-full bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-indigo-400 relative overflow-hidden"
+ className="group flex flex-col h-full bg-white dark:bg-[#0c1222] rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-slate-600 relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1"
  >
  
- <div className="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500 opacity-0 group-hover:opacity-100 z-20"/>
+ {/* Glow Effect Background on Hover */}
+ <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
+ 
+ <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-500 opacity-0 group-hover:opacity-100 z-20 transition-opacity duration-500"/>
 
- <div className="relative w-full aspect-[4/3] bg-slate-900 overflow-clip shrink-0 flex items-center justify-center border-b border-slate-100 dark:border-slate-700/50 rounded-t-[2rem]">
+ <div className="relative w-full aspect-[16/9] bg-slate-900 overflow-clip shrink-0 flex items-center justify-center border-b border-slate-100 dark:border-slate-700/50 rounded-t-2xl md:rounded-t-[2rem]">
  
  <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
  {/* Kiri - Status Event/Sisa Kuota */}
@@ -290,20 +290,22 @@ export default function EventsClient() {
 
  <div className={`w-full h-full relative ${isPast ? 'grayscale opacity-75' : ''}`}>
  {event.image ? (
- <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="w-full h-full object-contain p-2 rounded-t-[2rem]"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="w-full h-full object-cover rounded-t-[1.5rem] md:rounded-t-[2rem] group-hover:scale-110 transition-transform duration-700 ease-out"/>
  ) : (
- <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 relative z-10 rounded-t-[2rem]"><ImageIcon size={40} strokeWidth={1.5} /></div>
+ <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 relative z-10 rounded-t-[1.5rem] md:rounded-t-[2rem]"><ImageIcon size={40} strokeWidth={1.5} /></div>
  )}
+ {/* Glass Overlay Gradient */}
+ <div className="absolute inset-0 bg-gradient-to-t from-[#0c1222]/80 via-transparent to-transparent opacity-0 dark:opacity-100 pointer-events-none z-10"></div>
  </div>
  </div>
 
- <div className="p-5 sm:p-6 flex flex-col flex-1 relative bg-white dark:bg-[#111827]">
+ <div className="p-4 md:p-6 flex flex-col flex-1 relative bg-transparent z-10">
  
- <div className="absolute -top-7 right-5 z-30">
- <div className="w-12 h-12 rounded-full border-4 border-slate-200/50 dark:border-slate-700/30 bg-slate-50 dark:bg-[#111827] flex items-center justify-center overflow-hidden">
+ <div className="absolute -top-8 right-5 z-30">
+ <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-white dark:border-[#0c1222] bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden shadow-lg shadow-black/5 dark:shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
  {isSuperadmin ? (
  <img loading="lazy" src="/logo.png"
- className="w-full h-full object-contain p-1"
+ className="w-full h-full object-contain p-1 dark:brightness-0 dark:invert"
  alt="Amania Official"
  onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Amania&background=0D8ABC&color=fff&rounded=true&bold=true'; }} 
  />
@@ -315,49 +317,50 @@ export default function EventsClient() {
  </div>
  </div>
 
- <div className="flex flex-wrap items-center gap-2 mb-4 pr-14">
- <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-100 dark:border-amber-500/20">
- <Calendar size={12} className="mb-0.5"/> 
- {new Date(event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+ <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-3 pr-12">
+ <span className="flex items-center gap-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded-md md:rounded-lg border border-amber-100 dark:border-amber-500/20">
+ <Calendar size={12} className="mb-0.5 w-3 h-3"/> 
+ {new Date(event.start_time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
  </span>
- <span className="flex items-start gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg border border-indigo-100 dark:border-indigo-500/20">
- <MapPin size={12} className="mt-[2px] shrink-0"/> 
- <span className="break-words line-clamp-2">{event.venue}</span>
+ <span className="flex items-start gap-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded-md md:rounded-lg border border-indigo-100 dark:border-indigo-500/20">
+ <MapPin size={12} className="mt-[1px] shrink-0 w-3 h-3"/> 
+ <span className="break-words line-clamp-1">{event.venue}</span>
  </span>
  </div>
 
- <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white leading-[1.35] mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-2 min-h-[3rem] break-words">
+ <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white leading-[1.3] md:leading-[1.35] mb-1.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-2 min-h-[2.6rem] md:min-h-[2.7rem] break-words">
  {event.title}
  </h3>
 
- <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-6">
- Oleh <span className="text-slate-800 dark:text-slate-200 font-bold">{organizerName}</span> {isSuperadmin && <ShieldCheck size={12} className="text-emerald-500"/>}
+ <p className="text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-4 md:mb-5">
+ Oleh <span className="text-slate-800 dark:text-slate-200 font-bold truncate max-w-[120px]">{organizerName}</span> {isSuperadmin && <ShieldCheck size={12} className="text-emerald-500 w-3 h-3"/>}
  </p>
 
- <div className="mt-auto pt-4 border-t border-dashed border-slate-200 dark:border-slate-700/50 flex flex-col gap-3 w-full">
+ <div className="mt-auto pt-5 flex flex-col gap-3 w-full relative z-10">
  
  <div className="flex gap-2 w-full">
- <div className={`flex-1 rounded-xl p-2.5 border flex flex-col justify-center ${isFree ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-[#111827] border-slate-100 dark:border-slate-700/50'}`}>
- <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-400 mb-0.5">Basic Pass</p>
- <p className={`text-xs md:text-sm font-black truncate ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
+ <div className={`flex-1 rounded-xl md:rounded-2xl p-2.5 md:p-3 border flex flex-col justify-center transition-colors ${isFree ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 border-emerald-200/50 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200/60 dark:border-slate-700/50'}`}>
+ <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-0.5">Basic Pass</p>
+ <p className={`text-sm md:text-base font-black truncate ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
  {isFree ? 'GRATIS' : `Rp ${event.basic_price.toLocaleString('id-ID')}`}
  </p>
  </div>
 
  {event.premium_price > 0 && (
- <div className="flex-1 rounded-xl p-2.5 border border-amber-200/60 bg-amber-50 dark:bg-amber-950/30 flex flex-col justify-center relative overflow-hidden">
- <p className="text-[9px] font-black uppercase tracking-widest text-amber-600 mb-0.5 flex items-center gap-1">
- <Gem size={10} /> VIP Premium
+ <div className="flex-1 rounded-xl md:rounded-2xl p-2.5 md:p-3 border border-amber-300/40 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50/50 dark:from-amber-950/40 dark:to-orange-900/20 flex flex-col justify-center relative overflow-hidden group/premium">
+ <div className="absolute top-0 right-0 w-20 h-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-400/20 to-transparent rounded-full group-hover/premium:from-amber-400/30 transition-colors"></div>
+ <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-500 mb-0.5 flex items-center gap-1 relative z-10">
+ <Gem size={12} className="w-3 h-3 text-amber-500" /> VIP Premium
  </p>
- <p className="text-xs md:text-sm font-black text-amber-900 dark:text-amber-400 truncate">
+ <p className="text-sm md:text-base font-black text-amber-900 dark:text-amber-300 truncate relative z-10 drop-shadow-sm">
  Rp {event.premium_price.toLocaleString('id-ID')}
  </p>
  </div>
  )}
  </div>
 
- <div className="w-full bg-slate-900 text-white text-[11px] md:text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-indigo-600">
- Lihat Detail Program <ArrowRight size={14} />
+ <div className="w-full relative overflow-hidden bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] md:text-xs font-bold py-3 md:py-3.5 rounded-xl md:rounded-2xl flex items-center justify-center gap-2 group-hover:bg-indigo-600 dark:group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 shadow-md">
+ <span className="relative z-10 flex items-center gap-2">Lihat Detail <ArrowRight size={14} className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></span>
  </div>
 
  </div>
@@ -368,23 +371,14 @@ export default function EventsClient() {
  })}
  </div>
 
- {totalPages > 1 && (
- <div className="flex justify-center mt-12 md:mt-16 w-full">
- <div className="flex items-center gap-1 p-1.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/50 rounded-2xl">
- <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none">
- <ChevronLeft size={18} strokeWidth={2.5} />
+ {!loading && filteredEvents.length > visibleCount && (
+ <div className="mt-8 md:mt-12 flex justify-center w-full">
+ <button
+ onClick={() => setVisibleCount(prev => prev + 9)}
+ className="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm active:scale-95 flex items-center gap-2"
+ >
+ <LayoutGrid size={16} className="text-indigo-500" /> Tampilkan Lebih Banyak
  </button>
- <div className="flex items-center gap-1 px-1">
- {[...Array(totalPages)].map((_, i) => (
- <button key={i} onClick={() => handlePageChange(i + 1)} className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold ${currentPage === i + 1 ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
- {i + 1}
- </button>
- ))}
- </div>
- <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors">
- <ChevronRight size={18} strokeWidth={2.5} />
- </button>
- </div>
  </div>
  )}
  </>

@@ -150,7 +150,7 @@ export default function ETicketClient({ slug }: { slug: string }) {
  <header className="flex justify-between items-start mb-2">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 overflow-hidden rounded-lg flex items-center justify-center bg-slate-50 dark:bg-[#111827] border border-slate-100 dark:border-slate-700/50 shadow-sm dark:shadow-black/10">
- <img src="/logo-amania.png" alt="Amania" className="w-full h-full object-contain p-1"/>
+ <img src="/logo-amania.png" alt="Amania" className="w-full h-full object-contain p-1 dark:brightness-0 dark:invert"/>
  </div>
  <div>
  <h2 className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white leading-none">Amania.id</h2>
