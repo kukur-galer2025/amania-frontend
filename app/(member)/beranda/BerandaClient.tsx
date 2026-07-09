@@ -149,7 +149,7 @@ export default function BerandaClient() {
  <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 dark:bg-white/5 rounded-full transition-transform duration-500 group-hover:scale-150"></div>
  <div className="relative z-10 flex items-center justify-between text-white mb-8 w-full">
  <div className="w-14 h-14 bg-white dark:bg-slate-800/80 rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
- <Ticket size={28} className="text-amber-300"/>
+ <Ticket size={28} className="text-amber-500 dark:text-amber-300"/>
  </div>
  <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center border border-white/30 dark:border-white/10">
  <ArrowRight size={18} className="text-white opacity-80 group-hover:opacity-100 group-hover:translate-x-1.5 transition-transform shrink-0"/>
@@ -165,7 +165,7 @@ export default function BerandaClient() {
  <div className="absolute bottom-0 right-0 w-36 h-36 bg-white/10 dark:bg-white/5 rounded-full transition-transform duration-500 group-hover:scale-150"></div>
  <div className="relative z-10 flex items-center justify-between text-white mb-8 w-full">
  <div className="w-14 h-14 bg-white dark:bg-slate-800/80 rounded-2xl flex items-center justify-center border border-slate-200/30 dark:border-slate-700/20 shadow-inner shrink-0">
- <Receipt size={28} className="text-emerald-300"/>
+ <Receipt size={28} className="text-emerald-500 dark:text-emerald-300"/>
  </div>
  <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center border border-white/30 dark:border-white/10">
  <ArrowRight size={18} className="text-white opacity-80 group-hover:opacity-100 group-hover:translate-x-1.5 transition-transform shrink-0"/>
