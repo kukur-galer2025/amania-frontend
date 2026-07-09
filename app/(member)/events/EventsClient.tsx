@@ -14,7 +14,7 @@ import AdBanner from '@/app/components/AdBanner';
 
 const EventSkeleton = () => (
  <div className="bg-white dark:bg-[#111827] rounded-[2rem] overflow-clip border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-black/10 flex flex-col w-full h-full">
- <div className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-700/50 shrink-0"/>
+ <div className="w-full bg-slate-100 dark:bg-slate-700/50 shrink-0" style={{ aspectRatio: '4/3' }}/>
  <div className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col">
  <div className="flex gap-2">
  <div className="h-5 w-1/3 bg-slate-100 dark:bg-slate-700/50 rounded-md"/>
@@ -251,7 +251,7 @@ export default function EventsClient() {
  
  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-500 opacity-0 group-hover:opacity-100 z-20 transition-opacity duration-500"/>
 
- <div className="relative w-full aspect-[16/9] bg-slate-900 overflow-clip shrink-0 flex items-center justify-center border-b border-slate-100 dark:border-slate-700/50 rounded-t-2xl md:rounded-t-[2rem]">
+ <div className="relative w-full bg-slate-900 overflow-clip shrink-0 flex items-center justify-center border-b border-slate-100 dark:border-slate-700/50 rounded-t-2xl md:rounded-t-[2rem]" style={{ aspectRatio: '4/3' }}>
  
  <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
  {/* Kiri - Status Event/Sisa Kuota */}
@@ -290,7 +290,7 @@ export default function EventsClient() {
 
  <div className={`w-full h-full relative ${isPast ? 'grayscale opacity-75' : ''}`}>
  {event.image ? (
- <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="w-full h-full object-cover rounded-t-[1.5rem] md:rounded-t-[2rem] group-hover:scale-110 transition-transform duration-700 ease-out"/>
+ <img loading="lazy" src={`${STORAGE_URL}/${event.image}`} alt={event.title} className="absolute inset-0 w-full h-full object-cover rounded-t-[1.5rem] md:rounded-t-[2rem] group-hover:scale-110 transition-transform duration-700 ease-out"/>
  ) : (
  <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 relative z-10 rounded-t-[1.5rem] md:rounded-t-[2rem]"><ImageIcon size={40} strokeWidth={1.5} /></div>
  )}
@@ -328,9 +328,11 @@ export default function EventsClient() {
  </span>
  </div>
 
- <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white leading-[1.3] md:leading-[1.35] mb-1.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-2 min-h-[2.6rem] md:min-h-[2.7rem] break-words">
+ <div className="h-[52px] md:h-[58px] mb-1.5">
+ <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white leading-[1.3] md:leading-[1.35] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-2 break-words h-full">
  {event.title}
  </h3>
+ </div>
 
  <p className="text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-4 md:mb-5">
  Oleh <span className="text-slate-800 dark:text-slate-200 font-bold truncate max-w-[120px]">{organizerName}</span> {isSuperadmin && <ShieldCheck size={12} className="text-emerald-500 w-3 h-3"/>}

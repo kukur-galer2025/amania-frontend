@@ -48,43 +48,38 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
  fetchProductDetail();
  }, [slug]);
 
- const handleDownload = async () => {
- if (!activeMaterial) return;
+  const handleDownload = async () => {
+    if (!activeMaterial) return;
 
- if (activeMaterial.type === 'link') {
- window.open(activeMaterial.link_url || activeMaterial.link, '_blank');
- } else {
- const tid = toast.loading("Menyiapkan file unduhan...");
- try {
- const res = await apiFetch(`/my-e-products/materials/${activeMaterial.id}/download`, {
- headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
- });
+    if (activeMaterial.type === 'link') {
+      window.open(activeMaterial.link_url || activeMaterial.link, '_blank');
+    } else {
+      const tid = toast.loading("Menyiapkan link unduhan...");
+      try {
+        // 🚀 STEP 1: Minta signed URL dari backend (sangat cepat, hanya JSON)
+        const res = await apiFetch(`/my-e-products/materials/${activeMaterial.id}/download-url`, {
+          headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
+        });
 
- if (!res.ok) {
- const errorData = await res.json();
- throw new Error(errorData.message ||"Gagal mengunduh file.");
- }
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Gagal menyiapkan unduhan.");
+        }
 
- const blob = await res.blob();
- const url = window.URL.createObjectURL(blob);
- const link = document.createElement('a');
- link.href = url;
+        const data = await res.json();
 
- const ext = activeMaterial.file_path.split('.').pop();
- const safeTitle = activeMaterial.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
- link.setAttribute('download', `Amania_${safeTitle}.${ext}`);
-
- document.body.appendChild(link);
- link.click();
- document.body.removeChild(link);
- window.URL.revokeObjectURL(url);
-
- toast.success("File berhasil diunduh ke perangkat!", { id: tid });
- } catch (error: any) {
- toast.error(error.message ||"Gagal mengunduh file.", { id: tid });
- }
- }
- };
+        if (data.success && data.url) {
+          // 🚀 STEP 2: Buka link langsung di browser → download INSTAN!
+          window.open(data.url, '_blank');
+          toast.success("Download dimulai!", { id: tid });
+        } else {
+          throw new Error("Link download tidak tersedia.");
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Gagal mengunduh file.", { id: tid });
+      }
+    }
+  };
 
  if (loading) return (
  <div className="min-h-[70vh] flex flex-col items-center justify-center w-full">
