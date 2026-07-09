@@ -432,7 +432,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                 <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full md:w-max overflow-hidden mx-auto md:mx-0 group">
                                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 group-hover:scale-105">
                                         {authorName === 'Amania Official' ? (
-                                            <img src="/logo-mini.png" alt="Amania Official" className="w-5 h-5 md:w-6 md:h-6 object-contain dark:brightness-0 dark:invert" />
+                                            <img src="/logo-mini.webp" alt="Amania Official" className="w-5 h-5 md:w-6 md:h-6 object-contain dark:brightness-0 dark:invert" />
                                         ) : product.author?.avatar ? (
                                             <img src={`${STORAGE_URL}/${product.author.avatar}`} alt="seller" className="w-full h-full object-cover" />
                                         ) : (
@@ -831,10 +831,10 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
                                         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
                                         <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
-                                            <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
+                                            <img src="/qris-amania.webp" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
                                         </div>
                                         <div>
-                                            <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">
+                                            <a href="/qris-amania.webp" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">
                                                 <Download size={14} /> Unduh QRIS
                                             </a>
                                         </div>
@@ -919,7 +919,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                         <h3 className="text-sm sm:text-base font-black text-white leading-snug line-clamp-2">{product.title}</h3>
                                         <div className="flex items-center gap-3 mt-2">
                                             <span className="text-[9px] sm:text-[10px] font-bold text-white/70 flex items-center gap-1">
-                                                {authorName === 'Amania Official' && <img src="/logo-mini.png" className="w-3 h-3 object-contain brightness-0 invert" />}
+                                                {authorName === 'Amania Official' && <img src="/logo-mini.webp" className="w-3 h-3 object-contain brightness-0 invert" />}
                                                 {authorName}
                                             </span>
                                             {avgRating > 0 ? (

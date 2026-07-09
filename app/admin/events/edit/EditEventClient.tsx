@@ -662,7 +662,7 @@ export default function EditEventClient() {
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 border border-orange-200 text-orange-600 overflow-hidden">
                      {useQris ? (
-                       <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-cover" />
+                       <img loading="lazy" src="/qris-amania.webp" alt="QRIS Amania" className="w-full h-full object-cover" />
                      ) : (
                        <QrCode size={20} className="md:w-6 md:h-6" />
                      )}

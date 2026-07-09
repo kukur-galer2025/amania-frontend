@@ -611,7 +611,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  {organizerAvatar ? (
  <img src={organizerAvatar} alt={organizerName} className="w-full h-full object-cover rounded-full"/>
  ) : isSuperadmin ? (
- <img src="/logo-amania.png" alt="Amania" className="w-full h-full object-contain p-1 dark:brightness-0 dark:invert"/>
+ <img src="/logo-amania.webp" alt="Amania" className="w-full h-full object-contain p-1 dark:brightness-0 dark:invert"/>
  ) : (
  <User size={16} className="text-slate-400 dark:text-slate-400"/>
  )}

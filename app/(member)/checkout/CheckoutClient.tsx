@@ -168,7 +168,7 @@ export default function CheckoutClient() {
  // 🔥 FUNGSI UNDUH GAMBAR QRIS 🔥
  const downloadQris = () => {
  const link = document.createElement('a');
- link.href = '/qris-amania.jpeg'; // Pastikan path gambar sudah benar
+ link.href = '/qris-amania.webp'; // Pastikan path gambar sudah benar
  link.download = 'QRIS-Pembayaran-Amania.jpeg';
  document.body.appendChild(link);
  link.click();
@@ -481,7 +481,7 @@ export default function CheckoutClient() {
 
  {/* Gambar QRIS yang Lebih Besar */}
  <div className="w-full max-w-[260px] md:max-w-[320px] aspect-square border border-slate-200 dark:border-slate-700/50 rounded-2xl overflow-hidden p-2 bg-white dark:bg-[#111827] shadow-inner mx-auto my-2">
- <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-full h-full object-contain"/>
+ <img loading="lazy" src="/qris-amania.webp" alt="QRIS Amania" className="w-full h-full object-contain"/>
  </div>
 
  {/* Tombol Unduh Permanen (Selalu Tampil) */}
@@ -633,7 +633,7 @@ export default function CheckoutClient() {
  {organizerAvatar ? (
  <img loading="lazy" src={organizerAvatar} alt={organizerName} className="w-full h-full object-cover rounded-full"/>
  ) : isSuperadmin ? (
- <img loading="lazy" src="/logo-amania.png" alt="Amania" className="w-4 h-4 object-contain dark:brightness-0 dark:invert"/>
+ <img loading="lazy" src="/logo-amania.webp" alt="Amania" className="w-4 h-4 object-contain dark:brightness-0 dark:invert"/>
  ) : (
  <User size={14} className="text-slate-400 dark:text-slate-400"/>
  )}

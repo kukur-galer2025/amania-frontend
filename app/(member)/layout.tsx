@@ -436,7 +436,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
       <aside className={`fixed top-0 left-0 h-screen w-[270px] bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-700/50 flex flex-col z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="h-[72px] px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-700/40 dark:border-slate-800 shrink-0 bg-transparent">
           <Link href="/beranda" className="flex items-center gap-3 group">
-            <img loading="lazy" src="/logo-amania.png" alt="Logo Amania" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300 dark:brightness-0 dark:invert" />
+            <img loading="lazy" src="/logo-amania.webp" alt="Logo Amania" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300 dark:brightness-0 dark:invert" />
           </Link>
           <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 lg:hidden text-slate-400 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg">
             <X size={20} />
@@ -561,7 +561,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
             </div>
             {/* Logo Mobile Only */}
             <Link href="/beranda" className="sm:hidden shrink-0 block">
-              <img loading="lazy" src="/logo-amania.png" alt="Amania" className="h-7 w-auto object-contain dark:brightness-0 dark:invert" />
+              <img loading="lazy" src="/logo-amania.webp" alt="Amania" className="h-7 w-auto object-contain dark:brightness-0 dark:invert" />
             </Link>
           </div>
 
@@ -973,7 +973,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex flex-col items-center md:items-start gap-3.5">
               <div className="flex items-center gap-3">
-                <img loading="lazy" src="/logo-mini.png" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert" />
+                <img loading="lazy" src="/logo-mini.webp" alt="Amania" className="h-6 w-auto object-contain transition-transform duration-300 dark:brightness-0 dark:invert" />
                 <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Amania.id</span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center md:text-left max-w-sm leading-relaxed">

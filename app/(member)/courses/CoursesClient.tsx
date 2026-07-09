@@ -345,7 +345,7 @@ export default function CoursesClient() {
  {(!course.instructor || course.instructor.role === 'superadmin' || course.instructor.name === 'Admin Amania') ? (
  <>
  <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
- <img loading="lazy" src="/logo-mini.png" alt="Amania Official" className="w-3 h-3 sm:w-4 sm:h-4 object-contain dark:brightness-0 dark:invert" />
+ <img loading="lazy" src="/logo-mini.webp" alt="Amania Official" className="w-3 h-3 sm:w-4 sm:h-4 object-contain dark:brightness-0 dark:invert" />
  </div>
  <span className="text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 truncate">Amania Official</span>
  </>

@@ -52,7 +52,7 @@ export default function CalendarPage() {
 "url":"https://amania.id",
 "logo": {
 "@type":"ImageObject",
-"url":"https://amania.id/logo-amania.png"
+"url":"https://amania.id/logo-amania.webp"
  }
  }
  };

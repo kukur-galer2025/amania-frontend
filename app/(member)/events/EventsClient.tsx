@@ -304,7 +304,7 @@ export default function EventsClient() {
  <div className="absolute -top-8 right-5 z-30">
  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-white dark:border-[#0c1222] bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden shadow-lg shadow-black/5 dark:shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
  {isSuperadmin ? (
- <img loading="lazy" src="/logo.png"
+ <img loading="lazy" src="/logo.webp"
  className="w-full h-full object-contain p-1 dark:brightness-0 dark:invert"
  alt="Amania Official"
  onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Amania&background=0D8ABC&color=fff&rounded=true&bold=true'; }} 

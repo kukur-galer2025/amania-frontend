@@ -59,7 +59,7 @@ export default function CommunityPage() {
 "@type":"Organization",
 "name":"Amania",
 "url":"https://amania.id",
-"logo":"https://amania.id/logo-amania.png", 
+"logo":"https://amania.id/logo-amania.webp", 
 "contactPoint": [
  {
 "@type":"ContactPoint",

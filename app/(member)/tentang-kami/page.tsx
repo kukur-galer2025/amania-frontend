@@ -23,7 +23,7 @@ export const metadata: Metadata = {
  type: 'website', 
  images: [
  {
- url: 'https://amania.id/logo-amania.png',
+ url: 'https://amania.id/logo-amania.webp',
  width: 800,
  height: 600,
  alt: 'Amania Logo',
@@ -42,7 +42,7 @@ export default function TentangKamiPage() {
 "@type":"Organization",
 "name":"Amania",
 "url":"https://amania.id",
-"logo":"https://amania.id/logo-amania.png",
+"logo":"https://amania.id/logo-amania.webp",
 "description":"Platform edukasi teknologi yang menyediakan layanan kelas webinar, wawasan industri, dan penjualan e-product premium.",
 "sameAs": [
 "https://www.instagram.com/amania.id"

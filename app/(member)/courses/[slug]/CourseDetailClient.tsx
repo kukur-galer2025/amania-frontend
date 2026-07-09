@@ -397,7 +397,7 @@ export default function CourseDetailClient() {
   {(!course.instructor || course.instructor.role === 'superadmin' || course.instructor.name === 'Admin Amania') ? (
   <>
   <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm dark:shadow-black/10">
-  <img src="/logo-mini.png" alt="Amania Official" className="w-5 h-5 object-contain dark:brightness-0 dark:invert" />
+  <img src="/logo-mini.webp" alt="Amania Official" className="w-5 h-5 object-contain dark:brightness-0 dark:invert" />
   </div>
   <div>
   <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Amania Official</p>
@@ -869,10 +869,10 @@ export default function CourseDetailClient() {
  <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
  <div className="bg-white dark:bg-slate-800 p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
- <img src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
+ <img src="/qris-amania.webp" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
  </div>
  <div>
-    <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors border border-emerald-200 dark:border-emerald-500/20">
+    <a href="/qris-amania.webp" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors border border-emerald-200 dark:border-emerald-500/20">
         <Download size={14} /> Unduh QRIS
     </a>
  </div>

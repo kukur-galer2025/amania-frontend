@@ -524,7 +524,7 @@ export default function EProductsClient() {
                         {/* Author */}
                         <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 pt-1 sm:pt-2">
                           {authorName === 'Amania Official'
-                            ? <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0"><img loading="lazy" src="/logo-mini.png" className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 object-contain dark:brightness-0 dark:invert" /></div>
+                            ? <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0"><img loading="lazy" src="/logo-mini.webp" className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 object-contain dark:brightness-0 dark:invert" /></div>
                             : (
                               p.author?.avatar
                                 ? <img loading="lazy" src={`${storageUrl}/${p.author.avatar}`} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
@@ -611,10 +611,10 @@ export default function EProductsClient() {
                     <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">Transfer via QRIS</h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Silakan scan kode QRIS di bawah ini untuk melakukan pembayaran.</p>
                     <div className="bg-white p-2 rounded-xl inline-block border border-slate-200 dark:border-slate-700 shadow-sm mx-auto mb-3">
-                      <img loading="lazy" src="/qris-amania.jpeg" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
+                      <img loading="lazy" src="/qris-amania.webp" alt="QRIS Amania" className="w-48 h-auto object-contain mx-auto rounded-lg" />
                     </div>
                     <div>
-                      <a href="/qris-amania.jpeg" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">
+                      <a href="/qris-amania.webp" download="QRIS-Amania.jpeg" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors border border-indigo-200 dark:border-indigo-500/20">
                         <Download size={14} /> Unduh QRIS
                       </a>
                     </div>

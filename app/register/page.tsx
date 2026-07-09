@@ -62,7 +62,7 @@ export default function RegisterPage() {
     "publisher": {
       "@type": "Organization",
       "name": "Amania",
-      "logo": "https://amania.id/logo-amania.png"
+      "logo": "https://amania.id/logo-amania.webp"
     }
   };
 
