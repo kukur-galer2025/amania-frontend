@@ -123,7 +123,7 @@ export default function TicketDashboardClient() {
 
  <div className="relative z-10 px-6 py-8 md:px-8 md:py-14 flex flex-col md:flex-row md:items-center justify-between gap-6 w-full min-w-0">
  <div className="max-w-xl min-w-0 w-full">
- <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 rounded-full text-indigo-300 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-3 md:mb-4 backdrop-blur-md shrink-0">
+ <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 rounded-full text-indigo-600 dark:text-indigo-300 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-3 md:mb-4 backdrop-blur-md shrink-0">
  <Sparkles size={12} className="shrink-0"/> Dashboard Amania
  </motion.div>
  <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-tight mb-2 break-words w-full">

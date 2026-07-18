@@ -114,7 +114,7 @@ export default function MyCoursesClient() {
  <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 mb-8 shadow-xl dark:shadow-black/20">
  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_30%_20%,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"/>
  <div className="relative z-10">
- <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-200 uppercase tracking-[0.2em] bg-white dark:bg-slate-800/30 px-3 py-1.5 rounded-full backdrop- mb-4">
+ <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-700 dark:text-emerald-200 uppercase tracking-[0.2em] bg-white dark:bg-slate-800/30 px-3 py-1.5 rounded-full backdrop- mb-4">
  <GraduationCap size={12} /> Kursus Saya
  </span>
  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1">Lanjutkan Perjalanan</h1>

@@ -80,7 +80,7 @@ export default function CertificatesClient() {
 
  <div className="relative z-10 px-6 py-12 md:px-12 md:py-16 flex flex-col md:flex-row md:items-center justify-between gap-10">
  <div className="max-w-2xl">
- <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 rounded-full text-[#A5B4FC] text-[10px] font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-inner">
+ <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-700/20 rounded-full text-indigo-600 dark:text-[#A5B4FC] text-[10px] font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-inner">
  <Sparkles size={14} className="text-[#818CF8]"/> Dashboard Peserta Amania
  </motion.div>
  <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
