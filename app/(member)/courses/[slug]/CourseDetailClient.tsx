@@ -240,7 +240,7 @@ export default function CourseDetailClient() {
  toast.success('Pemesanan berhasil, mengarahkan...', { id: tid });
  window.location.href = json.checkout_url;
  } else {
- toast.success('Pemesanan berhasil! Menunggu konfirmasi admin.', { id: tid });
+ toast.success('Pembayaran berhasil! Akses kursus Anda telah aktif.', { id: tid });
  setIsPaymentModalOpen(false);
  router.push('/my-courses');
  }
