@@ -249,7 +249,7 @@ export default function AdminRegistrationsPage() {
                 
                 let tierLabel = '';
                 if (isPremium) {
-                   tierLabel = isFree ? 'VIP (Free)' : 'VIP';
+                   tierLabel = isFree ? 'Premium (Free)' : 'Premium';
                 } else {
                    tierLabel = isFree ? 'Basic (Free)' : 'Basic';
                 }
@@ -468,7 +468,7 @@ export default function AdminRegistrationsPage() {
                          <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5"><ShieldCheck size={10} className="text-slate-400 md:w-3 md:h-3"/> Tipe Akses</p>
                          <p className="text-xs md:text-sm font-bold text-slate-900 uppercase">
                             {selectedDetail.tier === 'premium' 
-                              ? (parseFloat(selectedDetail.total_amount) === 0 ? 'VIP (Free)' : 'VIP') 
+                              ? (parseFloat(selectedDetail.total_amount) === 0 ? 'Premium (Free)' : 'Premium') 
                               : (parseFloat(selectedDetail.total_amount) === 0 ? 'Basic (Free)' : 'Basic')
                             }
                          </p>

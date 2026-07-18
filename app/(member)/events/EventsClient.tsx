@@ -352,7 +352,7 @@ export default function EventsClient() {
  <div className="flex-1 rounded-xl md:rounded-2xl p-2.5 md:p-3 border border-amber-300/40 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50/50 dark:from-amber-950/40 dark:to-orange-900/20 flex flex-col justify-center relative overflow-hidden group/premium">
  <div className="absolute top-0 right-0 w-20 h-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-400/20 to-transparent rounded-full group-hover/premium:from-amber-400/30 transition-colors"></div>
  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-500 mb-0.5 flex items-center gap-1 relative z-10">
- <Gem size={12} className="w-3 h-3 text-amber-500" /> VIP Premium
+ <Gem size={12} className="w-3 h-3 text-amber-500" /> Premium
  </p>
  <p className="text-sm md:text-base font-black text-amber-900 dark:text-amber-300 truncate relative z-10 drop-shadow-sm">
  Rp {event.premium_price.toLocaleString('id-ID')}

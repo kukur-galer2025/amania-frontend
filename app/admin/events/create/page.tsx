@@ -362,7 +362,7 @@ export default function CreateEventPage() {
                 </div>
                 <div className="space-y-1 md:space-y-1.5">
                   <label className="text-[10px] md:text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <Star size={10} className={`${validationErrors.premium_price ? 'text-rose-500' : 'text-violet-500'} md:w-3 md:h-3`} /> VIP (Rp)
+                    <Star size={10} className={`${validationErrors.premium_price ? 'text-rose-500' : 'text-violet-500'} md:w-3 md:h-3`} /> Premium (Rp)
                   </label>
                   <input type="number" value={premiumPrice} onChange={(e) => { setPremiumPrice(e.target.value); if(validationErrors.premium_price) setValidationErrors({...validationErrors, premium_price: []}); }} placeholder="Opsional" className={`w-full bg-white border rounded-lg py-2.5 px-3 text-xs md:text-sm font-bold text-slate-900 outline-none transition-all ${validationErrors.premium_price ? 'border-rose-500 bg-rose-50 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`} />
                   {validationErrors.premium_price && <p className="text-[10px] text-rose-500 font-bold mt-1">{validationErrors.premium_price[0]}</p>}
@@ -399,8 +399,8 @@ export default function CreateEventPage() {
                     onChange={(e) => setCertificateTier(e.target.value as 'all'|'premium')} 
                     className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >
-                    <option value="all">Semua Peserta (Basic & VIP)</option>
-                    <option value="premium">Khusus Peserta VIP (Premium)</option>
+                    <option value="all">Semua Peserta (Basic & Premium)</option>
+                    <option value="premium">Khusus Peserta Premium (Premium)</option>
                   </select>
                 </div>
               </div>
@@ -427,8 +427,8 @@ export default function CreateEventPage() {
                     onChange={(e) => setRecordingTier(e.target.value as 'all'|'premium')} 
                     className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-3 text-xs md:text-sm font-medium text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >
-                    <option value="all">Semua Peserta (Basic & VIP)</option>
-                    <option value="premium">Khusus Peserta VIP (Premium)</option>
+                    <option value="all">Semua Peserta (Basic & Premium)</option>
+                    <option value="premium">Khusus Peserta Premium (Premium)</option>
                   </select>
                 </div>
               </div>

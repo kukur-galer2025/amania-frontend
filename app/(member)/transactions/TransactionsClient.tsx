@@ -462,7 +462,7 @@ export default function TransactionsClient() {
  </h3>
  
  <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-slate-500 dark:text-slate-400 w-full min-w-0">
- Kategori Tiket: <span className={`px-2 py-0.5 rounded text-[9px] md:text-[10px] uppercase tracking-widest font-black shrink-0 ${trx.tier === 'premium' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700 dark:text-indigo-400'}`}>{trx.tier === 'premium' ? 'VIP Access' : 'Basic Pass'}</span>
+ Kategori Tiket: <span className={`px-2 py-0.5 rounded text-[9px] md:text-[10px] uppercase tracking-widest font-black shrink-0 ${trx.tier === 'premium' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700 dark:text-indigo-400'}`}>{trx.tier === 'premium' ? 'Premium Access' : 'Basic Pass'}</span>
  </div>
  </div>
  </div>

@@ -200,13 +200,13 @@ export default function MyEventsClient() {
  )}
  <div className="absolute inset-0 bg-slate-950/80 z-0"/>
 
- {/* Lencana VIP / Basic */}
+ {/* Lencana Premium / Basic */}
  <div className="absolute top-4 left-4 z-20">
  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest border ${
  reg.tier === 'premium' ? 'bg-amber-500 text-white border-amber-400' : 'bg-white dark:bg-slate-800/95 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700/50'
  }`}>
  {reg.tier === 'premium' ? <Award size={12} className="shrink-0"/> : <Shield size={12} className="shrink-0 text-indigo-600 dark:text-indigo-400"/>}
- <span className="truncate">{reg.tier === 'premium' ? 'VIP Access' : 'Basic Pass'}</span>
+ <span className="truncate">{reg.tier === 'premium' ? 'Premium Access' : 'Basic Pass'}</span>
  </span>
  </div>
 

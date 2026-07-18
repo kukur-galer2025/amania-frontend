@@ -403,7 +403,7 @@ export default function CheckoutClient() {
  </ul>
  </div>
 
- {/* TIKET VIP */}
+ {/* TIKET Premium */}
  <div 
  onClick={() => { if(event.premium_price > 0) setTicketType('premium') }}
  className={`relative p-4 md:p-5 rounded-xl border-2 transition-transform duration-300 flex flex-col h-full min-w-0 w-full ${
@@ -416,7 +416,7 @@ export default function CheckoutClient() {
  >
  {event.premium_price > 0 && (
  <div className="absolute top-0 right-0 bg-amber-50 dark:bg-amber-500 text-white text-[8px] md:text-[9px] font-bold px-2.5 md:px-3 py-1 rounded-bl-lg rounded-tr-lg uppercase tracking-wider flex items-center gap-1 shrink-0">
- <Gem size={10} className="shrink-0"/> VIP
+ <Gem size={10} className="shrink-0"/> Premium
  </div>
  )}
  
@@ -616,7 +616,7 @@ export default function CheckoutClient() {
  <h4 className="font-semibold text-slate-900 dark:text-white text-xs md:text-sm leading-tight truncate w-full">{event?.title}</h4>
  <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
  <span className={`text-[8px] md:text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider truncate shrink-0 max-w-[120px] ${ticketType === 'free' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-amber-100 text-amber-700'}`}>
- {ticketType === 'free' ? 'Basic Access' : 'VIP Access'}
+ {ticketType === 'free' ? 'Basic Access' : 'Premium Access'}
  </span>
  </div>
  </div>

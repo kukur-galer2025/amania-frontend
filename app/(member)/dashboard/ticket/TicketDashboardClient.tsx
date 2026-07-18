@@ -286,7 +286,7 @@ export default function TicketDashboardClient() {
  </span>
  )}
  <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0">
- {reg.tier === 'premium' ? 'VIP Access' : 'Basic'}
+ {reg.tier === 'premium' ? 'Premium Access' : 'Basic'}
  </span>
  </div>
  

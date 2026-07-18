@@ -494,7 +494,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                                                     <p className="text-xs md:text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-1">Daftar Kurikulum</p>
                                                     <p className="text-[11px] md:text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed">
                                                         Berikut adalah materi yang akan dibahas. Materi dengan label{' '}
-                                                        <strong>VIP</strong> hanya bisa diakses secara penuh oleh peserta
+                                                        <strong>Premium</strong> hanya bisa diakses secara penuh oleh peserta
                                                         Premium setelah acara berlangsung.
                                                     </p>
                                                 </div>
@@ -514,7 +514,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                                                             </span>
                                                             {mat.access_tier === 'premium' ? (
                                                                 <span className="text-[8px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                                                    <Gem size={8} /> VIP ONLY
+                                                                    <Gem size={8} /> PREMIUM ONLY
                                                                 </span>
                                                             ) : (
                                                                 <span className="text-[8px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 px-1.5 py-0.5 rounded flex items-center gap-1">
@@ -609,7 +609,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                                 >
                                     <div>
                                         <p className={`text-[10px] font-black uppercase tracking-wider mb-1 flex items-center gap-1.5 ${selectedTier === 'premium' ? 'text-amber-600' : 'text-slate-500 dark:text-slate-400'}`}>
-                                            <Gem size={12} /> VIP Premium
+                                            <Gem size={12} /> Premium
                                         </p>
                                         <p className={`text-xl font-black ${selectedTier === 'premium' ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
                                             Rp {eventData.premium_price.toLocaleString('id-ID')}
@@ -692,7 +692,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                 <div className="px-4 py-3 sm:px-6 sm:py-4 max-w-7xl mx-auto flex items-center justify-between gap-4">
                     <div className="shrink-0 min-w-0 max-w-[40%]">
                         <p className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-0.5 truncate">
-                            {selectedTier === 'premium' ? 'Total (VIP)' : 'Total (Basic)'}
+                            {selectedTier === 'premium' ? 'Total (Premium)' : 'Total (Basic)'}
                         </p>
                         <p
                             className={`text-lg sm:text-xl font-black tracking-tight leading-none truncate ${selectedTier === 'premium' ? 'text-amber-600' : isFree ? 'text-emerald-500' : 'text-slate-900 dark:text-white'
@@ -822,7 +822,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
                     const premiumPrice = eventData?.premium_price || 0;
 
                     if (premiumPrice > 0) {
-                        priceStr = `\n▫️ Basic: ${basicPrice === 0 ? '*GRATIS*' : 'Rp ' + basicPrice.toLocaleString('id-ID')}\n▫️ VIP: Rp ${premiumPrice.toLocaleString('id-ID')}`;
+                        priceStr = `\n▫️ Basic: ${basicPrice === 0 ? '*GRATIS*' : 'Rp ' + basicPrice.toLocaleString('id-ID')}\n▫️ Premium: Rp ${premiumPrice.toLocaleString('id-ID')}`;
                     } else {
                         priceStr = basicPrice === 0 ? '*GRATIS!*' : 'Rp ' + basicPrice.toLocaleString('id-ID');
                     }

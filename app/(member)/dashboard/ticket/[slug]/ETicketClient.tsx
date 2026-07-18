@@ -158,7 +158,7 @@ export default function ETicketClient({ slug }: { slug: string }) {
  </div>
  </div>
  <div className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${ticketData.tier === 'premium' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 border-amber-200' : 'bg-slate-50 dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'}`}>
- {ticketData.tier === 'premium' ? 'VIP Premium Access' : 'General Admission'}
+ {ticketData.tier === 'premium' ? 'Premium Access' : 'General Admission'}
  </div>
  </header>
 

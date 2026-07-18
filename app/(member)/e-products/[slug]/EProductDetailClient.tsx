@@ -783,7 +783,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                             <div className="w-16 h-16 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-200/60 dark:border-amber-500/20">
                                 <Lock size={28} className="text-amber-500" />
                             </div>
-                            <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white mb-2">Area VIP Eksklusif</h3>
+                            <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white mb-2">Area Premium Eksklusif</h3>
                             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed px-2">
                                 Fitur ulasan hanya terbuka bagi member yang telah resmi memiliki aset digital ini demi menjaga <strong className="text-slate-700 dark:text-slate-200">kredibilitas 100%</strong> di platform Amania.
                             </p>

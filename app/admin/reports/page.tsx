@@ -169,7 +169,7 @@ export default function AdminReportsPage() {
                 >
                   <option value="all">Semua Tipe Tiket</option>
                   <option value="basic">Basic Pass</option>
-                  <option value="premium">Premium / VIP Pass</option>
+                  <option value="premium">Premium / Premium Pass</option>
                 </select>
               </div>
 

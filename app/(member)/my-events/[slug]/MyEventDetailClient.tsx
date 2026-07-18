@@ -452,7 +452,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <Info size={16} className="text-indigo-500 shrink-0 mt-0.5"/>
  <div>
  <p className="text-[11px] md:text-xs font-bold text-indigo-900 dark:text-indigo-300 mb-1 uppercase tracking-widest">Panduan Akses</p>
- <p className="text-[11px] md:text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed">Berikut adalah daftar seluruh materi untuk kelas ini. Modul dengan label VIP hanya bisa dibuka oleh peserta Premium.</p>
+ <p className="text-[11px] md:text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed">Berikut adalah daftar seluruh materi untuk kelas ini. Modul dengan label Premium hanya bisa dibuka oleh peserta Premium.</p>
  </div>
  </div>
 
@@ -467,7 +467,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <div className="flex items-center gap-2 min-w-0 w-full flex-wrap">
  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded shrink-0">MODUL {idx + 1}</span>
  {mat.access_tier === 'premium' ? (
- <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold flex items-center gap-1 shrink-0"><Gem size={10} className="shrink-0"/> VIP ONLY</span>
+ <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold flex items-center gap-1 shrink-0"><Gem size={10} className="shrink-0"/> PREMIUM ONLY</span>
  ) : (
  <span className="bg-emerald-100 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold flex items-center gap-1 shrink-0"><CheckCircle2 size={10} className="shrink-0"/> BASIC</span>
  )}
@@ -592,7 +592,7 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  </div>
  <div>
  <p className="text-[10px] text-slate-300 dark:text-slate-500 font-medium uppercase tracking-wider mb-0.5">Status Tiket Anda</p>
- <p className="text-xs sm:text-sm font-bold uppercase">{userTier === 'premium' ? 'VIP / Premium' : 'Basic / Reguler'}</p>
+ <p className="text-xs sm:text-sm font-bold uppercase">{userTier === 'premium' ? 'Premium / Premium' : 'Basic / Reguler'}</p>
  </div>
  </div>
  <div className="shrink-0 mr-2">
@@ -633,13 +633,13 @@ export default function MyEventDetailClient({ slug }: { slug: string }) {
  <span className="font-bold text-slate-900 dark:text-white text-right truncate min-w-0 bg-white dark:bg-[#111827] px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700/50">{event.quota === 0 ? 'Habis' : `${event.quota} Peserta`}</span>
  </div>
  
- {/* E-CERTIFICATE & (KHUSUS PREMIUM / VIP) */}
+ {/* E-CERTIFICATE & (KHUSUS PREMIUM / Premium) */}
  <div className="flex items-start justify-between text-[11px] md:text-xs min-w-0 w-full pt-1">
  <span className="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1.5 shrink-0 pt-0.5"><Award size={14} className="text-emerald-400 shrink-0"/> E-Certificate</span>
  <div className="flex flex-col items-end gap-1.5">
  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-right truncate min-w-0 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-200">Termasuk</span>
  <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest text-right leading-tight max-w-[100px] sm:max-w-none">
- (Khusus Premium/VIP)
+ (Khusus Premium/Premium)
  </span>
  </div>
  </div>

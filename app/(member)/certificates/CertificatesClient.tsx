@@ -264,7 +264,7 @@ export default function CertificatesClient() {
  {isLocked ? (
  <button disabled className="w-full flex items-center justify-center px-5 py-3.5 bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 text-slate-400 dark:text-slate-400 rounded-xl text-sm font-bold cursor-not-allowed">
  <span className="flex items-center gap-2">
- <Gem size={16} className="text-amber-500"/> Sertifikat Khusus VIP
+ <Gem size={16} className="text-amber-500"/> Sertifikat Khusus Premium
  </span>
  </button>
  ) : reg.event?.certificate_link ? (
