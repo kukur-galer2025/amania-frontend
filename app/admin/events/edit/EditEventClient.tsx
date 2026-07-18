@@ -15,6 +15,7 @@ import {
   User, Tag, Star, Clock, Briefcase, Zap, Info, X, Lock, QrCode
 } from 'lucide-react'; 
 import { apiFetch } from '@/app/utils/api'; 
+import { safeStorage } from '@/app/utils/safeStorage';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { 
   ssr: false,
@@ -88,6 +89,9 @@ export default function EditEventClient() {
   const [matAccess, setMatAccess] = useState<'all' | 'premium'>('all');
   const [matFile, setMatFile] = useState<File | null>(null);
   const matFileRef = useRef<HTMLInputElement>(null);
+  const [matUploading, setMatUploading] = useState(false);
+  const [matUploadProgress, setMatUploadProgress] = useState(0);
+  const matUploadXhrRef = useRef<XMLHttpRequest | null>(null);
 
   // State: Speaker
   const [speakers, setSpeakers] = useState<any[]>([]);
@@ -312,7 +316,6 @@ export default function EditEventClient() {
     e.preventDefault();
     if(!eventId) return;
 
-    const loadToast = toast.loading("Menambahkan modul...");
     const fd = new FormData();
     fd.append('event_id', eventId); 
     fd.append('title', matTitle); 
@@ -320,22 +323,80 @@ export default function EditEventClient() {
     fd.append('access_tier', matAccess); 
     
     if (matType === 'file' && matFile) fd.append('file', matFile); else fd.append('link', matLink);
-    
-    try {
-      const res = await apiFetch('/admin/materials', {
-        method: 'POST', 
-        body: fd
-      });
-      const resJson = await res.json();
-      if (res.ok) { 
-        toast.success("Modul ditambahkan!", { id: loadToast }); 
-        setMatTitle(''); setMatLink(''); setMatFile(null); setMatAccess('all');
-        if (matFileRef.current) matFileRef.current.value = ''; 
-        fetchEventData(); 
-      } else {
-        toast.error(resJson.message || "Gagal mengunggah", { id: loadToast });
+
+    // Untuk file kecil atau link, gunakan fetch biasa (lebih cepat)
+    if (matType === 'video' || !matFile || matFile.size < 1 * 1024 * 1024) {
+      const loadToast = toast.loading("Menambahkan modul...");
+      try {
+        const res = await apiFetch('/admin/materials', { method: 'POST', body: fd });
+        const resJson = await res.json();
+        if (res.ok) { 
+          toast.success("Modul ditambahkan!", { id: loadToast }); 
+          setMatTitle(''); setMatLink(''); setMatFile(null); setMatAccess('all');
+          if (matFileRef.current) matFileRef.current.value = ''; 
+          fetchEventData(); 
+        } else {
+          toast.error(resJson.message || "Gagal mengunggah", { id: loadToast });
+        }
+      } catch { toast.error("Gagal koneksi ke server", { id: loadToast }); }
+      return;
+    }
+
+    // Untuk file besar (>1MB), gunakan XMLHttpRequest agar bisa tracking progress
+    setMatUploading(true);
+    setMatUploadProgress(0);
+
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+    let token = safeStorage.getItem('token');
+    if (token && token.startsWith('"') && token.endsWith('"')) token = token.slice(1, -1);
+
+    const xhr = new XMLHttpRequest();
+    matUploadXhrRef.current = xhr;
+
+    xhr.upload.addEventListener('progress', (ev) => {
+      if (ev.lengthComputable) {
+        const pct = Math.round((ev.loaded / ev.total) * 100);
+        setMatUploadProgress(pct);
       }
-    } catch { toast.error("Gagal koneksi"); }
+    });
+
+    xhr.addEventListener('load', () => {
+      matUploadXhrRef.current = null;
+      setMatUploading(false);
+      setMatUploadProgress(0);
+      try {
+        const resJson = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300 && resJson.success) {
+          toast.success("Modul berhasil ditambahkan!");
+          setMatTitle(''); setMatLink(''); setMatFile(null); setMatAccess('all');
+          if (matFileRef.current) matFileRef.current.value = '';
+          fetchEventData();
+        } else {
+          toast.error(resJson.message || 'Gagal mengunggah modul');
+        }
+      } catch {
+        toast.error('Respons server tidak valid');
+      }
+    });
+
+    xhr.addEventListener('error', () => {
+      matUploadXhrRef.current = null;
+      setMatUploading(false);
+      setMatUploadProgress(0);
+      toast.error('Gagal koneksi ke server. Periksa koneksi internet Anda.');
+    });
+
+    xhr.addEventListener('abort', () => {
+      matUploadXhrRef.current = null;
+      setMatUploading(false);
+      setMatUploadProgress(0);
+      toast.error('Upload dibatalkan');
+    });
+
+    xhr.open('POST', `${BASE_URL}/admin/materials`);
+    xhr.setRequestHeader('Accept', 'application/json');
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.send(fd);
   };
 
   const handleAddSpeaker = async (e: React.FormEvent) => {
@@ -362,7 +423,7 @@ export default function EditEventClient() {
         if (spkPhotoRef.current) spkPhotoRef.current.value = ''; 
         fetchEventData(); 
       }
-    } catch { toast.error("Gagal"); }
+    } catch { toast.error("Gagal koneksi ke server", { id: loadToast }); }
   };
 
   const openDeleteModal = (id: number, endpoint: 'materials' | 'speakers') => {
@@ -823,7 +884,47 @@ export default function EditEventClient() {
                     )}
                   </div>
                   
-                  <button className="w-full mt-2 bg-slate-900 text-white py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">Tambahkan Modul</button>
+                  <button disabled={matUploading} className="w-full mt-2 bg-slate-900 text-white py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    {matUploading ? <><Loader2 size={14} className="animate-spin" /> Mengunggah...</> : 'Tambahkan Modul'}
+                  </button>
+
+                  {/* 🔥 PROGRESS BAR UPLOAD MATERI */}
+                  {matUploading && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between text-[10px] md:text-xs">
+                        <span className="text-slate-600 font-medium flex items-center gap-1.5">
+                          <Loader2 size={12} className="animate-spin text-indigo-500" />
+                          Mengunggah {matFile ? `(${(matFile.size / 1024 / 1024).toFixed(1)} MB)` : ''}...
+                        </span>
+                        <span className="text-indigo-600 font-bold tabular-nums">{matUploadProgress}%</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div 
+                          className="h-full rounded-full transition-all duration-300 ease-out"
+                          style={{ 
+                            width: `${matUploadProgress}%`,
+                            background: matUploadProgress === 100 
+                              ? 'linear-gradient(90deg, #22c55e, #16a34a)' 
+                              : 'linear-gradient(90deg, #6366f1, #8b5cf6)'
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[9px] md:text-[10px] text-slate-400">
+                          {matUploadProgress === 100 ? '✅ Upload selesai, memproses di server...' : 'Jangan tutup halaman ini'}
+                        </p>
+                        {matUploadProgress < 100 && (
+                          <button 
+                            type="button" 
+                            onClick={() => matUploadXhrRef.current?.abort()}
+                            className="text-[9px] md:text-[10px] text-rose-500 hover:text-rose-700 font-semibold"
+                          >
+                            Batalkan
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </form>
               </div>
 
