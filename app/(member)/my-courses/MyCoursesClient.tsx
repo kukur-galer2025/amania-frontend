@@ -194,18 +194,18 @@ export default function MyCoursesClient() {
  )}
  {/* Status overlay */}
  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
- <span className="text-white text-xs font-bold flex items-center gap-1.5 bg-white dark:bg-slate-800/20 backdrop- px-3 py-1.5 rounded-full">
+ <span className="text-slate-800 dark:text-white text-xs font-bold flex items-center gap-1.5 bg-white/90 dark:bg-slate-800/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
  <PlayCircle size={14} /> Lanjut Belajar
  </span>
  </div>
  {/* Status badge */}
  <div className="absolute top-3 right-3">
  {status === 'completed' ? (
- <span className="px-3 py-1.5 rounded-lg text-[10px] font-black bg-emerald-50 dark:bg-emerald-500 text-white shadow-lg dark:shadow-black/20 flex items-center gap-1">
+ <span className="px-3 py-1.5 rounded-lg text-[10px] font-black bg-emerald-100 dark:bg-emerald-500 text-emerald-700 dark:text-white shadow-sm flex items-center gap-1">
  <CheckCircle2 size={12} /> Selesai
  </span>
  ) : status === 'in_progress' ? (
- <span className="px-3 py-1.5 rounded-lg text-[10px] font-black bg-amber-50 dark:bg-amber-500 text-white shadow-lg dark:shadow-black/20">
+ <span className="px-3 py-1.5 rounded-lg text-[10px] font-black bg-amber-100 dark:bg-amber-500 text-amber-700 dark:text-white shadow-sm">
  {progress}%
  </span>
  ) : (

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 import toast from 'react-hot-toast';
+import ProtectedVideoPlayer from '@/app/components/ProtectedVideoPlayer';
 import ExamClient from './ExamClient';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -554,7 +555,14 @@ export default function LearnClient() {
     if (lessonType === 'video') {
       return (
         <div className="aspect-video bg-black relative">
-          {ytId ? (
+          {activeLesson.video_path ? (
+            /* 🔥 SELF-HOSTED PROTECTED VIDEO */
+            <ProtectedVideoPlayer
+              type="lesson"
+              id={activeLesson.id}
+              onEnded={() => handleMarkComplete()}
+            />
+          ) : ytId ? (
             <iframe
               key={ytId}
               src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}

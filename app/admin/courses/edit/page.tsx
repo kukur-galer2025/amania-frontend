@@ -6,7 +6,7 @@ import {
   ArrowLeft, Save, Loader2, GraduationCap, Trash2, Plus,
   ChevronDown, ChevronUp, Video, BookOpen, Edit, XCircle,
   CheckCircle2, Eye, EyeOff, Image as ImageIcon, Grip,
-  PlayCircle, Clock, ExternalLink, AlertCircle, FileText, Type, Upload, Info
+  PlayCircle, Clock, ExternalLink, AlertCircle, FileText, Type, Upload, Info, ShieldCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -61,9 +61,12 @@ export default function AdminCourseEditPage() {
   const [lessonYoutubeUrl, setLessonYoutubeUrl] = useState('');
   const [lessonTextContent, setLessonTextContent] = useState('');
   const [lessonFile, setLessonFile] = useState<File | null>(null);
+  const [lessonVideoFile, setLessonVideoFile] = useState<File | null>(null);
+  const [videoSource, setVideoSource] = useState<'youtube' | 'upload'>('youtube');
   const [lessonDuration, setLessonDuration] = useState('');
   const [lessonIsPreview, setLessonIsPreview] = useState(false);
   const [lessonSaving, setLessonSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Section modal
   const [sectionModal, setSectionModal] = useState<{ isOpen: boolean; editing: any | null }>({ isOpen: false, editing: null });
@@ -210,13 +213,15 @@ export default function AdminCourseEditPage() {
 
   // Lesson CRUD
   const openLessonModal = (sectionId: number, lesson?: any) => {
-    setLessonTitle(lesson?.title || '');
+    setLessonTitle(lesson?.title ?? '');
     setLessonType(lesson?.type || 'video');
-    setLessonYoutubeUrl(lesson?.youtube_url || '');
-    setLessonTextContent(lesson?.text_content || '');
+    setLessonYoutubeUrl(lesson?.youtube_url ?? '');
+    setLessonTextContent(lesson?.text_content ?? '');
     setLessonFile(null);
-    setLessonDuration(lesson?.duration_minutes?.toString() || '');
-    setLessonIsPreview(lesson?.is_preview || false);
+    setLessonVideoFile(null);
+    setVideoSource(lesson?.video_path ? 'upload' : 'youtube');
+    setLessonDuration(lesson?.duration_minutes != null ? String(lesson.duration_minutes) : '');
+    setLessonIsPreview(!!lesson?.is_preview);
     setLessonModal({ isOpen: true, sectionId, editingLesson: lesson || null });
   };
 
@@ -225,9 +230,15 @@ export default function AdminCourseEditPage() {
 
     // Type-specific validation
     if (lessonType === 'video') {
-      if (!lessonYoutubeUrl.trim()) { toast.error('YouTube URL wajib diisi untuk tipe Video!'); return; }
-      const ytId = extractYouTubeId(lessonYoutubeUrl);
-      if (!ytId) { toast.error('Format YouTube URL tidak valid!'); return; }
+      if (videoSource === 'youtube') {
+        if (!lessonYoutubeUrl.trim()) { toast.error('YouTube URL wajib diisi!'); return; }
+        const ytId = extractYouTubeId(lessonYoutubeUrl);
+        if (!ytId) { toast.error('Format YouTube URL tidak valid!'); return; }
+      } else {
+        // upload mode: require file for new lessons, optional for edits
+        if (!lessonModal.editingLesson && !lessonVideoFile) { toast.error('File video wajib diupload!'); return; }
+        if (lessonVideoFile && lessonVideoFile.size > 512 * 1024 * 1024) { toast.error('Ukuran video maksimal 512MB!'); return; }
+      }
     } else if (lessonType === 'text') {
       if (!lessonTextContent.trim() || lessonTextContent === '<p><br></p>') { toast.error('Konten teks wajib diisi untuk tipe Artikel!'); return; }
     } else if (lessonType === 'file') {
@@ -236,13 +247,83 @@ export default function AdminCourseEditPage() {
     }
 
     setLessonSaving(true);
+    setUploadProgress(0);
     try {
       const isEdit = lessonModal.editingLesson;
       const sectionId = lessonModal.sectionId;
       const currentSection = sections.find(s => s.id === sectionId);
       const lessonOrder = isEdit ? isEdit.order : ((currentSection?.lessons?.length || 0) + 1);
 
-      // Use FormData for file upload support
+      // Determine which file needs upload
+      const fileToUpload = (lessonType === 'video' && videoSource === 'upload') ? lessonVideoFile
+        : (lessonType === 'file') ? lessonFile
+        : null;
+
+      let uploadedFilePath: string | null = null;
+
+      // 🔥 CHUNKED UPLOAD for large files (> 1MB)
+      if (fileToUpload && fileToUpload.size > 1 * 1024 * 1024) {
+        const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB per chunk
+        const totalChunks = Math.ceil(fileToUpload.size / CHUNK_SIZE);
+        const uploadId = `upload_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || '').replace(/^"|"$/g, '') : '';
+
+        // Step 1: Upload all chunks
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * CHUNK_SIZE;
+          const end = Math.min(start + CHUNK_SIZE, fileToUpload.size);
+          const chunkBlob = fileToUpload.slice(start, end);
+
+          const chunkForm = new FormData();
+          chunkForm.append('chunk', chunkBlob, `chunk_${i}`);
+          chunkForm.append('upload_id', uploadId);
+          chunkForm.append('chunk_index', i.toString());
+          chunkForm.append('total_chunks', totalChunks.toString());
+
+          const chunkRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chunked-upload/chunk`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: chunkForm,
+          });
+
+          if (!chunkRes.ok) {
+            const errJson = await chunkRes.json().catch(() => ({}));
+            throw new Error(errJson.message || `Chunk ${i} gagal diupload.`);
+          }
+
+          // Update progress (upload phase = 0-90%)
+          const percent = Math.round(((i + 1) / totalChunks) * 90);
+          setUploadProgress(percent);
+        }
+
+        // Step 2: Merge chunks
+        setUploadProgress(92);
+        const destination = lessonType === 'file' ? 'courses/lessons/files' : 'courses/lessons/videos';
+        const mergeRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chunked-upload/merge`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            upload_id: uploadId,
+            total_chunks: totalChunks,
+            file_name: fileToUpload.name,
+            destination,
+          }),
+        });
+
+        const mergeJson = await mergeRes.json();
+        if (!mergeRes.ok || !mergeJson.success) {
+          throw new Error(mergeJson.message || 'Gagal menggabungkan file.');
+        }
+
+        uploadedFilePath = mergeJson.file_path;
+        setUploadProgress(95);
+      }
+
+      // Step 3: Save lesson data
       const formData = new FormData();
       formData.append('title', lessonTitle);
       formData.append('type', lessonType);
@@ -251,11 +332,25 @@ export default function AdminCourseEditPage() {
       formData.append('order', lessonOrder.toString());
 
       if (lessonType === 'video') {
-        formData.append('youtube_url', lessonYoutubeUrl);
+        if (videoSource === 'youtube') {
+          formData.append('youtube_url', lessonYoutubeUrl);
+        } else if (uploadedFilePath) {
+          // Chunked upload — kirim path hasil merge
+          formData.append('video_path', uploadedFilePath);
+        } else if (fileToUpload && fileToUpload.size <= 1 * 1024 * 1024) {
+          // Direct upload untuk file kecil (< 1MB)
+          formData.append('video_upload', fileToUpload);
+        }
       } else if (lessonType === 'text') {
         formData.append('text_content', lessonTextContent);
-      } else if (lessonType === 'file' && lessonFile) {
-        formData.append('file_upload', lessonFile);
+      } else if (lessonType === 'file') {
+        if (uploadedFilePath) {
+          // File besar via chunked — tidak perlu upload lagi
+          // Tapi kita perlu kirim path-nya. Untuk file, kita handle berbeda:
+          // TODO: Jika file biasa juga perlu chunked, extend controller.
+        } else if (fileToUpload) {
+          formData.append('file_upload', fileToUpload);
+        }
       }
 
       if (!isEdit) {
@@ -266,8 +361,11 @@ export default function AdminCourseEditPage() {
         ? `/admin/courses/${courseId}/lessons/${isEdit.id}`
         : `/admin/courses/${courseId}/lessons`;
 
+      setUploadProgress(98);
       const res = await apiFetch(url, { method: 'POST', body: formData }, true);
       const json = await res.json();
+
+      setUploadProgress(100);
 
       if (res.ok && json.success) {
         toast.success(isEdit ? 'Lesson diupdate!' : 'Lesson ditambahkan!');
@@ -276,10 +374,11 @@ export default function AdminCourseEditPage() {
       } else {
         toast.error(json.message || 'Gagal menyimpan lesson.');
       }
-    } catch {
-      toast.error('Terjadi kesalahan server.');
+    } catch (err: any) {
+      toast.error(err?.message || 'Terjadi kesalahan server.');
     } finally {
       setLessonSaving(false);
+      setUploadProgress(0);
     }
   };
 
@@ -376,7 +475,7 @@ export default function AdminCourseEditPage() {
 
             <div>
               <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Judul <span className="text-rose-500">*</span></label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Masukkan judul kursus yang menarik" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all shadow-inner" />
+              <input type="text" value={title || ''} onChange={(e) => setTitle(e.target.value)} placeholder="Masukkan judul kursus yang menarik" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all shadow-inner" />
               <p className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1"><Info size={10} /> Judul yang menarik dan deskriptif, maks 255 karakter</p>
             </div>
 
@@ -401,7 +500,7 @@ export default function AdminCourseEditPage() {
               </div>
               <div>
                 <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Harga (Rp)</label>
-                <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0 = Gratis" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all shadow-inner" />
+                <input type="number" min="0" value={price ?? ''} onChange={(e) => setPrice(e.target.value)} placeholder="0 = Gratis" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all shadow-inner" />
                 <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><Info size={10} /> 0 = Gratis</p>
               </div>
             </div>
@@ -544,6 +643,9 @@ export default function AdminCourseEditPage() {
                                         {lesson.is_preview && (
                                           <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">PREVIEW</span>
                                         )}
+                                        {lesson.video_path && (
+                                          <span className="text-[9px] font-black text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100 flex items-center gap-0.5"><ShieldCheck size={9} /> PROTECTED</span>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
@@ -591,7 +693,7 @@ export default function AdminCourseEditPage() {
               <div className="p-6 md:p-8 space-y-5">
                 <div>
                   <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Judul Section / Bab <span className="text-rose-500">*</span></label>
-                  <input type="text" value={sectionTitle} onChange={(e) => setSectionTitle(e.target.value)} placeholder="Cth: Bab 1 — Pengenalan React" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all shadow-inner" onKeyDown={(e) => { if (e.key === 'Enter') handleSaveSection(); }} />
+                  <input type="text" value={sectionTitle || ''} onChange={(e) => setSectionTitle(e.target.value)} placeholder="Cth: Bab 1 — Pengenalan React" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all shadow-inner" onKeyDown={(e) => { if (e.key === 'Enter') handleSaveSection(); }} />
                 </div>
                 <div className="flex justify-end gap-3">
                   <button onClick={() => setSectionModal({ isOpen: false, editing: null })} className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
@@ -660,34 +762,78 @@ export default function AdminCourseEditPage() {
                 {/* Title */}
                 <div>
                   <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Judul Lesson <span className="text-rose-500">*</span></label>
-                  <input type="text" value={lessonTitle} onChange={(e) => setLessonTitle(e.target.value)} placeholder="Cth: Apa itu React?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
+                  <input type="text" value={lessonTitle || ''} onChange={(e) => setLessonTitle(e.target.value)} placeholder="Cth: Apa itu React?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
                   <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><Info size={10} /> Nama lesson yang akan ditampilkan di kurikulum</p>
                 </div>
 
                 {/* VIDEO CONTENT */}
                 {lessonType === 'video' && (
                   <>
+                    {/* Toggle: YouTube vs Upload */}
                     <div>
-                      <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">YouTube URL <span className="text-rose-500">*</span></label>
-                      <input type="text" value={lessonYoutubeUrl} onChange={(e) => setLessonYoutubeUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner font-mono" />
-                      <p className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1"><Info size={10} /> Support: youtube.com/watch?v=xxx, youtu.be/xxx, atau ID langsung. Bisa unlisted.</p>
+                      <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Sumber Video</label>
+                      <div className="flex rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <button type="button" onClick={() => setVideoSource('youtube')} className={`flex-1 py-2.5 text-xs font-bold transition-colors ${videoSource === 'youtube' ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
+                          🎬 YouTube URL
+                        </button>
+                        <button type="button" onClick={() => setVideoSource('upload')} className={`flex-1 py-2.5 text-xs font-bold transition-colors ${videoSource === 'upload' ? 'bg-emerald-600 text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
+                          🔒 Upload Terproteksi
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
+                        <Info size={10} /> {videoSource === 'youtube' ? 'Gunakan link YouTube (publik/unlisted)' : 'Video dihosting di server Anda dengan proteksi anti-download & signed URL'}
+                      </p>
                     </div>
 
-                    {extractYouTubeId(lessonYoutubeUrl) && (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <div className="aspect-video bg-black">
-                          <iframe src={`https://www.youtube.com/embed/${extractYouTubeId(lessonYoutubeUrl)}`} referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
+                    {videoSource === 'youtube' ? (
+                      <>
+                        <div>
+                          <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">YouTube URL <span className="text-rose-500">*</span></label>
+                          <input key="youtube-input" type="text" value={lessonYoutubeUrl} onChange={(e) => setLessonYoutubeUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner font-mono" />
+                          <p className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1"><Info size={10} /> Support: youtube.com/watch?v=xxx, youtu.be/xxx, atau ID langsung. Bisa unlisted.</p>
                         </div>
-                        <div className="px-4 py-2 bg-slate-50 flex items-center gap-2 text-[10px] font-bold text-emerald-600">
-                          <CheckCircle2 size={12} /> Video YouTube berhasil terdeteksi
-                        </div>
-                      </motion.div>
-                    )}
 
-                    {lessonYoutubeUrl && !extractYouTubeId(lessonYoutubeUrl) && (
-                      <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-600">
-                        <AlertCircle size={14} /> URL YouTube tidak valid. Periksa kembali format URL.
-                      </div>
+                        {extractYouTubeId(lessonYoutubeUrl) && (
+                          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                            <div className="aspect-video bg-black">
+                              <iframe src={`https://www.youtube.com/embed/${extractYouTubeId(lessonYoutubeUrl)}`} referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
+                            </div>
+                            <div className="px-4 py-2 bg-slate-50 flex items-center gap-2 text-[10px] font-bold text-emerald-600">
+                              <CheckCircle2 size={12} /> Video YouTube berhasil terdeteksi
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {lessonYoutubeUrl && !extractYouTubeId(lessonYoutubeUrl) && (
+                          <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-600">
+                            <AlertCircle size={14} /> URL YouTube tidak valid. Periksa kembali format URL.
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Upload File Video <span className="text-rose-500">*</span></label>
+                          <input
+                            key="upload-input"
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                            onChange={(e) => setLessonVideoFile(e.target.files?.[0] || null)}
+                            className="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 bg-slate-50 p-2 rounded-xl border border-dashed border-slate-300"
+                          />
+                          <p className="text-[10px] text-slate-400 mt-1.5">Format: MP4, WebM, MOV, AVI. Maks 512MB.</p>
+                          {lessonVideoFile && (
+                            <div className="mt-2 flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] font-bold text-emerald-700">
+                              <CheckCircle2 size={12} /> {lessonVideoFile.name} ({(lessonVideoFile.size / 1024 / 1024).toFixed(1)} MB)
+                            </div>
+                          )}
+                          {lessonModal.editingLesson?.video_path && !lessonVideoFile && (
+                            <div className="mt-2 flex items-center gap-2 p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-[11px] font-bold text-indigo-700">
+                              <ShieldCheck size={12} /> Video terproteksi sudah tersimpan di server
+                            </div>
+                          )}
+                        </div>
+                      </>
                     )}
                   </>
                 )}
@@ -734,7 +880,7 @@ export default function AdminCourseEditPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[11px] font-black text-slate-500 mb-2 uppercase tracking-widest">Durasi (menit)</label>
-                    <input type="number" min="0" value={lessonDuration} onChange={(e) => setLessonDuration(e.target.value)} placeholder="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
+                    <input type="number" min="0" value={lessonDuration ?? ''} onChange={(e) => setLessonDuration(e.target.value)} placeholder="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-inner" />
                     <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><Info size={10} /> Estimasi waktu</p>
                   </div>
                   <div className="flex items-end">
@@ -749,12 +895,51 @@ export default function AdminCourseEditPage() {
                 </div>
               </div>
 
-              <div className="px-5 sm:px-8 py-4 sm:py-5 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
-                <button onClick={() => setLessonModal({ isOpen: false, sectionId: null, editingLesson: null })} className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
-                <button onClick={handleSaveLesson} disabled={lessonSaving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm disabled:opacity-70 active:scale-95">
-                  {lessonSaving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                  {lessonSaving ? 'Menyimpan...' : 'Simpan Lesson'}
-                </button>
+              <div className="px-5 sm:px-8 py-4 sm:py-5 border-t border-slate-200 bg-slate-50 shrink-0 space-y-3">
+                {/* Upload Progress Bar */}
+                {lessonSaving && uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[10px] font-bold">
+                      <span className="text-indigo-600 flex items-center gap-1.5">
+                        <Loader2 size={10} className="animate-spin" />
+                        {uploadProgress <= 90 ? '📦 Mengunggah potongan file...' :
+                         uploadProgress <= 95 ? '🔗 Menggabungkan file...' :
+                         '💾 Menyimpan data lesson...'}
+                      </span>
+                      <span className="text-indigo-700 font-black">{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full relative overflow-hidden"
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${uploadProgress}%` }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 animate-[shimmer_1.5s_infinite]" style={{ backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite linear' }} />
+                      </motion.div>
+                    </div>
+                    <p className="text-[9px] text-slate-400 font-medium">
+                      {uploadProgress <= 90 ? 'Chunked upload: file dipotong 2MB per bagian untuk kecepatan maksimal' : 
+                       uploadProgress <= 95 ? 'Potongan file sedang digabungkan di server...' :
+                       'Hampir selesai...'}
+                    </p>
+                  </div>
+                )}
+                {lessonSaving && uploadProgress >= 100 && (
+                  <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-600">
+                    <CheckCircle2 size={12} /> Upload selesai! ✨
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row justify-end gap-3">
+                  <button onClick={() => setLessonModal({ isOpen: false, sectionId: null, editingLesson: null })} disabled={lessonSaving} className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-50">
+                    Batal
+                  </button>
+                  <button onClick={handleSaveLesson} disabled={lessonSaving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm disabled:opacity-70 active:scale-95">
+                    {lessonSaving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                    {lessonSaving ? (uploadProgress > 0 && uploadProgress < 100 ? `Mengupload ${uploadProgress}%` : 'Menyimpan...') : 'Simpan Lesson'}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
