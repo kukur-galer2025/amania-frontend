@@ -363,7 +363,7 @@ export default function EditEProductClient() {
               <div className="mb-5 p-3 bg-indigo-50 rounded-xl border border-indigo-100 flex gap-3">
                   <AlertTriangle size={16} className="text-indigo-500 shrink-0 mt-0.5" />
                   <p className="text-[10px] md:text-xs text-indigo-700 leading-relaxed font-medium">
-                    Upload file (ZIP/PDF/RAR) dibatasi maksimal <strong className="text-rose-600">50 MB</strong> per file. Untuk file video atau file raksasa, gunakan Link Google Drive / YouTube.
+                    Upload file (ZIP/PDF/RAR/HTML) dibatasi maksimal <strong className="text-rose-600">50 MB</strong> per file. Untuk file video atau file raksasa, gunakan Link Google Drive / YouTube.
                   </p>
               </div>
 
@@ -386,7 +386,7 @@ export default function EditEProductClient() {
                     {matType === 'file' ? 'Pilih File (Maks 50MB)' : 'Masukkan Tautan URL'}
                   </label>
                   {matType === 'file' ? (
-                    <input type="file" ref={matFileRef} onChange={handleMatFileChange} accept=".pdf,.zip,.rar" className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 bg-slate-50 p-1.5 rounded-xl border border-slate-200 border-dashed" required />
+                    <input type="file" ref={matFileRef} onChange={handleMatFileChange} accept=".pdf,.zip,.rar,.html,.htm" className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 bg-slate-50 p-1.5 rounded-xl border border-slate-200 border-dashed" required />
                   ) : (
                     <input type="url" value={matLink || ''} onChange={(e) => setMatLink(e.target.value)} placeholder="https://..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none" required />
                   )}
