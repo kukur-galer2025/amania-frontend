@@ -70,8 +70,15 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
 
         if (data.success && data.url) {
           // 🚀 STEP 2: Buka link langsung di browser → download INSTAN!
-          window.open(data.url, '_blank');
-          toast.success("Download dimulai!", { id: tid });
+          const isHtml = activeMaterial?.type === 'file' && (activeMaterial.file_path?.toLowerCase().endsWith('.html') || activeMaterial.file_path?.toLowerCase().endsWith('.htm'));
+          
+          if (isHtml) {
+            window.open(`/view-materi?url=${encodeURIComponent(data.url)}`, '_blank');
+            toast.success("Materi berhasil dibuka!", { id: tid });
+          } else {
+            window.open(data.url, '_blank');
+            toast.success("Download dimulai!", { id: tid });
+          }
         } else {
           throw new Error("Link download tidak tersedia.");
         }
