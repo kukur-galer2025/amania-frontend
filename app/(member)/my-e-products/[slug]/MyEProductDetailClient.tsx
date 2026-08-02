@@ -54,6 +54,14 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
     if (activeMaterial.type === 'link') {
       window.open(activeMaterial.link_url || activeMaterial.link, '_blank');
     } else {
+      const isHtml = activeMaterial?.type === 'file' && (activeMaterial.file_path?.toLowerCase().endsWith('.html') || activeMaterial.file_path?.toLowerCase().endsWith('.htm'));
+      
+      if (isHtml) {
+        // HANYA kirim ID-nya saja ke tab baru, tab baru yang akan meminta Signed URL secara rahasia.
+        window.open(`/view-materi/${activeMaterial.id}`, '_blank');
+        return;
+      }
+
       const tid = toast.loading("Menyiapkan link unduhan...");
       try {
         // 🚀 STEP 1: Minta signed URL dari backend (sangat cepat, hanya JSON)
@@ -70,15 +78,8 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
 
         if (data.success && data.url) {
           // 🚀 STEP 2: Buka link langsung di browser → download INSTAN!
-          const isHtml = activeMaterial?.type === 'file' && (activeMaterial.file_path?.toLowerCase().endsWith('.html') || activeMaterial.file_path?.toLowerCase().endsWith('.htm'));
-          
-          if (isHtml) {
-            window.open(`/view-materi?url=${encodeURIComponent(data.url)}`, '_blank');
-            toast.success("Materi berhasil dibuka!", { id: tid });
-          } else {
-            window.open(data.url, '_blank');
-            toast.success("Download dimulai!", { id: tid });
-          }
+          window.open(data.url, '_blank');
+          toast.success("Download dimulai!", { id: tid });
         } else {
           throw new Error("Link download tidak tersedia.");
         }
