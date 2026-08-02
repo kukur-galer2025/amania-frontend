@@ -9,10 +9,16 @@ function ViewMateriContent() {
   const url = searchParams.get('url');
   const [loading, setLoading] = useState(true);
 
-  if (!url) {
+  // Validasi URL (Cegah celah Open Redirect/Phishing)
+  const isValidUrl = url && (
+    url.startsWith(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000') || 
+    url.startsWith('https://api.amania.id')
+  );
+
+  if (!isValidUrl) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-50 text-slate-500 font-medium">
-        Tautan tidak valid atau tidak ditemukan.
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50 text-slate-500 font-medium text-sm md:text-base">
+        Akses ditolak: Tautan materi tidak valid atau tidak diizinkan.
       </div>
     );
   }
