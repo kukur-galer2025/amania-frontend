@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { 
- ArrowLeft, FileText, Link as LinkIcon, DownloadCloud, 
+ ArrowLeft, FileText, Link as LinkIcon, DownloadCloud, Globe,
  Layers, CheckCircle2, PlayCircle, Loader2, BookOpen,
  ChevronRight, Star, Award, LayoutGrid
 } from 'lucide-react';
@@ -90,6 +90,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
 
  if (!product) return null;
 
+ const isHtml = activeMaterial?.type === 'file' && (activeMaterial.file_path?.toLowerCase().endsWith('.html') || activeMaterial.file_path?.toLowerCase().endsWith('.htm'));
  const activeIndex = product.materials?.findIndex((m: any) => m.id === activeMaterial?.id) ?? 0;
 
  return (
@@ -139,7 +140,7 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
 
  <div className="flex flex-wrap gap-3">
  <div className="inline-flex items-center gap-2 bg-slate-800 text-amber-400 px-3 py-1.5 rounded-full border border-slate-700 text-[10px] font-bold uppercase tracking-wider shadow-sm dark:shadow-black/10">
- {activeMaterial.type === 'link' ? <LinkIcon size={13}/> : <FileText size={13}/>}
+ {activeMaterial.type === 'link' ? <LinkIcon size={13}/> : isHtml ? <Globe size={13}/> : <FileText size={13}/>}
  Materi {activeIndex + 1}
  </div>
  <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-400 text-xs py-1.5">
@@ -176,17 +177,19 @@ export default function MyEProductDetailClient({ slug }: { slug: string }) {
  <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed mb-10 px-4">
  {activeMaterial.type === 'link' 
  ?"Materi ini tersedia melalui tautan eksternal yang aman dan terverifikasi. Klik tombol di bawah untuk membuka ruang penyimpanan atau video pembelajaran di tab baru."
+ :isHtml
+ ?"Materi Premium berupa interaktif HTML telah dioptimasi. Klik tombol di bawah untuk menampilkannya langsung di tab baru secara aman."
  :"File materi Premium telah dioptimasi untuk perangkat Anda. Klik tombol di bawah untuk menyimpannya langsung ke penyimpanan lokal secara instan."
  }
  </p>
 
  <button 
  onClick={handleDownload}
- className="group relative inline-flex items-center justify-center gap-3.5 px-10 py-4 md:py-5 bg-gradient-to-r from-orange-600 to-amber-700 hover:from-orange-700 hover:to-amber-800 text-white rounded-[1rem] font-black text-sm md:text-base transition-transform duration-300 shadow-xl dark:shadow-black/20 shadow-amber-900/20 active:scale-[0.98] overflow-hidden w-full sm:w-auto"
+ className={`group relative inline-flex items-center justify-center gap-3.5 px-10 py-4 md:py-5 ${isHtml ? 'bg-gradient-to-r from-indigo-600 to-blue-700 hover:from-indigo-700 hover:to-blue-800 shadow-blue-900/20' : 'bg-gradient-to-r from-orange-600 to-amber-700 hover:from-orange-700 hover:to-amber-800 shadow-amber-900/20'} text-white rounded-[1rem] font-black text-sm md:text-base transition-transform duration-300 shadow-xl dark:shadow-black/20 active:scale-[0.98] overflow-hidden w-full sm:w-auto`}
  >
  <div className="absolute inset-0 w-full h-full -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
- {activeMaterial.type === 'link' ? <PlayCircle size={22} className="relative z-10"/> : <DownloadCloud size={22} className="relative z-10"/>}
- <span className="relative z-10">{activeMaterial.type === 'link' ?"Buka Tautan Materi":"Download File Materi"}</span>
+ {activeMaterial.type === 'link' ? <PlayCircle size={22} className="relative z-10"/> : isHtml ? <Globe size={22} className="relative z-10"/> : <DownloadCloud size={22} className="relative z-10"/>}
+ <span className="relative z-10">{activeMaterial.type === 'link' ?"Buka Tautan Materi":isHtml ?"Buka Materi Interaktif":"Download File Materi"}</span>
  <ChevronRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform"/>
  </button>
 
