@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { apiFetch } from '@/app/utils/api';
 import { safeStorage } from '@/app/utils/safeStorage';
+import { useParams } from 'next/navigation';
 
-export default function ViewMateriIdPage({ params }: { params: { id: string } }) {
+export default function ViewMateriIdPage() {
+  const params = useParams();
+  const id = params.id;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
@@ -13,12 +16,14 @@ export default function ViewMateriIdPage({ params }: { params: { id: string } })
   useEffect(() => {
     const fetchSignedUrl = async () => {
       try {
+        if (!id) return;
+        
         const token = safeStorage.getItem('token');
         if (!token) {
           throw new Error("Sesi Anda telah berakhir. Silakan login kembali.");
         }
 
-        const res = await apiFetch(`/my-e-products/materials/${params.id}/download-url`, {
+        const res = await apiFetch(`/my-e-products/materials/${id}/download-url`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -40,7 +45,7 @@ export default function ViewMateriIdPage({ params }: { params: { id: string } })
     };
 
     fetchSignedUrl();
-  }, [params.id]);
+  }, [id]);
 
   if (error) {
     return (
