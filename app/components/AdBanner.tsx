@@ -124,28 +124,28 @@ export default function AdBanner({ placement, variant = 'banner', className = ''
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Image Container — proportional aspect ratio */}
-        <div className="relative w-full aspect-[3/1] sm:aspect-[3.5/1] lg:aspect-[4/1]">
+        {/* Image Container — auto height based on active image to prevent cropping */}
+        <div className="relative w-full h-auto flex items-center justify-center">
           {ads.map((ad, idx) => {
             const isActive = idx === currentIndex;
             return (
               <div
                 key={idx}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${
-                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                className={`transition-opacity duration-300 w-full ${
+                  isActive ? 'relative opacity-100 z-10' : 'absolute top-0 left-0 h-full opacity-0 z-0'
                 }`}
               >
                 {ad.url ? (
                   <a href={ad.url} target="_blank" rel="noreferrer" className="block w-full h-full">
                     <img loading="lazy" src={`${STORAGE_URL}/${ad.image_path}`}
                       alt={ad.title}
-                      className="w-full h-full object-cover rounded-xl md:rounded-2xl"
+                      className="w-full h-auto object-contain rounded-xl md:rounded-2xl"
                     />
                   </a>
                 ) : (
                   <img loading="lazy" src={`${STORAGE_URL}/${ad.image_path}`}
                     alt={ad.title}
-                    className="w-full h-full object-cover rounded-xl md:rounded-2xl"
+                    className="w-full h-auto object-contain rounded-xl md:rounded-2xl"
                   />
                 )}
               </div>
