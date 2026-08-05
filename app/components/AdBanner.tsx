@@ -120,7 +120,7 @@ export default function AdBanner({ placement, variant = 'banner', className = ''
   return (
     <section className={`px-4 sm:px-6 lg:px-8 py-4 max-w-7xl mx-auto w-full relative z-10 ${className}`}>
       <div
-        className="relative w-full max-w-5xl mx-auto rounded-xl md:rounded-2xl border border-slate-200/50 dark:border-white/10 group bg-slate-950 ring-1 ring-black/5 dark:ring-white/5 transform-gpu translate-z-0 overflow-clip"
+        className="relative w-full max-w-3xl mx-auto rounded-xl md:rounded-2xl border border-slate-200/50 dark:border-white/10 group bg-slate-950 ring-1 ring-black/5 dark:ring-white/5 transform-gpu translate-z-0 overflow-clip"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
