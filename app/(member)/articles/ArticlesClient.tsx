@@ -346,7 +346,7 @@ export default function ArticlesClient() {
                         </div>
 
                         {/* Kotak Iklan / Banner Edukasi */}
-                        <AdBanner placement="article" variant="sidebar" />
+                        <AdBanner placement="article" />
                         
 
                     </div>

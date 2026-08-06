@@ -329,7 +329,7 @@ export default function AdminAdvertisementsPage() {
                   <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Gambar Banner</label>
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full aspect-[21/9] rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-500 hover:bg-indigo-50/50 bg-slate-50 cursor-pointer overflow-hidden flex flex-col items-center justify-center transition-colors relative"
+                    className="w-full aspect-[16/5] rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-500 hover:bg-indigo-50/50 bg-slate-50 cursor-pointer overflow-hidden flex flex-col items-center justify-center transition-colors relative"
                   >
                     {imagePreview ? (
                       <img loading="lazy" src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -337,7 +337,7 @@ export default function AdminAdvertisementsPage() {
                       <div className="text-center p-4">
                         <ImageIcon className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                         <p className="text-xs font-bold text-slate-600">Klik untuk upload gambar</p>
-                        <p className="text-[10px] text-slate-400 mt-1">Rekomendasi rasio: 21:9 (Landscape) untuk halaman utama, atau 4:5 (Persegi) untuk Artikel.</p>
+                        <p className="text-[10px] text-slate-400 mt-1">Rekomendasi rasio: 16:5 (Landscape lebar). Ukuran ideal: 1600×500 px. Berlaku untuk SEMUA lokasi tampil.</p>
                         <p className="text-[10px] text-slate-400 mt-0.5">Format: JPG, PNG, WEBP (Max 10MB)</p>
                       </div>
                     )}
