@@ -345,14 +345,13 @@ export default function ArticlesClient() {
                             </div>
                         </div>
 
-                        {/* Kotak Iklan / Banner Edukasi */}
-                        <AdBanner placement="article" />
-                        
-
                     </div>
                 </aside>
 
             </div>
+
+            {/* Banner Iklan — Full Width, di bawah konten artikel */}
+            <AdBanner placement="article" className="mt-6 md:mt-10" />
 
             <style jsx global>{`
  /* CSS KHUSUS GAYA EDITORIAL RESPONSIVE */
