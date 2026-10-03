@@ -6,7 +6,7 @@ import {
   Plus, Search, Edit, Trash2, Image as ImageIcon, 
   FileText, CheckCircle2, XCircle, Loader2, PackageSearch, 
   Eye, EyeOff, Layers, Info, User, AlertTriangle, CreditCard, SmartphoneNfc, Store, AlertCircle, ArrowUpRight,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Send, Mail
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -166,6 +166,64 @@ export default function AdminEProductsPage() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
   };
 
+  // 🔥 BROADCAST LOGIC (PREMIUM) 🔥
+  const [broadcastMode, setBroadcastMode] = useState<'idle' | 'confirm' | 'progress' | 'done'>('idle');
+  const [broadcastTarget, setBroadcastTarget] = useState<any>(null);
+  const [broadcastProgress, setBroadcastProgress] = useState({ total: 0, sent: 0, percentage: 0, is_completed: false });
+  const [pollingRef, setPollingRef] = useState<NodeJS.Timeout | null>(null);
+
+  const openBroadcastConfirm = (product: any) => {
+    setBroadcastTarget(product);
+    setBroadcastMode('confirm');
+  };
+
+  const executeBroadcast = async () => {
+    if (!broadcastTarget) return;
+    setBroadcastMode('progress');
+    setBroadcastProgress({ total: 0, sent: 0, percentage: 0, is_completed: false });
+
+    try {
+      const res = await apiFetch(`/admin/e-products/${broadcastTarget.id}/broadcast`, { method: 'POST' });
+      const json = await res.json();
+      
+      if (res.ok && json.success) {
+        toast.success("Broadcast dimulai!");
+        setBroadcastProgress(prev => ({ ...prev, total: json.total_target }));
+        const interval = setInterval(() => pollProgress(broadcastTarget.id), 2000);
+        setPollingRef(interval);
+      } else {
+        toast.error(json.message || "Gagal memulai broadcast.");
+        setBroadcastMode('idle');
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan sistem.");
+      setBroadcastMode('idle');
+    }
+  };
+
+  const pollProgress = async (id: number) => {
+    try {
+      const res = await apiFetch(`/admin/e-products/${id}/broadcast-progress`);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setBroadcastProgress(json.data);
+        if (json.data.is_completed) {
+          setPollingRef((prev) => {
+            if (prev) clearInterval(prev);
+            return null;
+          });
+          setBroadcastMode('done');
+        }
+      }
+    } catch (error) {}
+  };
+
+  const closeBroadcastModal = () => {
+    if (pollingRef) clearInterval(pollingRef);
+    setBroadcastMode('idle');
+    setBroadcastTarget(null);
+  };
+
   const filteredProducts = products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   // Reset pagination when search changes
@@ -272,6 +330,10 @@ export default function AdminEProductsPage() {
                           <Edit size={14} /> Kelola Materi
                         </Link>
                         
+                        <button onClick={() => openBroadcastConfirm(product)} className="px-4 py-2 flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 hover:bg-amber-500 hover:text-white rounded-lg transition-colors border border-amber-100" title="Kirim Email Promosi ke Semua Konsumen">
+                          <Send size={14} /> Broadcast
+                        </button>
+
                         <button onClick={() => handleDelete(product.id)} className="p-2 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 shadow-sm" title="Hapus Permanen"><Trash2 size={16} /></button>
                       </div>
                     </td>
@@ -535,8 +597,177 @@ export default function AdminEProductsPage() {
         )}
       </AnimatePresence>
 
-      {/* ════ STYLES ════ */}
+      {/* 🔥 MODAL BROADCAST PREMIUM 🔥 */}
+      <AnimatePresence>
+        {broadcastMode !== 'idle' && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => broadcastMode === 'confirm' && closeBroadcastModal()} className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-indigo-950/50 to-slate-900/70 backdrop-blur-md" />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 30 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-lg overflow-hidden"
+            >
+              {/* Glass Card */}
+              <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-[0_25px_80px_rgba(0,0,0,0.25)] border border-white/30">
+                
+                {/* Gradient Accent Bar */}
+                <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-t-[2rem]" />
+                
+                {/* ═══ MODE: KONFIRMASI ═══ */}
+                {broadcastMode === 'confirm' && (
+                  <div className="p-8">
+                    <div className="text-center mb-6">
+                      <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_8px_30px_rgba(99,102,241,0.4)] rotate-3">
+                        <Send size={36} className="text-white -rotate-3" />
+                      </div>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">Broadcast Email</h3>
+                      <p className="text-sm text-slate-500 mt-2 leading-relaxed max-w-xs mx-auto">
+                        Email promosi akan dikirim ke <span className="font-bold text-indigo-600">seluruh konsumen</span> yang terdaftar di platform
+                      </p>
+                    </div>
+
+                    {/* Product Preview Card */}
+                    <div className="bg-gradient-to-br from-slate-50 to-indigo-50/50 rounded-2xl p-5 border border-slate-200/80 mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-16 rounded-xl overflow-hidden bg-white border border-slate-200 shrink-0 flex items-center justify-center shadow-sm">
+                          {broadcastTarget?.cover_image ? (
+                            <img src={`${STORAGE_URL}/${broadcastTarget.cover_image}`} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon size={20} className="text-slate-300" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 truncate text-sm">{broadcastTarget?.title}</p>
+                          <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                            <User size={12} /> {broadcastTarget?.author?.name || 'Kreator'}
+                          </p>
+                          <span className="inline-block mt-1.5 text-[10px] font-black px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-600">
+                            {broadcastTarget?.category?.name || 'Produk Digital'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Warning */}
+                    <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-3.5 flex gap-3 items-start mb-6">
+                      <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-amber-700 leading-relaxed">
+                        <strong>Perhatian:</strong> Tindakan ini tidak dapat dibatalkan setelah dimulai. Pastikan produk sudah siap sebelum melakukan broadcast.
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3">
+                      <button onClick={closeBroadcastModal} className="flex-1 py-3.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all active:scale-[0.98]">
+                        Batalkan
+                      </button>
+                      <button onClick={executeBroadcast} className="flex-1 py-3.5 text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl transition-all shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-[0.98] flex items-center justify-center gap-2">
+                        <Send size={16} /> Kirim Broadcast
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══ MODE: PROGRESS ═══ */}
+                {broadcastMode === 'progress' && (
+                  <div className="p-8">
+                    <div className="text-center mb-8">
+                      <div className="relative w-20 h-20 mx-auto mb-5">
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 animate-pulse shadow-[0_8px_30px_rgba(99,102,241,0.4)]" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Mail size={36} className="text-white animate-bounce" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">Mengirim Broadcast</h3>
+                      <p className="text-sm text-slate-500 mt-1 truncate max-w-[280px] mx-auto">{broadcastTarget?.title}</p>
+                    </div>
+
+                    {/* Progress Ring & Bar */}
+                    <div className="mb-6">
+                      {/* Percentage Display */}
+                      <div className="flex items-end justify-center gap-1 mb-4">
+                        <span className="text-5xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent leading-none">
+                          {broadcastProgress.percentage}
+                        </span>
+                        <span className="text-xl font-black text-slate-400 mb-1">%</span>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner">
+                        <motion.div 
+                          className="h-3 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 relative"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${broadcastProgress.percentage}%` }}
+                          transition={{ duration: 0.6, ease: 'easeOut' }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 animate-[shimmer_2s_infinite]" />
+                        </motion.div>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                      <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+                        <p className="text-2xl font-black text-indigo-600">{broadcastProgress.sent}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Terkirim</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+                        <p className="text-2xl font-black text-slate-700">{broadcastProgress.total}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total Target</p>
+                      </div>
+                    </div>
+
+                    <button onClick={closeBroadcastModal} className="w-full py-3.5 text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-200">
+                      Tutup — Proses Tetap Berjalan di Background
+                    </button>
+                  </div>
+                )}
+
+                {/* ═══ MODE: SELESAI ═══ */}
+                {broadcastMode === 'done' && (
+                  <div className="p-8">
+                    <div className="text-center mb-6">
+                      <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-[0_8px_30px_rgba(16,185,129,0.4)]">
+                        <CheckCircle2 size={40} className="text-white" />
+                      </div>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">Broadcast Selesai!</h3>
+                      <p className="text-sm text-slate-500 mt-2">Semua email promosi berhasil dikirim</p>
+                    </div>
+
+                    {/* Final Stats */}
+                    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100 mb-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <p className="text-3xl font-black text-emerald-600">{broadcastProgress.sent}</p>
+                          <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Email Terkirim</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-3xl font-black text-emerald-600">100%</p>
+                          <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Berhasil</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button onClick={closeBroadcastModal} className="w-full py-3.5 text-sm font-black text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-xl transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] active:scale-[0.98]">
+                      Selesai
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+            {/* ════ STYLES ════ */}
       <style jsx global>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
         .ql-toolbar.ql-snow {
           border: none !important;
           border-bottom: 1px solid #e2e8f0 !important;
