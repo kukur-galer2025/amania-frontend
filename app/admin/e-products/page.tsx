@@ -235,6 +235,44 @@ export default function AdminEProductsPage() {
     if (pollingRef) clearInterval(pollingRef);
     setBroadcastMode('idle');
     setBroadcastTarget(null);
+    setRecipients([]);
+    setRecipientPage(1);
+    setRecipientLastPage(1);
+    setRecipientFilter('all');
+    setShowRecipients(false);
+  };
+
+  // 🔥 RECIPIENTS LIST STATE 🔥
+  const [showRecipients, setShowRecipients] = useState(false);
+  const [recipients, setRecipients] = useState<any[]>([]);
+  const [recipientPage, setRecipientPage] = useState(1);
+  const [recipientLastPage, setRecipientLastPage] = useState(1);
+  const [recipientFilter, setRecipientFilter] = useState<'all' | 'sent' | 'pending' | 'failed'>('all');
+  const [recipientSearch, setRecipientSearch] = useState('');
+  const [recipientLoading, setRecipientLoading] = useState(false);
+
+  const fetchRecipients = async (productId: number, page = 1, status = 'all', search = '') => {
+    setRecipientLoading(true);
+    try {
+      let url = `/admin/e-products/${productId}/broadcast-recipients?page=${page}`;
+      if (status !== 'all') url += `&status=${status}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      const res = await apiFetch(url);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setRecipients(json.data.data);
+        setRecipientPage(json.data.current_page);
+        setRecipientLastPage(json.data.last_page);
+      }
+    } catch (e) {}
+    setRecipientLoading(false);
+  };
+
+  const toggleRecipients = () => {
+    if (!showRecipients && broadcastTarget) {
+      fetchRecipients(broadcastTarget.id, 1, recipientFilter, recipientSearch);
+    }
+    setShowRecipients(!showRecipients);
   };
 
   const filteredProducts = products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -674,6 +712,97 @@ export default function AdminEProductsPage() {
                             (Max limit harian: 100)
                           </span>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Tombol Lihat Penerima */}
+                    <button 
+                      onClick={toggleRecipients} 
+                      className="w-full mb-4 py-2.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-100 flex items-center justify-center gap-2"
+                    >
+                      <Eye size={14} /> {showRecipients ? 'Sembunyikan' : 'Lihat'} Daftar Penerima
+                    </button>
+
+                    {/* Recipients Panel */}
+                    {showRecipients && (
+                      <div className="mb-4 border border-slate-200 rounded-xl overflow-hidden">
+                        {/* Filter & Search */}
+                        <div className="bg-slate-50 p-3 flex gap-2 items-center border-b border-slate-200">
+                          <select
+                            value={recipientFilter}
+                            onChange={(e) => {
+                              const v = e.target.value as any;
+                              setRecipientFilter(v);
+                              if (broadcastTarget) fetchRecipients(broadcastTarget.id, 1, v, recipientSearch);
+                            }}
+                            className="text-[11px] font-bold bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          >
+                            <option value="all">Semua</option>
+                            <option value="sent">✅ Terkirim</option>
+                            <option value="pending">⏳ Pending</option>
+                            <option value="failed">❌ Gagal</option>
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Cari nama/email..."
+                            value={recipientSearch}
+                            onChange={(e) => {
+                              setRecipientSearch(e.target.value);
+                              if (broadcastTarget) fetchRecipients(broadcastTarget.id, 1, recipientFilter, e.target.value);
+                            }}
+                            className="flex-1 text-[11px] bg-white border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          />
+                        </div>
+
+                        {/* List */}
+                        <div className="max-h-[220px] overflow-y-auto custom-scrollbar">
+                          {recipientLoading ? (
+                            <div className="p-6 text-center text-xs text-slate-400">
+                              <Loader2 size={18} className="animate-spin mx-auto mb-2" /> Memuat...
+                            </div>
+                          ) : recipients.length === 0 ? (
+                            <div className="p-6 text-center text-xs text-slate-400">Tidak ada data.</div>
+                          ) : (
+                            recipients.map((r: any) => (
+                              <div key={r.id} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-800 truncate">{r.user?.name || '-'}</p>
+                                  <p className="text-[10px] text-slate-400 truncate">{r.user?.email || '-'}</p>
+                                </div>
+                                <span className={`text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap ${
+                                  r.status === 'sent' ? 'bg-emerald-100 text-emerald-600' :
+                                  r.status === 'failed' ? 'bg-red-100 text-red-600' :
+                                  'bg-amber-100 text-amber-600'
+                                }`}>
+                                  {r.status === 'sent' ? '✅ Terkirim' : r.status === 'failed' ? '❌ Gagal' : '⏳ Pending'}
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        {/* Pagination */}
+                        {recipientLastPage > 1 && (
+                          <div className="bg-slate-50 p-2 flex items-center justify-between border-t border-slate-200">
+                            <button
+                              disabled={recipientPage <= 1}
+                              onClick={() => broadcastTarget && fetchRecipients(broadcastTarget.id, recipientPage - 1, recipientFilter, recipientSearch)}
+                              className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 hover:bg-slate-100 transition-all"
+                            >
+                              ← Prev
+                            </button>
+                            <span className="text-[10px] font-bold text-slate-500">
+                              Hal {recipientPage} / {recipientLastPage}
+                            </span>
+                            <button
+                              disabled={recipientPage >= recipientLastPage}
+                              onClick={() => broadcastTarget && fetchRecipients(broadcastTarget.id, recipientPage + 1, recipientFilter, recipientSearch)}
+                              className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 hover:bg-slate-100 transition-all"
+                            >
+                              Next →
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
