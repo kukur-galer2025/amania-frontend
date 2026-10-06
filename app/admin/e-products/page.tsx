@@ -169,14 +169,14 @@ export default function AdminEProductsPage() {
   // 🔥 BROADCAST LOGIC (TRACKING V2) 🔥
   const [broadcastMode, setBroadcastMode] = useState<'idle' | 'confirm' | 'progress' | 'done'>('idle');
   const [broadcastTarget, setBroadcastTarget] = useState<any>(null);
-  const [broadcastStats, setBroadcastStats] = useState({ total: 0, sent: 0, pending: 0, failed: 0, is_completed: false });
+  const [broadcastStats, setBroadcastStats] = useState({ total: 0, sent: 0, pending: 0, failed: 0, is_completed: false, sent_today: 0, daily_limit: 100 });
   const [sendLimit, setSendLimit] = useState(100);
   const [pollingRef, setPollingRef] = useState<NodeJS.Timeout | null>(null);
 
   const openBroadcastConfirm = async (product: any) => {
     setBroadcastTarget(product);
     setBroadcastMode('confirm');
-    setBroadcastStats({ total: 0, sent: 0, pending: 0, failed: 0, is_completed: false });
+    setBroadcastStats({ total: 0, sent: 0, pending: 0, failed: 0, is_completed: false, sent_today: 0, daily_limit: 100 });
     
     try {
       const res = await apiFetch(`/admin/e-products/${product.id}/broadcast-stats`);
@@ -690,28 +690,41 @@ export default function AdminEProductsPage() {
                       </div>
                     </div>
 
-                    {broadcastStats.is_completed || broadcastStats.pending === 0 ? (
+                    {broadcastStats.sent_today >= broadcastStats.daily_limit ? (
+                      <div className="bg-red-50 text-red-700 p-4 rounded-xl text-center text-sm font-bold mb-6 border border-red-200">
+                        ⚠️ Limit harian Resend Anda ({broadcastStats.daily_limit}) sudah habis hari ini. Silakan kembali besok.
+                      </div>
+                    ) : broadcastStats.is_completed || broadcastStats.pending === 0 ? (
                       <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-center text-sm font-bold mb-6 border border-emerald-200">
                         🎉 Semua email untuk produk ini sudah berhasil dikirim!
                       </div>
                     ) : (
                       <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
-                        <label className="block text-xs font-bold text-indigo-900 mb-2">
-                          Jumlah email yang ingin dikirim sekarang:
-                        </label>
+                        <div className="flex justify-between items-end mb-2">
+                          <label className="block text-xs font-bold text-indigo-900">
+                            Jumlah email yang ingin dikirim sekarang:
+                          </label>
+                          <span className="text-[10px] font-black text-white bg-indigo-500 px-2 py-0.5 rounded-full">
+                            Sisa Kuota Hari Ini: {Math.max(0, broadcastStats.daily_limit - broadcastStats.sent_today)}
+                          </span>
+                        </div>
                         <div className="flex items-center gap-3">
                           <input 
                             type="number" 
                             min="1" 
-                            max={broadcastStats.pending}
+                            max={Math.min(broadcastStats.pending, Math.max(0, broadcastStats.daily_limit - broadcastStats.sent_today))}
                             value={sendLimit}
-                            onChange={(e) => setSendLimit(Math.min(Number(e.target.value), broadcastStats.pending))}
+                            onChange={(e) => setSendLimit(Math.min(Number(e.target.value), broadcastStats.pending, Math.max(0, broadcastStats.daily_limit - broadcastStats.sent_today)))}
                             className="flex-1 bg-white border border-indigo-200 rounded-lg px-4 py-2 text-sm font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           />
-                          <span className="text-xs text-indigo-500 font-medium whitespace-nowrap">
-                            (Max limit harian: 100)
+                          <span className="text-[10px] text-indigo-500 font-medium whitespace-nowrap">
+                            (Max: {Math.min(broadcastStats.pending, Math.max(0, broadcastStats.daily_limit - broadcastStats.sent_today))})
                           </span>
                         </div>
+                        <div className="mt-2 w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                          <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(broadcastStats.sent_today / broadcastStats.daily_limit) * 100}%` }}></div>
+                        </div>
+                        <p className="text-[9px] text-indigo-400 mt-1 text-right">Terkirim hari ini: {broadcastStats.sent_today} / {broadcastStats.daily_limit}</p>
                       </div>
                     )}
 
