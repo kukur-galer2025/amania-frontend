@@ -144,7 +144,15 @@ export default function RegisterClient() {
           )}
 
           <button
-            type="button" onClick={() => registerWithGoogle()}
+            type="button" 
+            onClick={() => {
+              const googleId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+              if (!googleId || googleId.startsWith('dummy')) {
+                toast.error('Google OAuth belum dikonfigurasi di .env.local. Silakan daftar menggunakan form manual.');
+                return;
+              }
+              registerWithGoogle();
+            }}
             disabled={isGoogleLoading || loading || showSuccessOverlay}
             className="w-full flex items-center justify-center gap-2.5 md:gap-3 bg-white border border-slate-300 md:border-2 md:border-slate-200 hover:bg-slate-50 text-slate-800 font-bold py-3 md:py-3.5 px-4 rounded-xl text-sm md:text-base disabled:opacity-50 transition-all mb-6 md:mb-8"
           >

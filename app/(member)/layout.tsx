@@ -993,7 +993,8 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
       {/* ════════ 🔥 FLOATING WHATSAPP BUTTON 🔥 ════════ */}
       <div
-        className="fixed bottom-24 md:bottom-[6.5rem] right-5 md:right-8 z-[99]"
+        id="floating-whatsapp-btn"
+        className="fixed bottom-[5.75rem] md:bottom-[6.5rem] right-6 md:right-8 z-[80] transition-all duration-300"
       >
         <Link
           href="https://wa.me/628985477864"
@@ -1013,6 +1014,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
           </div>
         </Link>
       </div>
+
 
       {/* DARK MODE INFO MODAL */}
       <AnimatePresence>

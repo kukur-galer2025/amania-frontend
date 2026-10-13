@@ -195,7 +195,14 @@ export default function LoginClient() {
           {/* Tombol Google Kustom */}
           <button
             type="button"
-            onClick={() => loginWithGoogle()}
+            onClick={() => {
+              const googleId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+              if (!googleId || googleId.startsWith('dummy')) {
+                toast.error('Google OAuth belum dikonfigurasi di .env.local. Silakan gunakan login via email.');
+                return;
+              }
+              loginWithGoogle();
+            }}
             disabled={isGoogleLoading || loading || showSuccessOverlay}
             className="w-full flex items-center justify-center gap-2.5 md:gap-3 bg-white border border-slate-300 md:border-2 md:border-slate-200 hover:bg-slate-50 hover:border-slate-400 md:hover:border-slate-300 text-slate-800 font-bold py-3 md:py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6 md:mb-8 shadow-sm focus:outline-none focus:ring-4 focus:ring-slate-100 text-sm md:text-base"
           >

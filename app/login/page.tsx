@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com';
 
   const jsonLd = {
     "@context": "https://schema.org",
