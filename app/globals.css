@@ -104,17 +104,34 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════
+   RICH TEXT CONTENT: Clean reset for Quill & HTML
+   Prevents white highlight boxes from copied text (Word/Docs)
+   ═══════════════════════════════════════════════════════ */
+.html-content,
+.html-content *:not(pre):not(code):not(kbd):not(table):not(th):not(td),
+.q-content,
+.q-content *:not(pre):not(code):not(kbd):not(table):not(th):not(td),
+.prose *:not(pre):not(code):not(kbd):not(table):not(th):not(td) {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════
    DARK MODE: Rich Text Content (Quill Editor / HTML)
    ═══════════════════════════════════════════════════════ */
 .dark .q-content,
-.dark .q-content p,
-.dark .q-content span,
-.dark .q-content li,
+.dark .q-content *:not(a):not(code):not(pre):not(strong):not(b):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6),
 .dark .html-content,
-.dark .html-content p,
-.dark .html-content span,
-.dark .html-content li {
+.dark .html-content *:not(a):not(code):not(pre):not(strong):not(b):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
   color: #cbd5e1 !important;
+}
+
+.dark .q-content em,
+.dark .q-content i,
+.dark .html-content em,
+.dark .html-content i {
+  color: #e2e8f0 !important;
+  font-style: italic !important;
 }
 
 .dark .q-content h1,
@@ -132,7 +149,7 @@ body {
 .dark .q-content b,
 .dark .html-content strong,
 .dark .html-content b {
-  color: #e2e8f0 !important;
+  color: #f8fafc !important;
 }
 
 .dark .q-content blockquote,

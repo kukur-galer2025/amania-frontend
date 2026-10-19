@@ -107,57 +107,61 @@ export default function TentangKamiClient() {
  </div>
 
  {/* ════ 3. KENAPA MEMILIH KAMI (Premium Dark Section - Skala Dashboard) ════ */}
- <div className="mx-auto max-w-6xl px-0 sm:px-2">
- <div className="relative isolate overflow-hidden bg-slate-900 px-6 py-12 sm:rounded-[2rem] sm:px-12 lg:flex lg:gap-x-12 lg:items-center shadow-xl dark:shadow-black/20 border border-slate-800">
- 
- <div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:text-left mb-10 lg:mb-0">
- <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-4">
- Standar Industri
- </h2>
- <p className="text-sm leading-relaxed text-slate-400 dark:text-slate-400">
- Setiap aset di platform Amania dikurasi secara ketat untuk menjamin relevansi dan kualitas maksimal bagi perkembangan *skill* Anda.
- </p>
- </div>
+		<div className="mx-auto max-w-6xl px-0 sm:px-2">
+			<div className="relative isolate overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 px-6 py-12 sm:rounded-[2rem] sm:px-12 lg:flex lg:gap-x-12 lg:items-center shadow-2xl border border-slate-800">
+				
+				{/* Ambient decorative glow */}
+				<div className="absolute -top-24 -left-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+				<div className="absolute -bottom-24 -right-24 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
- <div className="mx-auto max-w-md lg:mx-0 lg:flex-auto lg:max-w-none">
- <div className="grid grid-cols-1 gap-4">
- 
- <div className="flex items-start gap-4 rounded-xl bg-white dark:bg-slate-800/30 p-4 border border-slate-200/30 dark:border-slate-700/20 hover:bg-white/5 dark:hover:bg-slate-700/50">
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-500/30">
- <ShieldCheck className="h-5 w-5 text-indigo-400"/>
- </div>
- <div>
- <h4 className="font-semibold text-white text-sm mb-1">Transaksi Aman & Otomatis</h4>
- <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">Didukung *payment gateway* terpercaya, akses langsung terbuka otomatis detik itu juga setelah pembayaran.</p>
- </div>
- </div>
+				<div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:text-left mb-10 lg:mb-0 relative z-10">
+					<h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-4">
+						Standar Industri
+					</h2>
+					<p className="text-sm sm:text-base leading-relaxed text-slate-300">
+						Setiap aset di platform Amania dikurasi secara ketat untuk menjamin relevansi dan kualitas maksimal bagi perkembangan <span className="text-indigo-300 font-semibold italic">skill</span> Anda.
+					</p>
+				</div>
 
- <div className="flex items-start gap-4 rounded-xl bg-white dark:bg-slate-800/30 p-4 border border-slate-200/30 dark:border-slate-700/20 hover:bg-white/5 dark:hover:bg-slate-700/50">
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-500/30">
- <Zap className="h-5 w-5 text-emerald-400"/>
- </div>
- <div>
- <h4 className="font-semibold text-white text-sm mb-1">Akses Kapan Saja 24/7</h4>
- <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">Tidak perlu menunggu admin. Modul, e-book, dan rekaman langsung tersedia di lemari digital Anda.</p>
- </div>
- </div>
+				<div className="mx-auto max-w-md lg:mx-0 lg:flex-auto lg:max-w-none relative z-10">
+					<div className="grid grid-cols-1 gap-4">
+						
+						<div className="flex items-start gap-4 rounded-2xl bg-slate-800/70 hover:bg-slate-800/95 p-4 sm:p-5 border border-slate-700/60 shadow-lg backdrop-blur-sm transition-all duration-300 group">
+							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/25 transition-all duration-300">
+								<ShieldCheck className="h-5 w-5"/>
+							</div>
+							<div>
+								<h4 className="font-bold text-white text-sm sm:text-base mb-1">Transaksi Aman & Otomatis</h4>
+								<p className="text-xs sm:text-sm leading-relaxed text-slate-300">Didukung <span className="text-slate-100 font-medium italic">payment gateway</span> terpercaya, akses langsung terbuka otomatis detik itu juga setelah pembayaran.</p>
+							</div>
+						</div>
 
- <div className="flex items-start gap-4 rounded-xl bg-white dark:bg-slate-800/30 p-4 border border-slate-200/30 dark:border-slate-700/20 hover:bg-white/5 dark:hover:bg-slate-700/50">
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-500/20 border border-blue-500/30">
- <CheckCircle2 className="h-5 w-5 text-blue-400"/>
- </div>
- <div>
- <h4 className="font-semibold text-white text-sm mb-1">Materi Relevan & Terkurasi</h4>
- <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-400">Materi disusun oleh pakar dan diperbarui berkala mengikuti kebutuhan industri terkini.</p>
- </div>
- </div>
+						<div className="flex items-start gap-4 rounded-2xl bg-slate-800/70 hover:bg-slate-800/95 p-4 sm:p-5 border border-slate-700/60 shadow-lg backdrop-blur-sm transition-all duration-300 group">
+							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/25 transition-all duration-300">
+								<Zap className="h-5 w-5"/>
+							</div>
+							<div>
+								<h4 className="font-bold text-white text-sm sm:text-base mb-1">Akses Kapan Saja 24/7</h4>
+								<p className="text-xs sm:text-sm leading-relaxed text-slate-300">Tidak perlu menunggu admin. Modul, e-book, dan rekaman langsung tersedia di lemari digital Anda.</p>
+							</div>
+						</div>
 
- </div>
- </div>
+						<div className="flex items-start gap-4 rounded-2xl bg-slate-800/70 hover:bg-slate-800/95 p-4 sm:p-5 border border-slate-700/60 shadow-lg backdrop-blur-sm transition-all duration-300 group">
+							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 group-hover:scale-110 group-hover:bg-blue-500/25 transition-all duration-300">
+								<CheckCircle2 className="h-5 w-5"/>
+							</div>
+							<div>
+								<h4 className="font-bold text-white text-sm sm:text-base mb-1">Materi Relevan & Terkurasi</h4>
+								<p className="text-xs sm:text-sm leading-relaxed text-slate-300">Materi disusun oleh pakar dan diperbarui berkala mengikuti kebutuhan industri terkini.</p>
+							</div>
+						</div>
 
- </div>
- </div>
+					</div>
+				</div>
 
- </div>
- );
+			</div>
+		</div>
+
+	</div>
+  );
 }

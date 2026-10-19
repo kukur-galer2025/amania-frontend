@@ -31,6 +31,25 @@ function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
     );
 }
 
+const cleanHtmlContent = (html: string) => {
+    if (!html) return '';
+    return html
+        .replace(/&nbsp;/g, ' ')
+        .replace(/style="([^"]*)"/gi, (match, styleContent) => {
+            const cleaned = styleContent
+                .replace(/(?:background-color|background)\s*:\s*[^;"]+;?/gi, '')
+                .replace(/font-family\s*:\s*[^;"]+;?/gi, '')
+                .trim();
+            return cleaned ? `style="${cleaned}"` : '';
+        })
+        .replace(/class="([^"]*)"/gi, (match, classContent) => {
+            const cleaned = classContent
+                .replace(/\bql-bg-[a-zA-Z0-9_-]+\b/g, '')
+                .trim();
+            return cleaned ? `class="${cleaned}"` : '';
+        });
+};
+
 export default function EProductDetailClient({ slug }: { slug: string }) {
     const router = useRouter();
     const [product, setProduct] = useState<any>(null);
@@ -306,15 +325,19 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
  }
  .html-content { font-size: 1.05rem; line-height: 1.85; color: #475569; }
  .html-content, .html-content * { word-break: normal !important; word-wrap: normal !important; overflow-wrap: break-word !important; white-space: normal !important; }
- .dark .html-content { color: #cbd5e1; }
- .html-content p { margin-bottom: 1.5em; max-width: 100%; overflow-x: hidden; }
+ .html-content, .html-content *:not(pre):not(code):not(kbd) { background-color: transparent !important; background: transparent !important; }
+ .dark .html-content, .dark .html-content *:not(a):not(code):not(pre):not(strong):not(b):not(h1):not(h2):not(h3):not(h4) { color: #cbd5e1 !important; }
+ .html-content p { margin-bottom: 1.25em; max-width: 100%; overflow-x: hidden; }
  .html-content img, .html-content video, .html-content iframe { max-width: 100%; height: auto; border-radius: 1rem; margin: 1.5rem 0; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
- .html-content strong { color: #1e293b; font-weight: 800; }
- .dark .html-content strong { color: #f8fafc; }
+ .html-content strong, .html-content b { color: #1e293b; font-weight: 800; }
+ .dark .html-content strong, .dark .html-content b { color: #f8fafc !important; }
+ .html-content em, .html-content i { font-style: italic; }
+ .dark .html-content em, .dark .html-content i { color: #e2e8f0 !important; }
  .html-content ul { padding-left: 1.5em; margin-bottom: 1.5em; list-style-type: disc; }
+ .html-content ol { padding-left: 1.5em; margin-bottom: 1.5em; list-style-type: decimal; }
  .html-content li { margin-bottom: 0.5em; }
- .html-content h2 { color: #0f172a; font-weight: 900; margin-top: 2.5em; margin-bottom: 1em; font-size: 1.5rem; letter-spacing: -0.02em; }
- .dark .html-content h2 { color: #f8fafc; }
+ .html-content h2 { color: #0f172a; font-weight: 900; margin-top: 2em; margin-bottom: 0.8em; font-size: 1.4rem; letter-spacing: -0.02em; }
+ .dark .html-content h2 { color: #f8fafc !important; }
  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
  .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -453,7 +476,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                         </div>
 
                         {/* 2. DESKRIPSI HTML CARD - ENHANCED */}
-                        <div className="rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-8 md:p-10 border border-slate-200 dark:border-slate-800 w-full mt-2 overflow-hidden relative group">
+                        <div className="rounded-[1.5rem] md:rounded-[2rem] p-5 sm:p-8 md:p-10 border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 backdrop-blur-sm w-full mt-2 overflow-hidden relative group">
                             {/* Decorative corner accent */}
                             {/* removed bg gradient corner */}
 
@@ -466,7 +489,7 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
                                     <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Apa yang akan Anda dapatkan</p>
                                 </div>
                             </div>
-                            <div className="html-content w-full" dangerouslySetInnerHTML={{ __html: product.description.replace(/&nbsp;/g, ' ') }} />
+                            <div className="html-content w-full" dangerouslySetInnerHTML={{ __html: cleanHtmlContent(product.description) }} />
                         </div>
 
                         {/* 3. SEKSI ULASAN - ENHANCED */}
