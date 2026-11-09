@@ -533,10 +533,23 @@ export default function CartClient() {
  </div>
  </div>
  <div className="p-5 md:p-6 bg-white dark:bg-[#111827] border-t border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row items-center justify-between gap-4">
- <div className="w-full sm:w-auto text-center sm:text-left"><p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase mb-1">Total Tagihan</p><p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{formatRupiah(totals.totalPrice)}</p></div>
+ <div className="w-full sm:w-auto text-center sm:text-left">
+  <p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase mb-1">Total Tagihan</p>
+  {voucherData ? (
+    <div>
+      <p className="text-xs text-slate-400 line-through leading-none">{formatRupiah(totals.totalPrice)}</p>
+      <p className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatRupiah(voucherData.final_price)}</p>
+    </div>
+  ) : (
+    <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{formatRupiah(totals.totalPrice)}</p>
+  )}
+ </div>
  
- {/* 🔥 TOMBOL CHECKOUT MODAL TRIPAY 🔥 */}
- <button onClick={handleProcessCheckout} disabled={!paymentProof || checkoutLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg dark:shadow-black/20 shadow-emerald-600/20 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 dark:text-slate-400 transition-transform flex items-center justify-center gap-2">
+ {/* 🔥 TOMBOL CHECKOUT MODAL DENGAN KONFIRMASI 🔥 */}
+ <button onClick={() => {
+   if (!paymentProof) { toast.error('Unggah bukti transfer terlebih dahulu!'); return; }
+   setIsConfirmModalOpen(true);
+ }} disabled={!paymentProof || checkoutLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg dark:shadow-black/20 shadow-emerald-600/20 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 dark:text-slate-400 transition-transform flex items-center justify-center gap-2">
  {checkoutLoading ? <Loader2 className="animate-spin shrink-0" size={18}/> : <FaMoneyIcon className="shrink-0 w-[20px] h-[14px]"/>} {checkoutLoading ? 'Memproses...' : 'Bayar Sekarang'}
  </button>
  </div>
@@ -544,6 +557,62 @@ export default function CartClient() {
  </div>
  )}
  </AnimatePresence>
+
+ {/* MODAL: KONFIRMASI PEMBAYARAN CART */}
+ {isConfirmModalOpen && (
+   <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+     <div onClick={() => setIsConfirmModalOpen(false)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+     <div className="relative bg-white dark:bg-[#111827] rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700/50">
+       <div className="p-6 text-center">
+         <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+           <CheckCircle2 size={28} className="text-emerald-500" />
+         </div>
+         <h3 className="text-base font-black text-slate-900 dark:text-white mb-2">Konfirmasi Pengiriman Bukti</h3>
+         <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+           Pastikan bukti transfer yang Anda unggah sudah benar untuk {selectedItems.length} produk terpilih.
+         </p>
+         <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-left space-y-2 mb-5 text-sm">
+           <div className="flex justify-between">
+             <span className="text-slate-500 dark:text-slate-400">Total Item</span>
+             <span className="font-bold text-slate-800 dark:text-slate-200">{selectedItems.length} Produk</span>
+           </div>
+           <div className="flex justify-between">
+             <span className="text-slate-500 dark:text-slate-400">File Bukti</span>
+             <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[60%]">{paymentProof?.name}</span>
+           </div>
+           {voucherData && (
+             <div className="flex justify-between">
+               <span className="text-slate-500 dark:text-slate-400">Voucher</span>
+               <span className="font-bold text-emerald-600">{voucherData.code} (-{formatRupiah(voucherData.discount_amount)})</span>
+             </div>
+           )}
+           <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
+             <span className="text-slate-700 dark:text-slate-300 font-bold">Total Bayar</span>
+             <span className="font-black text-emerald-600 dark:text-emerald-400">
+               {formatRupiah(voucherData ? voucherData.final_price : totals.totalPrice)}
+             </span>
+           </div>
+         </div>
+       </div>
+       <div className="flex gap-3 px-6 pb-6">
+         <button onClick={() => setIsConfirmModalOpen(false)}
+           className="flex-1 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+           Batal
+         </button>
+         <button 
+           onClick={() => {
+             setIsConfirmModalOpen(false);
+             handleProcessCheckout();
+           }} 
+           disabled={checkoutLoading}
+           className="flex-1 py-3 text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-70 flex items-center justify-center gap-2">
+           {checkoutLoading ? <Loader2 size={15} className="animate-spin" /> : null}
+           Ya, Kirim Bukti
+         </button>
+       </div>
+     </div>
+   </div>
+ )}
 
  <style jsx global>{`
  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
