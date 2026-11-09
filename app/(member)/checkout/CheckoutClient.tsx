@@ -45,6 +45,9 @@ export default function CheckoutClient() {
  // 🔥 STATE BARU UNTUK MODAL BUKTI KOSONG 🔥
  const [showMissingProofModal, setShowMissingProofModal] = useState(false);
 
+ // STATE KONFIRMASI SEBELUM SUBMIT
+ const [showPaymentConfirmModal, setShowPaymentConfirmModal] = useState(false);
+
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
  useEffect(() => {
@@ -115,6 +118,12 @@ export default function CheckoutClient() {
  return toast.error("Harap konfirmasi data profil Anda terlebih dahulu.");
  }
 
+ // Tampilkan konfirmasi modal
+ setShowPaymentConfirmModal(true);
+ };
+
+ const submitCheckout = async () => {
+ setShowPaymentConfirmModal(false);
  setIsSubmitting(true);
  const loadToast = toast.loading("Memverifikasi pendaftaran...");
 
@@ -164,8 +173,6 @@ export default function CheckoutClient() {
  setIsSubmitting(false);
  } 
  };
-
- // 🔥 FUNGSI UNDUH GAMBAR QRIS 🔥
  const downloadQris = () => {
  const link = document.createElement('a');
  link.href = '/qris-amania.webp'; // Pastikan path gambar sudah benar
@@ -202,7 +209,7 @@ export default function CheckoutClient() {
   const organizerAvatar = event.organizer?.avatar ? `${STORAGE_URL}/${event.organizer.avatar}` : null;
 
  return (
- <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] pb-24 font-sans overflow-x-hidden w-full">
+ <><div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] pb-24 font-sans overflow-x-hidden w-full">
  
  {/* ==================================================== */}
  {/* OVERLAY MODAL BUKTI TRANSFER KOSONG (OPTIMASI MOBILE) */}
@@ -699,5 +706,63 @@ export default function CheckoutClient() {
 
  </main>
  </div>
+
+ {/* MODAL KONFIRMASI PEMBAYARAN */}
+ {showPaymentConfirmModal && (
+ <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+ <div onClick={() => setShowPaymentConfirmModal(false)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+ <div className="relative bg-white dark:bg-[#111827] rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700/50">
+ <div className="p-6 text-center">
+ <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+ <CheckCircle2 size={28} className="text-emerald-500" />
+ </div>
+ <h3 className="text-base font-black text-slate-900 dark:text-white mb-2">Konfirmasi Pengiriman Bukti</h3>
+ <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+ Pastikan bukti pembayaran yang Anda unggah sudah benar sebelum dikirim.
+ </p>
+ <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-left space-y-2 mb-5 text-sm">
+ <div className="flex justify-between">
+ <span className="text-slate-500 dark:text-slate-400">Event</span>
+ <span className="font-bold text-slate-800 dark:text-slate-200 text-right max-w-[60%] truncate">{event?.name}</span>
+ </div>
+ <div className="flex justify-between">
+ <span className="text-slate-500 dark:text-slate-400">Tiket</span>
+ <span className="font-bold text-slate-800 dark:text-slate-200 capitalize">{ticketType}</span>
+ </div>
+ {paymentProof && (
+ <div className="flex justify-between">
+ <span className="text-slate-500 dark:text-slate-400">File Bukti</span>
+ <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[60%]">{paymentProof.name}</span>
+ </div>
+ )}
+ <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
+ <span className="text-slate-700 dark:text-slate-300 font-bold">Total</span>
+ <span className="font-black text-indigo-600 dark:text-indigo-400">
+ {priceToPay === 0 ? 'Gratis' : `Rp ${priceToPay.toLocaleString('id-ID')}`}
+ </span>
+ </div>
+ </div>
+ {proofPreview && (
+ <div className="mb-4">
+ <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Preview Bukti:</p>
+ <img src={proofPreview} alt="Bukti Bayar" className="w-full max-h-32 object-cover rounded-xl border border-slate-200 dark:border-slate-700" />
+ </div>
+ )}
+ </div>
+ <div className="flex gap-3 px-6 pb-6">
+ <button onClick={() => setShowPaymentConfirmModal(false)}
+ className="flex-1 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+ Batal
+ </button>
+ <button onClick={submitCheckout} disabled={isSubmitting}
+ className="flex-1 py-3 text-sm font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-70 flex items-center justify-center gap-2">
+ {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
+ Ya, Kirim Bukti
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
+ </>
  );
 }

@@ -32,6 +32,7 @@ const ADMIN_PAGES = [
   { id: 'p11b', title: 'Kelola Kursus Online', link: '/admin/courses', icon: GraduationCap },
   { id: 'p11c', title: 'Transaksi Kursus', link: '/admin/course-transactions', icon: Receipt },
   { id: 'p11d', title: 'Ruang Diskusi Q&A', link: '/admin/discussions', icon: MessageSquare },
+  { id: 'p12',  title: 'Kelola Voucher',    link: '/admin/vouchers',   icon: Ticket },
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
@@ -81,7 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           const forbidden = [
               '/admin/events', '/admin/registrations', '/admin/tickets', '/admin/transactions',
               '/admin/reports', '/admin/e-product-categories', 
-              '/admin/course-categories', '/admin/users'
+              '/admin/course-categories', '/admin/users', '/admin/vouchers'
           ];
           if (forbidden.some(prefix => pathname.startsWith(prefix))) {
               router.replace('/admin/dashboard');
