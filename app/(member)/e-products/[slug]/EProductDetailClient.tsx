@@ -9,7 +9,8 @@ import {
     ShoppingCart, UserCircle, ShieldCheck,
     Infinity as InfinityIcon, RefreshCw, Star,
     MessageSquare, Send, CheckCircle2, Lock, ThumbsUp, X, AlertCircle, Sparkles,
-    AlertTriangle, Crown, Layers, Share2, Link as LinkIcon, Banknote, Zap, Award, BadgeCheck, Eye, Download
+    AlertTriangle, Crown, Layers, Share2, Link as LinkIcon, Banknote, Zap, Award, BadgeCheck, Eye, Download,
+    Ticket, Copy, Check
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -75,6 +76,9 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
     const [voucherData, setVoucherData] = useState<null | { code: string; name: string; discount_type: string; discount_value: number; discount_amount: number; final_price: number }>(null);
     const [voucherLoading, setVoucherLoading] = useState(false);
     const [voucherError, setVoucherError] = useState('');
+    const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
+    const [showVoucherList, setShowVoucherList] = useState(false);
+    const [loadingVouchers, setLoadingVouchers] = useState(false);
 
     const userData = typeof window !== 'undefined' ? JSON.parse(safeStorage.getItem('user') || 'null') : null;
     const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
@@ -171,7 +175,50 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
         setVoucherData(null);
         setVoucherError('');
         setPaymentProof(null);
+        setShowVoucherList(false);
         setIsPaymentModalOpen(true);
+        fetchAvailableVouchers();
+    };
+
+    const fetchAvailableVouchers = async () => {
+        setLoadingVouchers(true);
+        try {
+            const res = await apiFetch('/vouchers/available?type=e_product');
+            const json = await res.json();
+            if (res.ok && json.success) {
+                setAvailableVouchers(json.data || []);
+            }
+        } catch {
+            // silent
+        } finally {
+            setLoadingVouchers(false);
+        }
+    };
+
+    const handleSelectVoucher = async (code: string) => {
+        setVoucherCode(code);
+        setShowVoucherList(false);
+        setVoucherLoading(true);
+        setVoucherError('');
+        setVoucherData(null);
+        try {
+            const res = await apiFetch('/vouchers/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code.trim(), amount: product.price, type: 'e_product' }),
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                setVoucherData(json.data);
+                toast.success(`Voucher "${json.data.code}" berhasil diterapkan!`);
+            } else {
+                setVoucherError(json.message || 'Voucher tidak valid.');
+            }
+        } catch {
+            setVoucherError('Gagal menghubungi server.');
+        } finally {
+            setVoucherLoading(false);
+        }
     };
 
     const applyVoucher = async () => {
@@ -938,8 +985,57 @@ export default function EProductDetailClient({ slug }: { slug: string }) {
 
                                     {/* VOUCHER INPUT */}
                                     <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
-                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">Kode Voucher</h4>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h4 className="text-sm font-black text-slate-900 dark:text-white">Kode Voucher</h4>
+                                            {availableVouchers.length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowVoucherList(prev => !prev)}
+                                                    className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 transition-colors"
+                                                >
+                                                    <Ticket size={13} />
+                                                    {showVoucherList ? 'Tutup Voucher' : `Lihat Voucher (${availableVouchers.length})`}
+                                                </button>
+                                            )}
+                                        </div>
                                         <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 font-medium">Punya kode voucher? Masukkan di sini untuk mendapatkan diskon.</p>
+
+                                        {/* Available vouchers list accordion */}
+                                        {showVoucherList && availableVouchers.length > 0 && (
+                                            <div className="mb-4 space-y-2 max-h-56 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 custom-scrollbar">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Pilih Voucher Tersedia:</p>
+                                                {availableVouchers.map((v) => {
+                                                    const isEligible = product.price >= v.min_purchase;
+                                                    return (
+                                                        <div key={v.id} className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                            <div className="min-w-0 pr-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-mono font-bold text-xs bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded tracking-wider border border-indigo-200 dark:border-indigo-500/20">
+                                                                        {v.code}
+                                                                    </span>
+                                                                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                                                        {v.discount_type === 'percent' ? `${v.discount_value}% OFF` : `Potongan ${formatRupiah(v.discount_value)}`}
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium truncate mt-0.5">{v.name}</p>
+                                                                {v.min_purchase > 0 && (
+                                                                    <p className="text-[9px] text-slate-400">Min. beli {formatRupiah(v.min_purchase)} {!isEligible && '(Belum memenuhi)'}</p>
+                                                                )}
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                disabled={!isEligible}
+                                                                onClick={() => handleSelectVoucher(v.code)}
+                                                                className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-500 text-white rounded-lg transition-colors shrink-0"
+                                                            >
+                                                                Pakai
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
