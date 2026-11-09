@@ -9,7 +9,7 @@ import {
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
   CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt,
-  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe, ListTodo
+  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe, ListTodo, BadgePercent
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -32,7 +32,7 @@ const ADMIN_PAGES = [
   { id: 'p11b', title: 'Kelola Kursus Online', link: '/admin/courses', icon: GraduationCap },
   { id: 'p11c', title: 'Transaksi Kursus', link: '/admin/course-transactions', icon: Receipt },
   { id: 'p11d', title: 'Ruang Diskusi Q&A', link: '/admin/discussions', icon: MessageSquare },
-  { id: 'p12',  title: 'Kelola Voucher',    link: '/admin/vouchers',   icon: Ticket },
+  { id: 'p12',  title: 'Kelola Voucher',    link: '/admin/vouchers',   icon: BadgePercent },
   { id: 'p10', title: 'Kelola User', link: '/admin/users', icon: UserCog },
 ];
 
@@ -147,7 +147,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       let pages = ADMIN_PAGES;
       
       if (adminRole !== 'superadmin') {
-         pages = pages.filter(p => !['/admin/users', '/admin/e-product-categories', '/admin/course-categories', '/admin/events', '/admin/registrations', '/admin/tickets', '/admin/transactions', '/admin/reports'].includes(p.link));
+         pages = pages.filter(p => !['/admin/users', '/admin/e-product-categories', '/admin/course-categories', '/admin/events', '/admin/registrations', '/admin/tickets', '/admin/transactions', '/admin/reports', '/admin/vouchers'].includes(p.link));
       }
       setPageResults(pages.filter(p => p.title.toLowerCase().includes(q)).slice(0, 3));
       
@@ -270,6 +270,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
                   <div className="space-y-0.5">
                     {adminRole === 'superadmin' && <NavItem icon={MonitorPlay} label="Kelola Iklan/Promo" href="/admin/advertisements" />}
+                    {adminRole === 'superadmin' && <NavItem icon={BadgePercent} label="Kelola Voucher" href="/admin/vouchers" />}
                     {adminRole === 'superadmin' && <NavItem icon={Tag} label="Kategori Artikel" href="/admin/article-categories" />}
                     <NavItem icon={FileText} label="Semua Artikel" href="/admin/articles" />
                   </div>
