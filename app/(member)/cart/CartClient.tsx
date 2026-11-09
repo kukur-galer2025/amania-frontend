@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
  ShoppingCart, Trash2, ArrowRight, Loader2, 
  CreditCard, Store, ShoppingBag, ShieldCheck, 
- Info, Banknote, Layers, FileText, X, CheckCircle2, AlertCircle, Check, Download
+ Info, Banknote, Layers, FileText, X, CheckCircle2, AlertCircle, Check, Download, Ticket
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -31,6 +31,13 @@ export default function CartClient() {
  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
  const [paymentProof, setPaymentProof] = useState<File | null>(null);
  const [checkoutLoading, setCheckoutLoading] = useState(false);
+ const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+ // Voucher state
+ const [voucherCode, setVoucherCode] = useState('');
+ const [voucherData, setVoucherData] = useState<null | { code: string; name: string; discount_type: string; discount_value: number; discount_amount: number; final_price: number }>(null);
+ const [voucherLoading, setVoucherLoading] = useState(false);
+ const [voucherError, setVoucherError] = useState('');
 
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -119,6 +126,31 @@ export default function CartClient() {
  }
  };
 
+ const applyVoucher = async () => {
+ if (!voucherCode.trim()) return;
+ setVoucherLoading(true);
+ setVoucherError('');
+ setVoucherData(null);
+ try {
+ const res = await apiFetch('/vouchers/validate', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ code: voucherCode.trim(), amount: totals.totalPrice, type: 'e_product' }),
+ });
+ const json = await res.json();
+ if (res.ok && json.success) {
+ setVoucherData(json.data);
+ toast.success(`Voucher "${json.data.code}" berhasil diterapkan!`);
+ } else {
+ setVoucherError(json.message || 'Voucher tidak valid.');
+ }
+ } catch {
+ setVoucherError('Gagal menghubungi server.');
+ } finally {
+ setVoucherLoading(false);
+ }
+ };
+
  const handleOpenPaymentModal = async () => {
  if (selectedItems.length === 0) {
  toast.error("Pilih setidaknya satu produk untuk di-checkout!");
@@ -132,6 +164,7 @@ export default function CartClient() {
  if (!paymentProof) { toast.error("Unggah bukti transfer terlebih dahulu!"); return; }
  if (selectedItems.length === 0) { toast.error("Tidak ada item yang dipilih."); return; }
 
+ setIsConfirmModalOpen(false);
  setCheckoutLoading(true);
  const tid = toast.loading('Membuka gerbang pembayaran...');
  try {
@@ -142,6 +175,9 @@ export default function CartClient() {
  });
  if (paymentProof) {
  formData.append('payment_proof', paymentProof);
+ }
+ if (voucherData) {
+ formData.append('voucher_code', voucherData.code);
  }
 
  const res = await apiFetch('/checkout/e-product', {
@@ -322,7 +358,7 @@ export default function CartClient() {
 
  <div className="border-t border-slate-100 dark:border-slate-700/50 my-5 relative z-10"></div>
 
- <div className="space-y-4 mb-8 relative z-10">
+ <div className="space-y-4 mb-6 relative z-10">
  <div className="flex justify-between items-center text-sm">
  <span className="text-slate-500 dark:text-slate-400 font-bold">Total Harga ({totals.count} barang)</span>
  <span className="font-bold text-slate-400 dark:text-slate-400 line-through">{formatRupiah(totals.totalOriginal)}</span>
@@ -331,18 +367,83 @@ export default function CartClient() {
  <span className="text-slate-500 dark:text-slate-400 font-bold">Potongan Diskon</span>
  <span className="font-black text-rose-500">- {formatRupiah(totals.totalDiscount)}</span>
  </div>
+ {voucherData && (
+ <div className="flex justify-between items-center text-sm">
+ <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+ <Ticket size={13} /> Voucher ({voucherData.code})
+ </span>
+ <span className="font-black text-emerald-600 dark:text-emerald-400">- {formatRupiah(voucherData.discount_amount)}</span>
+ </div>
+ )}
  <div className="flex justify-between items-center text-sm">
  <span className="text-slate-500 dark:text-slate-400 font-bold">Biaya Layanan</span>
  <span className="font-black text-emerald-500">Gratis</span>
  </div>
  </div>
 
+ {/* KODE VOUCHER INPUT */}
+ {totals.totalPrice > 0 && (
+ <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 relative z-10">
+ <div className="flex items-center gap-1.5 mb-2">
+ <Ticket size={14} className="text-amber-600 dark:text-amber-400" />
+ <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Punya Kode Voucher?</span>
+ </div>
+ <div className="flex gap-2">
+ <input
+ type="text"
+ value={voucherCode}
+ onChange={(e) => {
+ setVoucherCode(e.target.value.toUpperCase());
+ setVoucherData(null);
+ setVoucherError('');
+ }}
+ placeholder="Kode voucher"
+ disabled={!!voucherData}
+ className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 disabled:opacity-60 text-slate-900 dark:text-white"
+ />
+ {voucherData ? (
+ <button
+ type="button"
+ onClick={() => { setVoucherData(null); setVoucherCode(''); setVoucherError(''); }}
+ className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors"
+ >
+ Hapus
+ </button>
+ ) : (
+ <button
+ type="button"
+ onClick={applyVoucher}
+ disabled={voucherLoading || !voucherCode.trim()}
+ className="px-3.5 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-1 shrink-0"
+ >
+ {voucherLoading ? <Loader2 size={12} className="animate-spin" /> : null}
+ Terapkan
+ </button>
+ )}
+ </div>
+ {voucherError && (
+ <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+ <AlertCircle size={11} /> {voucherError}
+ </p>
+ )}
+ {voucherData && (
+ <div className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-between">
+ <span>Diskon voucher ({voucherData.code}):</span>
+ <span>- {formatRupiah(voucherData.discount_amount)}</span>
+ </div>
+ )}
+ </div>
+ )}
+
  <div className="pt-6 border-t-2 border-dashed border-slate-100 dark:border-slate-700/50 mb-10 relative z-10">
  <div className="flex justify-between items-center">
  <span className="text-sm font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest">Total Tagihan</span>
+ <div className="text-right">
+ {voucherData && <span className="text-xs text-slate-400 line-through block leading-none mb-1">{formatRupiah(totals.totalPrice)}</span>}
  <span className="text-2xl md:text-3xl font-black text-orange-600 tracking-tighter">
- {formatRupiah(totals.totalPrice)}
+ {formatRupiah(voucherData ? voucherData.final_price : totals.totalPrice)}
  </span>
+ </div>
  </div>
  </div>
 

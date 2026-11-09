@@ -48,6 +48,12 @@ export default function CheckoutClient() {
  // STATE KONFIRMASI SEBELUM SUBMIT
  const [showPaymentConfirmModal, setShowPaymentConfirmModal] = useState(false);
 
+ // VOUCHER STATE
+ const [voucherCode, setVoucherCode] = useState('');
+ const [voucherData, setVoucherData] = useState<null | { code: string; name: string; discount_type: string; discount_value: number; discount_amount: number; final_price: number }>(null);
+ const [voucherLoading, setVoucherLoading] = useState(false);
+ const [voucherError, setVoucherError] = useState('');
+
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
  useEffect(() => {
@@ -84,6 +90,33 @@ export default function CheckoutClient() {
  ? (ticketType === 'free' ? (event.basic_price || 0) : (event.premium_price || event.basic_price || 0)) 
  : 0;
 
+ const finalPrice = voucherData ? voucherData.final_price : priceToPay;
+
+ const applyVoucher = async () => {
+ if (!voucherCode.trim()) return;
+ setVoucherLoading(true);
+ setVoucherError('');
+ setVoucherData(null);
+ try {
+ const res = await apiFetch('/vouchers/validate', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ code: voucherCode.trim(), amount: priceToPay, type: 'event' }),
+ });
+ const json = await res.json();
+ if (res.ok && json.success) {
+ setVoucherData(json.data);
+ toast.success(`Voucher "${json.data.code}" berhasil diterapkan!`);
+ } else {
+ setVoucherError(json.message || 'Voucher tidak valid.');
+ }
+ } catch {
+ setVoucherError('Gagal menghubungi server.');
+ } finally {
+ setVoucherLoading(false);
+ }
+ };
+
  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  if (e.target.files && e.target.files[0]) {
  const file = e.target.files[0];
@@ -105,7 +138,7 @@ export default function CheckoutClient() {
  }
  
  // 🔥 LOGIKA NOTIFIKASI MODAL ERROR BUKTI TRANSFER 🔥
- if (priceToPay > 0 && !paymentProof) {
+ if (finalPrice > 0 && !paymentProof) {
  setProofError(true); // Memicu animasi getar merah di area upload
  setTimeout(() => setProofError(false), 1000); // Reset getar agar bisa dipicu lagi
  
@@ -131,8 +164,11 @@ export default function CheckoutClient() {
  formData.append('event_id', event?.id);
  formData.append('tier', ticketType); 
  
- if (priceToPay > 0 && paymentProof) {
+ if (finalPrice > 0 && paymentProof) {
  formData.append('payment_proof', paymentProof);
+ }
+ if (voucherData) {
+ formData.append('voucher_code', voucherData.code);
  }
 
  try {
@@ -659,22 +695,87 @@ export default function CheckoutClient() {
  )}
 
  {/* Price Calculation */}
- <div className="space-y-3 md:space-y-4 mb-6 md:mb-8 bg-slate-50 dark:bg-[#111827] p-4 md:p-5 rounded-xl border border-slate-100 dark:border-slate-700/50 w-full min-w-0">
+ <div className="space-y-3 md:space-y-4 mb-4 bg-slate-50 dark:bg-[#111827] p-4 md:p-5 rounded-xl border border-slate-100 dark:border-slate-700/50 w-full min-w-0">
  <div className="flex justify-between items-center text-xs md:text-sm min-w-0 w-full">
  <span className="text-slate-500 dark:text-slate-400 font-medium shrink-0">Harga Tiket</span>
  <span className="font-semibold text-slate-900 dark:text-white text-right truncate min-w-0 max-w-[150px]">{priceToPay === 0 ? 'Gratis' : `Rp ${priceToPay.toLocaleString('id-ID')}`}</span>
  </div>
+ {voucherData && (
+ <div className="flex justify-between items-center text-xs md:text-sm min-w-0 w-full">
+ <span className="text-emerald-600 dark:text-emerald-400 font-medium shrink-0 flex items-center gap-1">
+ <Ticket size={13} /> Diskon Voucher ({voucherData.code})
+ </span>
+ <span className="font-bold text-emerald-600 dark:text-emerald-400 text-right shrink-0">- Rp {voucherData.discount_amount.toLocaleString('id-ID')}</span>
+ </div>
+ )}
  <div className="flex justify-between items-center text-xs md:text-sm min-w-0 w-full">
  <span className="text-slate-500 dark:text-slate-400 font-medium shrink-0">Pajak & Layanan</span>
  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-right shrink-0">Rp 0</span>
  </div>
  <div className="pt-3 md:pt-4 border-t border-slate-200 dark:border-slate-700/50 flex justify-between items-end min-w-0 w-full">
  <span className="font-bold text-slate-900 dark:text-white text-xs md:text-sm shrink-0">Total Bayar</span>
- <span className="text-xl md:text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight text-right truncate min-w-0 max-w-[160px] md:max-w-[200px]">
- {priceToPay === 0 ? 'Rp 0' : `Rp ${priceToPay.toLocaleString('id-ID')}`}
+ <div className="text-right">
+ {voucherData && <span className="text-xs text-slate-400 line-through block leading-none mb-1">Rp {priceToPay.toLocaleString('id-ID')}</span>}
+ <span className="text-xl md:text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight truncate min-w-0 max-w-[160px] md:max-w-[200px]">
+ {finalPrice === 0 ? 'Rp 0' : `Rp ${finalPrice.toLocaleString('id-ID')}`}
  </span>
  </div>
  </div>
+ </div>
+
+ {/* KODE VOUCHER */}
+ {priceToPay > 0 && (
+ <div className="mb-6 bg-slate-50 dark:bg-[#111827] p-3.5 md:p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+ <div className="flex items-center gap-1.5 mb-2">
+ <Ticket size={14} className="text-indigo-600 dark:text-indigo-400" />
+ <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Punya Kode Voucher?</span>
+ </div>
+ <div className="flex gap-2">
+ <input
+ type="text"
+ value={voucherCode}
+ onChange={(e) => {
+ setVoucherCode(e.target.value.toUpperCase());
+ setVoucherData(null);
+ setVoucherError('');
+ }}
+ placeholder="Masukkan kode voucher"
+ disabled={!!voucherData}
+ className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono font-bold tracking-wider focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:opacity-60 text-slate-900 dark:text-white"
+ />
+ {voucherData ? (
+ <button
+ type="button"
+ onClick={() => { setVoucherData(null); setVoucherCode(''); setVoucherError(''); }}
+ className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20 rounded-lg text-xs font-bold hover:bg-rose-100 transition-colors"
+ >
+ Hapus
+ </button>
+ ) : (
+ <button
+ type="button"
+ onClick={applyVoucher}
+ disabled={voucherLoading || !voucherCode.trim()}
+ className="px-3.5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-1"
+ >
+ {voucherLoading ? <Loader2 size={12} className="animate-spin" /> : null}
+ Terapkan
+ </button>
+ )}
+ </div>
+ {voucherError && (
+ <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+ <AlertTriangle size={11} /> {voucherError}
+ </p>
+ )}
+ {voucherData && (
+ <div className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-between">
+ <span>Diskon voucher:</span>
+ <span>- Rp {voucherData.discount_amount.toLocaleString('id-ID')}</span>
+ </div>
+ )}
+ </div>
+ )}
 
  {/* CHECKBOX KONFIRMASI PROFIL */}
  <label className="flex items-start gap-2.5 mb-4 p-3 md:p-4 border border-indigo-100 dark:border-indigo-500/20 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/20 w-full min-w-0">
@@ -735,10 +836,16 @@ export default function CheckoutClient() {
  <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[60%]">{paymentProof.name}</span>
  </div>
  )}
+ {voucherData && (
+ <div className="flex justify-between">
+ <span className="text-slate-500 dark:text-slate-400">Voucher</span>
+ <span className="font-bold text-emerald-600">{voucherData.code} (-Rp {voucherData.discount_amount.toLocaleString('id-ID')})</span>
+ </div>
+ )}
  <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
  <span className="text-slate-700 dark:text-slate-300 font-bold">Total</span>
  <span className="font-black text-indigo-600 dark:text-indigo-400">
- {priceToPay === 0 ? 'Gratis' : `Rp ${priceToPay.toLocaleString('id-ID')}`}
+ {finalPrice === 0 ? 'Gratis' : `Rp ${finalPrice.toLocaleString('id-ID')}`}
  </span>
  </div>
  </div>
