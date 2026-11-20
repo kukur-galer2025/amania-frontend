@@ -9,7 +9,7 @@ import {
   LogOut, Bell, Tag, ChevronRight, Search,
   UserCog, Ticket, CreditCard, FileSpreadsheet,
   CheckCircle2, AlertCircle, Loader2, ArrowRight, Newspaper, Menu, X, ShoppingCart, Layers, Receipt,
-  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe, ListTodo
+  GraduationCap, BookOpen, Video, MessageSquare, MonitorPlay, Globe, ListTodo, Bot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -269,6 +269,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <p className="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Konten Publik</p>
                   <div className="space-y-0.5">
                     {adminRole === 'superadmin' && <NavItem icon={MonitorPlay} label="Kelola Iklan/Promo" href="/admin/advertisements" />}
+                    {adminRole === 'superadmin' && <NavItem icon={Bot} label="AI Assistant" href="/admin/ai-assistant" />}
                     {adminRole === 'superadmin' && <NavItem icon={Tag} label="Kategori Artikel" href="/admin/article-categories" />}
                     <NavItem icon={FileText} label="Semua Artikel" href="/admin/articles" />
                   </div>
