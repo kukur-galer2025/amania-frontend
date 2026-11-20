@@ -23,6 +23,7 @@ const STATIC_PAGES = [
   { id: 'sp-2b', title: 'E-Produk Premium', link: '/e-products', icon: ShoppingCart },
   { id: 'sp-2c', title: 'Kursus Online', link: '/courses', icon: GraduationCap },
   { id: 'sp-3', title: 'Artikel & Jurnal', link: '/articles', icon: Newspaper },
+  { id: 'sp-3b', title: 'Promo & Voucher', link: '/promo', icon: Ticket },
   { id: 'sp-4', title: 'Tiket Aktif', link: '/dashboard/ticket', icon: Ticket },
   { id: 'sp-5', title: 'Event Saya', link: '/my-events', icon: CalendarHeart },
   { id: 'sp-5b', title: 'Koleksi E-Produk', link: '/my-e-products', icon: FileText },
@@ -483,6 +484,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
                 <NavLink icon={ShoppingCart} label="E-Produk Premium" href="/e-products" />
                 <NavLink icon={GraduationCap} label="Kursus Online" href="/courses" />
                 <NavLink icon={Newspaper} label="Artikel & Jurnal" href="/articles" />
+                <NavLink icon={Ticket} label="Promo & Voucher" href="/promo" />
               </div>
             </div>
             <div>

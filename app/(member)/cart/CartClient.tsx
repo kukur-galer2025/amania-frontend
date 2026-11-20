@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
  ShoppingCart, Trash2, ArrowRight, Loader2, 
  CreditCard, Store, ShoppingBag, ShieldCheck, 
- Info, Banknote, Layers, FileText, X, CheckCircle2, AlertCircle, Check, Download
+ Info, Banknote, Layers, FileText, X, CheckCircle2, AlertCircle, Check, Download, Ticket
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiFetch } from '@/app/utils/api';
@@ -31,6 +31,13 @@ export default function CartClient() {
  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
  const [paymentProof, setPaymentProof] = useState<File | null>(null);
  const [checkoutLoading, setCheckoutLoading] = useState(false);
+ const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+ // Voucher state
+ const [voucherCode, setVoucherCode] = useState('');
+ const [voucherData, setVoucherData] = useState<null | { code: string; name: string; discount_type: string; discount_value: number; discount_amount: number; final_price: number }>(null);
+ const [voucherLoading, setVoucherLoading] = useState(false);
+ const [voucherError, setVoucherError] = useState('');
 
  const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://127.0.0.1:8000/storage';
 
@@ -119,6 +126,31 @@ export default function CartClient() {
  }
  };
 
+ const applyVoucher = async () => {
+ if (!voucherCode.trim()) return;
+ setVoucherLoading(true);
+ setVoucherError('');
+ setVoucherData(null);
+ try {
+ const res = await apiFetch('/vouchers/validate', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ code: voucherCode.trim(), amount: totals.totalPrice, type: 'e_product' }),
+ });
+ const json = await res.json();
+ if (res.ok && json.success) {
+ setVoucherData(json.data);
+ toast.success(`Voucher "${json.data.code}" berhasil diterapkan!`);
+ } else {
+ setVoucherError(json.message || 'Voucher tidak valid.');
+ }
+ } catch {
+ setVoucherError('Gagal menghubungi server.');
+ } finally {
+ setVoucherLoading(false);
+ }
+ };
+
  const handleOpenPaymentModal = async () => {
  if (selectedItems.length === 0) {
  toast.error("Pilih setidaknya satu produk untuk di-checkout!");
@@ -132,6 +164,7 @@ export default function CartClient() {
  if (!paymentProof) { toast.error("Unggah bukti transfer terlebih dahulu!"); return; }
  if (selectedItems.length === 0) { toast.error("Tidak ada item yang dipilih."); return; }
 
+ setIsConfirmModalOpen(false);
  setCheckoutLoading(true);
  const tid = toast.loading('Membuka gerbang pembayaran...');
  try {
@@ -142,6 +175,9 @@ export default function CartClient() {
  });
  if (paymentProof) {
  formData.append('payment_proof', paymentProof);
+ }
+ if (voucherData) {
+ formData.append('voucher_code', voucherData.code);
  }
 
  const res = await apiFetch('/checkout/e-product', {
@@ -322,7 +358,7 @@ export default function CartClient() {
 
  <div className="border-t border-slate-100 dark:border-slate-700/50 my-5 relative z-10"></div>
 
- <div className="space-y-4 mb-8 relative z-10">
+ <div className="space-y-4 mb-6 relative z-10">
  <div className="flex justify-between items-center text-sm">
  <span className="text-slate-500 dark:text-slate-400 font-bold">Total Harga ({totals.count} barang)</span>
  <span className="font-bold text-slate-400 dark:text-slate-400 line-through">{formatRupiah(totals.totalOriginal)}</span>
@@ -331,18 +367,83 @@ export default function CartClient() {
  <span className="text-slate-500 dark:text-slate-400 font-bold">Potongan Diskon</span>
  <span className="font-black text-rose-500">- {formatRupiah(totals.totalDiscount)}</span>
  </div>
+ {voucherData && (
+ <div className="flex justify-between items-center text-sm">
+ <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+ <Ticket size={13} /> Voucher ({voucherData.code})
+ </span>
+ <span className="font-black text-emerald-600 dark:text-emerald-400">- {formatRupiah(voucherData.discount_amount)}</span>
+ </div>
+ )}
  <div className="flex justify-between items-center text-sm">
  <span className="text-slate-500 dark:text-slate-400 font-bold">Biaya Layanan</span>
  <span className="font-black text-emerald-500">Gratis</span>
  </div>
  </div>
 
+ {/* KODE VOUCHER INPUT */}
+ {totals.totalPrice > 0 && (
+ <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 relative z-10">
+ <div className="flex items-center gap-1.5 mb-2">
+ <Ticket size={14} className="text-amber-600 dark:text-amber-400" />
+ <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Punya Kode Voucher?</span>
+ </div>
+ <div className="flex gap-2">
+ <input
+ type="text"
+ value={voucherCode}
+ onChange={(e) => {
+ setVoucherCode(e.target.value.toUpperCase());
+ setVoucherData(null);
+ setVoucherError('');
+ }}
+ placeholder="Kode voucher"
+ disabled={!!voucherData}
+ className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 disabled:opacity-60 text-slate-900 dark:text-white"
+ />
+ {voucherData ? (
+ <button
+ type="button"
+ onClick={() => { setVoucherData(null); setVoucherCode(''); setVoucherError(''); }}
+ className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors"
+ >
+ Hapus
+ </button>
+ ) : (
+ <button
+ type="button"
+ onClick={applyVoucher}
+ disabled={voucherLoading || !voucherCode.trim()}
+ className="px-3.5 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-1 shrink-0"
+ >
+ {voucherLoading ? <Loader2 size={12} className="animate-spin" /> : null}
+ Terapkan
+ </button>
+ )}
+ </div>
+ {voucherError && (
+ <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+ <AlertCircle size={11} /> {voucherError}
+ </p>
+ )}
+ {voucherData && (
+ <div className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-between">
+ <span>Diskon voucher ({voucherData.code}):</span>
+ <span>- {formatRupiah(voucherData.discount_amount)}</span>
+ </div>
+ )}
+ </div>
+ )}
+
  <div className="pt-6 border-t-2 border-dashed border-slate-100 dark:border-slate-700/50 mb-10 relative z-10">
  <div className="flex justify-between items-center">
  <span className="text-sm font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest">Total Tagihan</span>
+ <div className="text-right">
+ {voucherData && <span className="text-xs text-slate-400 line-through block leading-none mb-1">{formatRupiah(totals.totalPrice)}</span>}
  <span className="text-2xl md:text-3xl font-black text-orange-600 tracking-tighter">
- {formatRupiah(totals.totalPrice)}
+ {formatRupiah(voucherData ? voucherData.final_price : totals.totalPrice)}
  </span>
+ </div>
  </div>
  </div>
 
@@ -432,10 +533,23 @@ export default function CartClient() {
  </div>
  </div>
  <div className="p-5 md:p-6 bg-white dark:bg-[#111827] border-t border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row items-center justify-between gap-4">
- <div className="w-full sm:w-auto text-center sm:text-left"><p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase mb-1">Total Tagihan</p><p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{formatRupiah(totals.totalPrice)}</p></div>
+ <div className="w-full sm:w-auto text-center sm:text-left">
+  <p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase mb-1">Total Tagihan</p>
+  {voucherData ? (
+    <div>
+      <p className="text-xs text-slate-400 line-through leading-none">{formatRupiah(totals.totalPrice)}</p>
+      <p className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatRupiah(voucherData.final_price)}</p>
+    </div>
+  ) : (
+    <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{formatRupiah(totals.totalPrice)}</p>
+  )}
+ </div>
  
- {/* 🔥 TOMBOL CHECKOUT MODAL TRIPAY 🔥 */}
- <button onClick={handleProcessCheckout} disabled={!paymentProof || checkoutLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg dark:shadow-black/20 shadow-emerald-600/20 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 dark:text-slate-400 transition-transform flex items-center justify-center gap-2">
+ {/* 🔥 TOMBOL CHECKOUT MODAL DENGAN KONFIRMASI 🔥 */}
+ <button onClick={() => {
+   if (!paymentProof) { toast.error('Unggah bukti transfer terlebih dahulu!'); return; }
+   setIsConfirmModalOpen(true);
+ }} disabled={!paymentProof || checkoutLoading} className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg dark:shadow-black/20 shadow-emerald-600/20 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 dark:text-slate-400 transition-transform flex items-center justify-center gap-2">
  {checkoutLoading ? <Loader2 className="animate-spin shrink-0" size={18}/> : <FaMoneyIcon className="shrink-0 w-[20px] h-[14px]"/>} {checkoutLoading ? 'Memproses...' : 'Bayar Sekarang'}
  </button>
  </div>
@@ -443,6 +557,62 @@ export default function CartClient() {
  </div>
  )}
  </AnimatePresence>
+
+ {/* MODAL: KONFIRMASI PEMBAYARAN CART */}
+ {isConfirmModalOpen && (
+   <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+     <div onClick={() => setIsConfirmModalOpen(false)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+     <div className="relative bg-white dark:bg-[#111827] rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700/50">
+       <div className="p-6 text-center">
+         <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+           <CheckCircle2 size={28} className="text-emerald-500" />
+         </div>
+         <h3 className="text-base font-black text-slate-900 dark:text-white mb-2">Konfirmasi Pengiriman Bukti</h3>
+         <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+           Pastikan bukti transfer yang Anda unggah sudah benar untuk {selectedItems.length} produk terpilih.
+         </p>
+         <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-left space-y-2 mb-5 text-sm">
+           <div className="flex justify-between">
+             <span className="text-slate-500 dark:text-slate-400">Total Item</span>
+             <span className="font-bold text-slate-800 dark:text-slate-200">{selectedItems.length} Produk</span>
+           </div>
+           <div className="flex justify-between">
+             <span className="text-slate-500 dark:text-slate-400">File Bukti</span>
+             <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[60%]">{paymentProof?.name}</span>
+           </div>
+           {voucherData && (
+             <div className="flex justify-between">
+               <span className="text-slate-500 dark:text-slate-400">Voucher</span>
+               <span className="font-bold text-emerald-600">{voucherData.code} (-{formatRupiah(voucherData.discount_amount)})</span>
+             </div>
+           )}
+           <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
+             <span className="text-slate-700 dark:text-slate-300 font-bold">Total Bayar</span>
+             <span className="font-black text-emerald-600 dark:text-emerald-400">
+               {formatRupiah(voucherData ? voucherData.final_price : totals.totalPrice)}
+             </span>
+           </div>
+         </div>
+       </div>
+       <div className="flex gap-3 px-6 pb-6">
+         <button onClick={() => setIsConfirmModalOpen(false)}
+           className="flex-1 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+           Batal
+         </button>
+         <button 
+           onClick={() => {
+             setIsConfirmModalOpen(false);
+             handleProcessCheckout();
+           }} 
+           disabled={checkoutLoading}
+           className="flex-1 py-3 text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-70 flex items-center justify-center gap-2">
+           {checkoutLoading ? <Loader2 size={15} className="animate-spin" /> : null}
+           Ya, Kirim Bukti
+         </button>
+       </div>
+     </div>
+   </div>
+ )}
 
  <style jsx global>{`
  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
