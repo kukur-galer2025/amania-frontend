@@ -8,7 +8,7 @@ import {
   CheckCircle2, Clock, AlertCircle, CornerDownLeft,
   RotateCcw, Headphones, GraduationCap, Package,
   MessageCircle, ShieldCheck, UserCheck, ExternalLink,
-  ArrowRight, ThumbsUp, ThumbsDown, Square
+  ArrowRight, ThumbsUp, ThumbsDown, Square, Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
@@ -378,6 +378,44 @@ const DEFAULT_ASSISTANT_CONFIG: AssistantConfig = {
 const CHAT_KEY_PREFIX = 'amania_chat_v1:';
 const CHAT_SESSION_KEY = 'amania_chat_sid';
 const MAX_STORED_MESSAGES = 40;
+// Sama dengan validasi backend (message max:2000)
+const MAX_INPUT_CHARS = 2000;
+const INPUT_COUNTER_FROM = 1800; // penghitung karakter baru muncul saat mendekati batas
+
+// Teks polos untuk tombol salin: buang penanda Markdown agar rapi saat ditempel di aplikasi lain
+function toPlainText(md: string): string {
+  return md
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(^|[\s(])[*_]([^*_\n]+)[*_](?=[\s).,!?]|$)/g, '$1$2')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .trim();
+}
+
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch { /* lanjut ke cara cadangan */ }
+  try {
+    // Cadangan untuk konteks non-HTTPS / peramban lama
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
 
 const GUEST_CHAT_KEY = CHAT_KEY_PREFIX + 'guest';
 
@@ -469,6 +507,8 @@ export default function AmaniaEventChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [inputTruncated, setInputTruncated] = useState(false); // teks yang ditempel/diketik melebihi batas lalu dipotong
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -577,7 +617,7 @@ export default function AmaniaEventChatbot() {
       epochRef.current++;
       abortRef.current?.abort();
       setMessages([]);
-      setInput('');
+      setInput(''); setInputTruncated(false);
       setIsLoading(false);
     }
     prevAuthKey.current = authKey;
@@ -754,7 +794,7 @@ export default function AmaniaEventChatbot() {
     const userMsg: ChatMessage = { role: 'user', content: text, timestamp: Date.now() };
     const history = [...messages, userMsg];
     setMessages(history);
-    setInput('');
+    setInput(''); setInputTruncated(false);
     setIsLoading(true);
     scrollToBottom();
 
@@ -893,9 +933,15 @@ export default function AmaniaEventChatbot() {
         return;
       }
 
-      const errMsg = err?.message?.includes('fetch')
-        ? 'Tidak dapat terhubung ke server backend Amania. Pastikan server aktif di port 8000.'
-        : `Maaf, terjadi kendala koneksi: ${err?.message ?? 'Kesalahan tidak diketahui'}. Silakan coba kembali atau hubungi Customer Service.`;
+      // Pesan untuk pengunjung: bedakan internet pengguna yang putus dari layanan yang tidak dapat dihubungi,
+      // tanpa detail teknis (alamat/port server tidak relevan bagi pengguna).
+      const isNetworkError = err instanceof TypeError || /fetch|network/i.test(err?.message ?? '');
+      const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      const errMsg = isOffline
+        ? '📡 Koneksi internet Anda sepertinya terputus. Periksa jaringan Anda, lalu kirim ulang pesan. Riwayat percakapan tetap tersimpan.'
+        : isNetworkError
+          ? 'Maaf, asisten sedang tidak dapat dihubungi. Silakan coba lagi beberapa saat lagi atau hubungi Customer Service bila mendesak.'
+          : `Maaf, terjadi kendala koneksi: ${err?.message ?? 'Kesalahan tidak diketahui'}. Silakan coba kembali atau hubungi Customer Service.`;
 
       updateMessages(prev => {
         const next = [...prev];
@@ -920,20 +966,34 @@ export default function AmaniaEventChatbot() {
   // ── Feedback 👍/👎 per jawaban ──
   const sendFeedback = useCallback(async (idx: number, rating: 'up' | 'down') => {
     const target = messages[idx];
-    if (!target?.messageId || target.feedback) return;
+    // Rating boleh diganti (👍 → 👎 atau sebaliknya); klik ulang pilihan yang sama tidak mengirim apa pun
+    if (!target?.messageId || target.feedback === rating) return;
+    const previous = target.feedback;
 
-    // Optimistic update: tombol langsung terkunci setelah diklik
+    // Optimistic update: pilihan langsung tampil aktif
     setMessages(prev => prev.map((m, i) => (i === idx ? { ...m, feedback: rating } : m)));
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
-      await fetch(`${apiUrl}/ai/event-assistant/feedback`, {
+      const res = await fetch(`${apiUrl}/ai/event-assistant/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ message_id: target.messageId, rating }),
       });
-    } catch { /* feedback bersifat best-effort, tidak mengganggu percakapan */ }
+      if (!res.ok) throw new Error(String(res.status));
+    } catch {
+      // Gagal tersimpan: kembalikan tampilan ke pilihan sebelumnya agar tidak menyesatkan pengguna
+      setMessages(prev => prev.map((m, i) => (i === idx ? { ...m, feedback: previous } : m)));
+    }
   }, [messages]);
+
+  // ── Salin jawaban ──
+  const copyMessage = useCallback(async (idx: number, content: string) => {
+    const ok = await copyToClipboard(toPlainText(content));
+    if (!ok) return;
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(cur => (cur === idx ? null : cur)), 2000);
+  }, []);
 
   // ── Key handler ──
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -949,7 +1009,7 @@ export default function AmaniaEventChatbot() {
     epochRef.current++;
     abortRef.current?.abort();
     setIsLoading(false);
-    setInput('');
+    setInput(''); setInputTruncated(false);
     setMessages([buildGreeting()]);
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = 0;
@@ -1179,32 +1239,54 @@ export default function AmaniaEventChatbot() {
                         {!msg.isStreaming && (
                           <div className="flex items-center gap-1.5 px-1 text-[10.5px] text-slate-400 dark:text-slate-500">
                             {msg.timestamp && <span>{fmtTime(msg.timestamp)}</span>}
+                            {!isUser && msg.content && (
+                              <span className="flex items-center gap-0.5">
+                                <span className="mr-0.5">·</span>
+                                <button
+                                  onClick={() => copyMessage(idx, msg.content)}
+                                  aria-label={copiedIdx === idx ? 'Jawaban tersalin' : 'Salin jawaban'}
+                                  title={copiedIdx === idx ? 'Tersalin' : 'Salin jawaban'}
+                                  className={`flex items-center gap-1 rounded-md p-1 transition-colors ${
+                                    copiedIdx === idx
+                                      ? 'text-emerald-600 dark:text-emerald-400'
+                                      : 'hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-200'
+                                  }`}
+                                >
+                                  {copiedIdx === idx ? <Check size={12} /> : <Copy size={12} />}
+                                  {copiedIdx === idx && <span>Tersalin</span>}
+                                </button>
+                              </span>
+                            )}
                             {!isUser && msg.messageId && (
-                              msg.feedback ? (
-                                <span className="flex items-center gap-1 text-slate-400">
-                                  <span>·</span> Terima kasih atas masukan Anda
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-0.5">
-                                  <span className="mr-0.5">·</span>
-                                  <button
-                                    onClick={() => sendFeedback(idx, 'up')}
-                                    aria-label="Jawaban membantu"
-                                    title="Membantu"
-                                    className="rounded-md p-1 transition-colors hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10"
-                                  >
-                                    <ThumbsUp size={12} />
-                                  </button>
-                                  <button
-                                    onClick={() => sendFeedback(idx, 'down')}
-                                    aria-label="Jawaban kurang membantu"
-                                    title="Kurang membantu"
-                                    className="rounded-md p-1 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10"
-                                  >
-                                    <ThumbsDown size={12} />
-                                  </button>
-                                </span>
-                              )
+                              <span className="flex items-center gap-0.5">
+                                <button
+                                  onClick={() => sendFeedback(idx, 'up')}
+                                  aria-label="Jawaban membantu"
+                                  aria-pressed={msg.feedback === 'up'}
+                                  title="Membantu"
+                                  className={`rounded-md p-1 transition-colors ${
+                                    msg.feedback === 'up'
+                                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+                                      : 'hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10'
+                                  }`}
+                                >
+                                  <ThumbsUp size={12} fill={msg.feedback === 'up' ? 'currentColor' : 'none'} />
+                                </button>
+                                <button
+                                  onClick={() => sendFeedback(idx, 'down')}
+                                  aria-label="Jawaban kurang membantu"
+                                  aria-pressed={msg.feedback === 'down'}
+                                  title="Kurang membantu"
+                                  className={`rounded-md p-1 transition-colors ${
+                                    msg.feedback === 'down'
+                                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400'
+                                      : 'hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10'
+                                  }`}
+                                >
+                                  <ThumbsDown size={12} fill={msg.feedback === 'down' ? 'currentColor' : 'none'} />
+                                </button>
+                                {msg.feedback && <span className="ml-0.5">Terima kasih atas masukan Anda</span>}
+                              </span>
                             )}
                           </div>
                         )}
@@ -1262,15 +1344,19 @@ export default function AmaniaEventChatbot() {
                     ref={inputRef}
                     value={input}
                     onChange={(e) => {
-                      setInput(e.target.value);
+                      // Batas ditegakkan di sini (bukan atribut maxLength) agar pemotongan bisa diberitahukan ke pengguna
+                      const raw = e.target.value;
+                      const over = raw.length > MAX_INPUT_CHARS;
+                      setInput(over ? raw.slice(0, MAX_INPUT_CHARS) : raw);
+                      setInputTruncated(over || (inputTruncated && raw.length >= MAX_INPUT_CHARS));
                       e.target.style.height = 'auto';
                       e.target.style.height = Math.min(e.target.scrollHeight, 110) + 'px';
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder="Tanya webinar, kursus, e-product, tiket…"
                     aria-label="Tulis pesan"
+                    aria-describedby={input.length >= INPUT_COUNTER_FROM ? 'amania-chatbot-counter' : undefined}
                     rows={1}
-                    maxLength={2000}
                     disabled={isLoading}
                     // 16px di HP mencegah iOS memperbesar layar saat input difokuskan
                     className="block max-h-[110px] w-full resize-none bg-transparent px-3.5 py-2.5 text-[16px] leading-[1.45] text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-[13.5px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -1306,6 +1392,19 @@ export default function AmaniaEventChatbot() {
                 )}
               </div>
 
+              {input.length >= INPUT_COUNTER_FROM && (
+                <p
+                  id="amania-chatbot-counter"
+                  aria-live="polite"
+                  className={`mt-1.5 px-1 text-right text-[10.5px] font-medium ${
+                    input.length >= MAX_INPUT_CHARS ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'
+                  }`}
+                >
+                  {inputTruncated
+                    ? `Teks dipotong: maksimal ${MAX_INPUT_CHARS.toLocaleString('id-ID')} karakter per pesan`
+                    : `${input.length.toLocaleString('id-ID')}/${MAX_INPUT_CHARS.toLocaleString('id-ID')} karakter`}
+                </p>
+              )}
               {!compact && (
                 <p className="mt-2 text-center text-[10.5px] leading-snug text-slate-400 dark:text-slate-500">
                   Didukung Hybrid RAG · AI bisa keliru, periksa informasi penting
